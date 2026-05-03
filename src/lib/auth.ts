@@ -19,34 +19,48 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.log('[AUTH] Missing credentials');
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        });
+        console.log(`[AUTH] Attempting login for: ${credentials.email}`);
+        console.log(`[AUTH] DATABASE_URL defined: ${!!process.env.DATABASE_URL}`);
+        console.log(`[AUTH] DB host: ${process.env.DATABASE_URL?.split('@')[1]?.split('/')[0] ?? 'unknown'}`);
 
-        if (!user || !user.isActive) {
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email as string },
+          });
+
+          console.log(`[AUTH] User found: ${!!user}, active: ${user?.isActive}`);
+
+          if (!user || !user.isActive) {
+            console.log('[AUTH] User not found or inactive');
+            return null;
+          }
+
+          const isValid = await bcrypt.compare(
+            credentials.password as string,
+            user.password
+          );
+
+          console.log(`[AUTH] Password valid: ${isValid}`);
+
+          if (!isValid) {
+            return null;
+          }
+
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            clientId: user.clientId,
+          };
+        } catch (error: any) {
+          console.error('[AUTH] DB ERROR:', error.message);
           return null;
         }
-
-        const isValid = await bcrypt.compare(
-          credentials.password as string,
-          user.password
-        );
-
-        if (!isValid) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          clientId: user.clientId,
-        };
-      },
     }),
   ],
   callbacks: {
