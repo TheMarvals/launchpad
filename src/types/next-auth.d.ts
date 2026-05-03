@@ -22,3 +22,5 @@ declare module "next-auth/jwt" {
     clientId?: string | null
   }
 }
+
+declare module "@novnc/novnc";
