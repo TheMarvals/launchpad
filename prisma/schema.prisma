@@ -65,6 +65,9 @@ model VpsService {
   ipAddress     String?
   status        String   @default("active") // active, suspended
   dueDate       DateTime?
+  memory        String?
+  storage       String?
+  bandwidth     String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

@@ -151,7 +151,31 @@ export default function ServerCard({ server }: { server: any }) {
                 content_copy
               </button>
             </div>
-            <div className="flex items-center text-sm pt-2 border-t border-gray-100 mt-2">
+            {/* Hardware Specs */}
+            {(server.memory || server.storage || server.bandwidth) && (
+              <div className="flex items-center space-x-5 text-sm pt-3 border-t border-gray-100 mt-3">
+                {server.memory && (
+                  <div className="flex items-center" title="Memoria RAM">
+                    <span className="material-icons text-gray-400 text-[16px] mr-1.5">memory</span>
+                    <span className="text-gray-600 font-medium text-xs">{server.memory}</span>
+                  </div>
+                )}
+                {server.storage && (
+                  <div className="flex items-center" title="Almacenamiento">
+                    <span className="material-icons text-gray-400 text-[16px] mr-1.5">storage</span>
+                    <span className="text-gray-600 font-medium text-xs">{server.storage}</span>
+                  </div>
+                )}
+                {server.bandwidth && (
+                  <div className="flex items-center" title="Ancho de Banda">
+                    <span className="material-icons text-gray-400 text-[16px] mr-1.5">speed</span>
+                    <span className="text-gray-600 font-medium text-xs">{server.bandwidth}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center text-sm pt-3 border-t border-gray-100 mt-3">
               <span className="material-icons text-blue-400 text-[16px] mr-2">info</span>
               <p className="text-[10px] text-gray-500 leading-tight">
                 <strong>Configuración DNS:</strong> Si usas Cloudflare, mantén la nube en <span className="text-gray-400 font-bold underline">Gris (DNS Only)</span> para evitar conflictos. Marval Cloud ya provee protección de Capa 7.
