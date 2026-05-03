@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import { sendNewTicketNotificationToAdmin, sendTicketReplyNotificationToClient } from '@/lib/email';
 
 // Crear un nuevo ticket
 export async function createTicket(data: { subject: string; priority: string; message: string }) {
@@ -33,6 +34,21 @@ export async function createTicket(data: { subject: string; priority: string; me
         }
       }
     });
+
+    // Obtener info del cliente para el email
+    const client = await prisma.client.findUnique({ where: { id: clientId as string } });
+
+    // Notificar al admin
+    sendNewTicketNotificationToAdmin({
+      ticketId: ticket.id,
+      subject: data.subject,
+      priority: data.priority,
+      message: data.message,
+      clientName: client?.razonSocial || session.user.name || 'Cliente',
+      clientEmail: session.user.email || '',
+      senderName: session.user.name || 'Usuario',
+      senderRole: session.user.role || 'CLIENT',
+    }).catch(e => console.error('Error sending ticket email:', e));
 
     revalidatePath('/client-portal/tickets');
     revalidatePath('/dashboard/tickets');
@@ -128,7 +144,10 @@ export async function sendTicketMessage(ticketId: string, message: string) {
 
   try {
     // Verificar permisos
-    const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+    const ticket = await prisma.ticket.findUnique({ 
+      where: { id: ticketId },
+      include: { user: true }
+    });
     if (!ticket) return { error: 'Ticket no encontrado' };
 
     if (session.user.role === 'CLIENT' && ticket.clientId !== session.user.clientId) {
@@ -160,6 +179,35 @@ export async function sendTicketMessage(ticketId: string, message: string) {
         updatedAt: new Date()
       }
     });
+
+    // Enviar notificaciones
+    if (session.user.role === 'ADMIN' && ticket.userId !== session.user.id) {
+      // El admin responde a un cliente
+      sendTicketReplyNotificationToClient({
+        ticketId: ticket.id,
+        subject: ticket.subject,
+        priority: ticket.priority,
+        message: '', // No usado en el template del cliente
+        clientName: ticket.user.name || 'Cliente',
+        clientEmail: ticket.user.email,
+        senderName: session.user.name || 'Soporte MARVAL',
+        senderRole: 'ADMIN',
+        replyMessage: message,
+      }).catch(e => console.error('Error sending reply email:', e));
+    } else if (session.user.role === 'CLIENT') {
+      // El cliente responde al ticket
+      const clientInfo = await prisma.client.findUnique({ where: { id: ticket.clientId } });
+      sendNewTicketNotificationToAdmin({
+        ticketId: ticket.id,
+        subject: `Re: ${ticket.subject}`,
+        priority: ticket.priority,
+        message: message,
+        clientName: clientInfo?.razonSocial || session.user.name || 'Cliente',
+        clientEmail: session.user.email || '',
+        senderName: session.user.name || 'Usuario',
+        senderRole: 'CLIENT',
+      }).catch(e => console.error('Error sending reply email to admin:', e));
+    }
 
     revalidatePath(`/client-portal/tickets/${ticketId}`);
     revalidatePath(`/dashboard/tickets/${ticketId}`);
