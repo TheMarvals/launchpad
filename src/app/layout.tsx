@@ -13,8 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MARVAL · Sistema de Cotizaciones",
-  description: "Plataforma de gestión y generación de cotizaciones profesionales.",
+  title: "MARVAL · Admin Panel",
+  description: "Plataforma administrativa y centro de productividad integral de MARVAL.",
+  icons: {
+    icon: '/favicon.png',
+  },
 };
 
 export default function RootLayout({
