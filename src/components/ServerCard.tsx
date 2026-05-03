@@ -151,25 +151,61 @@ export default function ServerCard({ server }: { server: any }) {
                 content_copy
               </button>
             </div>
-            {/* Hardware Specs */}
-            {(server.memory || server.storage || server.bandwidth) && (
-              <div className="flex items-center space-x-5 text-sm pt-3 border-t border-gray-100 mt-3">
-                {server.memory && (
-                  <div className="flex items-center" title="Memoria RAM">
-                    <span className="material-icons text-gray-400 text-[16px] mr-1.5">memory</span>
-                    <span className="text-gray-600 font-medium text-xs">{server.memory}</span>
+            {/* New Package & Traffic Specs */}
+            {(server.cpu || server.memory || server.storage || server.bandwidth) && (
+              <div className="pt-4 border-t border-gray-100 mt-4 space-y-4">
+                
+                {/* Package Info */}
+                {(server.cpu || server.memory || server.storage) && (
+                  <div>
+                    <div className="flex items-center mb-3">
+                      <span className="material-icons text-blue-500 mr-2 text-[20px]">inventory_2</span>
+                      <h4 className="text-sm font-bold text-gray-800 tracking-tight">Package</h4>
+                    </div>
+                    <div className="pl-7 space-y-2 text-sm">
+                      {server.cpu && (
+                        <div className="flex items-center">
+                          <span className="text-gray-400 w-16">vCPU</span>
+                          <span className="text-gray-900 font-medium">{server.cpu}</span>
+                        </div>
+                      )}
+                      {server.memory && (
+                        <div className="flex items-center">
+                          <span className="text-gray-400 w-16">RAM</span>
+                          <span className="text-gray-900 font-medium">{server.memory}</span>
+                        </div>
+                      )}
+                      {server.storage && (
+                        <div className="flex items-center">
+                          <span className="text-gray-400 w-16">Disk</span>
+                          <span className="text-gray-900 font-medium">{server.storage}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
-                {server.storage && (
-                  <div className="flex items-center" title="Almacenamiento">
-                    <span className="material-icons text-gray-400 text-[16px] mr-1.5">storage</span>
-                    <span className="text-gray-600 font-medium text-xs">{server.storage}</span>
-                  </div>
-                )}
+
+                {/* Traffic Info */}
                 {server.bandwidth && (
-                  <div className="flex items-center" title="Ancho de Banda">
-                    <span className="material-icons text-gray-400 text-[16px] mr-1.5">speed</span>
-                    <span className="text-gray-600 font-medium text-xs">{server.bandwidth}</span>
+                  <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="text-[13px] font-bold text-gray-900">Total traffic</h4>
+                      <span className="text-[13px] font-bold text-gray-900">
+                        <span className="text-gray-500 font-medium">0.00 TiB / </span>
+                        {server.bandwidth}
+                      </span>
+                    </div>
+                    {/* Progress bar mock */}
+                    <div className="w-full bg-gray-100 rounded-full h-1 mb-3">
+                      <div className="bg-[#8ac149] h-1 rounded-full" style={{ width: '2%' }}></div>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-600 mb-3">
+                      <span>Outgoing: <strong className="text-gray-900 font-medium">0.00 TiB</strong></span>
+                      <span>Incoming: <strong className="text-gray-900 font-medium">0.00 TiB</strong></span>
+                    </div>
+                    <p className="text-[10.5px] text-gray-500 leading-tight">
+                      Si alcanzas el límite total de tráfico, el ancho de banda de la red será reducido.
+                    </p>
                   </div>
                 )}
               </div>
