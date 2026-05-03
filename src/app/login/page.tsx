@@ -4,17 +4,42 @@ import React, { Suspense, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import { startLoginVerification } from '@/app/actions/login-otp';
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
+  const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleStep1 = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const res = await startLoginVerification(email, password);
+      if (res.error) {
+        setError(res.error);
+      } else {
+        setStep(2);
+        setMessage('Se ha enviado un código de 6 dígitos a tu correo electrónico.');
+      }
+    } catch {
+      setError('Error de conexión. Intenta de nuevo.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStep2 = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
@@ -22,12 +47,12 @@ function LoginForm() {
     try {
       const result = await signIn('credentials', {
         email,
-        password,
+        otp,
         redirect: false,
       });
 
       if (result?.error) {
-        setError('Credenciales incorrectas. Intenta de nuevo.');
+        setError('Código incorrecto o expirado.');
       } else {
         router.push(callbackUrl);
         router.refresh();
@@ -56,55 +81,95 @@ function LoginForm() {
           <p className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">Portal de Gestión Integral</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-10 shadow-2xl space-y-6">
+        <form onSubmit={step === 1 ? handleStep1 : handleStep2} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-10 shadow-2xl space-y-6">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium px-4 py-3 rounded-xl text-center">
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium px-4 py-3 rounded-xl text-center flex items-center justify-center gap-2">
+              <span className="material-icons text-[18px]">error_outline</span>
               {error}
             </div>
           )}
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Correo Electrónico</label>
-            <div className="relative">
-              <span className="material-icons absolute left-4 top-3.5 text-slate-500 text-sm">email</span>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 pl-11 text-white text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-600"
-                placeholder="mail@example.com"
-                required
-                autoFocus
-              />
+          {message && step === 2 && !error && (
+            <div className="bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium px-4 py-3 rounded-xl text-center flex items-center justify-center gap-2">
+              <span className="material-icons text-[18px]">mark_email_read</span>
+              {message}
             </div>
-          </div>
+          )}
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contraseña</label>
-            <div className="relative">
-              <span className="material-icons absolute left-4 top-3.5 text-slate-500 text-sm">lock</span>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 pl-11 text-white text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-600"
-                placeholder="••••••••"
-                required
-              />
+          {step === 1 ? (
+            <>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Correo Electrónico</label>
+                <div className="relative">
+                  <span className="material-icons absolute left-4 top-3.5 text-slate-500 text-sm">email</span>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 pl-11 text-white text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-600"
+                    placeholder="mail@example.com"
+                    required
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contraseña</label>
+                <div className="relative">
+                  <span className="material-icons absolute left-4 top-3.5 text-slate-500 text-sm">lock</span>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 pl-11 text-white text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-600"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Código de Verificación (6 dígitos)</label>
+              <div className="relative">
+                <span className="material-icons absolute left-4 top-3.5 text-slate-500 text-sm">security</span>
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 pl-11 text-white text-center font-mono text-xl tracking-[0.5em] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-600/50"
+                  placeholder="000000"
+                  required
+                  autoFocus
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || (step === 2 && otp.length !== 6)}
             className="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-blue-500 transition-all disabled:opacity-50 shadow-xl shadow-blue-600/30 active:scale-[0.98] flex items-center justify-center"
           >
             {isLoading ? (
-              <><span className="material-icons animate-spin mr-2 text-sm">sync</span> Ingresando...</>
+              <><span className="material-icons animate-spin mr-2 text-sm">sync</span> Procesando...</>
+            ) : step === 1 ? (
+              <><span className="material-icons mr-2 text-sm">arrow_forward</span> Continuar</>
             ) : (
               <><span className="material-icons mr-2 text-sm">login</span> Ingresar</>
             )}
           </button>
+          
+          {step === 2 && (
+            <button
+              type="button"
+              onClick={() => { setStep(1); setOtp(''); setError(''); setMessage(''); }}
+              disabled={isLoading}
+              className="w-full text-center text-slate-400 text-[11px] font-medium uppercase tracking-widest hover:text-white transition-colors mt-4 block"
+            >
+              ← Volver atrás
+            </button>
+          )}
         </form>
 
         <p className="text-center text-[10px] text-slate-600 mt-8 uppercase tracking-widest">
