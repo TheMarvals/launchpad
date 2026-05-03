@@ -288,10 +288,12 @@ export async function getServerLiveMetrics(serverId: string) {
     
     // We assume 8 TiB as default if unable to resolve limit from API payload format
     const fallbackLimitBytes = 8 * 1024 * 1024 * 1024 * 1024; // 8 TiB in bytes
-    
-    // If the limit is stored in TB we convert to bytes. The API spec might provide limit in bytes or GiB.
-    // If we assume limit is in bytes:
     const limitBytes = customPlanLimit && customPlanLimit > 0 ? customPlanLimit : fallbackLimitBytes;
+
+    // Fetch allocated hardware specs from the API
+    const allocatedCpu = data.custom_plan?.params?.vcpu || data.plan?.vcpu || null;
+    const allocatedRam = data.custom_plan?.params?.ram || data.plan?.ram || null;
+    const allocatedDisk = data.custom_plan?.params?.disk || data.plan?.disk || null;
 
     return {
       success: true,
@@ -301,6 +303,9 @@ export async function getServerLiveMetrics(serverId: string) {
         networkIncomingBytes,
         networkOutgoingBytes,
         networkLimitBytes: limitBytes,
+        allocatedCpu,
+        allocatedRam,
+        allocatedDisk
       }
     };
   } catch(e) {

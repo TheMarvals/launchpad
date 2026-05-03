@@ -29,20 +29,22 @@ export default function ServerCard({ server }: { server: any }) {
     }
   }, [server.id, server.providerId]);
 
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0.00 TiB'; // Default for traffic
+  const formatBytes = (bytes: any) => {
+    const num = Number(bytes);
+    if (!num || isNaN(num) || num === 0) return '0.00 TiB';
     const k = 1024;
     const dm = 2;
     const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    const i = Math.floor(Math.log(num) / Math.log(k));
+    return parseFloat((num / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   };
 
   const getTrafficPercentage = () => {
     if (!liveMetrics) return 0;
-    const totalBytes = liveMetrics.networkIncomingBytes + liveMetrics.networkOutgoingBytes;
-    const limitBytes = liveMetrics.networkLimitBytes || 1;
-    let percentage = (totalBytes / limitBytes) * 100;
+    const incoming = Number(liveMetrics.networkIncomingBytes) || 0;
+    const outgoing = Number(liveMetrics.networkOutgoingBytes) || 0;
+    const limitBytes = Number(liveMetrics.networkLimitBytes) || 1;
+    let percentage = ((incoming + outgoing) / limitBytes) * 100;
     if (percentage > 100) percentage = 100;
     return percentage;
   };
@@ -201,26 +203,26 @@ export default function ServerCard({ server }: { server: any }) {
                       {isLoadingMetrics && <span className="material-icons animate-spin text-gray-300 text-[14px]">sync</span>}
                     </div>
                     <div className="pl-7 space-y-2 text-sm">
-                      {(server.cpu || liveMetrics) && (
+                      {(server.cpu || liveMetrics?.allocatedCpu) && (
                         <div className="flex items-center">
                           <span className="text-gray-400 w-16">vCPU</span>
                           <span className="text-gray-900 font-medium">
-                            {server.cpu || 'Auto'} 
+                            {server.cpu || liveMetrics?.allocatedCpu || 'Auto'} 
                             {liveMetrics && <span className="text-[10px] text-gray-400 ml-2 font-normal">({liveMetrics.cpuUsage}% uso)</span>}
                           </span>
                         </div>
                       )}
-                      {server.memory && (
+                      {(server.memory || liveMetrics?.allocatedRam) && (
                         <div className="flex items-center">
                           <span className="text-gray-400 w-16">RAM</span>
-                          <span className="text-gray-900 font-medium">{server.memory}</span>
+                          <span className="text-gray-900 font-medium">{server.memory || (liveMetrics?.allocatedRam ? `${liveMetrics.allocatedRam} MiB` : 'Auto')}</span>
                         </div>
                       )}
-                      {(server.storage || liveMetrics) && (
+                      {(server.storage || liveMetrics?.allocatedDisk) && (
                         <div className="flex items-center">
                           <span className="text-gray-400 w-16">Disk</span>
                           <span className="text-gray-900 font-medium">
-                            {server.storage || 'Auto'}
+                            {server.storage || (liveMetrics?.allocatedDisk ? `${liveMetrics.allocatedDisk} GiB` : 'Auto')}
                             {liveMetrics && liveMetrics.diskBytes > 0 && <span className="text-[10px] text-gray-400 ml-2 font-normal">({formatBytes(liveMetrics.diskBytes)} ocupados)</span>}
                           </span>
                         </div>
@@ -241,7 +243,7 @@ export default function ServerCard({ server }: { server: any }) {
                       <h4 className="text-[13px] font-bold text-gray-900">Total traffic</h4>
                       <span className="text-[13px] font-bold text-gray-900">
                         <span className="text-gray-500 font-medium">
-                          {liveMetrics ? formatBytes(liveMetrics.networkIncomingBytes + liveMetrics.networkOutgoingBytes) : '0.00 TiB'} / 
+                          {liveMetrics ? formatBytes((Number(liveMetrics.networkIncomingBytes) || 0) + (Number(liveMetrics.networkOutgoingBytes) || 0)) : '0.00 TiB'} / 
                         </span>
                         {' '} {liveMetrics?.networkLimitBytes ? formatBytes(liveMetrics.networkLimitBytes) : server.bandwidth}
                       </span>
