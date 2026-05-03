@@ -1,0 +1,280 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("ADMIN") // ADMIN or CLIENT
+  isActive  Boolean  @default(true)
+  clientId  String?  // If role is CLIENT, this links to their company
+  googleId  String?  @unique // For Google OAuth
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client    Client?  @relation(fields: [clientId], references: [id])
+  actionLogs ActionLog[]
+  otpCodes   OtpCode[]
+  tickets    Ticket[]
+  ticketMessages TicketMessage[]
+  
+  // FreelanceHub Integration (Admin Only)
+  projects     Project[]
+  tasks        Task[]
+  timeEntries  TimeEntry[]
+  invoices     FreelanceInvoice[]
+  notes        PersonalNote[]
+  events       CalendarEvent[]
+  settings     ProductivitySettings?
+}
+
+model Client {
+  id           String   @id @default(uuid())
+  rut          String   @unique
+  razonSocial  String
+  giro         String
+  direccion    String
+  comuna       String
+  ciudad       String
+  email        String?
+  telefono     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  quotes       Quote[]
+  users        User[]
+  servers      VpsService[]
+  tickets      Ticket[]
+}
+
+model VpsService {
+  id            String   @id @default(uuid())
+  clientId      String
+  providerId    String?  // Provider ID for API calls
+  name          String   // Friendly name like 'Liceo A1 Web Server'
+  hostname      String?  // Public hostname like 'srv1.marval.host'
+  ipAddress     String?
+  status        String   @default("active") // active, suspended
+  dueDate       DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  client        Client   @relation(fields: [clientId], references: [id])
+  actionLogs    ActionLog[]
+  otpCodes      OtpCode[]
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  codigo      String?
+  nombre      String
+  descripcion String?
+  precioNeto  Float
+  esExento    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Quote {
+  id               String      @id @default(uuid())
+  correlativo      Int         @unique @default(autoincrement())
+  clientId         String
+  fechaEmision     DateTime    @default(now())
+  fechaValidez     DateTime
+  estado           String      @default("Borrador") // Borrador, Enviada, Aceptada, Rechazada
+  propuesta        String?
+  montoNeto        Float       @default(0)
+  montoIva         Float       @default(0)
+  montoTotal       Float       @default(0)
+  notasCondiciones String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  client           Client      @relation(fields: [clientId], references: [id])
+  items            QuoteItem[]
+}
+
+model QuoteItem {
+  id             String   @id @default(uuid())
+  quoteId        String
+  descripcion    String
+  cantidad       Float
+  precioUnitario Float
+  descuento      Float    @default(0)
+  subtotal       Float
+  esExento       Boolean  @default(false)
+
+  quote          Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  clientName  String?
+  status      String   @default("active") // active, paused, completed
+  priority    String   @default("medium") // low, medium, high, urgent
+  budget      Float    @default(0)
+  deadline    DateTime?
+  description String?  @db.Text
+  color       String   @default("#6366f1")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
+  tasks       Task[]
+  timeEntries TimeEntry[]
+  invoices    FreelanceInvoice[]
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  userId      String
+  projectId   String?
+  title       String
+  priority    String   @default("medium")
+  status      String   @default("todo") // todo, in-progress, done
+  dueDate     DateTime?
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
+  project     Project? @relation(fields: [projectId], references: [id])
+}
+
+model TimeEntry {
+  id          String   @id @default(uuid())
+  userId      String
+  projectId   String?
+  description String?  @db.Text
+  duration    Int      @default(0) // in seconds
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+  project     Project? @relation(fields: [projectId], references: [id])
+}
+
+model FreelanceInvoice {
+  id          String   @id @default(uuid())
+  userId      String
+  projectId   String?
+  concept     String
+  amount      Float
+  date        DateTime @default(now())
+  status      String   @default("unpaid") // paid, unpaid, overdue
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
+  project     Project? @relation(fields: [projectId], references: [id])
+}
+
+model PersonalNote {
+  id          String   @id @default(uuid())
+  userId      String
+  title       String
+  content     String?  @db.Text
+  category    String?  // General, Trabajo, Personal, etc.
+  color       String   @default("#6366f1")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model ProductivitySettings {
+  id                    String   @id @default(uuid())
+  userId                String   @unique
+  workDuration          Int      @default(45)
+  breakDuration         Int      @default(15)
+  telegramBotToken      String?
+  telegramChatId        String?
+  telegramEnabled       Boolean  @default(false)
+  googleRefreshToken    String?  @db.Text
+  googleCalendarEnabled Boolean  @default(false)
+  updatedAt             DateTime @updatedAt
+
+  user                  User     @relation(fields: [userId], references: [id])
+}
+
+model ActionLog {
+  id        String   @id @default(uuid())
+  userId    String
+  serverId  String
+  action    String   // start, stop, restart
+  status    String   // PENDING, SUCCESS, FAILED
+  details   String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  server    VpsService @relation(fields: [serverId], references: [id])
+}
+
+model OtpCode {
+  id        String   @id @default(uuid())
+  userId    String
+  serverId  String
+  action    String
+  code      String
+  used      Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  server    VpsService @relation(fields: [serverId], references: [id])
+}
+
+model Ticket {
+  id        String   @id @default(uuid())
+  subject   String
+  status    String   @default("OPEN") // OPEN, IN_PROGRESS, CLOSED
+  priority  String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  clientId  String
+  userId    String   // The user who created the ticket
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client    Client   @relation(fields: [clientId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  messages  TicketMessage[]
+}
+
+model TicketMessage {
+  id        String   @id @default(uuid())
+  ticketId  String
+  userId    String   // The user who sent the message (can be admin or client)
+  message   String   @db.Text
+
+  createdAt DateTime @default(now())
+
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model CalendarEvent {
+  id          String   @id @default(uuid())
+  userId      String
+  title       String
+  description String?  @db.Text
+  start       DateTime
+  end         DateTime
+  allDay      Boolean  @default(false)
+  color       String   @default("#3b82f6")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
+}
+

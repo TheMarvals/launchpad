@@ -1,0 +1,87 @@
+'use server';
+
+import { prisma } from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
+import { revalidatePath } from 'next/cache';
+
+export async function createClientUser(clientId: string, data: any) {
+  try {
+    const existing = await prisma.user.findUnique({ where: { email: data.email } });
+    if (existing) {
+      throw new Error('Ya existe un usuario con este correo electrónico.');
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, 12);
+
+    await prisma.user.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        password: hashedPassword,
+        role: 'CLIENT',
+        clientId: clientId,
+      }
+    });
+
+    revalidatePath(`/dashboard/clients/${clientId}`);
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || 'Error al crear el usuario' };
+  }
+}
+
+export async function bindVpsServer(clientId: string, data: any) {
+  try {
+    await prisma.vpsService.create({
+      data: {
+        clientId: clientId,
+        name: data.name,
+        hostname: data.hostname,
+        providerId: data.providerId,
+        ipAddress: data.ipAddress,
+        status: 'active'
+      }
+    });
+
+    revalidatePath(`/dashboard/clients/${clientId}`);
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || 'Error al vincular el servidor' };
+  }
+}
+
+export async function toggleUserAccess(userId: string, isActive: boolean) {
+  try {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { isActive }
+    });
+    
+    if (user.clientId) {
+      revalidatePath(`/dashboard/clients/${user.clientId}`);
+    }
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || 'Error al cambiar estado del usuario' };
+  }
+}
+
+export async function updateVpsService(vpsId: string, data: { name: string; hostname?: string; dueDate: string | null; providerId: string; ipAddress: string }) {
+  try {
+    const vps = await prisma.vpsService.update({
+      where: { id: vpsId },
+      data: {
+        name: data.name,
+        hostname: data.hostname,
+        dueDate: data.dueDate ? new Date(data.dueDate) : null,
+        providerId: data.providerId,
+        ipAddress: data.ipAddress
+      }
+    });
+
+    revalidatePath(`/dashboard/clients/${vps.clientId}`);
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || 'Error al actualizar VPS' };
+  }
+}
