@@ -8,6 +8,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.USERM,
     pass: process.env.PASSM,
   },
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
 
 interface TicketEmailData {
