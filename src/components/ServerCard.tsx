@@ -186,11 +186,12 @@ export default function ServerCard({ server }: { server: any }) {
               </button>
             </div>
             {/* New Package & Traffic Specs */}
-            {(server.cpu || server.memory || server.storage || server.bandwidth) && (
+            {/* New Package & Traffic Specs */}
+            {(server.cpu || server.memory || server.storage || server.bandwidth || liveMetrics || isLoadingMetrics) && (
               <div className="pt-4 border-t border-gray-100 mt-4 space-y-4">
                 
                 {/* Package Info */}
-                {(server.cpu || server.memory || server.storage) && (
+                {(server.cpu || server.memory || server.storage || isLoadingMetrics) && (
                   <div className="relative">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
@@ -200,11 +201,11 @@ export default function ServerCard({ server }: { server: any }) {
                       {isLoadingMetrics && <span className="material-icons animate-spin text-gray-300 text-[14px]">sync</span>}
                     </div>
                     <div className="pl-7 space-y-2 text-sm">
-                      {server.cpu && (
+                      {(server.cpu || liveMetrics) && (
                         <div className="flex items-center">
                           <span className="text-gray-400 w-16">vCPU</span>
                           <span className="text-gray-900 font-medium">
-                            {server.cpu} 
+                            {server.cpu || 'Auto'} 
                             {liveMetrics && <span className="text-[10px] text-gray-400 ml-2 font-normal">({liveMetrics.cpuUsage}% uso)</span>}
                           </span>
                         </div>
@@ -215,11 +216,11 @@ export default function ServerCard({ server }: { server: any }) {
                           <span className="text-gray-900 font-medium">{server.memory}</span>
                         </div>
                       )}
-                      {server.storage && (
+                      {(server.storage || liveMetrics) && (
                         <div className="flex items-center">
                           <span className="text-gray-400 w-16">Disk</span>
                           <span className="text-gray-900 font-medium">
-                            {server.storage}
+                            {server.storage || 'Auto'}
                             {liveMetrics && liveMetrics.diskBytes > 0 && <span className="text-[10px] text-gray-400 ml-2 font-normal">({formatBytes(liveMetrics.diskBytes)} ocupados)</span>}
                           </span>
                         </div>
@@ -229,7 +230,7 @@ export default function ServerCard({ server }: { server: any }) {
                 )}
 
                 {/* Traffic Info */}
-                {server.bandwidth && (
+                {(server.bandwidth || liveMetrics || isLoadingMetrics) && (
                   <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm relative overflow-hidden">
                     {isLoadingMetrics && (
                       <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
