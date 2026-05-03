@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { requestServerAction, executeServerActionWithOtp, getVncUrl } from '@/app/actions/provider';
+import { requestServerAction, executeServerActionWithOtp, getVncUrl, getServerLiveMetrics } from '@/app/actions/provider';
 import Swal from 'sweetalert2';
 
 export default function ServerCard({ server }: { server: any }) {
@@ -12,6 +12,40 @@ export default function ServerCard({ server }: { server: any }) {
   const [otpCode, setOtpCode] = useState('');
   const [pendingAction, setPendingAction] = useState<'start' | 'stop' | 'restart' | null>(null);
   const [otpError, setOtpError] = useState('');
+
+  // Live Metrics State
+  const [liveMetrics, setLiveMetrics] = useState<any>(null);
+  const [isLoadingMetrics, setIsLoadingMetrics] = useState(false);
+
+  React.useEffect(() => {
+    if (server.providerId) {
+      setIsLoadingMetrics(true);
+      getServerLiveMetrics(server.id).then((res) => {
+        if (res.success) {
+          setLiveMetrics(res.data);
+        }
+        setIsLoadingMetrics(false);
+      }).catch(() => setIsLoadingMetrics(false));
+    }
+  }, [server.id, server.providerId]);
+
+  const formatBytes = (bytes: number) => {
+    if (bytes === 0) return '0.00 TiB'; // Default for traffic
+    const k = 1024;
+    const dm = 2;
+    const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  };
+
+  const getTrafficPercentage = () => {
+    if (!liveMetrics) return 0;
+    const totalBytes = liveMetrics.networkIncomingBytes + liveMetrics.networkOutgoingBytes;
+    const limitBytes = liveMetrics.networkLimitBytes || 1;
+    let percentage = (totalBytes / limitBytes) * 100;
+    if (percentage > 100) percentage = 100;
+    return percentage;
+  };
 
   const handleOpenConsole = () => {
     window.open(`/client-portal/servers/${server.id}/console`, 'marval_console', 'width=1024,height=768');
@@ -157,16 +191,22 @@ export default function ServerCard({ server }: { server: any }) {
                 
                 {/* Package Info */}
                 {(server.cpu || server.memory || server.storage) && (
-                  <div>
-                    <div className="flex items-center mb-3">
-                      <span className="material-icons text-blue-500 mr-2 text-[20px]">inventory_2</span>
-                      <h4 className="text-sm font-bold text-gray-800 tracking-tight">Package</h4>
+                  <div className="relative">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center">
+                        <span className="material-icons text-blue-500 mr-2 text-[20px]">inventory_2</span>
+                        <h4 className="text-sm font-bold text-gray-800 tracking-tight">Package</h4>
+                      </div>
+                      {isLoadingMetrics && <span className="material-icons animate-spin text-gray-300 text-[14px]">sync</span>}
                     </div>
                     <div className="pl-7 space-y-2 text-sm">
                       {server.cpu && (
                         <div className="flex items-center">
                           <span className="text-gray-400 w-16">vCPU</span>
-                          <span className="text-gray-900 font-medium">{server.cpu}</span>
+                          <span className="text-gray-900 font-medium">
+                            {server.cpu} 
+                            {liveMetrics && <span className="text-[10px] text-gray-400 ml-2 font-normal">({liveMetrics.cpuUsage}% uso)</span>}
+                          </span>
                         </div>
                       )}
                       {server.memory && (
@@ -178,7 +218,10 @@ export default function ServerCard({ server }: { server: any }) {
                       {server.storage && (
                         <div className="flex items-center">
                           <span className="text-gray-400 w-16">Disk</span>
-                          <span className="text-gray-900 font-medium">{server.storage}</span>
+                          <span className="text-gray-900 font-medium">
+                            {server.storage}
+                            {liveMetrics && liveMetrics.diskBytes > 0 && <span className="text-[10px] text-gray-400 ml-2 font-normal">({formatBytes(liveMetrics.diskBytes)} ocupados)</span>}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -187,21 +230,28 @@ export default function ServerCard({ server }: { server: any }) {
 
                 {/* Traffic Info */}
                 {server.bandwidth && (
-                  <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                  <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm relative overflow-hidden">
+                    {isLoadingMetrics && (
+                      <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+                        <span className="material-icons animate-spin text-blue-500 text-[20px]">sync</span>
+                      </div>
+                    )}
                     <div className="flex justify-between items-center mb-2">
                       <h4 className="text-[13px] font-bold text-gray-900">Total traffic</h4>
                       <span className="text-[13px] font-bold text-gray-900">
-                        <span className="text-gray-500 font-medium">0.00 TiB / </span>
-                        {server.bandwidth}
+                        <span className="text-gray-500 font-medium">
+                          {liveMetrics ? formatBytes(liveMetrics.networkIncomingBytes + liveMetrics.networkOutgoingBytes) : '0.00 TiB'} / 
+                        </span>
+                        {' '} {liveMetrics?.networkLimitBytes ? formatBytes(liveMetrics.networkLimitBytes) : server.bandwidth}
                       </span>
                     </div>
-                    {/* Progress bar mock */}
+                    {/* Progress bar */}
                     <div className="w-full bg-gray-100 rounded-full h-1 mb-3">
-                      <div className="bg-[#8ac149] h-1 rounded-full" style={{ width: '2%' }}></div>
+                      <div className="bg-[#8ac149] h-1 rounded-full transition-all duration-1000 ease-out" style={{ width: `${getTrafficPercentage()}%` }}></div>
                     </div>
                     <div className="flex justify-between text-xs text-gray-600 mb-3">
-                      <span>Outgoing: <strong className="text-gray-900 font-medium">0.00 TiB</strong></span>
-                      <span>Incoming: <strong className="text-gray-900 font-medium">0.00 TiB</strong></span>
+                      <span>Outgoing: <strong className="text-gray-900 font-medium">{liveMetrics ? formatBytes(liveMetrics.networkOutgoingBytes) : '0.00 TiB'}</strong></span>
+                      <span>Incoming: <strong className="text-gray-900 font-medium">{liveMetrics ? formatBytes(liveMetrics.networkIncomingBytes) : '0.00 TiB'}</strong></span>
                     </div>
                     <p className="text-[10.5px] text-gray-500 leading-tight">
                       Si alcanzas el límite total de tráfico, el ancho de banda de la red será reducido.

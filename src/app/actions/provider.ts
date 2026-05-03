@@ -234,3 +234,77 @@ async function logAction(userId: string, serverId: string, action: string, statu
     }
   });
 }
+
+export async function getServerLiveMetrics(serverId: string) {
+  const session = await auth();
+  const userId = session?.user?.id;
+  const clientId = (session?.user as any)?.clientId;
+
+  if (!userId || !clientId) {
+    return { error: 'No autorizado' };
+  }
+
+  const server = await prisma.vpsService.findFirst({
+    where: { id: serverId, clientId }
+  });
+
+  if (!server || !server.providerId) {
+    return { error: 'Servidor no encontrado o sin ID de proveedor.' };
+  }
+
+  const token = process.env.PROVIDER_API_TOKEN;
+  if (!token) {
+    return { error: 'API Token del proveedor no configurado.' };
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/servers/${server.providerId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      },
+      next: { revalidate: 30 } // Cache results for 30s to prevent spamming the provider
+    });
+
+    if (!res.ok) {
+      return { error: 'No se pudieron obtener las métricas del servidor.' };
+    }
+
+    const raw = await res.json();
+    const data = raw.data || raw;
+
+    if (!data) return { error: 'Formato de respuesta inválido.' };
+
+    const usage = data.usage || {};
+    const cpuUsage = usage.cpu || 0;
+    const diskBytes = usage.disk?.actual_size || 0; 
+    const networkIncomingBytes = usage.network?.incoming || 0;
+    const networkOutgoingBytes = usage.network?.outgoing || 0;
+
+    // Traffic limit calculation (often defined in TB or GB)
+    // ServerCheap typically uses limits like custom_plan.limits.network_outgoing_traffic
+    const customPlanLimit = data.custom_plan?.limits?.network_outgoing_traffic?.limit;
+    
+    // We assume 8 TiB as default if unable to resolve limit from API payload format
+    const fallbackLimitBytes = 8 * 1024 * 1024 * 1024 * 1024; // 8 TiB in bytes
+    
+    // If the limit is stored in TB we convert to bytes. The API spec might provide limit in bytes or GiB.
+    // If we assume limit is in bytes:
+    const limitBytes = customPlanLimit && customPlanLimit > 0 ? customPlanLimit : fallbackLimitBytes;
+
+    return {
+      success: true,
+      data: {
+        cpuUsage,
+        diskBytes,
+        networkIncomingBytes,
+        networkOutgoingBytes,
+        networkLimitBytes: limitBytes,
+      }
+    };
+  } catch(e) {
+    console.error("Error fetching live metrics:", e);
+    return { error: 'Error de red al consultar el proveedor.' };
+  }
+}
