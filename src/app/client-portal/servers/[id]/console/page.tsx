@@ -39,7 +39,7 @@ export default function ConsolePage() {
       }
 
       try {
-        // Dynamic import of noVNC (it uses browser APIs)
+        // @ts-ignore - noVNC lacks official type definitions
         const { default: RFB } = await import('@novnc/novnc');
 
         if (!canvasRef.current) return;

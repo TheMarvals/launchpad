@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['ssh2-sftp-client', 'ssh2'],
   experimental: {
     serverActions: {
-      allowedOrigins: ['192.168.1.105', 'localhost:3000'],
+      allowedOrigins: ['192.168.1.105', 'localhost:3000', 'localhost:3010'],
     },
   },
 };
