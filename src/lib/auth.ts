@@ -61,6 +61,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           console.error('[AUTH] DB ERROR:', error.message);
           return null;
         }
+      },
     }),
   ],
   callbacks: {
