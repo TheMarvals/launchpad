@@ -193,7 +193,7 @@ export default function ServerCard({ server }: { server: any }) {
               <div className="pt-4 border-t border-gray-100 mt-4 space-y-4">
                 
                 {/* Package Info */}
-                {(server.cpu || server.memory || server.storage || isLoadingMetrics) && (
+                {(server.cpu || server.memory || server.storage || liveMetrics || isLoadingMetrics) && (
                   <div className="relative">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
