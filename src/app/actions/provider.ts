@@ -277,23 +277,33 @@ export async function getServerLiveMetrics(serverId: string) {
     if (!data) return { error: 'Formato de respuesta inválido.' };
 
     const usage = data.usage || {};
-    const cpuUsage = usage.cpu || 0;
+    const cpuUsage = data.cpu_usage || usage.cpu || 0;
     const diskBytes = usage.disk?.actual_size || 0; 
-    const networkIncomingBytes = usage.network?.incoming || 0;
-    const networkOutgoingBytes = usage.network?.outgoing || 0;
+    const networkIncomingBytes = usage.network?.incoming?.value || usage.network?.incoming || 0;
+    const networkOutgoingBytes = usage.network?.outgoing?.value || usage.network?.outgoing || 0;
 
-    // Traffic limit calculation (often defined in TB or GB)
-    // ServerCheap typically uses limits like custom_plan.limits.network_outgoing_traffic
-    const customPlanLimit = data.custom_plan?.limits?.network_outgoing_traffic?.limit;
+    // Traffic limit calculation
+    const planLimit = data.plan?.limits?.network_total_traffic?.limit;
+    const planUnit = data.plan?.limits?.network_total_traffic?.unit;
     
-    // We assume 8 TiB as default if unable to resolve limit from API payload format
-    const fallbackLimitBytes = 8 * 1024 * 1024 * 1024 * 1024; // 8 TiB in bytes
-    const limitBytes = customPlanLimit && customPlanLimit > 0 ? customPlanLimit : fallbackLimitBytes;
+    let limitBytes = 8 * 1024 * 1024 * 1024 * 1024; // fallback 8 TiB in bytes
+    if (planLimit && planUnit === 'TiB') {
+        limitBytes = planLimit * 1024 * 1024 * 1024 * 1024;
+    } else if (planLimit && planUnit === 'GiB') {
+        limitBytes = planLimit * 1024 * 1024 * 1024;
+    } else if (planLimit && planLimit > 0) {
+        limitBytes = planLimit; // assume bytes if unit missing
+    }
 
     // Fetch allocated hardware specs from the API
-    const allocatedCpu = data.custom_plan?.params?.vcpu || data.plan?.vcpu || null;
-    const allocatedRam = data.custom_plan?.params?.ram || data.plan?.ram || null;
-    const allocatedDisk = data.custom_plan?.params?.disk || data.plan?.disk || null;
+    const allocatedCpu = data.specifications?.vcpu || null;
+    
+    // RAM comes in bytes, convert to MiB
+    const ramBytes = data.specifications?.ram;
+    const allocatedRam = ramBytes ? Math.round(ramBytes / (1024 * 1024)) : null;
+    
+    // Disk comes in GiB
+    const allocatedDisk = data.specifications?.disk || null;
 
     return {
       success: true,
