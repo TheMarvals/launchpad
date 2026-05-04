@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { auth, signOut } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { MobileClientNav } from '@/components/MobileClientNav';
 
 export default async function ClientPortalLayout({
   children,
@@ -82,10 +83,13 @@ export default async function ClientPortalLayout({
 
       {/* Main Content */}
       <main className="flex-grow flex flex-col h-screen overflow-y-auto">
-        <header className="md:hidden h-16 bg-[#0a041a] text-white flex items-center justify-between px-6 shrink-0">
-          <h1 className="text-xl font-black tracking-tighter" style={{ WebkitTextStroke: '1px white', color: 'transparent' }}>MARVAL</h1>
+        <header className="md:hidden h-16 bg-[#0a041a] text-white flex items-center justify-between px-6 shrink-0 relative z-50">
+          <div className="flex items-center">
+            <MobileClientNav />
+            <h1 className="text-xl font-black tracking-tighter" style={{ WebkitTextStroke: '1px white', color: 'transparent' }}>MARVAL</h1>
+          </div>
           <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }); }}>
-             <button className="text-gray-400 hover:text-white"><span className="material-icons">logout</span></button>
+             <button className="text-gray-400 hover:text-white" title="Cerrar Sesión"><span className="material-icons">logout</span></button>
           </form>
         </header>
 
