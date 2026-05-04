@@ -85,7 +85,7 @@ function baseTemplate(content: string) {
 
 // Email para ADMIN cuando llega un nuevo ticket del cliente
 export async function sendNewTicketNotificationToAdmin(data: TicketEmailData) {
-  const adminEmail = process.env.USERM;
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.USERM;
   if (!adminEmail) return;
 
   const priorityBadge = priorityLabel[data.priority] || data.priority;
