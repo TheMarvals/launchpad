@@ -75,8 +75,11 @@ export async function getVncUrl(serverId: string) {
     return { success: true, url: finalWsUrl, vncPassword };
   } catch (e) {
     return { error: 'Error de conexión con el proveedor.' };
-    export async function requestServerAction(serverId: string, action: 'start' | 'stop' | 'restart') {
-      const session = await auth();
+  }
+}
+
+export async function requestServerAction(serverId: string, action: 'start' | 'stop' | 'restart') {
+  const session = await auth();
       const userId = session?.user?.id;
       const clientId = (session?.user as any)?.clientId;
 
