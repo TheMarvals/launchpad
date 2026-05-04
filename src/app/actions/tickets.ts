@@ -39,7 +39,7 @@ export async function createTicket(data: { subject: string; priority: string; me
     const client = await prisma.client.findUnique({ where: { id: clientId as string } });
 
     // Notificar al admin
-    sendNewTicketNotificationToAdmin({
+    await sendNewTicketNotificationToAdmin({
       ticketId: ticket.id,
       subject: data.subject,
       priority: data.priority,
@@ -183,7 +183,7 @@ export async function sendTicketMessage(ticketId: string, message: string) {
     // Enviar notificaciones
     if (session.user.role === 'ADMIN' && ticket.userId !== session.user.id) {
       // El admin responde a un cliente
-      sendTicketReplyNotificationToClient({
+      await sendTicketReplyNotificationToClient({
         ticketId: ticket.id,
         subject: ticket.subject,
         priority: ticket.priority,
@@ -197,7 +197,7 @@ export async function sendTicketMessage(ticketId: string, message: string) {
     } else if (session.user.role === 'CLIENT') {
       // El cliente responde al ticket
       const clientInfo = await prisma.client.findUnique({ where: { id: ticket.clientId } });
-      sendNewTicketNotificationToAdmin({
+      await sendNewTicketNotificationToAdmin({
         ticketId: ticket.id,
         subject: `Re: ${ticket.subject}`,
         priority: ticket.priority,
