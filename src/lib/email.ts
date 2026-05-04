@@ -1,17 +1,22 @@
 import nodemailer from 'nodemailer';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.HOSTM,
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.USERM,
-    pass: process.env.PASSM,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
+function getTransporter() {
+  if (!process.env.HOSTM || !process.env.USERM || !process.env.PASSM) {
+    console.error("[Email] Falta configuración SMTP en variables de entorno (HOSTM, USERM o PASSM).");
+  }
+  return nodemailer.createTransport({
+    host: process.env.HOSTM,
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.USERM,
+      pass: process.env.PASSM,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+}
 
 interface TicketEmailData {
   ticketId: string;
@@ -110,7 +115,7 @@ export async function sendNewTicketNotificationToAdmin(data: TicketEmailData) {
   console.log(`[Email] Preparando correo de nuevo ticket para admin: ${adminEmail}`);
 
   try {
-    const info = await transporter.sendMail({
+    const info = await getTransporter().sendMail({
       from: `"MARVAL Soporte" <${process.env.USERM}>`,
       to: adminEmail,
       subject: `[Nuevo Ticket] ${data.subject} — ${data.clientName}`,
@@ -149,7 +154,7 @@ export async function sendTicketReplyNotificationToClient(data: TicketEmailData 
   console.log(`[Email] Preparando correo de respuesta de ticket para cliente: ${data.clientEmail}`);
 
   try {
-    const info = await transporter.sendMail({
+    const info = await getTransporter().sendMail({
       from: `"MARVAL Soporte" <${process.env.USERM}>`,
       to: data.clientEmail,
       subject: `Re: ${data.subject} — Ticket #${data.ticketId.slice(-6).toUpperCase()}`,
@@ -183,7 +188,7 @@ export async function sendSecurityOtpEmail(email: string, code: string, userName
     </p>
   `;
 
-  await transporter.sendMail({
+  await getTransporter().sendMail({
     from: `"MARVAL Seguridad" <${process.env.USERM}>`,
     to: email,
     subject: `[MARVAL] ${title}: ${code}`,
