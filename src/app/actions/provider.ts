@@ -3,7 +3,8 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
-import { sendOtpEmail } from '@/lib/mail';
+import { sendSecurityOtpEmail } from '@/lib/email';
+import { generateAndSaveOtp, verifyAndConsumeOtp } from '@/lib/otp';
 
 const API_BASE = 'https://panel.servercheap.com/api/v1';
 
@@ -77,10 +78,6 @@ export async function getVncUrl(serverId: string) {
   }
 }
 
-function generateOtp() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
 export async function requestServerAction(serverId: string, action: 'start' | 'stop' | 'restart') {
   const session = await auth();
   const userId = session?.user?.id;
@@ -104,31 +101,18 @@ export async function requestServerAction(serverId: string, action: 'start' | 's
     return { error: 'Usuario inválido o sin correo.' };
   }
 
-  // Disable old unused OTPs for this action and server
-  await prisma.otpCode.updateMany({
-    where: { serverId, action, used: false },
-    data: { used: true }
-  });
+  // Generate new OTP and invalidate old ones via helper
+  const code = await generateAndSaveOtp(userId, action, serverId);
 
-  // Generate new OTP
-  const code = generateOtp();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
-
-  await prisma.otpCode.create({
-    data: {
-      userId,
-      serverId,
-      action,
-      code,
-      expiresAt
-    }
-  });
-
-  // Send email
-  const mailRes = await sendOtpEmail(user.email, code, action, server.name);
-  if (mailRes.error) {
-    return { error: mailRes.error };
-  }
+  // Send unified email
+  const actionText = action === 'start' ? 'Iniciar' : action === 'stop' ? 'Detener' : 'Reiniciar';
+  await sendSecurityOtpEmail(
+    user.email,
+    code,
+    user.name || 'Usuario',
+    "Autorización de Acción Crítica",
+    `Has solicitado <strong style="color:#ffffff;">${actionText}</strong> el servidor <strong style="color:#ffffff;">${server.name}</strong>. Para proceder de forma segura, ingresa el siguiente código de autorización temporal en el portal:`
+  );
 
   return { success: true, message: 'Código enviado a tu correo' };
 }
@@ -150,28 +134,12 @@ export async function executeServerActionWithOtp(serverId: string, action: 'star
     return { error: 'Servidor no encontrado o acceso denegado.' };
   }
 
-  // Validate OTP
-  const otpRecord = await prisma.otpCode.findFirst({
-    where: {
-      serverId,
-      userId,
-      action,
-      code,
-      used: false,
-      expiresAt: { gt: new Date() }
-    },
-    orderBy: { createdAt: 'desc' }
-  });
+  // Validate OTP via helper
+  const verification = await verifyAndConsumeOtp(userId, action, code, serverId);
 
-  if (!otpRecord) {
-    return { error: 'Código inválido o ha expirado.' };
+  if (!verification.isValid) {
+    return { error: verification.error };
   }
-
-  // Mark OTP as used
-  await prisma.otpCode.update({
-    where: { id: otpRecord.id },
-    data: { used: true }
-  });
 
   const token = process.env.PROVIDER_API_TOKEN;
   if (!token) {

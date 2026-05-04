@@ -146,31 +146,31 @@ export async function sendTicketReplyNotificationToClient(data: TicketEmailData 
   });
 }
 
-// Email para el flujo de Login OTP (2-Step Verification)
-export async function sendLoginOtpEmail(email: string, code: string, userName: string) {
+// Email genérico para OTPs de Seguridad (Login, Acciones de Servidor, etc.)
+export async function sendSecurityOtpEmail(email: string, code: string, userName: string, title: string, description: string) {
   const content = `
     <div style="margin-bottom:24px;">
       <span style="background:rgba(99,102,241,0.15);color:#818cf8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:4px 12px;border-radius:20px;border:1px solid rgba(99,102,241,0.2);">
         🔐 Verificación de Seguridad
       </span>
     </div>
-    <h2 style="color:#ffffff;font-size:20px;font-weight:800;margin:0 0 16px 0;">Código de Acceso</h2>
+    <h2 style="color:#ffffff;font-size:20px;font-weight:800;margin:0 0 16px 0;">${title}</h2>
     <p style="color:#94a3b8;font-size:14px;line-height:1.6;margin:0 0 24px 0;">
       Hola <strong style="color:#ffffff;">${userName}</strong>,<br>
-      Se ha detectado un intento de inicio de sesión en tu cuenta. Usa el siguiente código para completar el proceso:
+      ${description}
     </p>
     <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
       <span style="font-family:monospace;font-size:32px;font-weight:700;letter-spacing:8px;color:#3b82f6;">${code}</span>
     </div>
     <p style="color:#64748b;font-size:12px;line-height:1.5;margin:0;">
-      Este código expirará en 10 minutos. Si no solicitaste este acceso, por favor ignora este correo y asegúrate de que tu contraseña sea segura.
+      Este código expirará en 10 minutos. Si no solicitaste esta acción, puedes ignorar este mensaje y asegurarte de que tu cuenta esté protegida.
     </p>
   `;
 
   await transporter.sendMail({
     from: `"MARVAL Seguridad" <${process.env.USERM}>`,
     to: email,
-    subject: `Tu código de acceso: ${code}`,
+    subject: `[MARVAL] ${title}: ${code}`,
     html: baseTemplate(content),
   });
 }

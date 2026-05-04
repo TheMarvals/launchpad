@@ -2,8 +2,8 @@
 
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { sendLoginOtpEmail } from '@/lib/email';
-import crypto from 'crypto';
+import { sendSecurityOtpEmail } from '@/lib/email';
+import { generateAndSaveOtp } from '@/lib/otp';
 
 export async function startLoginVerification(email: string, password: string) {
   try {
@@ -22,34 +22,17 @@ export async function startLoginVerification(email: string, password: string) {
       return { error: 'Credenciales inválidas' };
     }
 
-    // Generate a 6 digit OTP code
-    const code = crypto.randomInt(100000, 999999).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+    // Generate and save OTP
+    const code = await generateAndSaveOtp(user.id, 'LOGIN');
 
-    // Invalidate previous LOGIN OTPs for this user
-    await prisma.otpCode.updateMany({
-      where: {
-        userId: user.id,
-        action: 'LOGIN',
-        used: false,
-      },
-      data: {
-        used: true,
-      },
-    });
-
-    // Save the new OTP
-    await prisma.otpCode.create({
-      data: {
-        userId: user.id,
-        action: 'LOGIN',
-        code,
-        expiresAt,
-      },
-    });
-
-    // Send the email
-    await sendLoginOtpEmail(user.email, code, user.name);
+    // Send the unified email
+    await sendSecurityOtpEmail(
+      user.email,
+      code,
+      user.name,
+      "Código de Acceso",
+      "Se ha detectado un intento de inicio de sesión en tu cuenta. Usa el siguiente código para completar el proceso:"
+    );
 
     return { success: true };
   } catch (error: any) {
