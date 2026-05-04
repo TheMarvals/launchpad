@@ -39,6 +39,7 @@ export async function createTicket(data: { subject: string; priority: string; me
     const client = await prisma.client.findUnique({ where: { id: clientId as string } });
 
     // Notificar al admin
+    console.log(`[Tickets] Intentando notificar al admin sobre el ticket ${ticket.id}`);
     await sendNewTicketNotificationToAdmin({
       ticketId: ticket.id,
       subject: data.subject,
@@ -48,7 +49,7 @@ export async function createTicket(data: { subject: string; priority: string; me
       clientEmail: session.user.email || '',
       senderName: session.user.name || 'Usuario',
       senderRole: session.user.role || 'CLIENT',
-    }).catch(e => console.error('Error sending ticket email:', e));
+    }).catch(e => console.error('[Tickets] Error catch sending ticket email to admin:', e));
 
     revalidatePath('/client-portal/tickets');
     revalidatePath('/dashboard/tickets');
@@ -183,20 +184,22 @@ export async function sendTicketMessage(ticketId: string, message: string) {
     // Enviar notificaciones
     if (session.user.role === 'ADMIN' && ticket.userId !== session.user.id) {
       // El admin responde a un cliente
+      console.log(`[Tickets] Intentando notificar al cliente sobre la respuesta en el ticket ${ticket.id}`);
       await sendTicketReplyNotificationToClient({
         ticketId: ticket.id,
         subject: ticket.subject,
         priority: ticket.priority,
         message: '', // No usado en el template del cliente
         clientName: ticket.user.name || 'Cliente',
-        clientEmail: ticket.user.email,
+        clientEmail: ticket.user.email || '',
         senderName: session.user.name || 'Soporte MARVAL',
         senderRole: 'ADMIN',
         replyMessage: message,
-      }).catch(e => console.error('Error sending reply email:', e));
+      }).catch(e => console.error('[Tickets] Error catch sending reply email to client:', e));
     } else if (session.user.role === 'CLIENT') {
       // El cliente responde al ticket
       const clientInfo = await prisma.client.findUnique({ where: { id: ticket.clientId } });
+      console.log(`[Tickets] Intentando notificar al admin sobre la respuesta en el ticket ${ticket.id}`);
       await sendNewTicketNotificationToAdmin({
         ticketId: ticket.id,
         subject: `Re: ${ticket.subject}`,
@@ -206,7 +209,7 @@ export async function sendTicketMessage(ticketId: string, message: string) {
         clientEmail: session.user.email || '',
         senderName: session.user.name || 'Usuario',
         senderRole: 'CLIENT',
-      }).catch(e => console.error('Error sending reply email to admin:', e));
+      }).catch(e => console.error('[Tickets] Error catch sending reply email to admin:', e));
     }
 
     revalidatePath(`/client-portal/tickets/${ticketId}`);

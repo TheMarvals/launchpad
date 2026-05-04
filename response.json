@@ -1,0 +1,589 @@
+{
+  "data": {
+    "id": 1632,
+    "name": "mysalonhubnew.us",
+    "description": "",
+    "specifications": {
+      "vcpu": 4,
+      "ram": 15032385536,
+      "disk": 100
+    },
+    "uuid": "548127fc-2e45-4733-baa3-48509ee00b3f",
+    "os_type": "Linux",
+    "settings": {
+      "firmware": "bios",
+      "os_image": {
+        "url": "https://images.prod.solus.io/jammy-server-cloudimg-amd64.img",
+        "icon": "https://panel.servercheap.com/shared/icons/ubuntu.svg",
+        "name": "Ubuntu 22.04",
+        "type": "os_image",
+        "cloud_init_version": "v2"
+      },
+      "disk_driver": "scsi",
+      "mac_address": "52:54:00:75:0b:9a",
+      "vnc_enabled": true,
+      "vnc_password": "KI9i1daq",
+      "disk_cache_mode": "default",
+      "guest_agent_available": true,
+      "guest_tools_installed": true,
+      "application_login_link": [],
+      "user": "root"
+    },
+    "status": "started",
+    "real_status": "started",
+    "plan": {
+      "id": 1465,
+      "name": "Custom plan",
+      "params": {
+        "vcpu": 4,
+        "ram": 15032385536,
+        "disk": 100
+      },
+      "virtualization_type": "kvm",
+      "storage_type": "lvm",
+      "image_format": "raw",
+      "is_default": false,
+      "is_snapshot_available": true,
+      "is_snapshots_enabled": true,
+      "is_backup_available": false,
+      "backup_settings": {
+        "is_incremental_backup_enabled": false,
+        "incremental_backups_limit": 3
+      },
+      "is_additional_ips_available": true,
+      "is_visible": false,
+      "is_thin_provisioned": false,
+      "is_custom": true,
+      "position": 0,
+      "reset_limit_policy": "vm_created_day",
+      "network_traffic_limit_type": "total",
+      "limits": {
+        "disk_iops": {
+          "unit": "iops",
+          "limit": 1,
+          "is_enabled": false
+        },
+        "backups_number": {
+          "unit": "units",
+          "limit": 7,
+          "is_enabled": true
+        },
+        "disk_bandwidth": {
+          "unit": "Bps",
+          "limit": 1,
+          "is_enabled": false
+        },
+        "snapshots_size": {
+          "unit": "GiB",
+          "limit": 5,
+          "is_enabled": true
+        },
+        "snapshots_count": {
+          "unit": "units",
+          "limit": 1,
+          "is_enabled": true
+        },
+        "network_total_traffic": {
+          "unit": "TiB",
+          "limit": 8,
+          "is_enabled": true
+        },
+        "additional_disks_number": {
+          "unit": "units",
+          "limit": 7,
+          "is_enabled": true
+        },
+        "network_incoming_traffic": {
+          "unit": "GiB",
+          "limit": 1,
+          "is_enabled": false
+        },
+        "network_outgoing_traffic": {
+          "unit": "GiB",
+          "limit": 1,
+          "is_enabled": false
+        },
+        "network_reduce_bandwidth": {
+          "unit": "Mbps",
+          "limit": 50,
+          "is_enabled": true
+        },
+        "network_incoming_bandwidth": {
+          "unit": "Mbps",
+          "limit": 800,
+          "is_enabled": true
+        },
+        "network_outgoing_bandwidth": {
+          "unit": "Mbps",
+          "limit": 800,
+          "is_enabled": true
+        }
+      },
+      "available_os_image_versions": [
+        {
+          "id": 30,
+          "name": "AlmaLinux 10.0"
+        },
+        {
+          "id": 32,
+          "name": "OpenSUSE 16"
+        },
+        {
+          "id": 31,
+          "name": "Debian 13"
+        },
+        {
+          "id": 15,
+          "name": "Fedora Latest"
+        },
+        {
+          "id": 6,
+          "name": "AlpineLinux 3.15"
+        },
+        {
+          "id": 10,
+          "name": "CentOS 9 Stream"
+        },
+        {
+          "id": 14,
+          "name": "Debian 12"
+        },
+        {
+          "id": 16,
+          "name": "OpenSUSE 15"
+        },
+        {
+          "id": 17,
+          "name": "RockyLinux 8.4"
+        },
+        {
+          "id": 21,
+          "name": "Ubuntu 22.04"
+        },
+        {
+          "id": 24,
+          "name": "Fedora Latest"
+        },
+        {
+          "id": 29,
+          "name": "AlmaLinux 9.6"
+        },
+        {
+          "id": 18,
+          "name": "RockyLinux 9"
+        },
+        {
+          "id": 13,
+          "name": "Debian 11"
+        },
+        {
+          "id": 9,
+          "name": "CentOS 8 Stream"
+        },
+        {
+          "id": 5,
+          "name": "AlmaLinux 9.2"
+        },
+        {
+          "id": 20,
+          "name": "Ubuntu 20.04"
+        },
+        {
+          "id": 12,
+          "name": "Debian 10"
+        },
+        {
+          "id": 19,
+          "name": "Ubuntu 18.04"
+        },
+        {
+          "id": 4,
+          "name": "AlmaLinux 9.1"
+        },
+        {
+          "id": 8,
+          "name": "CentOS 8"
+        },
+        {
+          "id": 3,
+          "name": "AlmaLinux 9.0"
+        },
+        {
+          "id": 7,
+          "name": "CentOS 7"
+        },
+        {
+          "id": 11,
+          "name": "Debian 9"
+        },
+        {
+          "id": 2,
+          "name": "AlmaLinux 8.7"
+        },
+        {
+          "id": 1,
+          "name": "AlmaLinux 8.4"
+        },
+        {
+          "id": 25,
+          "name": "AlmaLinux 8.9"
+        },
+        {
+          "id": 27,
+          "name": "AlmaLinux 9.4"
+        },
+        {
+          "id": 26,
+          "name": "Ubuntu 24.04"
+        }
+      ],
+      "available_applications": [
+        {
+          "id": 17,
+          "name": "Plesk on Windows 2025"
+        },
+        {
+          "id": 1,
+          "name": "WordPress on Plesk"
+        },
+        {
+          "id": 2,
+          "name": "NextCloud"
+        },
+        {
+          "id": 3,
+          "name": "OpenVPN"
+        },
+        {
+          "id": 4,
+          "name": "Cloudron"
+        },
+        {
+          "id": 5,
+          "name": "GitLab"
+        },
+        {
+          "id": 6,
+          "name": "MariaDB"
+        },
+        {
+          "id": 7,
+          "name": "NGINX"
+        },
+        {
+          "id": 8,
+          "name": "Jenkins"
+        },
+        {
+          "id": 9,
+          "name": "cPanel on CloudLinux"
+        },
+        {
+          "id": 10,
+          "name": "cPanel"
+        },
+        {
+          "id": 11,
+          "name": "cPanel on Ubuntu 20.04"
+        },
+        {
+          "id": 12,
+          "name": "Plesk"
+        },
+        {
+          "id": 13,
+          "name": "Plesk on AlmaLinux"
+        },
+        {
+          "id": 15,
+          "name": "Jitsi Meet"
+        }
+      ],
+      "tokens_per_hour": 0,
+      "tokens_per_month": 0,
+      "ip_tokens_per_month": 0,
+      "ip_tokens_per_hour": 0,
+      "iso_image_tokens_per_hour": 0,
+      "iso_image_tokens_per_month": 0,
+      "backup_price": 0,
+      "image_presets": [],
+      "is_disaster_recovery_enabled": false,
+      "disaster_recovery_price": 0
+    },
+    "fqdns": [
+      "mysalonhubnew.us"
+    ],
+    "boot_mode": "disk",
+    "user": {
+      "id": 835,
+      "email": "emarvalr@gmail.com"
+    },
+    "usage": {
+      "cpu": 0,
+      "network": {
+        "incoming": {
+          "value": 106638750328,
+          "prev": 462828653,
+          "is_exceeded": false
+        },
+        "outgoing": {
+          "value": 29056077979,
+          "prev": 791385732,
+          "is_exceeded": false
+        }
+      },
+      "disk": {
+        "actual_size": 0
+      }
+    },
+    "is_suspended": false,
+    "backup_settings": {
+      "enabled": false,
+      "schedule": {
+        "type": "daily",
+        "time": {
+          "hour": 0,
+          "minutes": 0
+        },
+        "days": []
+      },
+      "limit": {
+        "limit": 7,
+        "is_enabled": true,
+        "unit": "units"
+      },
+      "next_backup_type": null
+    },
+    "is_processing": false,
+    "progress": 0,
+    "next_scheduled_backup_at": null,
+    "ssh_keys": [],
+    "project": {
+      "id": 835,
+      "name": "Marval-Management",
+      "description": "",
+      "owner": {
+        "id": 835,
+        "email": "emarvalr@gmail.com",
+        "email_verified_at": "2026-02-19T19:20:42.000000Z",
+        "limit_usage": {
+          "servers": null,
+          "running_servers": 3,
+          "additional_ips": 0,
+          "additional_ipv6": 0,
+          "iso_images": 0,
+          "iso_images_size": 0
+        },
+        "roles": [
+          {
+            "id": 3,
+            "name": "CLIENT-ENHANCED",
+            "is_default": null,
+            "permissions": [
+              {
+                "id": 27,
+                "name": "manage owned ISO images"
+              },
+              {
+                "id": 31,
+                "name": "get locations"
+              },
+              {
+                "id": 32,
+                "name": "get os images"
+              },
+              {
+                "id": 33,
+                "name": "get applications"
+              },
+              {
+                "id": 44,
+                "name": "get backups"
+              },
+              {
+                "id": 50,
+                "name": "get ISO images"
+              },
+              {
+                "id": 59,
+                "name": "change servers hostname"
+              },
+              {
+                "id": 60,
+                "name": "change servers boot mode"
+              },
+              {
+                "id": 63,
+                "name": "create servers snapshot"
+              },
+              {
+                "id": 64,
+                "name": "revert servers snapshot"
+              },
+              {
+                "id": 65,
+                "name": "delete servers snapshot"
+              },
+              {
+                "id": 66,
+                "name": "boot from ISO images"
+              },
+              {
+                "id": 68,
+                "name": "reset root password"
+              },
+              {
+                "id": 69,
+                "name": "start servers"
+              },
+              {
+                "id": 70,
+                "name": "stop servers"
+              },
+              {
+                "id": 71,
+                "name": "restart servers"
+              },
+              {
+                "id": 72,
+                "name": "power off servers"
+              },
+              {
+                "id": 73,
+                "name": "open vnc console"
+              },
+              {
+                "id": 79,
+                "name": "get VPC networks"
+              }
+            ]
+          }
+        ],
+        "created_at": "2026-02-19T19:20:42.000000Z",
+        "status": "active",
+        "has_verified_email": true,
+        "language": {
+          "id": 1,
+          "name": "English",
+          "locale": "en_US",
+          "country": "United States of America",
+          "icon": {
+            "id": 344,
+            "name": "United States of America",
+            "type": "flags",
+            "url": "https://panel.servercheap.com/shared/icons/flags/united-states-of-america.svg"
+          },
+          "is_default": true,
+          "is_visible": true
+        },
+        "allowed_ips": null,
+        "is_two_factor_auth_enabled": false,
+        "two_factor_auth_recovery_code_count": 0
+      },
+      "members": 1,
+      "servers": 3,
+      "is_default": true,
+      "is_owner": true
+    },
+    "ips": [
+      {
+        "id": 3262,
+        "ip": "65.75.201.217",
+        "issued_for": "vm",
+        "reverse_dns": [
+          {
+            "id": 2123,
+            "ip": "65.75.201.217",
+            "ip_id": 3262,
+            "domain": "",
+            "is_primary": true
+          }
+        ],
+        "is_reverse_dns_enabled": false,
+        "is_primary": true,
+        "is_reserved": true
+      },
+      {
+        "id": 3263,
+        "ip": "2606:cc0:11:22cf::1",
+        "issued_for": "vm",
+        "reverse_dns": [
+          {
+            "id": 2124,
+            "ip": "2606:cc0:11:22cf::1",
+            "ip_id": 3263,
+            "domain": "",
+            "is_primary": false
+          }
+        ],
+        "is_reverse_dns_enabled": false,
+        "is_primary": true,
+        "is_reserved": true
+      }
+    ],
+    "ip_addresses": {
+      "ipv4": [
+        {
+          "id": 3262,
+          "ip": "65.75.201.217",
+          "is_primary": true,
+          "issued_for": "vm",
+          "is_reverse_dns_enabled": false,
+          "reverse_dns": {
+            "id": 2123,
+            "ip": "65.75.201.217",
+            "ip_id": 3262,
+            "domain": "",
+            "is_primary": true
+          },
+          "gateway": "65.75.201.193",
+          "netmask": "255.255.255.192",
+          "cidr": "65.75.201.194/26",
+          "ns_1": "8.8.8.8",
+          "ns_2": "8.8.4.4"
+        }
+      ],
+      "ipv6": [
+        {
+          "id": 3263,
+          "range": "2606:cc0:11:22cf::/64",
+          "primary_ip": "2606:cc0:11:22cf::1",
+          "is_primary": true,
+          "issued_for": "vm",
+          "is_reverse_dns_enabled": false,
+          "reverse_dns": [
+            {
+              "id": 2124,
+              "ip": "2606:cc0:11:22cf::1",
+              "ip_id": 3263,
+              "domain": "",
+              "is_primary": false
+            }
+          ],
+          "gateway": "2606:cc0:11:2200::1",
+          "ns_1": "2001:4860:4860::8888",
+          "ns_2": "2001:4860:4860::8844"
+        }
+      ]
+    },
+    "created_at": "2026-04-04T17:58:33.000000Z",
+    "has_incremental_backups": false,
+    "virtualization_type": "kvm",
+    "vnc_url": "NDZjZTQ5YjA5NGE3ZmQ5MmQyZTgxYzJkZGI2MjM4MjkyNDQ1ZDc1YzQ3OWM3YTA0OGViOGY5MTViY2VmODc2MWMxMDUwM2MyYTQxYTA1ZjMyOGQ4YzBiNzhhMmY3OTVkMzg2ZjU3NDU4NzA2OTY5NzUzYjZkOGExODY2MTlmZDhiZWQ1YjNlM2VmNDE5MzdlNDMyNDA5ZDM4YjY0YzBhMmNkNjk3YTRiMmE2NDVlZTFmZDI5NmE5YzAzYTA1MTlmZGE4M2I0Y2UwNDljOGRkZQ",
+    "product": "solusvm2",
+    "is_disaster_recovery_enabled": false,
+    "storage_id": 36,
+    "cpu_usage": 16.23,
+    "location": {
+      "id": 1,
+      "name": "Default",
+      "description": "Default",
+      "icon": null,
+      "is_default": true,
+      "is_visible": true,
+      "position": 1
+    },
+    "last_backup_date": null,
+    "is_backup_available": false
+  }
+}

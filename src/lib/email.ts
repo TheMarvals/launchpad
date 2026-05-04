@@ -107,12 +107,20 @@ export async function sendNewTicketNotificationToAdmin(data: TicketEmailData) {
     </a>
   `;
 
-  await transporter.sendMail({
-    from: `"MARVAL Soporte" <${process.env.USERM}>`,
-    to: adminEmail,
-    subject: `[Nuevo Ticket] ${data.subject} — ${data.clientName}`,
-    html: baseTemplate(content),
-  });
+  console.log(`[Email] Preparando correo de nuevo ticket para admin: ${adminEmail}`);
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"MARVAL Soporte" <${process.env.USERM}>`,
+      to: adminEmail,
+      subject: `[Nuevo Ticket] ${data.subject} — ${data.clientName}`,
+      html: baseTemplate(content),
+    });
+    console.log(`[Email] Correo de nuevo ticket enviado al admin exitosamente. MessageID: ${info.messageId}`);
+  } catch (err) {
+    console.error(`[Email] Error al enviar correo de nuevo ticket al admin:`, err);
+    throw err;
+  }
 }
 
 // Email para CLIENTE cuando el admin responde un ticket
@@ -138,12 +146,20 @@ export async function sendTicketReplyNotificationToClient(data: TicketEmailData 
     <p style="color:#475569;font-size:12px;margin:24px 0 0 0;">Si tienes alguna duda adicional, puedes responder directamente desde el portal.</p>
   `;
 
-  await transporter.sendMail({
-    from: `"MARVAL Soporte" <${process.env.USERM}>`,
-    to: data.clientEmail,
-    subject: `Re: ${data.subject} — Ticket #${data.ticketId.slice(-6).toUpperCase()}`,
-    html: baseTemplate(content),
-  });
+  console.log(`[Email] Preparando correo de respuesta de ticket para cliente: ${data.clientEmail}`);
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"MARVAL Soporte" <${process.env.USERM}>`,
+      to: data.clientEmail,
+      subject: `Re: ${data.subject} — Ticket #${data.ticketId.slice(-6).toUpperCase()}`,
+      html: baseTemplate(content),
+    });
+    console.log(`[Email] Correo de respuesta enviado al cliente exitosamente. MessageID: ${info.messageId}`);
+  } catch (err) {
+    console.error(`[Email] Error al enviar correo de respuesta al cliente:`, err);
+    throw err;
+  }
 }
 
 // Email genérico para OTPs de Seguridad (Login, Acciones de Servidor, etc.)
