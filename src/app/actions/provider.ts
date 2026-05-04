@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { sendSecurityOtpEmail } from '@/lib/email';
 import { generateAndSaveOtp, verifyAndConsumeOtp } from '@/lib/otp';
 
-const API_BASE = process.env.PROVIDER_API_BASE || 'https://panel.servercheap.com/api/v1';
+const API_BASE = process.env.PROVIDER_API_BASE;
 
 export async function getVncUrl(serverId: string) {
   const session = await auth();
