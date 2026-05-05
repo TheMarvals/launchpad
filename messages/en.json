@@ -1,0 +1,13 @@
+{
+  "Index": {
+    "title": "Welcome",
+    "description": "Quotation and Billing Management System"
+  },
+  "Navigation": {
+    "dashboard": "Dashboard",
+    "clients": "Clients",
+    "quotes": "Quotes",
+    "tickets": "Tickets",
+    "settings": "Settings"
+  }
+}

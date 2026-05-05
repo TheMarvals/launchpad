@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { redirect } from '@/i18n/routing';
 
 export async function createQuote(formData: any) {
   const { clientId, items, notasCondiciones, propuesta, estado, fechaValidez } = formData;

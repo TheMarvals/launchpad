@@ -1,0 +1,13 @@
+{
+  "Index": {
+    "title": "Bienvenido",
+    "description": "Sistema de Gestión de Cotizaciones y Facturación"
+  },
+  "Navigation": {
+    "dashboard": "Panel de Control",
+    "clients": "Clientes",
+    "quotes": "Cotizaciones",
+    "tickets": "Tickets",
+    "settings": "Configuración"
+  }
+}
