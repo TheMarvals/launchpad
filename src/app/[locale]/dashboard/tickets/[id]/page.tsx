@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { getTicketDetails } from '@/app/actions/tickets';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import TicketReplyForm from '@/app/client-portal/tickets/[id]/TicketReplyForm';
+import TicketReplyForm from '@/app/[locale]/client-portal/tickets/[id]/TicketReplyForm';
 import AdminTicketStatus from './AdminTicketStatus';
 
 export default async function AdminTicketDetailsPage({ params }: { params: { id: string } }) {
