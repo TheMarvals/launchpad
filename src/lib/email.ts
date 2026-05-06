@@ -204,6 +204,9 @@ export async function sendRemindersEmail(
     tasks: any[];
     events: any[];
     vpsExpirations: any[];
+    openTickets?: any[];
+    expiringQuotes?: any[];
+    failedActions?: any[];
   },
   locale: string = 'es'
 ) {
