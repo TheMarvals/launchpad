@@ -212,88 +212,24 @@ export async function sendRemindersEmail(
 ) {
   let remindersHtml = '';
 
+  const sectionStyle = `
+    margin-top: 24px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+  `;
+
   if (data.vpsExpirations.length > 0) {
     remindersHtml += `
-      <div style="margin-top:20px;">
-        <h3 style="color:#ef4444;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">💾 VPS por Vencer</h3>
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.1);border-radius:12px;padding:15px;">
+      <div style="${sectionStyle}">
+        <h3 style="color:#ef4444;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px 0;">💾 VPS por Vencer</h3>
+        <table width="100%" cellpadding="0" cellspacing="0">
           ${data.vpsExpirations.map(v => `
             <tr>
-              <td style="padding:5px 0;">
-                <div style="color:#ffffff;font-weight:700;font-size:14px;">${v.name}</div>
-                <div style="color:#94a3b8;font-size:12px;">${v.client?.razonSocial || 'Cliente'} — Vence: ${v.dueDate ? new Date(v.dueDate).toLocaleDateString(locale) : 'N/A'}</div>
-              </td>
-            </tr>
-          `).join('')}
-        </table>
-      </div>
-    `;
-  }
-
-  if (data.tasks.length > 0) {
-    remindersHtml += `
-      <div style="margin-top:20px;">
-        <h3 style="color:#3b82f6;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">✅ Tareas Pendientes</h3>
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.1);border-radius:12px;padding:15px;">
-          ${data.tasks.map(t => `
-            <tr>
-              <td style="padding:5px 0;">
-                <div style="color:#ffffff;font-weight:700;font-size:14px;">${t.title}</div>
-                <div style="color:#94a3b8;font-size:12px;">Fecha límite: ${t.dueDate ? new Date(t.dueDate).toLocaleDateString(locale) : 'N/A'}</div>
-              </td>
-            </tr>
-          `).join('')}
-        </table>
-      </div>
-    `;
-  }
-
-  if (data.events.length > 0) {
-    remindersHtml += `
-      <div style="margin-top:20px;">
-        <h3 style="color:#a855f7;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">📅 Próximos Eventos</h3>
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.1);border-radius:12px;padding:15px;">
-          ${data.events.map(e => `
-            <tr>
-              <td style="padding:5px 0;">
-                <div style="color:#ffffff;font-weight:700;font-size:14px;">${e.title}</div>
-                <div style="color:#94a3b8;font-size:12px;">${new Date(e.start).toLocaleDateString(locale)} ${new Date(e.start).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</div>
-              </td>
-            </tr>
-          `).join('')}
-        </table>
-      </div>
-    `;
-  }
-
-  if (data.openTickets && data.openTickets.length > 0) {
-    remindersHtml += `
-      <div style="margin-top:20px;">
-        <h3 style="color:#f59e0b;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🎫 Tickets Pendientes</h3>
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.1);border-radius:12px;padding:15px;">
-          ${data.openTickets.map(t => `
-            <tr>
-              <td style="padding:5px 0;">
-                <div style="color:#ffffff;font-weight:700;font-size:14px;">${t.subject}</div>
-                <div style="color:#94a3b8;font-size:12px;">Cliente: ${t.client?.razonSocial || 'Desconocido'} — Estado: <span style="color:#f59e0b;">${t.status}</span></div>
-              </td>
-            </tr>
-          `).join('')}
-        </table>
-      </div>
-    `;
-  }
-
-  if (data.expiringQuotes && data.expiringQuotes.length > 0) {
-    remindersHtml += `
-      <div style="margin-top:20px;">
-        <h3 style="color:#10b981;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">📄 Cotizaciones por Vencer</h3>
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.1);border-radius:12px;padding:15px;">
-          ${data.expiringQuotes.map(q => `
-            <tr>
-              <td style="padding:5px 0;">
-                <div style="color:#ffffff;font-weight:700;font-size:14px;">Cotización #${q.correlativo}</div>
-                <div style="color:#94a3b8;font-size:12px;">Cliente: ${q.client?.razonSocial || 'Desconocido'} — Vence: ${new Date(q.fechaValidez).toLocaleDateString(locale)}</div>
+              <td style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
+                <div style="color:#ffffff;font-weight:600;font-size:14px;">${v.name}</div>
+                <div style="color:#64748b;font-size:12px;">${v.client?.razonSocial || 'Cliente'} — Vence: ${v.dueDate ? new Date(v.dueDate).toLocaleDateString(locale) : 'N/A'}</div>
               </td>
             </tr>
           `).join('')}
@@ -304,14 +240,86 @@ export async function sendRemindersEmail(
 
   if (data.failedActions && data.failedActions.length > 0) {
     remindersHtml += `
-      <div style="margin-top:20px;">
-        <h3 style="color:#ef4444;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">⚠️ Fallos en Servidores (24h)</h3>
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.1);border-radius:12px;padding:15px;">
+      <div style="${sectionStyle} border-color: rgba(239,68,68,0.2);">
+        <h3 style="color:#ef4444;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px 0;">⚠️ Fallos en Servidores (24h)</h3>
+        <table width="100%" cellpadding="0" cellspacing="0">
           ${data.failedActions.map(a => `
             <tr>
-              <td style="padding:5px 0;">
-                <div style="color:#ffffff;font-weight:700;font-size:14px;">${a.action.toUpperCase()} fallido</div>
-                <div style="color:#94a3b8;font-size:12px;">Servidor: ${a.server?.name || 'Desconocido'} — Usuario: ${a.user?.name || 'Sistema'}</div>
+              <td style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
+                <div style="color:#ffffff;font-weight:600;font-size:14px;">${a.action.toUpperCase()} fallido</div>
+                <div style="color:#64748b;font-size:12px;">Servidor: ${a.server?.name || 'Desconocido'} — Usuario: ${a.user?.name || 'Sistema'}</div>
+              </td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+    `;
+  }
+
+  if (data.tasks.length > 0) {
+    remindersHtml += `
+      <div style="${sectionStyle}">
+        <h3 style="color:#3b82f6;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px 0;">✅ Tareas Pendientes</h3>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${data.tasks.map(t => `
+            <tr>
+              <td style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
+                <div style="color:#ffffff;font-weight:600;font-size:14px;">${t.title}</div>
+                <div style="color:#64748b;font-size:12px;">Fecha límite: ${t.dueDate ? new Date(t.dueDate).toLocaleDateString(locale) : 'N/A'}</div>
+              </td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+    `;
+  }
+
+  if (data.openTickets && data.openTickets.length > 0) {
+    remindersHtml += `
+      <div style="${sectionStyle}">
+        <h3 style="color:#f59e0b;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px 0;">🎫 Tickets Pendientes</h3>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${data.openTickets.map(t => `
+            <tr>
+              <td style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
+                <div style="color:#ffffff;font-weight:600;font-size:14px;">${t.subject}</div>
+                <div style="color:#64748b;font-size:12px;">Cliente: ${t.client?.razonSocial || 'Desconocido'} — Estado: <span style="color:#f59e0b;">${t.status}</span></div>
+              </td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+    `;
+  }
+
+  if (data.expiringQuotes && data.expiringQuotes.length > 0) {
+    remindersHtml += `
+      <div style="${sectionStyle}">
+        <h3 style="color:#10b981;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px 0;">📄 Cotizaciones por Vencer</h3>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${data.expiringQuotes.map(q => `
+            <tr>
+              <td style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
+                <div style="color:#ffffff;font-weight:600;font-size:14px;">Cotización #${q.correlativo}</div>
+                <div style="color:#64748b;font-size:12px;">Cliente: ${q.client?.razonSocial || 'Desconocido'} — Vence: ${new Date(q.fechaValidez).toLocaleDateString(locale)}</div>
+              </td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+    `;
+  }
+
+  if (data.events.length > 0) {
+    remindersHtml += `
+      <div style="${sectionStyle}">
+        <h3 style="color:#a855f7;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px 0;">📅 Próximos Eventos</h3>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${data.events.map(e => `
+            <tr>
+              <td style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
+                <div style="color:#ffffff;font-weight:600;font-size:14px;">${e.title}</div>
+                <div style="color:#64748b;font-size:12px;">${new Date(e.start).toLocaleDateString(locale)} ${new Date(e.start).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</div>
               </td>
             </tr>
           `).join('')}
@@ -322,27 +330,28 @@ export async function sendRemindersEmail(
 
   const content = `
     <div style="margin-bottom:24px;">
-      <span style="background:rgba(16,185,129,0.15);color:#10b981;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:4px 12px;border-radius:20px;border:1px solid rgba(16,185,129,0.2);">
-        🚀 Resumen de Productividad
+      <span style="background:rgba(59,130,246,0.1);color:#3b82f6;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:4px 12px;border-radius:20px;border:1px solid rgba(59,130,246,0.2);">
+        🚀 Productividad
       </span>
     </div>
-    <h2 style="color:#ffffff;font-size:20px;font-weight:800;margin:0 0 16px 0;">Hola ${userName},</h2>
-    <p style="color:#94a3b8;font-size:14px;line-height:1.6;margin:0 0 24px 0;">
-      Aquí tienes un resumen de tus recordatorios para los próximos 7 días:
+    <h2 style="color:#ffffff;font-size:20px;font-weight:800;margin:0 0 12px 0;">Hola ${userName},</h2>
+    <p style="color:#94a3b8;font-size:14px;line-height:1.6;margin:0 0 10px 0;">
+      Este es tu resumen estratégico de los próximos 7 días. Hemos identificado los siguientes puntos que requieren tu atención:
     </p>
     ${remindersHtml}
-    <div style="margin-top:30px;text-align:center;">
+    <div style="margin-top:32px;text-align:center;">
       <a href="https://admin.themarvals.com/dashboard/productivity/reminders" 
-         style="display:inline-block;background:#3b82f6;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;">
-        Ver en el Portal →
+         style="display:inline-block;background:#3b82f6;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:12px;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 12px rgba(59,130,246,0.3);">
+        Acceder al Panel de Control
       </a>
     </div>
   `;
 
   await getTransporter().sendMail({
-    from: `"MARVAL Productivity" <${process.env.USERM}>`,
+    from: `"MARVAL Portal" <${process.env.USERM}>`,
     to: toEmail,
-    subject: `[MARVAL] Resumen de Recordatorios — ${new Date().toLocaleDateString(locale)}`,
+    subject: `[MARVAL] Resumen de Productividad — ${new Date().toLocaleDateString(locale)}`,
     html: baseTemplate(content),
   });
 }
+
