@@ -19,6 +19,7 @@ export default async function ClientPortalLayout({
   
   if (!session?.user || (session.user as any).role !== 'CLIENT') {
     redirect({ href: '/login', locale });
+    return null; // Satisfy TypeScript
   }
 
   const initials = session.user.name

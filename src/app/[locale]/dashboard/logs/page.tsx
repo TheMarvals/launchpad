@@ -8,6 +8,7 @@ export default async function AuditLogsPage({params}: {params: Promise<{locale: 
   const session = await auth();
   if (session?.user?.role !== 'ADMIN') {
     redirect({href: '/', locale});
+    return null;
   }
 
   const logs = await prisma.actionLog.findMany({

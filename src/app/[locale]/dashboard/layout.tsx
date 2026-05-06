@@ -18,6 +18,7 @@ export default async function DashboardLayout({
   
   if (!session?.user) {
     redirect({ href: '/login', locale });
+    return null; // Satisfy TypeScript
   }
 
   const initials = session.user.name
