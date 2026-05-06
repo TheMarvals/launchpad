@@ -51,29 +51,29 @@ function baseTemplate(content: string) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>MARVAL</title>
 </head>
-<body style="margin:0;padding:0;background:#0a041a;font-family:'Segoe UI',Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a041a;min-height:100vh;">
+<body style="margin:0;padding:0;background:#f8fafc;font-family:'Segoe UI',Arial,sans-serif;color:#1e293b;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;min-height:100vh;">
     <tr><td align="center" style="padding:40px 16px;">
       <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
         <!-- Header -->
         <tr>
           <td style="padding:0 0 32px 0;text-align:center;">
-            <div style="font-size:32px;font-weight:900;letter-spacing:-2px;color:transparent;-webkit-text-stroke:1.5px #ffffff;font-family:'Segoe UI',Arial,sans-serif;">MARVAL</div>
-            <div style="width:48px;height:2px;background:#3b82f6;margin:8px auto;"></div>
-            <div style="font-size:10px;text-transform:uppercase;letter-spacing:4px;color:#64748b;font-weight:700;">Portal de Gestión Integral</div>
+            <div style="font-size:28px;font-weight:900;letter-spacing:-1.5px;color:#0f172a;font-family:'Segoe UI',Arial,sans-serif;text-transform:uppercase;">MARVAL</div>
+            <div style="width:40px;height:3px;background:#0f172a;margin:8px auto;"></div>
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:3px;color:#64748b;font-weight:700;">Gestión Integral</div>
           </td>
         </tr>
         <!-- Card -->
         <tr>
-          <td style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:40px;">
+          <td style="background:#ffffff;border:1px solid #e2e8f0;border-radius:32px;padding:48px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.05);">
             ${content}
           </td>
         </tr>
         <!-- Footer -->
         <tr>
-          <td style="padding:24px 0 0 0;text-align:center;">
-            <div style="font-size:10px;text-transform:uppercase;letter-spacing:3px;color:#334155;">© 2026 MARVAL · Todos los derechos reservados</div>
-            <div style="font-size:10px;color:#334155;margin-top:4px;">admin.themarvals.com</div>
+          <td style="padding:32px 0 0 0;text-align:center;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#94a3b8;font-weight:600;">© 2026 MARVAL · Excellence in Consulting</div>
+            <div style="font-size:11px;color:#cbd5e1;margin-top:6px;">Este es un mensaje automático del sistema.</div>
           </td>
         </tr>
       </table>
@@ -93,23 +93,25 @@ export async function sendNewTicketNotificationToAdmin(data: TicketEmailData) {
 
   const content = `
     <div style="margin-bottom:24px;">
-      <span style="background:rgba(59,130,246,0.15);color:#3b82f6;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:4px 12px;border-radius:20px;border:1px solid rgba(59,130,246,0.2);">
-        🎫 Nuevo Ticket de Soporte
+      <span style="background:#f1f5f9;color:#475569;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:6px 12px;border-radius:12px;border:1px solid #e2e8f0;">
+        🎫 Nuevo Ticket
       </span>
     </div>
-    <h2 style="color:#ffffff;font-size:20px;font-weight:800;margin:0 0 8px 0;line-height:1.3;">${data.subject}</h2>
+    <h2 style="color:#0f172a;font-size:24px;font-weight:800;margin:0 0 12px 0;line-height:1.2;">${data.subject}</h2>
     <div style="margin-bottom:24px;display:flex;gap:8px;flex-wrap:wrap;">
-      <span style="background:rgba(255,255,255,0.05);color:#94a3b8;font-size:11px;padding:3px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);">👤 ${data.clientName}</span>
-      <span style="background:${badgeColor}20;color:${badgeColor};font-size:11px;padding:3px 10px;border-radius:10px;border:1px solid ${badgeColor}40;">Prioridad: ${priorityBadge}</span>
+      <span style="background:#f1f5f9;color:#64748b;font-size:11px;padding:4px 12px;border-radius:10px;border:1px solid #e2e8f0;font-weight:600;">👤 ${data.clientName}</span>
+      <span style="background:${badgeColor}15;color:${badgeColor};font-size:11px;padding:4px 12px;border-radius:10px;border:1px solid ${badgeColor}30;font-weight:600;">${priorityBadge}</span>
     </div>
-    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin-bottom:28px;">
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#64748b;margin-bottom:10px;font-weight:700;">Mensaje inicial</div>
-      <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin:0;">${data.message.replace(/\n/g, '<br>')}</p>
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:24px;margin-bottom:32px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#94a3b8;margin-bottom:12px;font-weight:800;">Descripción del Problema</div>
+      <p style="color:#334155;font-size:15px;line-height:1.7;margin:0;">${data.message.replace(/\n/g, '<br>')}</p>
     </div>
-    <a href="https://admin.themarvals.com/dashboard/tickets/${data.ticketId}" 
-       style="display:inline-block;background:#3b82f6;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:12px;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;">
-      Ver Ticket →
-    </a>
+    <div style="text-align:center;">
+      <a href="https://admin.themarvals.com/dashboard/tickets/${data.ticketId}" 
+         style="display:inline-block;background:#0f172a;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:12px;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;">
+        Gestionar en el Portal →
+      </a>
+    </div>
   `;
 
   console.log(`[Email] Preparando correo de nuevo ticket para admin: ${adminEmail}`);
@@ -134,21 +136,23 @@ export async function sendTicketReplyNotificationToClient(data: TicketEmailData 
 
   const content = `
     <div style="margin-bottom:24px;">
-      <span style="background:rgba(99,102,241,0.15);color:#818cf8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:4px 12px;border-radius:20px;border:1px solid rgba(99,102,241,0.2);">
-        💬 Respuesta a tu Ticket
+      <span style="background:#f1f5f9;color:#475569;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:6px 12px;border-radius:12px;border:1px solid #e2e8f0;">
+        💬 Soporte MARVAL
       </span>
     </div>
-    <p style="color:#94a3b8;font-size:14px;margin:0 0 20px 0;">Hola <strong style="color:#ffffff;">${data.clientName}</strong>, el equipo de soporte de MARVAL ha respondido a tu ticket:</p>
-    <h3 style="color:#ffffff;font-size:16px;font-weight:700;margin:0 0 16px 0;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.06);">📋 ${data.subject}</h3>
-    <div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.15);border-radius:12px;padding:20px;margin-bottom:28px;">
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#818cf8;margin-bottom:10px;font-weight:700;">Respuesta del equipo MARVAL</div>
-      <p style="color:#e2e8f0;font-size:14px;line-height:1.7;margin:0;">${data.replyMessage.replace(/\n/g, '<br>')}</p>
+    <p style="color:#475569;font-size:14px;margin:0 0 20px 0;">Hola <strong style="color:#0f172a;">${data.clientName}</strong>, el equipo de soporte ha respondido a tu ticket:</p>
+    <h3 style="color:#0f172a;font-size:16px;font-weight:700;margin:0 0 16px 0;padding-bottom:12px;border-bottom:1px solid #f1f5f9;">📋 ${data.subject}</h3>
+    <div style="background:#f0f9ff;border:1px solid #e0f2fe;border-radius:16px;padding:24px;margin-bottom:32px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#0369a1;margin-bottom:12px;font-weight:800;">Respuesta de MARVAL</div>
+      <p style="color:#0c4a6e;font-size:15px;line-height:1.7;margin:0;">${data.replyMessage.replace(/\n/g, '<br>')}</p>
     </div>
-    <a href="https://admin.themarvals.com/client-portal/tickets/${data.ticketId}" 
-       style="display:inline-block;background:#6366f1;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:12px;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;">
-      Ver Conversación →
-    </a>
-    <p style="color:#475569;font-size:12px;margin:24px 0 0 0;">Si tienes alguna duda adicional, puedes responder directamente desde el portal.</p>
+    <div style="text-align:center;">
+      <a href="https://admin.themarvals.com/client-portal/tickets/${data.ticketId}" 
+         style="display:inline-block;background:#0f172a;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:12px;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;">
+        Ver en el Portal de Cliente →
+      </a>
+    </div>
+    <p style="color:#94a3b8;font-size:12px;margin:32px 0 0 0;text-align:center;">También puedes responder directamente desde tu portal de gestión.</p>
   `;
 
   console.log(`[Email] Preparando correo de respuesta de ticket para cliente: ${data.clientEmail}`);
@@ -171,20 +175,21 @@ export async function sendTicketReplyNotificationToClient(data: TicketEmailData 
 export async function sendSecurityOtpEmail(email: string, code: string, userName: string, title: string, description: string) {
   const content = `
     <div style="margin-bottom:24px;">
-      <span style="background:rgba(99,102,241,0.15);color:#818cf8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:4px 12px;border-radius:20px;border:1px solid rgba(99,102,241,0.2);">
-        🔐 Verificación de Seguridad
+      <span style="background:#eef2ff;color:#4f46e5;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:6px 12px;border-radius:12px;border:1px solid #e0e7ff;">
+        🔐 Seguridad
       </span>
     </div>
-    <h2 style="color:#ffffff;font-size:20px;font-weight:800;margin:0 0 16px 0;">${title}</h2>
-    <p style="color:#94a3b8;font-size:14px;line-height:1.6;margin:0 0 24px 0;">
-      Hola <strong style="color:#ffffff;">${userName}</strong>,<br>
+    <h2 style="color:#0f172a;font-size:22px;font-weight:800;margin:0 0 12px 0;">${title}</h2>
+    <p style="color:#475569;font-size:14px;line-height:1.6;margin:0 0 24px 0;">
+      Hola <strong style="color:#0f172a;">${userName}</strong>,<br>
       ${description}
     </p>
-    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
-      <span style="font-family:monospace;font-size:32px;font-weight:700;letter-spacing:8px;color:#3b82f6;">${code}</span>
+    <div style="background:#f8fafc;border:2px solid #e2e8f0;border-radius:16px;padding:32px;text-align:center;margin-bottom:24px;">
+      <div style="color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:8px;">Código de Acceso</div>
+      <span style="font-family:monospace;font-size:36px;font-weight:900;letter-spacing:10px;color:#0f172a;">${code}</span>
     </div>
-    <p style="color:#64748b;font-size:12px;line-height:1.5;margin:0;">
-      Este código expirará en 10 minutos. Si no solicitaste esta acción, puedes ignorar este mensaje y asegurarte de que tu cuenta esté protegida.
+    <p style="color:#94a3b8;font-size:12px;line-height:1.5;margin:0;">
+      Este código expirará en 10 minutos por motivos de seguridad.
     </p>
   `;
 
@@ -214,21 +219,21 @@ export async function sendRemindersEmail(
 
   const sectionStyle = `
     margin-top: 24px;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 16px;
+    padding: 24px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
   `;
 
   if (data.vpsExpirations.length > 0) {
     remindersHtml += `
       <div style="${sectionStyle}">
-        <h3 style="color:#ef4444;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px 0;">💾 VPS por Vencer</h3>
+        <h3 style="color:#ef4444;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 16px 0;font-weight:800;">💾 VPS por Vencer</h3>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${data.vpsExpirations.map(v => `
             <tr>
-              <td style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
-                <div style="color:#ffffff;font-weight:600;font-size:14px;">${v.name}</div>
+              <td style="padding:10px 0; border-bottom:1px solid #f1f5f9;">
+                <div style="color:#0f172a;font-weight:700;font-size:14px;">${v.name}</div>
                 <div style="color:#64748b;font-size:12px;">${v.client?.razonSocial || 'Cliente'} — Vence: ${v.dueDate ? new Date(v.dueDate).toLocaleDateString(locale) : 'N/A'}</div>
               </td>
             </tr>
@@ -240,14 +245,14 @@ export async function sendRemindersEmail(
 
   if (data.failedActions && data.failedActions.length > 0) {
     remindersHtml += `
-      <div style="${sectionStyle} border-color: rgba(239,68,68,0.2);">
-        <h3 style="color:#ef4444;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px 0;">⚠️ Fallos en Servidores (24h)</h3>
+      <div style="${sectionStyle} border-left: 4px solid #ef4444;">
+        <h3 style="color:#ef4444;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 16px 0;font-weight:800;">⚠️ Alertas de Auditoría</h3>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${data.failedActions.map(a => `
             <tr>
-              <td style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
-                <div style="color:#ffffff;font-weight:600;font-size:14px;">${a.action.toUpperCase()} fallido</div>
-                <div style="color:#64748b;font-size:12px;">Servidor: ${a.server?.name || 'Desconocido'} — Usuario: ${a.user?.name || 'Sistema'}</div>
+              <td style="padding:10px 0; border-bottom:1px solid #f1f5f9;">
+                <div style="color:#0f172a;font-weight:700;font-size:14px;">${a.action.toUpperCase()} fallido</div>
+                <div style="color:#64748b;font-size:12px;">Servidor: ${a.server?.name || 'Desconocido'} — Por: ${a.user?.name || 'Sistema'}</div>
               </td>
             </tr>
           `).join('')}
@@ -259,12 +264,12 @@ export async function sendRemindersEmail(
   if (data.tasks.length > 0) {
     remindersHtml += `
       <div style="${sectionStyle}">
-        <h3 style="color:#3b82f6;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px 0;">✅ Tareas Pendientes</h3>
+        <h3 style="color:#3b82f6;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 16px 0;font-weight:800;">✅ Tareas Pendientes</h3>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${data.tasks.map(t => `
             <tr>
-              <td style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
-                <div style="color:#ffffff;font-weight:600;font-size:14px;">${t.title}</div>
+              <td style="padding:10px 0; border-bottom:1px solid #f1f5f9;">
+                <div style="color:#0f172a;font-weight:700;font-size:14px;">${t.title}</div>
                 <div style="color:#64748b;font-size:12px;">Fecha límite: ${t.dueDate ? new Date(t.dueDate).toLocaleDateString(locale) : 'N/A'}</div>
               </td>
             </tr>
@@ -277,13 +282,13 @@ export async function sendRemindersEmail(
   if (data.openTickets && data.openTickets.length > 0) {
     remindersHtml += `
       <div style="${sectionStyle}">
-        <h3 style="color:#f59e0b;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px 0;">🎫 Tickets Pendientes</h3>
+        <h3 style="color:#f59e0b;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 16px 0;font-weight:800;">🎫 Tickets de Soporte</h3>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${data.openTickets.map(t => `
             <tr>
-              <td style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
-                <div style="color:#ffffff;font-weight:600;font-size:14px;">${t.subject}</div>
-                <div style="color:#64748b;font-size:12px;">Cliente: ${t.client?.razonSocial || 'Desconocido'} — Estado: <span style="color:#f59e0b;">${t.status}</span></div>
+              <td style="padding:10px 0; border-bottom:1px solid #f1f5f9;">
+                <div style="color:#0f172a;font-weight:700;font-size:14px;">${t.subject}</div>
+                <div style="color:#64748b;font-size:12px;">Cliente: ${t.client?.razonSocial || 'Desconocido'} — <span style="color:#f59e0b;font-weight:700;">${t.status}</span></div>
               </td>
             </tr>
           `).join('')}
@@ -295,13 +300,13 @@ export async function sendRemindersEmail(
   if (data.expiringQuotes && data.expiringQuotes.length > 0) {
     remindersHtml += `
       <div style="${sectionStyle}">
-        <h3 style="color:#10b981;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px 0;">📄 Cotizaciones por Vencer</h3>
+        <h3 style="color:#10b981;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 16px 0;font-weight:800;">📄 Cotizaciones Próximas</h3>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${data.expiringQuotes.map(q => `
             <tr>
-              <td style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
-                <div style="color:#ffffff;font-weight:600;font-size:14px;">Cotización #${q.correlativo}</div>
-                <div style="color:#64748b;font-size:12px;">Cliente: ${q.client?.razonSocial || 'Desconocido'} — Vence: ${new Date(q.fechaValidez).toLocaleDateString(locale)}</div>
+              <td style="padding:10px 0; border-bottom:1px solid #f1f5f9;">
+                <div style="color:#0f172a;font-weight:700;font-size:14px;">Cotización #${q.correlativo}</div>
+                <div style="color:#64748b;font-size:12px;">Cliente: ${q.client?.razonSocial || 'Desconocido'} — Expira: ${new Date(q.fechaValidez).toLocaleDateString(locale)}</div>
               </td>
             </tr>
           `).join('')}
@@ -313,13 +318,13 @@ export async function sendRemindersEmail(
   if (data.events.length > 0) {
     remindersHtml += `
       <div style="${sectionStyle}">
-        <h3 style="color:#a855f7;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px 0;">📅 Próximos Eventos</h3>
+        <h3 style="color:#a855f7;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 16px 0;font-weight:800;">📅 Agenda Semanal</h3>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${data.events.map(e => `
             <tr>
-              <td style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
-                <div style="color:#ffffff;font-weight:600;font-size:14px;">${e.title}</div>
-                <div style="color:#64748b;font-size:12px;">${new Date(e.start).toLocaleDateString(locale)} ${new Date(e.start).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</div>
+              <td style="padding:10px 0; border-bottom:1px solid #f1f5f9;">
+                <div style="color:#0f172a;font-weight:700;font-size:14px;">${e.title}</div>
+                <div style="color:#64748b;font-size:12px;">${new Date(e.start).toLocaleDateString(locale)} a las ${new Date(e.start).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</div>
               </td>
             </tr>
           `).join('')}
@@ -330,19 +335,19 @@ export async function sendRemindersEmail(
 
   const content = `
     <div style="margin-bottom:24px;">
-      <span style="background:rgba(59,130,246,0.1);color:#3b82f6;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:4px 12px;border-radius:20px;border:1px solid rgba(59,130,246,0.2);">
-        🚀 Productividad
+      <span style="background:#f1f5f9;color:#475569;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:6px 12px;border-radius:12px;border:1px solid #e2e8f0;">
+        🚀 Resumen Ejecutivo
       </span>
     </div>
-    <h2 style="color:#ffffff;font-size:20px;font-weight:800;margin:0 0 12px 0;">Hola ${userName},</h2>
-    <p style="color:#94a3b8;font-size:14px;line-height:1.6;margin:0 0 10px 0;">
-      Este es tu resumen estratégico de los próximos 7 días. Hemos identificado los siguientes puntos que requieren tu atención:
+    <h2 style="color:#0f172a;font-size:24px;font-weight:800;margin:0 0 12px 0;">Hola ${userName},</h2>
+    <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 12px 0;">
+      Hemos consolidado los eventos y tareas críticas que requieren tu supervisión para esta semana:
     </p>
     ${remindersHtml}
-    <div style="margin-top:32px;text-align:center;">
+    <div style="margin-top:40px;text-align:center;">
       <a href="https://admin.themarvals.com/dashboard/productivity/reminders" 
-         style="display:inline-block;background:#3b82f6;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:12px;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 12px rgba(59,130,246,0.3);">
-        Acceder al Panel de Control
+         style="display:inline-block;background:#0f172a;color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:16px;font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:1px;box-shadow:0 10px 20px rgba(15,23,42,0.15);">
+        Ir al Centro de Control
       </a>
     </div>
   `;
