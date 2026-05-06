@@ -110,9 +110,11 @@ export default async function DashboardLayout({
                 <div className="text-[10px] text-gray-400">{session.user.email}</div>
               </div>
 
-            <div className="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold text-xs">
-              {initials}
+              <div className="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold text-xs">
+                {initials}
+              </div>
             </div>
+            
             <form
               action={async () => {
                 'use server';
