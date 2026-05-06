@@ -5,6 +5,7 @@ import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { startLoginVerification } from '@/app/actions/login-otp';
+import LocaleSwitcher from '@/components/LocaleSwitcher';
 
 function LoginForm() {
   const router = useRouter();
@@ -79,6 +80,9 @@ function LoginForm() {
           <h1 className="text-4xl font-black tracking-tighter text-white mb-2" style={{ WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#ffffff', WebkitTextStrokeWidth: '1.5px' }}>MARVAL</h1>
           <div className="w-12 h-0.5 bg-blue-500 mx-auto mb-4" />
           <p className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">Portal de Gestión Integral</p>
+          <div className="mt-6 flex justify-center">
+            <LocaleSwitcher />
+          </div>
         </div>
 
         <form onSubmit={step === 1 ? handleStep1 : handleStep2} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-10 shadow-2xl space-y-6">
