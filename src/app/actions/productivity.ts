@@ -240,3 +240,37 @@ export async function deleteCalendarEvent(id: string) {
   revalidatePath('/dashboard/productivity/calendar');
   return { success: true };
 }
+
+// --- SETTINGS ---
+
+export async function getProductivitySettings() {
+  const user = await ensureAdmin();
+  const settings = await prisma.productivitySettings.findUnique({
+    where: { userId: user.id },
+  });
+
+  if (!settings) {
+    return await prisma.productivitySettings.create({
+      data: { userId: user.id },
+    });
+  }
+
+  return settings;
+}
+
+export async function updateProductivitySettings(data: any) {
+  const user = await ensureAdmin();
+  const settings = await prisma.productivitySettings.update({
+    where: { userId: user.id },
+    data,
+  });
+  revalidatePath('/dashboard/productivity/settings');
+  return settings;
+}
+
+import { sendTelegramMessage } from '@/lib/telegram';
+
+export async function testTelegram(botToken: string, chatId: string) {
+  await ensureAdmin();
+  return await sendTelegramMessage(botToken, chatId, '🧪 <b>MARVAL Productivity</b>\nTest de conexión exitoso.');
+}

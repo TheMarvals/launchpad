@@ -195,3 +195,97 @@ export async function sendSecurityOtpEmail(email: string, code: string, userName
     html: baseTemplate(content),
   });
 }
+
+// Email de Resumen de Recordatorios (Productividad)
+export async function sendRemindersEmail(
+  toEmail: string,
+  userName: string,
+  data: {
+    tasks: any[];
+    events: any[];
+    vpsExpirations: any[];
+  },
+  locale: string = 'es'
+) {
+  let remindersHtml = '';
+
+  if (data.vpsExpirations.length > 0) {
+    remindersHtml += `
+      <div style="margin-top:20px;">
+        <h3 style="color:#ef4444;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">💾 VPS por Vencer</h3>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.1);border-radius:12px;padding:15px;">
+          ${data.vpsExpirations.map(v => `
+            <tr>
+              <td style="padding:5px 0;">
+                <div style="color:#ffffff;font-weight:700;font-size:14px;">${v.name}</div>
+                <div style="color:#94a3b8;font-size:12px;">${v.client?.razonSocial || 'Cliente'} — Vence: ${new Date(v.dueDate).toLocaleDateString(locale)}</div>
+              </td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+    `;
+  }
+
+  if (data.tasks.length > 0) {
+    remindersHtml += `
+      <div style="margin-top:20px;">
+        <h3 style="color:#3b82f6;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">✅ Tareas Pendientes</h3>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.1);border-radius:12px;padding:15px;">
+          ${data.tasks.map(t => `
+            <tr>
+              <td style="padding:5px 0;">
+                <div style="color:#ffffff;font-weight:700;font-size:14px;">${t.title}</div>
+                <div style="color:#94a3b8;font-size:12px;">Fecha límite: ${new Date(t.dueDate).toLocaleDateString(locale)}</div>
+              </td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+    `;
+  }
+
+  if (data.events.length > 0) {
+    remindersHtml += `
+      <div style="margin-top:20px;">
+        <h3 style="color:#a855f7;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">📅 Próximos Eventos</h3>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.1);border-radius:12px;padding:15px;">
+          ${data.events.map(e => `
+            <tr>
+              <td style="padding:5px 0;">
+                <div style="color:#ffffff;font-weight:700;font-size:14px;">${e.title}</div>
+                <div style="color:#94a3b8;font-size:12px;">${new Date(e.start).toLocaleDateString(locale)} ${new Date(e.start).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</div>
+              </td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+    `;
+  }
+
+  const content = `
+    <div style="margin-bottom:24px;">
+      <span style="background:rgba(16,185,129,0.15);color:#10b981;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:4px 12px;border-radius:20px;border:1px solid rgba(16,185,129,0.2);">
+        🚀 Resumen de Productividad
+      </span>
+    </div>
+    <h2 style="color:#ffffff;font-size:20px;font-weight:800;margin:0 0 16px 0;">Hola ${userName},</h2>
+    <p style="color:#94a3b8;font-size:14px;line-height:1.6;margin:0 0 24px 0;">
+      Aquí tienes un resumen de tus recordatorios para los próximos 7 días:
+    </p>
+    ${remindersHtml}
+    <div style="margin-top:30px;text-align:center;">
+      <a href="https://admin.themarvals.com/dashboard/productivity/reminders" 
+         style="display:inline-block;background:#3b82f6;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;">
+        Ver en el Portal →
+      </a>
+    </div>
+  `;
+
+  await getTransporter().sendMail({
+    from: `"MARVAL Productivity" <${process.env.USERM}>`,
+    to: toEmail,
+    subject: `[MARVAL] Resumen de Recordatorios — ${new Date().toLocaleDateString(locale)}`,
+    html: baseTemplate(content),
+  });
+}

@@ -15,6 +15,7 @@
     "tasks": "Tasks",
     "notes": "My Notes",
     "calendar": "Calendar",
+    "reminders": "Reminders",
     "settings": "Settings",
     "logout": "Logout",
     "servers": "Servers"
@@ -24,9 +25,10 @@
     "summary": "General overview of your business activity.",
     "newQuote": "New Quote",
     "stats": {
-      "quotes": "QUOTES",
-      "clients": "CLIENTS",
-      "total": "TOTAL BILLABLE (NET)"
+      "quotes": "Quotations",
+      "clients": "Clients",
+      "reminders": "Reminders",
+      "total": "Total Billed"
     },
     "recentQuotes": {
       "title": "Recent Quotes",
@@ -337,6 +339,19 @@
       "saving": "Saving..."
     }
   },
+  "Reminders": {
+    "title": "Reminders & Expirations",
+    "subtitle": "Unified view of your upcoming commitments and service expirations.",
+    "tasks": "Pending Tasks",
+    "events": "Calendar Events",
+    "vps": "VPS Expirations",
+    "noReminders": "No upcoming reminders for the next 7 days.",
+    "daysLeft": "{days} days",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "client": "Client",
+    "empty": "Nothing pending for now. Great job!"
+  },
   "Audit": {
     "title": "Audit Logs",
     "subtitle": "History of actions executed on VPS servers (Recent 100).",
@@ -353,6 +368,23 @@
       "failed": "FAILED"
     },
     "noLogs": "No actions recorded yet."
+  },
+  "Settings": {
+    "title": "Productivity Settings",
+    "subtitle": "Manage system integrations and notifications.",
+    "telegram": {
+      "title": "Telegram Integration",
+      "subtitle": "Receive automatic reminders for tasks and expirations.",
+      "enabled": "Enable Telegram",
+      "botToken": "Bot Token",
+      "chatId": "Chat ID",
+      "test": "Test Connection",
+      "save": "Save Settings",
+      "success": "Settings saved successfully.",
+      "error": "Error saving settings.",
+      "testSuccess": "Test message sent.",
+      "testError": "Error sending test message."
+    }
   },
   "Login": {
     "subtitle": "Comprehensive Management Portal",

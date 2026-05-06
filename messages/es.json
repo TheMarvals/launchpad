@@ -15,6 +15,7 @@
     "tasks": "Tareas",
     "notes": "Mis Notas",
     "calendar": "Calendario",
+    "reminders": "Recordatorios",
     "settings": "Configuración",
     "logout": "Cerrar Sesión",
     "servers": "Servidores"
@@ -26,6 +27,7 @@
     "stats": {
       "quotes": "COTIZACIONES",
       "clients": "CLIENTES",
+      "reminders": "RECORDATORIOS",
       "total": "TOTAL FACTURABLE (NETO)"
     },
     "recentQuotes": {
@@ -337,6 +339,19 @@
       "saving": "Guardando..."
     }
   },
+  "Reminders": {
+    "title": "Recordatorios y Vencimientos",
+    "subtitle": "Vista unificada de tus próximos compromisos y vencimientos de servicios.",
+    "tasks": "Tareas Pendientes",
+    "events": "Eventos de Calendario",
+    "vps": "Vencimientos VPS",
+    "noReminders": "No hay recordatorios próximos para los siguientes 7 días.",
+    "daysLeft": "{days} días",
+    "today": "Hoy",
+    "tomorrow": "Mañana",
+    "client": "Cliente",
+    "empty": "Nada pendiente por ahora. ¡Buen trabajo!"
+  },
   "Audit": {
     "title": "Logs de Auditoría",
     "subtitle": "Historial de acciones ejecutadas sobre los servidores VPS (Top 100 recientes).",
@@ -353,6 +368,23 @@
       "failed": "FALLIDO"
     },
     "noLogs": "No se han registrado acciones aún."
+  },
+  "Settings": {
+    "title": "Configuración de Productividad",
+    "subtitle": "Gestiona integraciones y notificaciones del sistema.",
+    "telegram": {
+      "title": "Integración con Telegram",
+      "subtitle": "Recibe recordatorios automáticos de tareas y vencimientos.",
+      "enabled": "Activar Telegram",
+      "botToken": "Bot Token",
+      "chatId": "Chat ID",
+      "test": "Probar Conexión",
+      "save": "Guardar Configuración",
+      "success": "Configuración guardada correctamente.",
+      "error": "Error al guardar la configuración.",
+      "testSuccess": "Mensaje de prueba enviado.",
+      "testError": "Error al enviar mensaje de prueba."
+    }
   },
   "Login": {
     "subtitle": "Portal de Gestión Integral",

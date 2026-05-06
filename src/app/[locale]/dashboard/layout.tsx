@@ -93,6 +93,16 @@ export default async function DashboardLayout({
                 <span className="material-icons mr-3 text-sm opacity-70">calendar_month</span> {t('calendar')}
               </Link>
             </li>
+            <li>
+              <Link href="/dashboard/productivity/reminders" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
+                <span className="material-icons mr-3 text-sm opacity-70">notifications_active</span> {t('reminders')}
+              </Link>
+            </li>
+            <li>
+              <Link href="/dashboard/productivity/settings" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
+                <span className="material-icons mr-3 text-sm opacity-70">settings</span> {t('settings')}
+              </Link>
+            </li>
           </ul>
         </nav>
 

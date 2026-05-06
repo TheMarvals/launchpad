@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { getTranslations } from 'next-intl/server';
 import QuoteActions from '@/components/QuoteActions';
+import { getUpcomingReminders } from '@/app/actions/reminders';
 
 export default async function DashboardPage({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
@@ -11,6 +12,8 @@ export default async function DashboardPage({params}: {params: Promise<{locale: 
   const session = await auth();
   const quotesCount = await prisma.quote.count();
   const clientsCount = await prisma.client.count();
+  const { tasks, events, vpsExpirations } = await getUpcomingReminders();
+  const remindersCount = tasks.length + events.length + vpsExpirations.length;
   
   const recentQuotes = await prisma.quote.findMany({
     take: 5,
@@ -33,9 +36,10 @@ export default async function DashboardPage({params}: {params: Promise<{locale: 
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard title={t('stats.quotes')} value={quotesCount} icon="description" />
         <StatCard title={t('stats.clients')} value={clientsCount} icon="people" />
+        <StatCard title={t('stats.reminders') || 'Reminders'} value={remindersCount} icon="notifications_active" color="red" />
         <StatCard title={t('stats.total')} value="$0" icon="payments" />
       </div>
 
@@ -89,10 +93,10 @@ export default async function DashboardPage({params}: {params: Promise<{locale: 
   );
 }
 
-function StatCard({ title, value, icon }: { title: string; value: string | number; icon: string }) {
+function StatCard({ title, value, icon, color = 'blue' }: { title: string; value: string | number; icon: string; color?: string }) {
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
-      <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-900">
+      <div className={`w-12 h-12 rounded-full ${color === 'red' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-900'} flex items-center justify-center`}>
         <span className="material-icons">{icon}</span>
       </div>
       <div>
