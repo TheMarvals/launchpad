@@ -39,13 +39,15 @@ export default function QuoteActions({ quoteId }: QuoteActionsProps) {
       >
         <span className="material-icons text-[18px]">edit</span>
       </Link>
-      <Link 
+      <a 
         href={`/api/quotes/${quoteId}/pdf`} 
         className="text-slate-500 hover:text-blue-600 transition-colors"
         title={t('download')}
+        target="_blank"
+        rel="noopener noreferrer"
       >
         <span className="material-icons text-[18px]">picture_as_pdf</span>
-      </Link>
+      </a>
 
       <button
         onClick={async () => {

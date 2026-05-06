@@ -85,13 +85,15 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
       >
         <span className="material-icons text-[18px]">edit</span>
       </Link>
-      <Link 
+      <a 
         href={`/api/invoices/${invoice.id}/pdf`} 
         className="text-slate-500 hover:text-blue-600 transition-colors"
         title={t('download')}
+        target="_blank"
+        rel="noopener noreferrer"
       >
         <span className="material-icons text-[18px]">picture_as_pdf</span>
-      </Link>
+      </a>
       
       {showConfirm ? (
         <div className="flex items-center space-x-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5 absolute right-0 -top-1 shadow-lg z-10">
