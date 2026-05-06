@@ -7,8 +7,43 @@
     "dashboard": "Dashboard",
     "clients": "Clients",
     "quotes": "Quotes",
+    "products": "Products",
     "tickets": "Tickets",
-    "settings": "Settings"
+    "audit": "Audit Logs",
+    "productivity": "Productivity",
+    "projects": "My Projects",
+    "tasks": "Tasks",
+    "notes": "My Notes",
+    "calendar": "Calendar",
+    "settings": "Settings",
+    "logout": "Logout",
+    "servers": "Servers"
+  },
+  "Dashboard": {
+    "welcome": "Welcome, {name}",
+    "summary": "General overview of your business activity.",
+    "newQuote": "New Quote",
+    "stats": {
+      "quotes": "QUOTES",
+      "clients": "CLIENTS",
+      "total": "TOTAL BILLABLE (NET)"
+    },
+    "recentQuotes": {
+      "title": "Recent Quotes",
+      "correlative": "CORRELATIVE",
+      "client": "CLIENT",
+      "date": "DATE",
+      "total": "TOTAL",
+      "status": "STATUS",
+      "actions": "ACTIONS",
+      "noQuotes": "No recent quotes found.",
+      "edit": "Edit",
+      "download": "Download PDF",
+      "delete": "Delete",
+      "confirmDelete": "Delete?",
+      "yes": "Yes",
+      "no": "No"
+    }
   },
   "Login": {
     "subtitle": "Comprehensive Management Portal",

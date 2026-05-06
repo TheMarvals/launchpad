@@ -4,12 +4,14 @@ import React, { useState } from 'react';
 import { Link } from '@/i18n/routing';
 import { useRouter } from 'next/navigation';
 import { deleteQuote } from '@/app/actions/quotes';
+import { useTranslations } from 'next-intl';
 
 interface QuoteActionsProps {
   quoteId: string;
 }
 
 export default function QuoteActions({ quoteId }: QuoteActionsProps) {
+  const t = useTranslations('Dashboard.recentQuotes');
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -33,40 +35,40 @@ export default function QuoteActions({ quoteId }: QuoteActionsProps) {
       <Link 
         href={`/dashboard/quotes/edit/${quoteId}`}
         className="text-slate-500 hover:text-blue-600 transition-colors"
-        title="Editar"
+        title={t('edit')}
       >
         <span className="material-icons text-[18px]">edit</span>
       </Link>
       <Link 
         href={`/api/quotes/${quoteId}/pdf`} 
         className="text-slate-500 hover:text-blue-600 transition-colors"
-        title="Descargar PDF"
+        title={t('download')}
       >
         <span className="material-icons text-[18px]">picture_as_pdf</span>
       </Link>
       
       {showConfirm ? (
         <div className="flex items-center space-x-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5 absolute right-0 -top-1 shadow-lg z-10">
-          <span className="text-xs font-bold text-red-600 whitespace-nowrap">¿Eliminar?</span>
+          <span className="text-xs font-bold text-red-600 whitespace-nowrap">{t('confirmDelete')}</span>
           <button
             onClick={handleDelete}
             disabled={isDeleting}
             className="text-xs font-bold text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md transition-colors disabled:opacity-50"
           >
-            {isDeleting ? '...' : 'Sí'}
+            {isDeleting ? '...' : t('yes')}
           </button>
           <button
             onClick={() => setShowConfirm(false)}
             className="text-xs font-bold text-red-400 hover:text-red-600 px-2 py-1 transition-colors"
           >
-            No
+            {t('no')}
           </button>
         </div>
       ) : (
         <button
           onClick={() => setShowConfirm(true)}
           className="text-slate-400 hover:text-red-500 transition-colors"
-          title="Eliminar"
+          title={t('delete')}
         >
           <span className="material-icons text-[18px]">delete_outline</span>
         </button>

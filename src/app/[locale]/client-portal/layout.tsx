@@ -52,7 +52,7 @@ export default async function ClientPortalLayout({
             </li>
             <li>
               <Link href="/client-portal/servers" className="flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-colors text-sm font-medium">
-                <span className="material-icons mr-3 text-[18px] text-blue-400">dns</span> Servidores
+                <span className="material-icons mr-3 text-[18px] text-blue-400">dns</span> {t('servers')}
               </Link>
             </li>
             <li>
@@ -86,7 +86,7 @@ export default async function ClientPortalLayout({
               </div>
             </div>
             <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }); }}>
-              <button title="Cerrar Sesión" className="text-gray-400 hover:text-red-400 transition-colors">
+              <button title={t('logout')} className="text-gray-400 hover:text-red-400 transition-colors">
                 <span className="material-icons text-[18px]">logout</span>
               </button>
             </form>
@@ -102,7 +102,7 @@ export default async function ClientPortalLayout({
             <h1 className="text-xl font-black tracking-tighter" style={{ WebkitTextStroke: '1px white', color: 'transparent' }}>MARVAL</h1>
           </div>
           <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }); }}>
-             <button className="text-gray-400 hover:text-white" title="Cerrar Sesión"><span className="material-icons">logout</span></button>
+             <button className="text-gray-400 hover:text-white" title={t('logout')}><span className="material-icons">logout</span></button>
           </form>
         </header>
 

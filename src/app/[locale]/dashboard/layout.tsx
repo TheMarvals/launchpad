@@ -56,7 +56,7 @@ export default async function DashboardLayout({
             </li>
             <li>
               <Link href="/dashboard/products" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">inventory_2</span> Productos
+                <span className="material-icons mr-3 text-sm opacity-70">inventory_2</span> {t('products')}
               </Link>
             </li>
             <li>
@@ -66,31 +66,31 @@ export default async function DashboardLayout({
             </li>
             <li>
               <Link href="/dashboard/logs" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">policy</span> Auditoría
+                <span className="material-icons mr-3 text-sm opacity-70">policy</span> {t('audit')}
               </Link>
             </li>
 
             <div className="px-6 py-4 mt-4">
-              <p className="text-[10px] uppercase tracking-widest opacity-40 font-bold">Productividad</p>
+              <p className="text-[10px] uppercase tracking-widest opacity-40 font-bold">{t('productivity')}</p>
             </div>
             <li>
               <Link href="/dashboard/productivity/projects" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">folder</span> Mis Proyectos
+                <span className="material-icons mr-3 text-sm opacity-70">folder</span> {t('projects')}
               </Link>
             </li>
             <li>
               <Link href="/dashboard/productivity/tasks" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">task_alt</span> Tareas
+                <span className="material-icons mr-3 text-sm opacity-70">task_alt</span> {t('tasks')}
               </Link>
             </li>
             <li>
               <Link href="/dashboard/productivity/notes" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">note_alt</span> Mis Notas
+                <span className="material-icons mr-3 text-sm opacity-70">note_alt</span> {t('notes')}
               </Link>
             </li>
             <li>
               <Link href="/dashboard/productivity/calendar" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">calendar_month</span> Calendario
+                <span className="material-icons mr-3 text-sm opacity-70">calendar_month</span> {t('calendar')}
               </Link>
             </li>
           </ul>
@@ -128,7 +128,7 @@ export default async function DashboardLayout({
               <button
                 type="submit"
                 className="text-slate-400 hover:text-red-500 transition-colors"
-                title="Cerrar Sesión"
+                title={t('logout')}
               >
                 <span className="material-icons text-[20px]">logout</span>
               </button>

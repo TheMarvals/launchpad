@@ -7,8 +7,43 @@
     "dashboard": "Panel de Control",
     "clients": "Clientes",
     "quotes": "Cotizaciones",
+    "products": "Productos",
     "tickets": "Tickets",
-    "settings": "Configuración"
+    "audit": "Auditoría",
+    "productivity": "Productividad",
+    "projects": "Mis Proyectos",
+    "tasks": "Tareas",
+    "notes": "Mis Notas",
+    "calendar": "Calendario",
+    "settings": "Configuración",
+    "logout": "Cerrar Sesión",
+    "servers": "Servidores"
+  },
+  "Dashboard": {
+    "welcome": "Bienvenido, {name}",
+    "summary": "Resumen general de tu actividad comercial.",
+    "newQuote": "Nueva Cotización",
+    "stats": {
+      "quotes": "COTIZACIONES",
+      "clients": "CLIENTES",
+      "total": "TOTAL FACTURABLE (NETO)"
+    },
+    "recentQuotes": {
+      "title": "Cotizaciones Recientes",
+      "correlative": "CORRELATIVO",
+      "client": "CLIENTE",
+      "date": "FECHA",
+      "total": "TOTAL",
+      "status": "ESTADO",
+      "actions": "ACCIONES",
+      "noQuotes": "No hay cotizaciones recientes.",
+      "edit": "Editar",
+      "download": "Descargar PDF",
+      "delete": "Eliminar",
+      "confirmDelete": "¿Eliminar?",
+      "yes": "Sí",
+      "no": "No"
+    }
   },
   "Login": {
     "subtitle": "Portal de Gestión Integral",
