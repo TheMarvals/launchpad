@@ -10,14 +10,17 @@ interface RemindersBoardProps {
   tasks: any[];
   events: any[];
   vpsExpirations: any[];
+  openTickets: any[];
+  expiringQuotes: any[];
+  failedActions: any[];
 }
 
-export default function RemindersBoard({ tasks, events, vpsExpirations }: RemindersBoardProps) {
+export default function RemindersBoard({ tasks, events, vpsExpirations, openTickets, expiringQuotes, failedActions }: RemindersBoardProps) {
   const t = useTranslations('Reminders');
   const locale = useLocale();
   const [isNotifying, setIsNotifying] = useState(false);
 
-  const isEmpty = tasks.length === 0 && events.length === 0 && vpsExpirations.length === 0;
+  const isEmpty = tasks.length === 0 && events.length === 0 && vpsExpirations.length === 0 && openTickets.length === 0 && expiringQuotes.length === 0 && failedActions.length === 0;
 
   const handleNotify = async () => {
     setIsNotifying(true);
@@ -85,7 +88,7 @@ export default function RemindersBoard({ tasks, events, vpsExpirations }: Remind
           <h3 className="text-xl font-bold text-gray-900">{t('empty')}</h3>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
           {/* VPS Expirations */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3 px-2">
@@ -162,6 +165,83 @@ export default function RemindersBoard({ tasks, events, vpsExpirations }: Remind
                 </div>
               )) : (
                 <p className="text-sm text-gray-400 px-2 italic">{t('noReminders')}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Tickets */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3 px-2">
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500">
+                <span className="material-icons text-xl">confirmation_number</span>
+              </div>
+              <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">Tickets</h2>
+            </div>
+            <div className="space-y-3">
+              {openTickets.length > 0 ? openTickets.map((ticket) => (
+                <div key={ticket.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full ${
+                      ticket.status === 'OPEN' ? 'bg-green-50 text-green-500' : 'bg-amber-50 text-amber-500'
+                    }`}>
+                      {ticket.status}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-gray-900">{ticket.subject}</h3>
+                  <p className="text-xs text-gray-400 mt-1">{ticket.client.razonSocial}</p>
+                </div>
+              )) : (
+                <p className="text-sm text-gray-400 px-2 italic">{t('noReminders')}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Quotes */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3 px-2">
+              <div className="w-10 h-10 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-500">
+                <span className="material-icons text-xl">description</span>
+              </div>
+              <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">Cotizaciones</h2>
+            </div>
+            <div className="space-y-3">
+              {expiringQuotes.length > 0 ? expiringQuotes.map((quote) => (
+                <div key={quote.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-[10px] uppercase tracking-widest font-bold text-teal-500 bg-teal-50 px-3 py-1 rounded-full">
+                      {new Date(quote.fechaValidez).toLocaleDateString(locale)}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-gray-900">#{quote.correlativo}</h3>
+                  <p className="text-xs text-gray-400 mt-1">{quote.client.razonSocial}</p>
+                </div>
+              )) : (
+                <p className="text-sm text-gray-400 px-2 italic">{t('noReminders')}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Failed Actions */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3 px-2">
+              <div className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center text-red-500">
+                <span className="material-icons text-xl">error_outline</span>
+              </div>
+              <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">Audit</h2>
+            </div>
+            <div className="space-y-3">
+              {failedActions.length > 0 ? failedActions.map((action) => (
+                <div key={action.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-[10px] uppercase tracking-widest font-bold text-red-500 bg-red-50 px-3 py-1 rounded-full">
+                      {action.action.toUpperCase()} FALLIDO
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-gray-900">{action.server.name}</h3>
+                  <p className="text-xs text-gray-400 mt-1">{action.user.name}</p>
+                </div>
+              )) : (
+                <p className="text-sm text-gray-400 px-2 italic">Sin fallos recientes</p>
               )}
             </div>
           </div>

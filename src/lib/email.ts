@@ -263,6 +263,60 @@ export async function sendRemindersEmail(
     `;
   }
 
+  if (data.openTickets && data.openTickets.length > 0) {
+    remindersHtml += `
+      <div style="margin-top:20px;">
+        <h3 style="color:#f59e0b;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🎫 Tickets Pendientes</h3>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.1);border-radius:12px;padding:15px;">
+          ${data.openTickets.map(t => `
+            <tr>
+              <td style="padding:5px 0;">
+                <div style="color:#ffffff;font-weight:700;font-size:14px;">${t.subject}</div>
+                <div style="color:#94a3b8;font-size:12px;">Cliente: ${t.client?.razonSocial || 'Desconocido'} — Estado: <span style="color:#f59e0b;">${t.status}</span></div>
+              </td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+    `;
+  }
+
+  if (data.expiringQuotes && data.expiringQuotes.length > 0) {
+    remindersHtml += `
+      <div style="margin-top:20px;">
+        <h3 style="color:#10b981;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">📄 Cotizaciones por Vencer</h3>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.1);border-radius:12px;padding:15px;">
+          ${data.expiringQuotes.map(q => `
+            <tr>
+              <td style="padding:5px 0;">
+                <div style="color:#ffffff;font-weight:700;font-size:14px;">Cotización #${q.correlativo}</div>
+                <div style="color:#94a3b8;font-size:12px;">Cliente: ${q.client?.razonSocial || 'Desconocido'} — Vence: ${new Date(q.fechaValidez).toLocaleDateString(locale)}</div>
+              </td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+    `;
+  }
+
+  if (data.failedActions && data.failedActions.length > 0) {
+    remindersHtml += `
+      <div style="margin-top:20px;">
+        <h3 style="color:#ef4444;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">⚠️ Fallos en Servidores (24h)</h3>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.1);border-radius:12px;padding:15px;">
+          ${data.failedActions.map(a => `
+            <tr>
+              <td style="padding:5px 0;">
+                <div style="color:#ffffff;font-weight:700;font-size:14px;">${a.action.toUpperCase()} fallido</div>
+                <div style="color:#94a3b8;font-size:12px;">Servidor: ${a.server?.name || 'Desconocido'} — Usuario: ${a.user?.name || 'Sistema'}</div>
+              </td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+    `;
+  }
+
   const content = `
     <div style="margin-bottom:24px;">
       <span style="background:rgba(16,185,129,0.15);color:#10b981;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:4px 12px;border-radius:20px;border:1px solid rgba(16,185,129,0.2);">

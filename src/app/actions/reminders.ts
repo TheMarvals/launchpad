@@ -62,10 +62,54 @@ export async function getUpcomingReminders() {
     orderBy: { dueDate: 'asc' },
   });
 
+  // 4. Open/In-Progress Tickets
+  const openTickets = await prisma.ticket.findMany({
+    where: {
+      status: { in: ['OPEN', 'IN_PROGRESS'] },
+    },
+    include: {
+      client: { select: { razonSocial: true } },
+    },
+    orderBy: { updatedAt: 'desc' },
+  });
+
+  // 5. Expiring Quotes (next 7 days)
+  const expiringQuotes = await prisma.quote.findMany({
+    where: {
+      estado: 'Enviada',
+      fechaValidez: {
+        gte: now,
+        lte: nextWeek,
+      },
+    },
+    include: {
+      client: { select: { razonSocial: true } },
+    },
+    orderBy: { fechaValidez: 'asc' },
+  });
+
+  // 6. Failed Audit Logs (last 24h)
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+  const failedActions = await prisma.actionLog.findMany({
+    where: {
+      status: 'FAILED',
+      createdAt: { gte: yesterday },
+    },
+    include: {
+      server: { select: { name: true } },
+      user: { select: { name: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
   return {
     tasks,
     events,
     vpsExpirations,
+    openTickets,
+    expiringQuotes,
+    failedActions,
   };
 }
 
@@ -113,6 +157,30 @@ export async function triggerRemindersNotification(locale: string = 'es') {
         message += `📅 <b>EVENTOS:</b>\n`;
         data.events.forEach(e => {
           message += `- ${e.title}: ${new Date(e.start).toLocaleDateString(locale)} ${new Date(e.start).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}\n`;
+        });
+        message += `\n`;
+      }
+
+      if (data.openTickets.length > 0) {
+        message += `🎫 <b>TICKETS PENDIENTES:</b>\n`;
+        data.openTickets.forEach(t => {
+          message += `- [${t.status}] ${t.subject} (${t.client.razonSocial})\n`;
+        });
+        message += `\n`;
+      }
+
+      if (data.expiringQuotes.length > 0) {
+        message += `📄 <b>COTIZACIONES POR VENCER:</b>\n`;
+        data.expiringQuotes.forEach(q => {
+          message += `- #${q.correlativo} (${q.client.razonSocial}): ${new Date(q.fechaValidez).toLocaleDateString(locale)}\n`;
+        });
+        message += `\n`;
+      }
+
+      if (data.failedActions.length > 0) {
+        message += `⚠️ <b>FALLOS EN SERVIDORES (24h):</b>\n`;
+        data.failedActions.forEach(a => {
+          message += `- ${a.action} en ${a.server.name} (${a.user.name})\n`;
         });
       }
 
