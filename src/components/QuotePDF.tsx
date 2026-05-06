@@ -1,10 +1,13 @@
 import React from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface QuotePDFProps {
   quote: any;
 }
 
 const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
+  const t = useTranslations('PDF');
+  const locale = useLocale();
   // Split proposal into pages
   const proposalPages = (quote.propuesta || '').split('---PAGE_BREAK---');
 
@@ -26,10 +29,10 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
                   </div>
                   <div className="flex flex-col space-y-1.5 pt-4">
                     <div className="flex items-center text-[8px] font-black tracking-[0.3em] text-blue-400 uppercase">
-                      <span className="w-4 h-[1px] bg-blue-400 mr-3"></span> Arquitectura de Sistemas
+                      <span className="w-4 h-[1px] bg-blue-400 mr-3"></span> {t('architecture')}
                     </div>
                     <div className="flex items-center text-[9px] font-bold tracking-wider text-slate-400 uppercase pl-7">
-                      Consultoría TI • Software Engineering
+                      {t('consulting')}
                     </div>
                   </div>
                 </div>
@@ -69,7 +72,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
                 <div className="flex justify-between items-start border-b border-slate-100 pb-8">
                   <div className="max-w-[60%]">
                     <div className="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-[8px] font-black uppercase tracking-[0.2em] rounded-md mb-3">
-                      Información del Cliente
+                      {t('clientInfo')}
                     </div>
                     <h3 className="font-black text-2xl uppercase tracking-tighter text-slate-900 leading-tight mb-2">
                       {quote.client?.razonSocial || 'CLIENTE DE PRUEBA'}
@@ -81,16 +84,16 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
                   </div>
                   <div className="text-right space-y-4">
                     <div className="space-y-1">
-                      <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Documento</div>
+                    <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{t('document')}</div>
                       <div className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">
-                        Cotización <span className="text-blue-600">#{String(quote.correlativo || 0).padStart(4, '0')}</span>
+                        {t('quote')} <span className="text-blue-600">#{String(quote.correlativo || 0).padStart(4, '0')}</span>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-right">
-                      <div className="text-[9px] font-black text-slate-300 uppercase">Emisión</div>
-                      <div className="text-xs font-black text-slate-800">{new Date(quote.fechaEmision || Date.now()).toLocaleDateString('es-CL')}</div>
-                      <div className="text-[9px] font-black text-slate-300 uppercase">Validez</div>
-                      <div className="text-xs font-black text-blue-600">{quote.fechaValidez ? new Date(quote.fechaValidez).toLocaleDateString('es-CL') : 'Por definir'}</div>
+                      <div className="text-[9px] font-black text-slate-300 uppercase">{t('issue')}</div>
+                      <div className="text-xs font-black text-slate-800">{new Date(quote.fechaEmision || Date.now()).toLocaleDateString(locale)}</div>
+                      <div className="text-[9px] font-black text-slate-300 uppercase">{t('validity')}</div>
+                      <div className="text-xs font-black text-blue-600">{quote.fechaValidez ? new Date(quote.fechaValidez).toLocaleDateString(locale) : t('toDefine')}</div>
                     </div>
                   </div>
                 </div>
@@ -142,16 +145,16 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
             {/* Table */}
             <div className="space-y-4">
               <div className="flex items-center">
-                <h3 className="text-slate-900 uppercase text-[11px] font-black tracking-[0.3em] mr-4 whitespace-nowrap">Detalle de Inversión</h3>
+                <h3 className="text-slate-900 uppercase text-[11px] font-black tracking-[0.3em] mr-4 whitespace-nowrap">{t('investmentDetail')}</h3>
                 <div className="h-[1px] bg-slate-100 w-full"></div>
               </div>
               <div className="rounded-2xl overflow-hidden border border-slate-100">
                 <table className="w-full">
                   <thead>
                     <tr className="bg-slate-50 text-left text-[10px] uppercase text-slate-500 tracking-widest font-black border-b border-slate-100">
-                      <th className="p-4">Descripción</th>
-                      <th className="p-4 text-right w-20">Cant.</th>
-                      <th className="p-4 text-right w-28">Subtotal</th>
+                      <th className="p-4">{t('description')}</th>
+                      <th className="p-4 text-right w-20">{t('quantity')}</th>
+                      <th className="p-4 text-right w-28">{t('subtotal')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -159,7 +162,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
                       <tr key={idx} className="text-[13px]">
                         <td className="p-4 font-bold text-slate-800">{item.descripcion}</td>
                         <td className="p-4 text-right font-bold text-slate-300">{item.cantidad}</td>
-                        <td className="p-4 text-right font-black text-slate-900">${(item.subtotal || 0).toLocaleString('es-CL')}</td>
+                        <td className="p-4 p-4 text-right font-black text-slate-900">${(item.subtotal || 0).toLocaleString(locale)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -170,23 +173,23 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
             {/* Totals & Conditions */}
             <div className="grid grid-cols-2 gap-8 items-start">
               <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                <h4 className="text-[9px] font-black uppercase text-slate-400 tracking-[0.3em] mb-3">Condiciones</h4>
+                <h4 className="text-[9px] font-black uppercase text-slate-400 tracking-[0.3em] mb-3">{t('conditions')}</h4>
                 <p className="text-[10px] text-slate-400 leading-relaxed whitespace-pre-wrap">
                   {quote.notasCondiciones}
                 </p>
               </div>
               <div className="space-y-2 p-4 w-64 ml-auto">
                 <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
-                  <span>Neto</span>
-                  <span>${(quote.montoNeto || 0).toLocaleString('es-CL')}</span>
+                  <span>{t('net')}</span>
+                  <span>${(quote.montoNeto || 0).toLocaleString(locale)}</span>
                 </div>
                 <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
-                  <span>IVA (19%)</span>
-                  <span>${(quote.montoIva || 0).toLocaleString('es-CL')}</span>
+                  <span>{t('tax')}</span>
+                  <span>${(quote.montoIva || 0).toLocaleString(locale)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-black text-slate-900 border-t border-slate-200 pt-2 mt-2">
-                  <span className="text-[10px] uppercase tracking-widest text-slate-500 self-center">Total</span>
-                  <span>${(quote.montoTotal || 0).toLocaleString('es-CL')}</span>
+                  <span className="text-[10px] uppercase tracking-widest text-slate-500 self-center">{t('total')}</span>
+                  <span>${(quote.montoTotal || 0).toLocaleString(locale)}</span>
                 </div>
               </div>
             </div>

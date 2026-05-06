@@ -45,6 +45,188 @@
       "no": "No"
     }
   },
+  "Clients": {
+    "title": "Clientes",
+    "subtitle": "Gestión de base de datos de clientes.",
+    "newClient": "Nuevo Cliente",
+    "editClient": "Editar Cliente",
+    "createClient": "Crear Cliente",
+    "updateClient": "Actualizar",
+    "noClients": "No hay clientes registrados aún.",
+    "form": {
+      "rut": "RUT",
+      "razonSocial": "Razón Social",
+      "giro": "Giro",
+      "direction": "Dirección",
+      "commune": "Comuna",
+      "city": "Ciudad",
+      "email": "Email",
+      "phone": "Teléfono",
+      "requiredFields": "Por favor, completa todos los campos obligatorios.",
+      "saveError": "Error al guardar el cliente.",
+      "deleteError": "Error al eliminar el cliente."
+    },
+    "table": {
+      "razonSocial": "Razón Social",
+      "rut": "RUT",
+      "giro": "Giro",
+      "contact": "Contacto",
+      "quotes": "Cotizaciones",
+      "actions": "Acciones"
+    }
+  },
+  "Quotes": {
+    "title": "Cotizaciones",
+    "subtitle": "{count} documento{count, plural, one {} other {s}} registrado{count, plural, one {} other {s}}.",
+    "newQuote": "Nueva Cotización",
+    "editQuote": "Editar Cotización",
+    "noQuotes": "No hay cotizaciones disponibles.",
+    "table": {
+      "number": "Nº",
+      "client": "Cliente",
+      "issueDate": "Fecha Emisión",
+      "validity": "Validez",
+      "total": "Total",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "pagination": {
+      "showing": "Mostrando {start}–{end} de {total}",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    }
+  },
+  "Products": {
+    "title": "Productos y Servicios",
+    "subtitle": "Catálogo de servicios TI y licenciamiento.",
+    "newProduct": "Nuevo Producto",
+    "inDevelopment": "El módulo de productos está en desarrollo.",
+    "manualAdd": "Puedes agregar productos manualmente al crear una cotización."
+  },
+  "Tickets": {
+    "title": "Bandeja de Soporte",
+    "subtitle": "Gestiona los tickets de soporte de todos tus clientes",
+    "emptyTitle": "Bandeja Vacía",
+    "emptyMessage": "No hay tickets de soporte registrados.",
+    "status": {
+      "OPEN": "Pendiente (Nuevo)",
+      "IN_PROGRESS": "En Progreso",
+      "CLOSED": "Resuelto"
+    },
+    "table": {
+      "client": "Cliente",
+      "subject": "Asunto",
+      "status": "Estado",
+      "updated": "Actualizado",
+      "actions": "Acciones",
+      "id": "ID",
+      "priority": "Prioridad",
+      "view": "Ver/Responder"
+    }
+  },
+  "QuoteForm": {
+    "title": "Datos de la Cotización",
+    "clientLabel": "Cliente Seleccionado",
+    "clientPlaceholder": "Buscar cliente...",
+    "validityLabel": "Fecha de Validez",
+    "proposalTitle": "Editor de Propuesta",
+    "newPage": "Nueva Página",
+    "page": "Hoja",
+    "of": "de",
+    "capacity": "capacidad",
+    "pageLimit": "Límite de página alcanzado. Considera usar una nueva hoja.",
+    "standardA4": "Formato A4 Estándar",
+    "characters": "caracteres",
+    "economicDetail": "Detalle Económico",
+    "addItem": "Agregar Ítem",
+    "itemLabel": "Servicio / Producto",
+    "quantity": "Cantidad",
+    "unitPrice": "Precio Unitario",
+    "subtotal": "Subtotal",
+    "net": "Neto",
+    "tax": "IVA (19%)",
+    "total": "Total",
+    "notesTitle": "Notas y Condiciones Comerciales",
+    "preview": "Vista Previa",
+    "saveDraft": "Guardar Borrador",
+    "generate": "Generar Cotización",
+    "update": "Actualizar Cotización",
+    "close": "Cerrar",
+    "saving": "Guardando...",
+    "errors": {
+      "selectClient": "Por favor, selecciona un cliente.",
+      "saveError": "Hubo un error al guardar la cotización."
+    },
+    "defaultProposal": {
+      "page1": "1. RESUMEN EJECUTIVO\n\nSe presenta una propuesta integral para el desarrollo de soluciones tecnológicas avanzadas...",
+      "page2": "2. PROPUESTA TÉCNICA\n\nArquitectura y Plataforma:\n\n• Desarrollo sobre estándares modernos\n• Escalabilidad y mantenibilidad"
+    },
+    "defaultNotes": "Pago 50% anticipado, 50% contra entrega. Válido por 15 días."
+  },
+  "PDF": {
+    "architecture": "Arquitectura de Sistemas",
+    "consulting": "Consultoría TI • Software Engineering",
+    "clientInfo": "Información del Cliente",
+    "document": "Documento",
+    "quote": "Cotización",
+    "issue": "Emisión",
+    "validity": "Validez",
+    "toDefine": "Por definir",
+    "investmentDetail": "Detalle de Inversión",
+    "description": "Descripción",
+    "quantity": "Cant.",
+    "subtotal": "Subtotal",
+    "conditions": "Condiciones",
+    "net": "Neto",
+    "tax": "IVA (19%)",
+    "total": "Total"
+  },
+  "Projects": {
+    "title": "Mis Proyectos",
+    "subtitle": "Gestión integral de proyectos freelance y consultorías.",
+    "newProject": "Nuevo Proyecto",
+    "emptyTitle": "No hay proyectos activos.",
+    "emptyMessage": "Crea tu primer proyecto para empezar a trackear.",
+    "status": {
+      "active": "En Curso",
+      "completed": "Completado",
+      "on_hold": "En Espera"
+    },
+    "labels": {
+      "client": "Cliente",
+      "budget": "Presupuesto",
+      "internal": "Interno",
+      "noDescription": "Sin descripción detallada."
+    },
+    "delete": {
+      "title": "¿Eliminar proyecto?",
+      "text": "Se borrarán también las tareas asociadas.",
+      "confirm": "Sí, eliminar",
+      "cancel": "Cancelar",
+      "error": "No se pudo eliminar el proyecto."
+    },
+    "create": {
+      "title": "Crear Nuevo Proyecto",
+      "error": "No se pudo crear el proyecto."
+    }
+  },
+  "Audit": {
+    "title": "Logs de Auditoría",
+    "subtitle": "Historial de acciones ejecutadas sobre los servidores VPS (Top 100 recientes).",
+    "table": {
+      "date": "Fecha",
+      "user": "Usuario",
+      "server": "Servidor",
+      "action": "Acción",
+      "status": "Estado"
+    },
+    "status": {
+      "success": "ÉXITO",
+      "pending": "PENDIENTE OTP",
+      "failed": "FALLIDO"
+    },
+    "noLogs": "No se han registrado acciones aún."
+  },
   "Login": {
     "subtitle": "Portal de Gestión Integral",
     "emailLabel": "Correo Electrónico",

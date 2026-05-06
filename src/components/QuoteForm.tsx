@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createQuote, updateQuote } from '@/app/actions/quotes';
+import { useTranslations, useLocale } from 'next-intl';
 import QuotePDF from './QuotePDF';
 
 interface Client {
@@ -29,6 +30,9 @@ interface QuoteFormProps {
 }
 
 export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
+  const t = useTranslations('QuoteForm');
+  const tCommon = useTranslations('Dashboard.recentQuotes');
+  const locale = useLocale();
   const router = useRouter();
   const isEditing = !!initialData;
 
@@ -45,12 +49,12 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
       return initialData.propuesta.split('---PAGE_BREAK---');
     }
     return [
-      `1. RESUMEN EJECUTIVO\n\nSe presenta una propuesta integral para el desarrollo de soluciones tecnológicas avanzadas...`,
-      `2. PROPUESTA TÉCNICA\n\nArquitectura y Plataforma:\n\n• Desarrollo sobre estándares modernos\n• Escalabilidad y mantenibilidad`
+      t('defaultProposal.page1'),
+      t('defaultProposal.page2')
     ];
   });
 
-  const [notasCondiciones, setNotasCondiciones] = useState(initialData?.notasCondiciones || 'Pago 50% anticipado, 50% contra entrega. Válido por 15 días.');
+  const [notasCondiciones, setNotasCondiciones] = useState(initialData?.notasCondiciones || t('defaultNotes'));
   const [items, setItems] = useState(
     initialData?.items?.map(it => ({
       descripcion: it.descripcion,
@@ -98,7 +102,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
   const total = neto + iva;
 
   const handleSubmit = async (estado: 'Borrador' | 'Enviada' = 'Enviada') => {
-    if (!clientId) return alert('Por favor, selecciona un cliente.');
+    if (!clientId) return alert(t('errors.selectClient'));
     
     setIsSubmitting(true);
     try {
@@ -134,7 +138,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert('Hubo un error al guardar la cotización.');
+      alert(t('errors.saveError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -162,13 +166,13 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
           <div className="bg-white rounded-t-2xl p-4 border-b flex justify-between items-center shadow-2xl shrink-0">
             <div className="flex items-center">
               <span className="material-icons text-blue-900 mr-2">description</span>
-              <h3 className="font-black text-slate-900 uppercase tracking-tighter text-sm md:text-base">Vista Previa del Documento</h3>
+              <h3 className="font-black text-slate-900 uppercase tracking-tighter text-sm md:text-base">{t('preview')}</h3>
             </div>
             <button 
               onClick={() => setShowPreview(false)}
               className="px-4 py-2 md:px-6 md:py-2 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all flex items-center"
             >
-              <span className="material-icons text-sm mr-2">close</span> Cerrar
+              <span className="material-icons text-sm mr-2">close</span> {t('close')}
             </button>
           </div>
           <div className="flex-grow bg-slate-200/50 overflow-auto p-4 md:p-12 rounded-b-2xl shadow-inner border-x border-b border-white/20">
@@ -187,25 +191,25 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
       {/* 1. Header Information */}
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-8">
         <h2 className="text-xl font-black flex items-center text-slate-900 tracking-tight">
-          <span className="material-icons mr-3 text-blue-600 bg-blue-50 p-2 rounded-lg">business</span> Datos de la Cotización
+          <span className="material-icons mr-3 text-blue-600 bg-blue-50 p-2 rounded-lg">business</span> {t('title')}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cliente Seleccionado</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('clientLabel')}</label>
             <select 
               className="w-full border-2 border-slate-100 rounded-xl p-3.5 bg-slate-50 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-700"
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}
               required
             >
-              <option value="">Buscar cliente...</option>
+              <option value="">{t('clientPlaceholder')}</option>
               {clients.map(c => (
                 <option key={c.id} value={c.id}>{c.razonSocial} ({c.rut})</option>
               ))}
             </select>
           </div>
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha de Validez</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('validityLabel')}</label>
             <input 
               type="date" 
               className="w-full border-2 border-slate-100 rounded-xl p-3.5 bg-slate-50 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-700"
@@ -221,15 +225,15 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
       <div className="space-y-6">
         <div className="flex justify-between items-end">
           <h2 className="text-xl font-black flex items-center text-slate-900 tracking-tight">
-            <span className="material-icons mr-3 text-blue-600 bg-blue-50 p-2 rounded-lg">edit_note</span> Editor de Propuesta
+            <span className="material-icons mr-3 text-blue-600 bg-blue-50 p-2 rounded-lg">edit_note</span> {t('proposalTitle')}
           </h2>
-          <button 
-            type="button" 
-            onClick={addPage}
-            className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all flex items-center"
-          >
-            <span className="material-icons mr-2 text-sm">add</span> Nueva Página
-          </button>
+            <button 
+              type="button" 
+              onClick={addPage}
+              className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all flex items-center"
+            >
+              <span className="material-icons mr-2 text-sm">add</span> {t('newPage')}
+            </button>
         </div>
 
         <div className="space-y-12">
@@ -242,7 +246,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
               <div key={idx} className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden group">
                 <div className="bg-slate-50 px-6 py-3 border-b flex justify-between items-center">
                   <div className="flex items-center space-x-4">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hoja {idx + 1} de {pages.length}</span>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('page')} {idx + 1} {t('of')} {pages.length}</span>
                     <div className="h-1 w-24 bg-slate-200 rounded-full overflow-hidden">
                       <div 
                         className={`h-full transition-all duration-300 ${progress > 100 ? 'bg-red-500' : isNearLimit ? 'bg-amber-500' : 'bg-blue-500'}`}
@@ -250,7 +254,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
                       />
                     </div>
                     <span className={`text-[9px] font-bold ${progress > 100 ? 'text-red-500' : isNearLimit ? 'text-amber-500' : 'text-slate-400'}`}>
-                      {Math.round(progress)}% capacidad
+                      {Math.round(progress)}% {t('capacity')}
                     </span>
                   </div>
                   {pages.length > 1 && (
@@ -267,15 +271,15 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
                   className="w-full p-10 text-[15px] bg-white min-h-[400px] focus:outline-none font-sans leading-relaxed text-slate-700 scrollbar-hide"
                   value={content}
                   onChange={(e) => updatePage(idx, e.target.value)}
-                  placeholder={`Contenido de la página ${idx + 1}...`}
+                  placeholder={`${t('page')} ${idx + 1}...`}
                   maxLength={MAX_CHARS}
                 />
                 <div className="px-6 py-2 bg-slate-50 flex justify-between items-center border-t">
                   <div className="text-[10px] text-slate-400 italic">
-                    {progress > 90 ? 'Límite de página alcanzado. Considera usar una nueva hoja.' : 'Formato A4 Estándar'}
+                    {progress > 90 ? t('pageLimit') : t('standardA4')}
                   </div>
                   <div className="text-[10px] font-bold text-slate-300">
-                    {content.length} / {MAX_CHARS} caracteres
+                    {content.length} / {MAX_CHARS} {t('characters')}
                   </div>
                 </div>
               </div>
@@ -288,14 +292,14 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-8">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-black flex items-center text-slate-900 tracking-tight">
-            <span className="material-icons mr-3 text-blue-600 bg-blue-50 p-2 rounded-lg">payments</span> Detalle Económico
+            <span className="material-icons mr-3 text-blue-600 bg-blue-50 p-2 rounded-lg">payments</span> {t('economicDetail')}
           </h2>
           <button 
             type="button" 
             onClick={addItem}
             className="text-blue-600 font-bold text-sm hover:bg-blue-50 px-4 py-2 rounded-lg transition-all flex items-center"
           >
-            <span className="material-icons mr-2 text-sm">add_circle</span> Agregar Ítem
+            <span className="material-icons mr-2 text-sm">add_circle</span> {t('addItem')}
           </button>
         </div>
 
@@ -303,7 +307,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
           {items.map((item, idx) => (
             <div key={idx} className="flex gap-4 items-end border-b border-slate-50 pb-6 last:border-0">
               <div className="flex-grow space-y-2">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Servicio / Producto</label>
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('itemLabel')}</label>
                 <input 
                   type="text" 
                   className="w-full border-2 border-slate-50 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white transition-all font-medium"
@@ -313,7 +317,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
                 />
               </div>
               <div className="w-24 space-y-2">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Cantidad</label>
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('quantity')}</label>
                 <input 
                   type="number" 
                   min="1"
@@ -324,7 +328,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
                 />
               </div>
               <div className="w-40 space-y-2">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Precio Unitario</label>
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('unitPrice')}</label>
                 <div className="relative">
                   <span className="absolute left-4 top-3 text-slate-400 font-bold">$</span>
                   <input 
@@ -338,9 +342,9 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
                 </div>
               </div>
               <div className="w-32 text-right self-center pt-6">
-                <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Subtotal</div>
+                <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">{t('subtotal')}</div>
                 <div className="font-black text-slate-900">
-                  ${(Number(item.cantidad) * Number(item.precioUnitario) || 0).toLocaleString('es-CL')}
+                  ${(Number(item.cantidad) * Number(item.precioUnitario) || 0).toLocaleString(locale)}
                 </div>
               </div>
               <button 
@@ -357,16 +361,16 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
         <div className="flex justify-end pt-8">
           <div className="w-64 space-y-3 p-6 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 ml-auto">
             <div className="flex justify-between text-xs font-semibold text-slate-500 tracking-widest uppercase">
-              <span>Neto</span>
-              <span>${neto.toLocaleString('es-CL')}</span>
+              <span>{t('net')}</span>
+              <span>${neto.toLocaleString(locale)}</span>
             </div>
             <div className="flex justify-between text-xs font-semibold text-slate-500 tracking-widest uppercase">
-              <span>IVA (19%)</span>
-              <span>${iva.toLocaleString('es-CL')}</span>
+              <span>{t('tax')}</span>
+              <span>${iva.toLocaleString(locale)}</span>
             </div>
             <div className="flex justify-between text-xl pt-3 border-t border-slate-200 font-black">
-              <span className="text-xs font-semibold text-slate-500 self-center tracking-widest uppercase">Total</span>
-              <span className="text-slate-900">${total.toLocaleString('es-CL')}</span>
+              <span className="text-xs font-semibold text-slate-500 self-center tracking-widest uppercase">{t('total')}</span>
+              <span className="text-slate-900">${total.toLocaleString(locale)}</span>
             </div>
           </div>
         </div>
@@ -375,7 +379,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
       {/* 4. Notes & Conditions */}
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-4">
         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
-          <span className="material-icons text-sm mr-2">gavel</span> Notas y Condiciones Comerciales
+          <span className="material-icons text-sm mr-2">gavel</span> {t('notesTitle')}
         </label>
         <textarea 
           className="w-full border-2 border-slate-50 rounded-xl p-4 text-sm bg-slate-50 min-h-[120px] focus:bg-white transition-all outline-none"
@@ -392,7 +396,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
             onClick={() => router.back()}
             className="text-slate-400 font-bold hover:text-white transition-colors text-sm"
           >
-            Cancelar
+            {tCommon('no')}
           </button>
           <div className="h-4 w-px bg-white/10" />
           <button 
@@ -400,7 +404,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
             onClick={() => setShowPreview(true)}
             className="text-white font-bold hover:text-blue-400 transition-all flex items-center text-sm"
           >
-            <span className="material-icons mr-2 text-base">visibility</span> Vista Previa
+            <span className="material-icons mr-2 text-base">visibility</span> {t('preview')}
           </button>
         </div>
         
@@ -411,7 +415,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
             disabled={isSubmitting}
             className="bg-slate-800 text-white px-6 py-4 rounded-2xl font-bold hover:bg-slate-700 transition-all disabled:opacity-50 text-sm border border-white/5"
           >
-            Guardar Borrador
+            {t('saveDraft')}
           </button>
           <button 
             type="button" 
@@ -424,7 +428,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
             ) : (
               <span className="material-icons mr-2">send</span>
             )}
-            {isSubmitting ? 'Guardando...' : isEditing ? 'Actualizar Cotización' : 'Generar Cotización'}
+            {isSubmitting ? t('saving') : isEditing ? t('update') : t('generate')}
           </button>
         </div>
       </div>

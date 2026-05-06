@@ -2,9 +2,11 @@ import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { redirect } from '@/i18n/routing';
+import { getTranslations } from 'next-intl/server';
 
 export default async function AuditLogsPage({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
+  const t = await getTranslations('Audit');
   const session = await auth();
   if (session?.user?.role !== 'ADMIN') {
     redirect({href: '/', locale});
@@ -27,8 +29,8 @@ export default async function AuditLogsPage({params}: {params: Promise<{locale: 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-gray-900">Logs de Auditoría</h1>
-        <p className="text-gray-500 mt-1">Historial de acciones ejecutadas sobre los servidores VPS (Top 100 recientes).</p>
+        <h1 className="text-3xl font-black tracking-tight text-gray-900">{t('title')}</h1>
+        <p className="text-gray-500 mt-1">{t('subtitle')}</p>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
@@ -36,18 +38,18 @@ export default async function AuditLogsPage({params}: {params: Promise<{locale: 
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                <th className="px-6 py-4 font-bold text-gray-700">Fecha</th>
-                <th className="px-6 py-4 font-bold text-gray-700">Usuario</th>
-                <th className="px-6 py-4 font-bold text-gray-700">Servidor</th>
-                <th className="px-6 py-4 font-bold text-gray-700">Acción</th>
-                <th className="px-6 py-4 font-bold text-gray-700 text-right">Estado</th>
+                <th className="px-6 py-4 font-bold text-gray-700">{t('table.date')}</th>
+                <th className="px-6 py-4 font-bold text-gray-700">{t('table.user')}</th>
+                <th className="px-6 py-4 font-bold text-gray-700">{t('table.server')}</th>
+                <th className="px-6 py-4 font-bold text-gray-700">{t('table.action')}</th>
+                <th className="px-6 py-4 font-bold text-gray-700 text-right">{t('table.status')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {logs.map((log) => (
                 <tr key={log.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                    {new Date(log.createdAt).toLocaleString('es-CL', {
+                    {new Date(log.createdAt).toLocaleString(locale, {
                       day: '2-digit', month: '2-digit', year: 'numeric',
                       hour: '2-digit', minute: '2-digit'
                     })}
@@ -68,15 +70,15 @@ export default async function AuditLogsPage({params}: {params: Promise<{locale: 
                   <td className="px-6 py-4 text-right">
                     {log.status === 'SUCCESS' ? (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800">
-                        ÉXITO
+                        {t('status.success')}
                       </span>
                     ) : log.status === 'PENDING' ? (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800">
-                        PENDIENTE OTP
+                        {t('status.pending')}
                       </span>
                     ) : (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800" title={log.details || ''}>
-                        FALLIDO
+                        {t('status.failed')}
                       </span>
                     )}
                   </td>
@@ -86,7 +88,7 @@ export default async function AuditLogsPage({params}: {params: Promise<{locale: 
               {logs.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
-                    No se han registrado acciones aún.
+                    {t('noLogs')}
                   </td>
                 </tr>
               )}

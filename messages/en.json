@@ -45,6 +45,188 @@
       "no": "No"
     }
   },
+  "Clients": {
+    "title": "Clients",
+    "subtitle": "Customer database management.",
+    "newClient": "New Client",
+    "editClient": "Edit Client",
+    "createClient": "Create Client",
+    "updateClient": "Update",
+    "noClients": "No clients registered yet.",
+    "form": {
+      "rut": "TAX ID (RUT)",
+      "razonSocial": "Company Name",
+      "giro": "Business Type",
+      "direction": "Address",
+      "commune": "Commune",
+      "city": "City",
+      "email": "Email",
+      "phone": "Phone",
+      "requiredFields": "Please fill in all required fields.",
+      "saveError": "Error saving client.",
+      "deleteError": "Error deleting client."
+    },
+    "table": {
+      "razonSocial": "Company Name",
+      "rut": "TAX ID",
+      "giro": "Business Type",
+      "contact": "Contact",
+      "quotes": "Quotes",
+      "actions": "Actions"
+    }
+  },
+  "Quotes": {
+    "title": "Quotes",
+    "subtitle": "{count} document{count, plural, one {} other {s}} registered.",
+    "newQuote": "New Quote",
+    "editQuote": "Edit Quote",
+    "noQuotes": "No quotes available.",
+    "table": {
+      "number": "Nº",
+      "client": "Client",
+      "issueDate": "Issue Date",
+      "validity": "Validity",
+      "total": "Total",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "pagination": {
+      "showing": "Showing {start}–{end} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "Products": {
+    "title": "Products & Services",
+    "subtitle": "IT services and licensing catalog.",
+    "newProduct": "New Product",
+    "inDevelopment": "The products module is under development.",
+    "manualAdd": "You can add products manually when creating a quote."
+  },
+  "Tickets": {
+    "title": "Support Inbox",
+    "subtitle": "Manage support tickets from all your customers",
+    "emptyTitle": "Empty Inbox",
+    "emptyMessage": "No support tickets registered.",
+    "status": {
+      "OPEN": "Pending (New)",
+      "IN_PROGRESS": "In Progress",
+      "CLOSED": "Resolved"
+    },
+    "table": {
+      "client": "Client",
+      "subject": "Subject",
+      "status": "Status",
+      "updated": "Updated",
+      "actions": "Actions",
+      "id": "ID",
+      "priority": "Priority",
+      "view": "View/Respond"
+    }
+  },
+  "QuoteForm": {
+    "title": "Quote Details",
+    "clientLabel": "Selected Client",
+    "clientPlaceholder": "Search client...",
+    "validityLabel": "Validity Date",
+    "proposalTitle": "Proposal Editor",
+    "newPage": "New Page",
+    "page": "Page",
+    "of": "of",
+    "capacity": "capacity",
+    "pageLimit": "Page limit reached. Consider using a new sheet.",
+    "standardA4": "Standard A4 Format",
+    "characters": "characters",
+    "economicDetail": "Economic Detail",
+    "addItem": "Add Item",
+    "itemLabel": "Service / Product",
+    "quantity": "Quantity",
+    "unitPrice": "Unit Price",
+    "subtotal": "Subtotal",
+    "net": "Net",
+    "tax": "Tax (19%)",
+    "total": "Total",
+    "notesTitle": "Notes and Commercial Conditions",
+    "preview": "Preview",
+    "saveDraft": "Save Draft",
+    "generate": "Generate Quote",
+    "update": "Update Quote",
+    "close": "Close",
+    "saving": "Saving...",
+    "errors": {
+      "selectClient": "Please select a client.",
+      "saveError": "There was an error saving the quote."
+    },
+    "defaultProposal": {
+      "page1": "1. EXECUTIVE SUMMARY\n\nA comprehensive proposal is presented for the development of advanced technological solutions...",
+      "page2": "2. TECHNICAL PROPOSAL\n\nArchitecture and Platform:\n\n• Development on modern standards\n• Scalability and maintainability"
+    },
+    "defaultNotes": "50% advance payment, 50% upon delivery. Valid for 15 days."
+  },
+  "PDF": {
+    "architecture": "Systems Architecture",
+    "consulting": "IT Consulting • Software Engineering",
+    "clientInfo": "Client Information",
+    "document": "Document",
+    "quote": "Quote",
+    "issue": "Issued",
+    "validity": "Validity",
+    "toDefine": "To be defined",
+    "investmentDetail": "Investment Detail",
+    "description": "Description",
+    "quantity": "Qty.",
+    "subtotal": "Subtotal",
+    "conditions": "Conditions",
+    "net": "Net",
+    "tax": "Tax (19%)",
+    "total": "Total"
+  },
+  "Projects": {
+    "title": "My Projects",
+    "subtitle": "Comprehensive management of freelance projects and consulting.",
+    "newProject": "New Project",
+    "emptyTitle": "No active projects.",
+    "emptyMessage": "Create your first project to start tracking.",
+    "status": {
+      "active": "In Progress",
+      "completed": "Completed",
+      "on_hold": "On Hold"
+    },
+    "labels": {
+      "client": "Client",
+      "budget": "Budget",
+      "internal": "Internal",
+      "noDescription": "No detailed description."
+    },
+    "delete": {
+      "title": "Delete project?",
+      "text": "Associated tasks will also be deleted.",
+      "confirm": "Yes, delete",
+      "cancel": "Cancel",
+      "error": "Could not delete the project."
+    },
+    "create": {
+      "title": "Create New Project",
+      "error": "Could not create the project."
+    }
+  },
+  "Audit": {
+    "title": "Audit Logs",
+    "subtitle": "History of actions executed on VPS servers (Recent 100).",
+    "table": {
+      "date": "Date",
+      "user": "User",
+      "server": "Server",
+      "action": "Action",
+      "status": "Status"
+    },
+    "status": {
+      "success": "SUCCESS",
+      "pending": "PENDING OTP",
+      "failed": "FAILED"
+    },
+    "noLogs": "No actions recorded yet."
+  },
   "Login": {
     "subtitle": "Comprehensive Management Portal",
     "emailLabel": "Email Address",

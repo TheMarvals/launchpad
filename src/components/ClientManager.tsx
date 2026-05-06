@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient, updateClient, deleteClient } from '@/app/actions/clients';
+import { useTranslations } from 'next-intl';
 
 interface Client {
   id: string;
@@ -33,6 +34,8 @@ const emptyForm = {
 };
 
 export default function ClientManager({ clients }: ClientManagerProps) {
+  const t = useTranslations('Clients');
+  const tCommon = useTranslations('Dashboard.recentQuotes');
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -67,7 +70,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.rut || !form.razonSocial || !form.giro || !form.direccion || !form.comuna || !form.ciudad) {
-      setError('Por favor, completa todos los campos obligatorios.');
+      setError(t('form.requiredFields'));
       return;
     }
 
@@ -84,7 +87,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
       setEditingId(null);
       router.refresh();
     } catch (err: any) {
-      setError(err.message || 'Error al guardar el cliente.');
+      setError(err.message || t('form.saveError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -96,7 +99,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
       setDeletingId(null);
       router.refresh();
     } catch (err: any) {
-      alert(err.message || 'Error al eliminar el cliente.');
+      alert(err.message || t('form.deleteError'));
       setDeletingId(null);
     }
   };
@@ -113,7 +116,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
           onClick={openCreate}
           className="bg-blue-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-800 transition-colors shadow-lg shadow-blue-900/20 flex items-center"
         >
-          <span className="material-icons mr-2 text-sm">add</span> Nuevo Cliente
+          <span className="material-icons mr-2 text-sm">add</span> {t('newClient')}
         </button>
       </div>
 
@@ -129,7 +132,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 <span className="material-icons mr-3 text-blue-600 bg-blue-50 p-2 rounded-lg">
                   {editingId ? 'edit' : 'person_add'}
                 </span>
-                {editingId ? 'Editar Cliente' : 'Nuevo Cliente'}
+                {editingId ? t('editClient') : t('newClient')}
               </h2>
               <button
                 type="button"
@@ -148,7 +151,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RUT *</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.rut')} *</label>
                 <input
                   type="text"
                   className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
@@ -159,7 +162,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Razón Social *</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.razonSocial')} *</label>
                 <input
                   type="text"
                   className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
@@ -170,7 +173,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 />
               </div>
               <div className="md:col-span-2 space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Giro *</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.giro')} *</label>
                 <input
                   type="text"
                   className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
@@ -181,7 +184,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 />
               </div>
               <div className="md:col-span-2 space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dirección *</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.direction')} *</label>
                 <input
                   type="text"
                   className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
@@ -192,7 +195,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Comuna *</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.commune')} *</label>
                 <input
                   type="text"
                   className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
@@ -203,7 +206,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ciudad *</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.city')} *</label>
                 <input
                   type="text"
                   className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
@@ -214,7 +217,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.email')}</label>
                 <input
                   type="email"
                   className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
@@ -224,7 +227,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Teléfono</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.phone')}</label>
                 <input
                   type="text"
                   className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
@@ -241,7 +244,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 onClick={() => { setShowForm(false); setError(''); }}
                 className="px-6 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors"
               >
-                Cancelar
+                {tCommon('no')}
               </button>
               <button
                 type="submit"
@@ -249,9 +252,9 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-500 transition-all disabled:opacity-50 shadow-lg shadow-blue-600/20 flex items-center"
               >
                 {isSubmitting ? (
-                  <><span className="material-icons animate-spin mr-2 text-sm">sync</span> Guardando...</>
+                  <><span className="material-icons animate-spin mr-2 text-sm">sync</span> ...</>
                 ) : (
-                  <><span className="material-icons mr-2 text-sm">{editingId ? 'save' : 'add'}</span> {editingId ? 'Actualizar' : 'Crear Cliente'}</>
+                  <><span className="material-icons mr-2 text-sm">{editingId ? 'save' : 'add'}</span> {editingId ? t('updateClient') : t('createClient')}</>
                 )}
               </button>
             </div>
@@ -265,12 +268,12 @@ export default function ClientManager({ clients }: ClientManagerProps) {
           <table className="w-full">
             <thead>
               <tr className="text-left text-xs font-bold text-gray-400 uppercase tracking-wider border-b bg-gray-50">
-                <th className="px-6 py-4">Razón Social</th>
-                <th className="px-6 py-4">RUT</th>
-                <th className="px-6 py-4">Giro</th>
-                <th className="px-6 py-4">Contacto</th>
-                <th className="px-6 py-4">Cotizaciones</th>
-                <th className="px-6 py-4 text-right">Acciones</th>
+                <th className="px-6 py-4">{t('table.razonSocial')}</th>
+                <th className="px-6 py-4">{t('table.rut')}</th>
+                <th className="px-6 py-4">{t('table.giro')}</th>
+                <th className="px-6 py-4">{t('table.contact')}</th>
+                <th className="px-6 py-4">{t('table.quotes')}</th>
+                <th className="px-6 py-4 text-right">{t('table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -300,32 +303,32 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                       <button
                         onClick={() => openEdit(client)}
                         className="text-slate-500 hover:text-blue-600 transition-colors"
-                        title="Editar"
+                        title={tCommon('edit')}
                       >
                         <span className="material-icons text-[18px]">edit</span>
                       </button>
 
                       {deletingId === client.id ? (
                         <div className="flex items-center space-x-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5">
-                          <span className="text-xs font-bold text-red-600 whitespace-nowrap">¿Eliminar?</span>
+                          <span className="text-xs font-bold text-red-600 whitespace-nowrap">{tCommon('confirmDelete')}</span>
                           <button
                             onClick={() => handleDelete(client.id)}
                             className="text-xs font-bold text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md transition-colors"
                           >
-                            Sí
+                            {tCommon('yes')}
                           </button>
                           <button
                             onClick={() => setDeletingId(null)}
                             className="text-xs font-bold text-red-400 hover:text-red-600 px-2 py-1 transition-colors"
                           >
-                            No
+                            {tCommon('no')}
                           </button>
                         </div>
                       ) : (
                         <button
                           onClick={() => setDeletingId(client.id)}
                           className="text-slate-400 hover:text-red-500 transition-colors"
-                          title="Eliminar"
+                          title={tCommon('delete')}
                         >
                           <span className="material-icons text-[18px]">delete_outline</span>
                         </button>
@@ -339,7 +342,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
         ) : (
           <div className="text-center py-20 text-gray-400">
             <span className="material-icons text-5xl mb-4 block opacity-30">people</span>
-            No hay clientes registrados aún.
+            {t('noClients')}
           </div>
         )}
       </div>
