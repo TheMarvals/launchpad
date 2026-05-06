@@ -218,7 +218,7 @@ export async function sendRemindersEmail(
             <tr>
               <td style="padding:5px 0;">
                 <div style="color:#ffffff;font-weight:700;font-size:14px;">${v.name}</div>
-                <div style="color:#94a3b8;font-size:12px;">${v.client?.razonSocial || 'Cliente'} — Vence: ${new Date(v.dueDate).toLocaleDateString(locale)}</div>
+                <div style="color:#94a3b8;font-size:12px;">${v.client?.razonSocial || 'Cliente'} — Vence: ${v.dueDate ? new Date(v.dueDate).toLocaleDateString(locale) : 'N/A'}</div>
               </td>
             </tr>
           `).join('')}
@@ -236,7 +236,7 @@ export async function sendRemindersEmail(
             <tr>
               <td style="padding:5px 0;">
                 <div style="color:#ffffff;font-weight:700;font-size:14px;">${t.title}</div>
-                <div style="color:#94a3b8;font-size:12px;">Fecha límite: ${new Date(t.dueDate).toLocaleDateString(locale)}</div>
+                <div style="color:#94a3b8;font-size:12px;">Fecha límite: ${t.dueDate ? new Date(t.dueDate).toLocaleDateString(locale) : 'N/A'}</div>
               </td>
             </tr>
           `).join('')}

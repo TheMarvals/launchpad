@@ -91,21 +91,23 @@ export async function triggerRemindersNotification(locale: string = 'es') {
     if (settings.telegramEnabled && settings.telegramBotToken && settings.telegramChatId) {
       let message = `🚀 <b>RECORDATORIOS PRÓXIMOS</b>\n\n`;
       
-      if (data.vpsExpirations.length > 0) {
-        message += `💾 <b>VPS A VENCER:</b>\n`;
-        data.vpsExpirations.forEach(v => {
-          message += `- ${v.name} (${v.client.razonSocial}): ${new Date(v.dueDate).toLocaleDateString(locale)}\n`;
-        });
-        message += `\n`;
-      }
+        if (data.vpsExpirations.length > 0) {
+      message += `💾 <b>VPS A VENCER:</b>\n`;
+      data.vpsExpirations.forEach(v => {
+        const dateStr = v.dueDate ? new Date(v.dueDate).toLocaleDateString(locale) : 'N/A';
+        message += `- ${v.name} (${v.client.razonSocial}): ${dateStr}\n`;
+      });
+      message += `\n`;
+    }
 
-      if (data.tasks.length > 0) {
-        message += `✅ <b>TAREAS:</b>\n`;
-        data.tasks.forEach(t => {
-          message += `- ${t.title}: ${new Date(t.dueDate).toLocaleDateString(locale)}\n`;
-        });
-        message += `\n`;
-      }
+    if (data.tasks.length > 0) {
+      message += `✅ <b>TAREAS:</b>\n`;
+      data.tasks.forEach(t => {
+        const dateStr = t.dueDate ? new Date(t.dueDate).toLocaleDateString(locale) : 'N/A';
+        message += `- ${t.title}: ${dateStr}\n`;
+      });
+      message += `\n`;
+    }
 
       if (data.events.length > 0) {
         message += `📅 <b>EVENTOS:</b>\n`;
