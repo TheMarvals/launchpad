@@ -3,10 +3,11 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { redirect } from '@/i18n/routing';
 
-export default async function AuditLogsPage() {
+export default async function AuditLogsPage({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
   const session = await auth();
   if (session?.user?.role !== 'ADMIN') {
-    redirect('/');
+    redirect({href: '/', locale});
   }
 
   const logs = await prisma.actionLog.findMany({

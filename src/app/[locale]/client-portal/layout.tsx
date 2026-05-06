@@ -8,15 +8,17 @@ import LocaleSwitcher from '@/components/LocaleSwitcher';
 
 export default async function ClientPortalLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
-
+  const { locale } = await params;
   const t = await getTranslations('Navigation');
   const session = await auth();
   
   if (!session?.user || (session.user as any).role !== 'CLIENT') {
-    redirect('/login');
+    redirect({ href: '/login', locale });
   }
 
   const initials = session.user.name
