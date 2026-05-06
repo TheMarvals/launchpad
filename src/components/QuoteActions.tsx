@@ -46,6 +46,20 @@ export default function QuoteActions({ quoteId }: QuoteActionsProps) {
       >
         <span className="material-icons text-[18px]">picture_as_pdf</span>
       </Link>
+
+      <button
+        onClick={async () => {
+          if (confirm('¿Convertir esta cotización en una factura?')) {
+            const { convertQuoteToInvoice } = await import('@/app/actions/invoices');
+            await convertQuoteToInvoice(quoteId);
+            router.push('/dashboard/invoices');
+          }
+        }}
+        className="text-slate-500 hover:text-green-600 transition-colors"
+        title="Convertir a Factura"
+      >
+        <span className="material-icons text-[18px]">receipt_long</span>
+      </button>
       
       {showConfirm ? (
         <div className="flex items-center space-x-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5 absolute right-0 -top-1 shadow-lg z-10">

@@ -50,6 +50,11 @@ export default async function DashboardLayout({
               </Link>
             </li>
             <li>
+              <Link href="/dashboard/invoices" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
+                <span className="material-icons mr-3 text-sm opacity-70">receipt_long</span> {t('invoices')}
+              </Link>
+            </li>
+            <li>
               <Link href="/dashboard/clients" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
                 <span className="material-icons mr-3 text-sm opacity-70">people</span> {t('clients')}
               </Link>

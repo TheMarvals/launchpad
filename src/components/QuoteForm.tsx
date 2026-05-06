@@ -24,6 +24,11 @@ interface QuoteFormProps {
     propuesta: string | null;
     notasCondiciones: string | null;
     estado: string;
+    taxName: string;
+    taxPercent: number;
+    extraFeeName: string | null;
+    extraFeeAmount: number;
+    paymentMethod: string | null;
     items: { descripcion: string; cantidad: number; precioUnitario: number }[];
     client: Client;
   };
@@ -43,6 +48,13 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
       : ''
   );
   
+  // Custom Taxes & Fees State
+  const [taxName, setTaxName] = useState(initialData?.taxName || 'IVA');
+  const [taxPercent, setTaxPercent] = useState(initialData?.taxPercent?.toString() || '19');
+  const [extraFeeName, setExtraFeeName] = useState(initialData?.extraFeeName || '');
+  const [extraFeeAmount, setExtraFeeAmount] = useState(initialData?.extraFeeAmount?.toString() || '0');
+  const [paymentMethod, setPaymentMethod] = useState(initialData?.paymentMethod || '');
+
   // Multi-page Proposal State
   const [pages, setPages] = useState<string[]>(() => {
     if (initialData?.propuesta) {
@@ -98,8 +110,9 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
   };
 
   const neto = items.reduce((acc, item) => acc + (Number(item.cantidad) * Number(item.precioUnitario) || 0), 0);
-  const iva = Math.round(neto * 0.19);
-  const total = neto + iva;
+  const iva = Math.round(neto * ((parseFloat(taxPercent) || 0) / 100));
+  const fee = parseFloat(extraFeeAmount) || 0;
+  const total = neto + iva + fee;
 
   const handleSubmit = async (estado: 'Borrador' | 'Enviada' = 'Enviada') => {
     if (!clientId) return alert(t('errors.selectClient'));
@@ -114,24 +127,24 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
       // Join pages with a unique separator
       const combinedPropuesta = pages.join('---PAGE_BREAK---');
 
+      const payload = {
+        clientId,
+        fechaValidez,
+        notasCondiciones,
+        propuesta: combinedPropuesta,
+        estado,
+        taxName,
+        taxPercent,
+        extraFeeName: extraFeeName || null,
+        extraFeeAmount,
+        paymentMethod: paymentMethod || null,
+        items: itemsWithSubtotals
+      };
+
       if (isEditing) {
-        await updateQuote(initialData!.id, {
-          clientId,
-          fechaValidez,
-          notasCondiciones,
-          propuesta: combinedPropuesta,
-          estado,
-          items: itemsWithSubtotals
-        });
+        await updateQuote(initialData!.id, payload);
       } else {
-        await createQuote({
-          clientId,
-          fechaValidez,
-          notasCondiciones,
-          propuesta: combinedPropuesta,
-          estado,
-          items: itemsWithSubtotals
-        });
+        await createQuote(payload);
       }
       
       router.push('/dashboard/quotes');
@@ -153,6 +166,11 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
     montoNeto: neto,
     montoIva: iva,
     montoTotal: total,
+    taxName,
+    taxPercent: parseFloat(taxPercent),
+    extraFeeName,
+    extraFeeAmount: fee,
+    paymentMethod,
     notasCondiciones,
     propuesta: pages.join('---PAGE_BREAK---'),
     client: selectedClient || { razonSocial: 'CLIENTE NO SELECCIONADO', rut: '---' },
@@ -358,34 +376,98 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
           ))}
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-slate-50">
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('taxLabel')}</label>
+            <input 
+              type="text" 
+              className="w-full border-2 border-slate-100 rounded-xl p-3 bg-slate-50 focus:bg-white transition-all font-medium text-sm"
+              value={taxName}
+              onChange={(e) => setTaxName(e.target.value)}
+              placeholder="Ej. IVA"
+            />
+          </div>
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('taxPercent')}</label>
+            <input 
+              type="number" 
+              step="0.01"
+              className="w-full border-2 border-slate-100 rounded-xl p-3 bg-slate-50 focus:bg-white transition-all font-medium text-sm"
+              value={taxPercent}
+              onChange={(e) => setTaxPercent(e.target.value)}
+            />
+          </div>
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('extraFeeLabel')}</label>
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                className="flex-grow border-2 border-slate-100 rounded-xl p-3 bg-slate-50 focus:bg-white transition-all font-medium text-sm"
+                value={extraFeeName}
+                onChange={(e) => setExtraFeeName(e.target.value)}
+                placeholder="Ej. PayPal Fee"
+              />
+              <input 
+                type="number" 
+                className="w-24 border-2 border-slate-100 rounded-xl p-3 bg-slate-50 focus:bg-white transition-all font-medium text-sm"
+                value={extraFeeAmount}
+                onChange={(e) => setExtraFeeAmount(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
         <div className="flex justify-end pt-8">
-          <div className="w-64 space-y-3 p-6 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 ml-auto">
-            <div className="flex justify-between text-xs font-semibold text-slate-500 tracking-widest uppercase">
+          <div className="w-80 space-y-3 p-6 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 ml-auto shadow-sm">
+            <div className="flex justify-between text-[10px] font-black text-slate-400 tracking-widest uppercase">
               <span>{t('net')}</span>
-              <span>${neto.toLocaleString(locale)}</span>
+              <span className="text-slate-900 font-bold">${neto.toLocaleString(locale)}</span>
             </div>
-            <div className="flex justify-between text-xs font-semibold text-slate-500 tracking-widest uppercase">
-              <span>{t('tax')}</span>
-              <span>${iva.toLocaleString(locale)}</span>
+            <div className="flex justify-between text-[10px] font-black text-slate-400 tracking-widest uppercase">
+              <span>{taxName} ({taxPercent}%)</span>
+              <span className="text-slate-900 font-bold">${iva.toLocaleString(locale)}</span>
             </div>
-            <div className="flex justify-between text-xl pt-3 border-t border-slate-200 font-black">
-              <span className="text-xs font-semibold text-slate-500 self-center tracking-widest uppercase">{t('total')}</span>
+            {fee > 0 && (
+              <div className="flex justify-between text-[10px] font-black text-slate-400 tracking-widest uppercase">
+                <span>{extraFeeName || t('extraFee')}</span>
+                <span className="text-slate-900 font-bold">${fee.toLocaleString(locale)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-xl pt-4 border-t border-slate-200 font-black">
+              <span className="text-[10px] font-black text-slate-500 self-center tracking-widest uppercase">{t('total')}</span>
               <span className="text-slate-900">${total.toLocaleString(locale)}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 4. Notes & Conditions */}
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
-          <span className="material-icons text-sm mr-2">gavel</span> {t('notesTitle')}
-        </label>
-        <textarea 
-          className="w-full border-2 border-slate-50 rounded-xl p-4 text-sm bg-slate-50 min-h-[120px] focus:bg-white transition-all outline-none"
-          value={notasCondiciones}
-          onChange={(e) => setNotasCondiciones(e.target.value)}
-        />
+      {/* 4. Notes & Payment Method */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
+            <span className="material-icons text-sm mr-2 text-blue-600">gavel</span> {t('notesTitle')}
+          </label>
+          <textarea 
+            className="w-full border-2 border-slate-50 rounded-xl p-4 text-sm bg-slate-50 min-h-[150px] focus:bg-white transition-all outline-none"
+            value={notasCondiciones}
+            onChange={(e) => setNotasCondiciones(e.target.value)}
+          />
+        </div>
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
+            <span className="material-icons text-sm mr-2 text-blue-600">account_balance_wallet</span> {t('paymentMethodLabel')}
+          </label>
+          <input 
+            type="text" 
+            className="w-full border-2 border-slate-50 rounded-xl p-4 text-sm bg-slate-50 focus:bg-white transition-all outline-none"
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            placeholder={t('paymentMethodPlaceholder')}
+          />
+          <p className="text-[10px] text-slate-400 italic">
+            Especifica cómo deseas recibir el pago (Transferencia, PayPal, etc.)
+          </p>
+        </div>
       </div>
 
       {/* 5. Sticky Actions Bar */}

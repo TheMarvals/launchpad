@@ -184,13 +184,25 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
                   <span>${(quote.montoNeto || 0).toLocaleString(locale)}</span>
                 </div>
                 <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
-                  <span>{t('tax')}</span>
+                  <span>{quote.taxName || t('tax')} ({quote.taxPercent ?? 19}%)</span>
                   <span>${(quote.montoIva || 0).toLocaleString(locale)}</span>
                 </div>
+                {quote.extraFeeAmount > 0 && (
+                  <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
+                    <span>{quote.extraFeeName || t('fee')}</span>
+                    <span>${(quote.extraFeeAmount || 0).toLocaleString(locale)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-lg font-black text-slate-900 border-t border-slate-200 pt-2 mt-2">
                   <span className="text-[10px] uppercase tracking-widest text-slate-500 self-center">{t('total')}</span>
                   <span>${(quote.montoTotal || 0).toLocaleString(locale)}</span>
                 </div>
+                {quote.paymentMethod && (
+                  <div className="pt-4 mt-4 border-t border-slate-50">
+                    <div className="text-[8px] font-black uppercase text-slate-300 tracking-[0.2em] mb-1">{t('paymentMethod')}</div>
+                    <div className="text-[10px] font-bold text-slate-800">{quote.paymentMethod}</div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

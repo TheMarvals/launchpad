@@ -7,6 +7,7 @@
     "dashboard": "Panel de Control",
     "clients": "Clientes",
     "quotes": "Cotizaciones",
+    "invoices": "Facturación",
     "products": "Productos",
     "tickets": "Tickets",
     "audit": "Auditoría",
@@ -26,6 +27,7 @@
     "newQuote": "Nueva Cotización",
     "stats": {
       "quotes": "COTIZACIONES",
+      "invoices": "FACTURAS",
       "clients": "CLIENTES",
       "reminders": "RECORDATORIOS",
       "total": "TOTAL FACTURABLE (NETO)"
@@ -98,7 +100,27 @@
       "next": "Siguiente"
     }
   },
-  "Products": {
+  "Invoices": {
+    "title": "Facturación",
+    "subtitle": "{count} factura{count, plural, one {} other {s}} emitida{count, plural, one {} other {s}}.",
+    "newInvoice": "Nueva Factura",
+    "editInvoice": "Editar Factura",
+    "noInvoices": "No hay facturas registradas.",
+    "status": {
+      "Pendiente": "Pendiente",
+      "Pagada": "Pagada",
+      "Anulada": "Anulada"
+    },
+    "table": {
+      "number": "Nº",
+      "client": "Cliente",
+      "issueDate": "Emisión",
+      "dueDate": "Vencimiento",
+      "total": "Total",
+      "status": "Estado",
+      "actions": "Acciones"
+    }
+  },
     "title": "Productos y Servicios",
     "subtitle": "Catálogo de servicios TI y licenciamiento.",
     "newProduct": "Nuevo Producto",
@@ -146,7 +168,13 @@
     "unitPrice": "Precio Unitario",
     "subtotal": "Subtotal",
     "net": "Neto",
-    "tax": "IVA (19%)",
+    "taxLabel": "Nombre del Impuesto",
+    "taxPercent": "Porcentaje (%)",
+    "tax": "Impuesto",
+    "extraFeeLabel": "Comisión / Cargo Extra (Ej. PayPal)",
+    "extraFee": "Comisión",
+    "paymentMethodLabel": "Método de Pago",
+    "paymentMethodPlaceholder": "Ej. Transferencia Banco Chile, PayPal...",
     "total": "Total",
     "notesTitle": "Notas y Condiciones Comerciales",
     "preview": "Vista Previa",
@@ -180,8 +208,10 @@
     "subtotal": "Subtotal",
     "conditions": "Condiciones",
     "net": "Neto",
-    "tax": "IVA (19%)",
-    "total": "Total"
+    "tax": "Impuesto",
+    "fee": "Comisión",
+    "total": "Total",
+    "paymentMethod": "Método de Pago"
   },
   "Projects": {
     "title": "Mis Proyectos",

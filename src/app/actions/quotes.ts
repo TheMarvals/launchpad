@@ -5,7 +5,10 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from '@/i18n/routing';
 
 export async function createQuote(formData: any) {
-  const { clientId, items, notasCondiciones, propuesta, estado, fechaValidez } = formData;
+  const { 
+    clientId, items, notasCondiciones, propuesta, estado, fechaValidez,
+    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod
+  } = formData;
 
   // Calculate totals
   let montoNeto = 0;
@@ -13,8 +16,11 @@ export async function createQuote(formData: any) {
     montoNeto += item.subtotal;
   });
 
-  const montoIva = Math.round(montoNeto * 0.19);
-  const montoTotal = montoNeto + montoIva;
+  const percent = parseFloat(taxPercent || 19);
+  const fee = parseFloat(extraFeeAmount || 0);
+  
+  const montoIva = Math.round(montoNeto * (percent / 100));
+  const montoTotal = montoNeto + montoIva + fee;
 
   const quote = await prisma.quote.create({
     data: {
@@ -25,6 +31,11 @@ export async function createQuote(formData: any) {
       montoNeto,
       montoIva,
       montoTotal,
+      taxName: taxName || 'IVA',
+      taxPercent: percent,
+      extraFeeName,
+      extraFeeAmount: fee,
+      paymentMethod,
       estado: estado || 'Borrador',
       items: {
         create: items.map((item: any) => ({
@@ -61,7 +72,10 @@ export async function getQuoteById(id: string) {
 }
 
 export async function updateQuote(id: string, formData: any) {
-  const { clientId, items, notasCondiciones, propuesta, estado, fechaValidez } = formData;
+  const { 
+    clientId, items, notasCondiciones, propuesta, estado, fechaValidez,
+    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod
+  } = formData;
 
   // Calculate totals
   let montoNeto = 0;
@@ -69,8 +83,11 @@ export async function updateQuote(id: string, formData: any) {
     montoNeto += item.subtotal;
   });
 
-  const montoIva = Math.round(montoNeto * 0.19);
-  const montoTotal = montoNeto + montoIva;
+  const percent = parseFloat(taxPercent || 19);
+  const fee = parseFloat(extraFeeAmount || 0);
+  
+  const montoIva = Math.round(montoNeto * (percent / 100));
+  const montoTotal = montoNeto + montoIva + fee;
 
   // Delete existing items and create new ones in a transaction
   const quote = await prisma.$transaction(async (tx) => {
@@ -88,6 +105,11 @@ export async function updateQuote(id: string, formData: any) {
         montoNeto,
         montoIva,
         montoTotal,
+        taxName: taxName || 'IVA',
+        taxPercent: percent,
+        extraFeeName,
+        extraFeeAmount: fee,
+        paymentMethod,
         estado: estado || 'Borrador',
         items: {
           create: items.map((item: any) => ({

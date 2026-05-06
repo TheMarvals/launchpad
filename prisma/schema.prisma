@@ -51,6 +51,7 @@ model Client {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   quotes       Quote[]
+  invoices     Invoice[]
   users        User[]
   servers      VpsService[]
   tickets      Ticket[]
@@ -99,12 +100,23 @@ model Quote {
   montoNeto        Float       @default(0)
   montoIva         Float       @default(0)
   montoTotal       Float       @default(0)
+  
+  // Custom Taxes & Fees
+  taxName          String      @default("IVA")
+  taxPercent       Float       @default(19)
+  extraFeeName     String?     // e.g., "PayPal Fee"
+  extraFeeAmount   Float       @default(0)
+  paymentMethod    String?     // e.g., "Transferencia", "PayPal"
+
   notasCondiciones String?
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
   client           Client      @relation(fields: [clientId], references: [id])
   items            QuoteItem[]
+  
+  invoice          Invoice?    @relation(fields: [invoiceId], references: [id])
+  invoiceId        String?     @unique
 }
 
 model QuoteItem {
@@ -118,6 +130,45 @@ model QuoteItem {
   esExento       Boolean  @default(false)
 
   quote          Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id               String      @id @default(uuid())
+  correlativo      Int         @unique @default(autoincrement())
+  clientId         String
+  fechaEmision     DateTime    @default(now())
+  fechaVencimiento DateTime
+  estado           String      @default("Pendiente") // Pendiente, Pagada, Anulada
+  montoNeto        Float       @default(0)
+  montoIva         Float       @default(0)
+  montoTotal       Float       @default(0)
+  
+  // Custom Taxes & Fees
+  taxName          String      @default("IVA")
+  taxPercent       Float       @default(19)
+  extraFeeName     String?
+  extraFeeAmount   Float       @default(0)
+  paymentMethod    String?
+  
+  notas            String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  client           Client      @relation(fields: [clientId], references: [id])
+  items            InvoiceItem[]
+  quote            Quote?
+}
+
+model InvoiceItem {
+  id             String   @id @default(uuid())
+  invoiceId      String
+  descripcion    String
+  cantidad       Float
+  precioUnitario Float
+  subtotal       Float
+  esExento       Boolean  @default(false)
+
+  invoice        Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
 model Project {

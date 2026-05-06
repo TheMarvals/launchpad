@@ -11,9 +11,17 @@ export default async function DashboardPage({params}: {params: Promise<{locale: 
   const t = await getTranslations('Dashboard');
   const session = await auth();
   const quotesCount = await prisma.quote.count();
+  const invoicesCount = await prisma.invoice.count();
   const clientsCount = await prisma.client.count();
   const { tasks, events, vpsExpirations } = await getUpcomingReminders();
   const remindersCount = tasks.length + events.length + vpsExpirations.length;
+  
+  const totalInvoiced = await prisma.invoice.aggregate({
+    _sum: { montoNeto: true },
+    where: { estado: 'Pagada' }
+  });
+
+  const totalIncome = totalInvoiced._sum.montoNeto || 0;
   
   const recentQuotes = await prisma.quote.findMany({
     take: 5,
@@ -28,19 +36,27 @@ export default async function DashboardPage({params}: {params: Promise<{locale: 
           <h1 className="text-3xl font-bold text-gray-900">{t('welcome', { name: session?.user?.name?.split(' ')[0] || 'Usuario' })}</h1>
           <p className="text-gray-500 mt-1">{t('summary')}</p>
         </div>
-        <Link 
-          href="/dashboard/quotes/new" 
-          className="bg-blue-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-800 transition-colors shadow-lg shadow-blue-900/20"
-        >
-          + {t('newQuote')}
-        </Link>
+        <div className="flex gap-4">
+          <Link 
+            href="/dashboard/invoices/new" 
+            className="bg-white text-slate-900 border-2 border-slate-100 px-6 py-2 rounded-lg font-bold hover:bg-slate-50 transition-colors shadow-sm"
+          >
+            + {t('newQuote').replace('Cotización', 'Factura')}
+          </Link>
+          <Link 
+            href="/dashboard/quotes/new" 
+            className="bg-blue-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-800 transition-colors shadow-lg shadow-blue-900/20"
+          >
+            + {t('newQuote')}
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard title={t('stats.quotes')} value={quotesCount} icon="description" />
+        <StatCard title={t('stats.invoices') || 'Facturas'} value={invoicesCount} icon="receipt_long" color="green" />
         <StatCard title={t('stats.clients')} value={clientsCount} icon="people" />
-        <StatCard title={t('stats.reminders') || 'Reminders'} value={remindersCount} icon="notifications_active" color="red" />
-        <StatCard title={t('stats.total')} value="$0" icon="payments" />
+        <StatCard title={t('stats.total')} value={`$${totalIncome.toLocaleString(locale)}`} icon="payments" color="emerald" />
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -96,7 +112,12 @@ export default async function DashboardPage({params}: {params: Promise<{locale: 
 function StatCard({ title, value, icon, color = 'blue' }: { title: string; value: string | number; icon: string; color?: string }) {
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
-      <div className={`w-12 h-12 rounded-full ${color === 'red' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-900'} flex items-center justify-center`}>
+      <div className={`w-12 h-12 rounded-full ${
+        color === 'red' ? 'bg-red-50 text-red-600' : 
+        color === 'green' ? 'bg-green-50 text-green-600' :
+        color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
+        'bg-blue-50 text-blue-900'
+      } flex items-center justify-center`}>
         <span className="material-icons">{icon}</span>
       </div>
       <div>

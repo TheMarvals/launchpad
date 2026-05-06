@@ -49,7 +49,12 @@ export function MobileClientNav() {
             </li>
             <li>
               <Link href="/client-portal/quotes" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-colors text-sm font-medium text-white">
-                <span className="material-icons mr-3 text-[18px] text-blue-400">receipt_long</span> Mis Cotizaciones
+                <span className="material-icons mr-3 text-[18px] text-blue-400">description</span> Mis Cotizaciones
+              </Link>
+            </li>
+            <li>
+              <Link href="/client-portal/invoices" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-colors text-sm font-medium text-white">
+                <span className="material-icons mr-3 text-[18px] text-blue-400">receipt_long</span> Mis Facturas
               </Link>
             </li>
             <li>
