@@ -70,7 +70,7 @@ export default function InvoiceForm({ clients, initialData }: InvoiceFormProps) 
     
     setIsSubmitting(true);
     try {
-      const itemsWithSubtotals = items.map(item => ({
+      const itemsWithSubtotals = items.map((item: any) => ({
         ...item,
         subtotal: Number(item.cantidad) * Number(item.precioUnitario)
       }));
@@ -142,7 +142,7 @@ export default function InvoiceForm({ clients, initialData }: InvoiceFormProps) 
             required
           >
             <option value="">{tForm('clientPlaceholder')}</option>
-            {clients.map(c => (
+            {clients.map((c: any) => (
               <option key={c.id} value={c.id}>{c.razonSocial} ({c.rut})</option>
             ))}
           </select>
@@ -189,7 +189,7 @@ export default function InvoiceForm({ clients, initialData }: InvoiceFormProps) 
         </div>
 
         <div className="space-y-4 mb-8">
-          {items.map((item, index) => (
+          {items.map((item: any, index: number) => (
             <div key={index} className="grid grid-cols-12 gap-4 items-center group">
               <div className="col-span-6 space-y-2">
                 <input 

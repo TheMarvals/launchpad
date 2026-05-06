@@ -119,7 +119,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
     
     setIsSubmitting(true);
     try {
-      const itemsWithSubtotals = items.map(item => ({
+      const itemsWithSubtotals = items.map((item: any) => ({
         ...item,
         subtotal: Number(item.cantidad) * Number(item.precioUnitario)
       }));
@@ -322,7 +322,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
         </div>
 
         <div className="space-y-4">
-          {items.map((item, idx) => (
+          {items.map((item: any, idx: number) => (
             <div key={idx} className="flex gap-4 items-end border-b border-slate-50 pb-6 last:border-0">
               <div className="flex-grow space-y-2">
                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('itemLabel')}</label>
