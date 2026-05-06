@@ -55,7 +55,7 @@ export default function InvoiceForm({ clients, initialData }: InvoiceFormProps) 
 
   const removeItem = (index: number) => {
     if (items.length > 1) {
-      setItems(items.filter((_, i) => i !== index));
+      setItems(items.filter((_: any, i: number) => i !== index));
     }
   };
 

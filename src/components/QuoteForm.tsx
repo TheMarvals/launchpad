@@ -89,7 +89,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
 
   const removePage = (index: number) => {
     if (pages.length > 1) {
-      setPages(pages.filter((_, i) => i !== index));
+      setPages(pages.filter((_: any, i: number) => i !== index));
     }
   };
 
@@ -105,7 +105,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
 
   const removeItem = (index: number) => {
     if (items.length > 1) {
-      setItems(items.filter((_, i) => i !== index));
+      setItems(items.filter((_: any, i: number) => i !== index));
     }
   };
 
