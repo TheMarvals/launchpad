@@ -9,5 +9,16 @@
     "quotes": "Quotes",
     "tickets": "Tickets",
     "settings": "Settings"
+  },
+  "Login": {
+    "subtitle": "Comprehensive Management Portal",
+    "emailLabel": "Email Address",
+    "passwordLabel": "Password",
+    "otpLabel": "Verification Code (6 digits)",
+    "submitEmail": "Continue",
+    "submitOtp": "Login",
+    "back": "Go Back",
+    "otpSent": "A 6-digit code has been sent to your email address.",
+    "footer": "ALL RIGHTS RESERVED"
   }
 }

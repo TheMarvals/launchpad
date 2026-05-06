@@ -2,12 +2,14 @@
 
 import React, { Suspense, useState } from 'react';
 import { signIn } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { startLoginVerification } from '@/app/actions/login-otp';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
 
 function LoginForm() {
+  const t = useTranslations('Login');
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
@@ -79,7 +81,7 @@ function LoginForm() {
         <div className="text-center mb-10">
           <h1 className="text-4xl font-black tracking-tighter text-white mb-2" style={{ WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#ffffff', WebkitTextStrokeWidth: '1.5px' }}>MARVAL</h1>
           <div className="w-12 h-0.5 bg-blue-500 mx-auto mb-4" />
-          <p className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">Portal de Gestión Integral</p>
+          <p className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">{t('subtitle')}</p>
           <div className="mt-6 flex justify-center">
             <LocaleSwitcher />
           </div>
@@ -95,14 +97,14 @@ function LoginForm() {
           {message && step === 2 && !error && (
             <div className="bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium px-4 py-3 rounded-xl text-center flex items-center justify-center gap-2">
               <span className="material-icons text-[18px]">mark_email_read</span>
-              {message}
+              {t('otpSent')}
             </div>
           )}
 
           {step === 1 ? (
             <>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Correo Electrónico</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('emailLabel')}</label>
                 <div className="relative">
                   <span className="material-icons absolute left-4 top-3.5 text-slate-500 text-sm">email</span>
                   <input
@@ -118,7 +120,7 @@ function LoginForm() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contraseña</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('passwordLabel')}</label>
                 <div className="relative">
                   <span className="material-icons absolute left-4 top-3.5 text-slate-500 text-sm">lock</span>
                   <input
@@ -134,7 +136,7 @@ function LoginForm() {
             </>
           ) : (
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Código de Verificación (6 dígitos)</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('otpLabel')}</label>
               <div className="relative">
                 <span className="material-icons absolute left-4 top-3.5 text-slate-500 text-sm">security</span>
                 <input
@@ -156,11 +158,11 @@ function LoginForm() {
             className="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-blue-500 transition-all disabled:opacity-50 shadow-xl shadow-blue-600/30 active:scale-[0.98] flex items-center justify-center"
           >
             {isLoading ? (
-              <><span className="material-icons animate-spin mr-2 text-sm">sync</span> Procesando...</>
+              <><span className="material-icons animate-spin mr-2 text-sm">sync</span> ...</>
             ) : step === 1 ? (
-              <><span className="material-icons mr-2 text-sm">arrow_forward</span> Continuar</>
+              <><span className="material-icons mr-2 text-sm">arrow_forward</span> {t('submitEmail')}</>
             ) : (
-              <><span className="material-icons mr-2 text-sm">login</span> Ingresar</>
+              <><span className="material-icons mr-2 text-sm">login</span> {t('submitOtp')}</>
             )}
           </button>
           
@@ -171,13 +173,13 @@ function LoginForm() {
               disabled={isLoading}
               className="w-full text-center text-slate-400 text-[11px] font-medium uppercase tracking-widest hover:text-white transition-colors mt-4 block"
             >
-              ← Volver atrás
+              ← {t('back')}
             </button>
           )}
         </form>
 
         <p className="text-center text-[10px] text-slate-600 mt-8 uppercase tracking-widest">
-          © 2026 Marval · Todos los derechos reservados
+          © 2026 Marval · {t('footer')}
         </p>
       </div>
     </div>

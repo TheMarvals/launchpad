@@ -16,7 +16,7 @@ export default function LocaleSwitcher() {
   };
 
   return (
-    <div className="flex items-center space-x-2 bg-yellow-400 p-1 rounded-lg border-2 border-black shadow-lg">
+    <div className="flex items-center space-x-2 bg-white/5 backdrop-blur-md p-1 rounded-xl border border-white/10 shadow-xl">
       <button
         onClick={() => onLocaleChange('es')}
         className={`px-2 py-1 text-xs font-bold rounded-md transition-all ${

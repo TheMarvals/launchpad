@@ -9,5 +9,16 @@
     "quotes": "Cotizaciones",
     "tickets": "Tickets",
     "settings": "Configuración"
+  },
+  "Login": {
+    "subtitle": "Portal de Gestión Integral",
+    "emailLabel": "Correo Electrónico",
+    "passwordLabel": "Contraseña",
+    "otpLabel": "Código de Verificación (6 dígitos)",
+    "submitEmail": "Continuar",
+    "submitOtp": "Ingresar",
+    "back": "Volver Atrás",
+    "otpSent": "Se ha enviado un código de 6 dígitos a tu correo electrónico.",
+    "footer": "TODOS LOS DERECHOS RESERVADOS"
   }
 }
