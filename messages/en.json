@@ -208,6 +208,133 @@
     "create": {
       "title": "Create New Project",
       "error": "Could not create the project."
+    },
+    "form": {
+      "name": "Project Name",
+      "namePlaceholder": "e.g., Mobile App Development",
+      "client": "Client",
+      "clientPlaceholder": "Client's name",
+      "budget": "Budget ($)",
+      "description": "Description",
+      "descriptionPlaceholder": "Project scope...",
+      "deadline": "Deadline",
+      "color": "Identification Color",
+      "save": "Save Project",
+      "cancel": "Cancel",
+      "saving": "Saving..."
+    }
+  },
+  "Tasks": {
+    "title": "Tasks",
+    "subtitle": "Control of activities and personal pending items.",
+    "newTask": "New Task",
+    "editTask": "Edit Task",
+    "emptyTitle": "No pending tasks.",
+    "emptyMessage": "Organize your day by adding your first task.",
+    "table": {
+      "status": "Status",
+      "task": "Task",
+      "priority": "Priority",
+      "dueDate": "Due Date"
+    },
+    "priority": {
+      "urgent": "Urgent",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "noDate": "No date",
+    "delete": {
+      "title": "Delete task?",
+      "confirm": "Yes, delete",
+      "cancel": "Cancel",
+      "error": "Could not delete the task."
+    },
+    "create": {
+      "error": "Could not create the task."
+    },
+    "update": {
+      "error": "Could not update the task."
+    },
+    "form": {
+      "title": "Task Title",
+      "titlePlaceholder": "e.g., Review hosting contract",
+      "project": "Associated Project",
+      "noProject": "No project",
+      "priority": "Priority",
+      "notes": "Notes / Details",
+      "notesPlaceholder": "Additional information...",
+      "dueDate": "Due Date",
+      "save": "Save Task",
+      "cancel": "Cancel",
+      "saving": "Saving..."
+    }
+  },
+  "Notes": {
+    "title": "My Notes",
+    "subtitle": "Capture ideas, reminders, and quick documentation.",
+    "newNote": "New Note",
+    "editNote": "Edit Note",
+    "emptyTitle": "No notes yet.",
+    "emptyMessage": "Create your first note to organize your ideas.",
+    "noContent": "No content.",
+    "modified": "Modified",
+    "delete": {
+      "title": "Delete note?",
+      "text": "This action cannot be undone.",
+      "confirm": "Yes, delete",
+      "cancel": "Cancel",
+      "error": "Could not delete the note."
+    },
+    "create": {
+      "error": "Could not create the note."
+    },
+    "update": {
+      "error": "Could not update the note."
+    },
+    "form": {
+      "title": "Note Title",
+      "titlePlaceholder": "Subject or Title",
+      "content": "Note Content",
+      "contentPlaceholder": "Write your ideas here...",
+      "category": "Category / Tag",
+      "categoryPlaceholder": "e.g., Ideas, Meeting, Technical",
+      "color": "Tag Color",
+      "save": "Save Note",
+      "cancel": "Cancel",
+      "saving": "Saving..."
+    }
+  },
+  "Calendar": {
+    "title": "Calendar",
+    "subtitle": "Monthly view of your commitments and deliveries.",
+    "newEvent": "New Event",
+    "editEvent": "Edit Event",
+    "delete": {
+      "title": "Delete event?",
+      "confirm": "Yes, delete",
+      "cancel": "Cancel",
+      "error": "Could not delete the event."
+    },
+    "create": {
+      "error": "Could not create the event."
+    },
+    "update": {
+      "error": "Could not update the event."
+    },
+    "form": {
+      "title": "Event Title",
+      "titlePlaceholder": "e.g., Campaign Launch",
+      "start": "Start",
+      "end": "End",
+      "allDay": "All Day",
+      "description": "Description",
+      "descriptionPlaceholder": "Event details...",
+      "color": "Identification Color",
+      "save": "Save Event",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "saving": "Saving..."
     }
   },
   "Audit": {

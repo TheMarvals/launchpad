@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import GenericModal from './GenericModal';
 
 interface TaskModalProps {
@@ -26,6 +27,7 @@ interface TaskModalProps {
 }
 
 export default function TaskModal({ isOpen, onClose, onSave, projects, initialData, title }: TaskModalProps) {
+  const t = useTranslations('Tasks');
   const [formData, setFormData] = useState({
     title: '',
     projectId: '',
@@ -68,58 +70,58 @@ export default function TaskModal({ isOpen, onClose, onSave, projects, initialDa
     <GenericModal isOpen={isOpen} onClose={onClose} title={title}>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Título de la Tarea</label>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.title')}</label>
           <input
             required
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            placeholder="Ej. Revisar contrato de hosting"
+            placeholder={t('form.titlePlaceholder')}
             className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium placeholder:text-gray-300"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Proyecto Asociado</label>
+            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.project')}</label>
             <select
               value={formData.projectId}
               onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
               className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium appearance-none"
             >
-              <option value="">Sin proyecto</option>
+              <option value="">{t('form.noProject')}</option>
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Prioridad</label>
+            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.priority')}</label>
             <select
               value={formData.priority}
               onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
               className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium appearance-none"
             >
-              <option value="low">Baja</option>
-              <option value="medium">Media</option>
-              <option value="high">Alta</option>
-              <option value="urgent">Urgente</option>
+              <option value="low">{t('priority.low')}</option>
+              <option value="medium">{t('priority.medium')}</option>
+              <option value="high">{t('priority.high')}</option>
+              <option value="urgent">{t('priority.urgent')}</option>
             </select>
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Notas / Detalles</label>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.notes')}</label>
           <textarea
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            placeholder="Información adicional..."
+            placeholder={t('form.notesPlaceholder')}
             rows={3}
             className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium placeholder:text-gray-300 resize-none"
           />
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Fecha de Vencimiento</label>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.dueDate')}</label>
           <input
             type="date"
             value={formData.dueDate}
@@ -134,14 +136,14 @@ export default function TaskModal({ isOpen, onClose, onSave, projects, initialDa
             onClick={onClose}
             className="flex-1 px-6 py-4 rounded-2xl font-bold text-gray-500 hover:bg-gray-100 transition-all"
           >
-            Cancelar
+            {t('form.cancel')}
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
             className="flex-[2] bg-[#0a041a] text-white px-6 py-4 rounded-2xl font-bold hover:shadow-lg hover:shadow-[#0a041a]/20 transition-all disabled:opacity-50"
           >
-            {isSubmitting ? 'Guardando...' : 'Guardar Tarea'}
+            {isSubmitting ? t('form.saving') : t('form.save')}
           </button>
         </div>
       </form>

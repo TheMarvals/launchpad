@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import GenericModal from './GenericModal';
 
 interface EventModalProps {
@@ -21,6 +22,7 @@ interface EventModalProps {
 }
 
 export default function EventModal({ isOpen, onClose, onSave, onDelete, initialData, title }: EventModalProps) {
+  const t = useTranslations('Calendar');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -72,19 +74,19 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
     <GenericModal isOpen={isOpen} onClose={onClose} title={title}>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Título del Evento</label>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.title')}</label>
           <input
             required
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            placeholder="Ej. Reunión de Avance"
+            placeholder={t('form.titlePlaceholder')}
             className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium placeholder:text-gray-300"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Inicio</label>
+            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.start')}</label>
             <input
               required
               type="datetime-local"
@@ -94,7 +96,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Fin</label>
+            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.end')}</label>
             <input
               required
               type="datetime-local"
@@ -106,11 +108,11 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Notas Adicionales</label>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.description')}</label>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Detalles del evento..."
+            placeholder={t('form.descriptionPlaceholder')}
             rows={3}
             className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium placeholder:text-gray-300 resize-none"
           />
@@ -118,7 +120,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
 
         <div className="flex items-center space-x-4">
           <div className="space-y-2 flex-1">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Categoría Color</label>
+            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.color')}</label>
             <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded-2xl">
               {['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#6366f1', '#ec4899'].map((c) => (
                 <button
@@ -140,7 +142,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
               onClick={onDelete}
               className="px-6 py-4 rounded-2xl font-bold text-red-500 hover:bg-red-50 transition-all flex items-center"
             >
-              <span className="material-icons mr-2 text-[18px]">delete</span> Eliminar
+              <span className="material-icons mr-2 text-[18px]">delete</span> {t('form.delete')}
             </button>
           )}
           
@@ -150,14 +152,14 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
               onClick={onClose}
               className="flex-1 px-6 py-4 rounded-2xl font-bold text-gray-500 hover:bg-gray-100 transition-all"
             >
-              Cancelar
+              {t('form.cancel')}
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
               className="flex-[2] bg-[#0a041a] text-white px-6 py-4 rounded-2xl font-bold hover:shadow-lg hover:shadow-[#0a041a]/20 transition-all disabled:opacity-50"
             >
-              {isSubmitting ? 'Guardando...' : 'Guardar Evento'}
+              {isSubmitting ? t('form.saving') : t('form.save')}
             </button>
           </div>
         </div>

@@ -6,11 +6,16 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import esLocale from '@fullcalendar/core/locales/es';
+import enLocale from '@fullcalendar/core/locales/en-gb';
 import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from '@/app/actions/productivity';
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import Swal from 'sweetalert2';
 import EventModal from './EventModal';
 
 export default function CalendarBoard({ initialEvents }: { initialEvents: any[] }) {
+  const t = useTranslations('Calendar');
+  const locale = useLocale();
   const [events, setEvents] = useState(initialEvents.map(e => ({
     id: e.id,
     title: e.title,
@@ -90,7 +95,7 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
         }]);
       }
     } catch (err) {
-      Swal.fire('Error', 'No se pudo guardar el evento.', 'error');
+      Swal.fire('Error', t('create.error'), 'error');
     }
   };
 
@@ -98,14 +103,14 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
     if (!selectedEvent?.id) return;
     
     const result = await Swal.fire({
-      title: '¿Eliminar evento?',
-      text: "Esta acción no se puede deshacer.",
+      title: t('delete.title'),
+      text: t('delete.text'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#f3f4f6',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
+      confirmButtonText: t('delete.confirm'),
+      cancelButtonText: t('delete.cancel'),
       customClass: {
         popup: 'rounded-[2rem]',
         confirmButton: 'rounded-xl px-6 py-3 font-bold',
@@ -119,7 +124,7 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
         setEvents(events.filter(e => e.id !== selectedEvent.id));
         setIsModalOpen(false);
       } catch (err) {
-        Swal.fire('Error', 'No se pudo eliminar el evento.', 'error');
+        Swal.fire('Error', t('delete.error'), 'error');
       }
     }
   };
@@ -155,7 +160,7 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
         events={events}
         select={handleDateSelect}
         eventClick={handleEventClick}
-        locale={esLocale}
+        locale={locale === 'es' ? esLocale : enLocale}
         height="100%"
       />
 
@@ -164,7 +169,7 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveEvent}
         onDelete={handleDeleteEvent}
-        title={selectedEvent?.id ? 'Editar Evento' : 'Nuevo Evento'}
+        title={selectedEvent?.id ? t('editEvent') : t('newEvent')}
         initialData={selectedEvent}
       />
     </div>

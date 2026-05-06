@@ -208,6 +208,133 @@
     "create": {
       "title": "Crear Nuevo Proyecto",
       "error": "No se pudo crear el proyecto."
+    },
+    "form": {
+      "name": "Nombre del Proyecto",
+      "namePlaceholder": "Ej. Desarrollo App Móvil",
+      "client": "Cliente",
+      "clientPlaceholder": "Nombre del cliente",
+      "budget": "Presupuesto ($)",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Alcance del proyecto...",
+      "deadline": "Fecha Límite",
+      "color": "Color Identificador",
+      "save": "Guardar Proyecto",
+      "cancel": "Cancelar",
+      "saving": "Guardando..."
+    }
+  },
+  "Tasks": {
+    "title": "Tareas",
+    "subtitle": "Control de actividades y pendientes personales.",
+    "newTask": "Nueva Tarea",
+    "editTask": "Editar Tarea",
+    "emptyTitle": "No tienes tareas pendientes.",
+    "emptyMessage": "Organiza tu día agregando tu primera tarea.",
+    "table": {
+      "status": "Estado",
+      "task": "Tarea",
+      "priority": "Prioridad",
+      "dueDate": "Vencimiento"
+    },
+    "priority": {
+      "urgent": "Urgente",
+      "high": "Alta",
+      "medium": "Media",
+      "low": "Baja"
+    },
+    "noDate": "Sin fecha",
+    "delete": {
+      "title": "¿Eliminar tarea?",
+      "confirm": "Sí, eliminar",
+      "cancel": "Cancelar",
+      "error": "No se pudo eliminar la tarea."
+    },
+    "create": {
+      "error": "No se pudo crear la tarea."
+    },
+    "update": {
+      "error": "No se pudo actualizar la tarea."
+    },
+    "form": {
+      "title": "Título de la Tarea",
+      "titlePlaceholder": "Ej. Revisar contrato de hosting",
+      "project": "Proyecto Asociado",
+      "noProject": "Sin proyecto",
+      "priority": "Prioridad",
+      "notes": "Notas / Detalles",
+      "notesPlaceholder": "Información adicional...",
+      "dueDate": "Fecha de Vencimiento",
+      "save": "Guardar Tarea",
+      "cancel": "Cancelar",
+      "saving": "Guardando..."
+    }
+  },
+  "Notes": {
+    "title": "Mis Notas",
+    "subtitle": "Captura ideas, recordatorios y documentación rápida.",
+    "newNote": "Nueva Nota",
+    "editNote": "Editar Nota",
+    "emptyTitle": "No hay notas aún.",
+    "emptyMessage": "Crea tu primera nota para organizar tus ideas.",
+    "noContent": "Sin contenido.",
+    "modified": "Modificado",
+    "delete": {
+      "title": "¿Eliminar nota?",
+      "text": "Esta acción no se puede deshacer.",
+      "confirm": "Sí, eliminar",
+      "cancel": "Cancelar",
+      "error": "No se pudo eliminar la nota."
+    },
+    "create": {
+      "error": "No se pudo crear la nota."
+    },
+    "update": {
+      "error": "No se pudo actualizar la nota."
+    },
+    "form": {
+      "title": "Título de la Nota",
+      "titlePlaceholder": "Asunto o Título",
+      "content": "Contenido de la Nota",
+      "contentPlaceholder": "Escribe tus ideas aquí...",
+      "category": "Categoría / Tag",
+      "categoryPlaceholder": "Ej. Ideas, Reunión, Técnico",
+      "color": "Color de Etiqueta",
+      "save": "Guardar Nota",
+      "cancel": "Cancelar",
+      "saving": "Guardando..."
+    }
+  },
+  "Calendar": {
+    "title": "Calendario",
+    "subtitle": "Vista mensual de tus compromisos y entregas.",
+    "newEvent": "Nuevo Evento",
+    "editEvent": "Editar Evento",
+    "delete": {
+      "title": "¿Eliminar evento?",
+      "confirm": "Sí, eliminar",
+      "cancel": "Cancelar",
+      "error": "No se pudo eliminar el evento."
+    },
+    "create": {
+      "error": "No se pudo crear el evento."
+    },
+    "update": {
+      "error": "No se pudo actualizar el evento."
+    },
+    "form": {
+      "title": "Título del Evento",
+      "titlePlaceholder": "Ej. Lanzamiento Campaña",
+      "start": "Inicio",
+      "end": "Fin",
+      "allDay": "Todo el día",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Detalles del evento...",
+      "color": "Color de Identificación",
+      "save": "Guardar Evento",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "saving": "Guardando..."
     }
   },
   "Audit": {

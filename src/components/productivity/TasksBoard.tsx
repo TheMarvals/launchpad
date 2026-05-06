@@ -2,10 +2,13 @@
 
 import { useState } from 'react';
 import { createTask, updateTask, deleteTask } from '@/app/actions/productivity';
+import { useTranslations, useLocale } from 'next-intl';
 import TaskModal from './TaskModal';
 import Swal from 'sweetalert2';
 
 export default function TasksBoard({ initialTasks, projects }: { initialTasks: any[], projects: any[] }) {
+  const t = useTranslations('Tasks');
+  const locale = useLocale();
   const [tasks, setTasks] = useState(initialTasks);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<any>(null);
@@ -15,7 +18,7 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
       const newTask = await createTask(data);
       setTasks([newTask, ...tasks]);
     } catch (err) {
-      Swal.fire('Error', 'No se pudo crear la tarea.', 'error');
+      Swal.fire('Error', t('create.error'), 'error');
     }
   };
 
@@ -24,18 +27,18 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
       const updated = await updateTask(id, data);
       setTasks(tasks.map(t => t.id === id ? updated : t));
     } catch (err) {
-      Swal.fire('Error', 'No se pudo actualizar la tarea.', 'error');
+      Swal.fire('Error', t('update.error'), 'error');
     }
   };
 
   const handleDelete = async (id: string) => {
     const result = await Swal.fire({
-      title: '¿Eliminar tarea?',
+      title: t('delete.title'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
+      confirmButtonText: t('delete.confirm'),
+      cancelButtonText: t('delete.cancel'),
       customClass: {
         popup: 'rounded-[2rem]',
         confirmButton: 'rounded-xl px-6 py-3 font-bold',
@@ -48,7 +51,7 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
         await deleteTask(id);
         setTasks(tasks.filter(t => t.id !== id));
       } catch (err) {
-        Swal.fire('Error', 'No se pudo eliminar la tarea.', 'error');
+        Swal.fire('Error', t('delete.error'), 'error');
       }
     }
   };
@@ -71,14 +74,14 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-[#0a041a]">Tareas</h1>
-          <p className="text-gray-400 font-medium mt-1">Control de actividades y pendientes personales.</p>
+          <h1 className="text-3xl font-black tracking-tight text-[#0a041a]">{t('title')}</h1>
+          <p className="text-gray-400 font-medium mt-1">{t('subtitle')}</p>
         </div>
         <button 
           onClick={() => { setSelectedTask(null); setIsModalOpen(true); }}
           className="bg-[#0a041a] text-white px-8 py-4 rounded-[1.5rem] font-bold text-sm hover:scale-105 transition-all shadow-xl shadow-[#0a041a]/10 flex items-center justify-center"
         >
-          <span className="material-icons mr-2 text-[20px]">add_task</span> Nueva Tarea
+          <span className="material-icons mr-2 text-[20px]">add_task</span> {t('newTask')}
         </button>
       </div>
 
@@ -87,10 +90,10 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-gray-50">
-                <th className="px-10 py-8 text-[10px] uppercase tracking-widest font-black text-gray-300">Estado</th>
-                <th className="px-10 py-8 text-[10px] uppercase tracking-widest font-black text-gray-300">Tarea</th>
-                <th className="px-10 py-8 text-[10px] uppercase tracking-widest font-black text-gray-300">Prioridad</th>
-                <th className="px-10 py-8 text-[10px] uppercase tracking-widest font-black text-gray-300">Vencimiento</th>
+                <th className="px-10 py-8 text-[10px] uppercase tracking-widest font-black text-gray-300">{t('table.status')}</th>
+                <th className="px-10 py-8 text-[10px] uppercase tracking-widest font-black text-gray-300">{t('table.task')}</th>
+                <th className="px-10 py-8 text-[10px] uppercase tracking-widest font-black text-gray-300">{t('table.priority')}</th>
+                <th className="px-10 py-8 text-[10px] uppercase tracking-widest font-black text-gray-300">{t('table.dueDate')}</th>
                 <th className="px-10 py-8"></th>
               </tr>
             </thead>
@@ -98,13 +101,13 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
               {tasks.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-10 py-32 text-center">
-                    <div className="flex flex-col items-center">
-                      <div className="w-20 h-20 bg-gray-50 rounded-[1.5rem] flex items-center justify-center mb-4">
-                        <span className="material-icons text-3xl text-gray-200">checklist</span>
+                      <div className="flex flex-col items-center">
+                        <div className="w-20 h-20 bg-gray-50 rounded-[1.5rem] flex items-center justify-center mb-4">
+                          <span className="material-icons text-3xl text-gray-200">checklist</span>
+                        </div>
+                        <p className="text-gray-400 font-bold text-lg">{t('emptyTitle')}</p>
+                        <p className="text-gray-300 text-sm mt-1">{t('emptyMessage')}</p>
                       </div>
-                      <p className="text-gray-400 font-bold text-lg">No tienes tareas pendientes.</p>
-                      <p className="text-gray-300 text-sm mt-1">Organiza tu día agregando tu primera tarea.</p>
-                    </div>
                   </td>
                 </tr>
               ) : (
@@ -134,13 +137,13 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
                     </td>
                     <td className="px-10 py-8">
                       <span className={`text-[10px] uppercase tracking-widest font-black px-4 py-1.5 rounded-full ${getPriorityColor(task.priority)}`}>
-                        {task.priority === 'urgent' ? 'Urgente' : task.priority === 'high' ? 'Alta' : task.priority === 'medium' ? 'Media' : 'Baja'}
+                        {t(`priority.${task.priority}` as any)}
                       </span>
                     </td>
                     <td className="px-10 py-8">
                       <div className="flex items-center text-gray-400 font-bold text-sm">
                         <span className="material-icons text-[16px] mr-2 opacity-40">calendar_today</span>
-                        {task.dueDate ? new Date(task.dueDate).toLocaleDateString('es-CL', { day: '2-digit', month: 'short' }) : 'Sin fecha'}
+                        {task.dueDate ? new Date(task.dueDate).toLocaleDateString(locale, { day: '2-digit', month: 'short' }) : t('noDate')}
                       </div>
                     </td>
                     <td className="px-10 py-8 text-right">
@@ -179,7 +182,7 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
         }}
         projects={projects}
         initialData={selectedTask}
-        title={selectedTask ? 'Editar Tarea' : 'Nueva Tarea'}
+        title={selectedTask ? t('editTask') : t('newTask')}
       />
     </div>
   );

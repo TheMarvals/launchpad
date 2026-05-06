@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { createNote, updateNote, deleteNote } from '@/app/actions/productivity';
+import { useTranslations, useLocale } from 'next-intl';
 import Swal from 'sweetalert2';
 import NoteModal from './NoteModal';
 
@@ -15,6 +16,8 @@ interface Note {
 }
 
 export default function NotesBoard({ initialNotes }: { initialNotes: any[] }) {
+  const t = useTranslations('Notes');
+  const locale = useLocale();
   const [notes, setNotes] = useState<Note[]>(initialNotes);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
@@ -41,14 +44,14 @@ export default function NotesBoard({ initialNotes }: { initialNotes: any[] }) {
 
   const handleDelete = async (id: string) => {
     const result = await Swal.fire({
-      title: '¿Eliminar nota?',
-      text: "Esta acción no se puede deshacer.",
+      title: t('delete.title'),
+      text: t('delete.text'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#0a041a',
       cancelButtonColor: '#f3f4f6',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
+      confirmButtonText: t('delete.confirm'),
+      cancelButtonText: t('delete.cancel'),
       customClass: {
         popup: 'rounded-[2rem]',
         confirmButton: 'rounded-xl px-6 py-3 font-bold',
@@ -61,7 +64,7 @@ export default function NotesBoard({ initialNotes }: { initialNotes: any[] }) {
         await deleteNote(id);
         setNotes(notes.filter(n => n.id !== id));
       } catch (err) {
-        Swal.fire('Error', 'No se pudo eliminar la nota.', 'error');
+        Swal.fire('Error', t('delete.error'), 'error');
       }
     }
   };
@@ -70,15 +73,15 @@ export default function NotesBoard({ initialNotes }: { initialNotes: any[] }) {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-[#0a041a]">Mis Notas</h1>
-          <p className="text-gray-400 font-medium mt-1">Gestión centralizada de conocimiento y apuntes.</p>
+          <h1 className="text-3xl font-black tracking-tight text-[#0a041a]">{t('title')}</h1>
+          <p className="text-gray-400 font-medium mt-1">{t('subtitle')}</p>
         </div>
         <button 
           onClick={handleOpenCreate}
           className="bg-[#0a041a] text-white px-8 py-4 rounded-[1.5rem] font-bold text-sm hover:shadow-2xl hover:shadow-[#0a041a]/30 transition-all flex items-center justify-center group"
         >
           <span className="material-icons mr-2 text-[20px] group-hover:rotate-90 transition-transform">add</span> 
-          Nueva Nota
+          {t('newNote')}
         </button>
       </div>
 
@@ -88,8 +91,8 @@ export default function NotesBoard({ initialNotes }: { initialNotes: any[] }) {
             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-6">
               <span className="material-icons text-4xl text-gray-200">description</span>
             </div>
-            <p className="text-gray-400 font-bold text-xl">Tu tablero está vacío</p>
-            <p className="text-gray-300 mt-2">Comienza creando tu primera nota profesional.</p>
+            <p className="text-gray-400 font-bold text-xl">{t('emptyTitle')}</p>
+            <p className="text-gray-300 mt-2">{t('emptyMessage')}</p>
           </div>
         ) : (
           notes.map((note) => (
@@ -130,15 +133,15 @@ export default function NotesBoard({ initialNotes }: { initialNotes: any[] }) {
                   {note.title}
                 </h3>
                 <p className="text-sm text-gray-500 line-clamp-6 whitespace-pre-wrap leading-relaxed">
-                  {note.content}
+                  {note.content || t('noContent')}
                 </p>
               </div>
 
               {/* Footer */}
               <div className="mt-8 pt-6 border-t border-gray-50 flex justify-between items-center">
                 <div className="flex flex-col">
-                  <span className="text-[9px] uppercase tracking-wider text-gray-300 font-bold">Modificado</span>
-                  <span className="text-[11px] text-gray-400 font-medium">{new Date(note.updatedAt).toLocaleDateString('es-CL')}</span>
+                  <span className="text-[9px] uppercase tracking-wider text-gray-300 font-bold">{t('modified')}</span>
+                  <span className="text-[11px] text-gray-400 font-medium">{new Date(note.updatedAt).toLocaleDateString(locale)}</span>
                 </div>
                 <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-200">
                   <span className="material-icons text-[20px]">bookmark_border</span>
@@ -154,7 +157,7 @@ export default function NotesBoard({ initialNotes }: { initialNotes: any[] }) {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
         initialData={editingNote || undefined}
-        title={editingNote ? 'Editar Nota' : 'Crear Nueva Nota'}
+        title={editingNote ? t('editNote') : t('newNote')}
       />
     </div>
   );

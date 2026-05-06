@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import GenericModal from './GenericModal';
 
 interface ProjectModalProps {
@@ -27,6 +28,7 @@ interface ProjectModalProps {
 }
 
 export default function ProjectModal({ isOpen, onClose, onSave, initialData, title }: ProjectModalProps) {
+  const t = useTranslations('Projects');
   const [formData, setFormData] = useState({
     name: '',
     clientName: '',
@@ -70,28 +72,28 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData, tit
     <GenericModal isOpen={isOpen} onClose={onClose} title={title}>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Nombre del Proyecto</label>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.name')}</label>
           <input
             required
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="Ej. Desarrollo App Móvil"
+            placeholder={t('form.namePlaceholder')}
             className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium placeholder:text-gray-300"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Cliente</label>
+            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.client')}</label>
             <input
               value={formData.clientName}
               onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
-              placeholder="Nombre del cliente"
+              placeholder={t('form.clientPlaceholder')}
               className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium placeholder:text-gray-300"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Presupuesto ($)</label>
+            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.budget')}</label>
             <input
               type="number"
               value={formData.budget}
@@ -102,11 +104,11 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData, tit
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Descripción</label>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.description')}</label>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Alcance del proyecto..."
+            placeholder={t('form.descriptionPlaceholder')}
             rows={3}
             className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium placeholder:text-gray-300 resize-none"
           />
@@ -114,7 +116,7 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData, tit
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Fecha Límite</label>
+            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.deadline')}</label>
             <input
               type="date"
               value={formData.deadline}
@@ -123,7 +125,7 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData, tit
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Color Identificador</label>
+            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.color')}</label>
             <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded-2xl">
               {['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4'].map((c) => (
                 <button
@@ -144,14 +146,14 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData, tit
             onClick={onClose}
             className="flex-1 px-6 py-4 rounded-2xl font-bold text-gray-500 hover:bg-gray-100 transition-all"
           >
-            Cancelar
+            {t('form.cancel')}
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
             className="flex-[2] bg-[#0a041a] text-white px-6 py-4 rounded-2xl font-bold hover:shadow-lg hover:shadow-[#0a041a]/20 transition-all disabled:opacity-50"
           >
-            {isSubmitting ? 'Guardando...' : 'Guardar Proyecto'}
+            {isSubmitting ? t('form.saving') : t('form.save')}
           </button>
         </div>
       </form>

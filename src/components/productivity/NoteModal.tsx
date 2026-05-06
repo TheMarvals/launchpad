@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import GenericModal from './GenericModal';
 
 interface NoteModalProps {
@@ -17,6 +18,7 @@ interface NoteModalProps {
 }
 
 export default function NoteModal({ isOpen, onClose, onSave, initialData, title }: NoteModalProps) {
+  const t = useTranslations('Notes');
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -60,23 +62,23 @@ export default function NoteModal({ isOpen, onClose, onSave, initialData, title 
     <GenericModal isOpen={isOpen} onClose={onClose} title={title}>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Título de la Nota</label>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.title')}</label>
           <input
             required
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            placeholder="Ej. Credenciales de Servidor"
+            placeholder={t('form.titlePlaceholder')}
             className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium placeholder:text-gray-300"
           />
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Contenido</label>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.content')}</label>
           <textarea
             required
             value={formData.content}
             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-            placeholder="Escribe aquí tus apuntes..."
+            placeholder={t('form.contentPlaceholder')}
             rows={6}
             className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium placeholder:text-gray-300 resize-none"
           />
@@ -84,22 +86,17 @@ export default function NoteModal({ isOpen, onClose, onSave, initialData, title 
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Categoría</label>
-            <select
+            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.category')}</label>
+            <input
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium appearance-none"
-            >
-              <option value="General">General</option>
-              <option value="Trabajo">Trabajo</option>
-              <option value="Personal">Personal</option>
-              <option value="Idea">Idea</option>
-              <option value="Claves">Claves</option>
-            </select>
+              placeholder={t('form.categoryPlaceholder')}
+              className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium"
+            />
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">Color Distintivo</label>
+            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.color')}</label>
             <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded-2xl">
               {['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#6366f1', '#ec4899'].map((c) => (
                 <button
@@ -120,14 +117,14 @@ export default function NoteModal({ isOpen, onClose, onSave, initialData, title 
             onClick={onClose}
             className="flex-1 px-6 py-4 rounded-2xl font-bold text-gray-500 hover:bg-gray-100 transition-all"
           >
-            Cancelar
+            {t('form.cancel')}
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
             className="flex-[2] bg-[#0a041a] text-white px-6 py-4 rounded-2xl font-bold hover:shadow-lg hover:shadow-[#0a041a]/20 transition-all disabled:opacity-50"
           >
-            {isSubmitting ? 'Guardando...' : 'Guardar Nota'}
+            {isSubmitting ? t('form.saving') : t('form.save')}
           </button>
         </div>
       </form>
