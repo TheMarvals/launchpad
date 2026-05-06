@@ -59,7 +59,7 @@ export default function InvoiceForm({ clients, initialData }: InvoiceFormProps) 
     }
   };
 
-  const neto = items.reduce((acc, item) => acc + (Number(item.cantidad) * Number(item.precioUnitario) || 0), 0);
+  const neto = items.reduce((acc: number, item: any) => acc + (Number(item.cantidad) * Number(item.precioUnitario) || 0), 0);
   const iva = Math.round(neto * ((parseFloat(taxPercent) || 0) / 100));
   const fee = parseFloat(extraFeeAmount) || 0;
   const total = neto + iva + fee;
