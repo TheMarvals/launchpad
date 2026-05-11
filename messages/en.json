@@ -7,6 +7,7 @@
     "dashboard": "Dashboard",
     "clients": "Clients",
     "quotes": "Quotes",
+    "invoices": "Billing",
     "products": "Products",
     "tickets": "Tickets",
     "audit": "Audit Logs",
@@ -26,9 +27,10 @@
     "newQuote": "New Quote",
     "stats": {
       "quotes": "Quotations",
+      "invoices": "Invoices",
       "clients": "Clients",
       "reminders": "Reminders",
-      "total": "Total Billed"
+      "total": "TOTAL BILLED (NET)"
     },
     "recentQuotes": {
       "title": "Recent Quotes",
@@ -96,6 +98,27 @@
       "showing": "Showing {start}–{end} of {total}",
       "previous": "Previous",
       "next": "Next"
+    }
+  },
+  "Invoices": {
+    "title": "Billing",
+    "subtitle": "{count} invoice{count, plural, one {} other {s}} issued.",
+    "newInvoice": "New Invoice",
+    "editInvoice": "Edit Invoice",
+    "noInvoices": "No invoices registered.",
+    "status": {
+      "Pendiente": "Pending",
+      "Pagada": "Paid",
+      "Anulada": "Voided"
+    },
+    "table": {
+      "number": "Nº",
+      "client": "Client",
+      "issueDate": "Issued",
+      "dueDate": "Due Date",
+      "total": "Total",
+      "status": "Status",
+      "actions": "Actions"
     }
   },
   "Products": {
@@ -186,8 +209,10 @@
     "subtotal": "Subtotal",
     "conditions": "Conditions",
     "net": "Net",
-    "tax": "Tax (19%)",
-    "total": "Total"
+    "tax": "Tax",
+    "fee": "Commission",
+    "total": "Total",
+    "paymentMethod": "Payment Method"
   },
   "Projects": {
     "title": "My Projects",

@@ -121,6 +121,7 @@
       "actions": "Acciones"
     }
   },
+  "Products": {
     "title": "Productos y Servicios",
     "subtitle": "Catálogo de servicios TI y licenciamiento.",
     "newProduct": "Nuevo Producto",
