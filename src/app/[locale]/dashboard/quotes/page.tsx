@@ -37,12 +37,22 @@ export default async function QuotesListPage({ searchParams, params }: { searchP
             {t('subtitle', { count: totalCount })}
           </p>
         </div>
-        <Link 
-          href="/dashboard/quotes/new" 
-          className="bg-blue-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-800 transition-colors"
-        >
-          + {t('newQuote')}
-        </Link>
+        <div className="flex space-x-3">
+          <a 
+            href="/api/quotes/template/pdf"
+            className="bg-white text-blue-900 border-2 border-blue-900 px-6 py-2 rounded-lg font-bold hover:bg-blue-50 transition-all flex items-center shadow-sm active:scale-95"
+            title="Download blank template"
+          >
+            <span className="material-icons mr-2 text-sm">picture_as_pdf</span>
+            {locale === 'es' ? 'Plantilla en Blanco' : 'Blank Template'}
+          </a>
+          <Link 
+            href="/dashboard/quotes/new" 
+            className="bg-blue-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-800 transition-all shadow-md active:scale-95"
+          >
+            + {t('newQuote')}
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">

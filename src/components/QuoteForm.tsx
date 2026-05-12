@@ -5,6 +5,44 @@ import { useRouter } from 'next/navigation';
 import { createQuote, updateQuote } from '@/app/actions/quotes';
 import { useTranslations, useLocale } from 'next-intl';
 import QuotePDF from './QuotePDF';
+import dynamic from 'next/dynamic';
+import 'react-quill-new/dist/quill.snow.css';
+
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
+
+const QUILL_MODULES = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+    ['clean']
+  ],
+};
+
+const EDITOR_STYLE = `
+  .ql-container.ql-snow {
+    border: none !important;
+    font-family: inherit;
+    font-size: 15px;
+  }
+  .ql-toolbar.ql-snow {
+    border: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    background: #f8fafc;
+    padding: 8px 24px !important;
+  }
+  .ql-editor {
+    padding: 40px !important;
+    min-height: 400px;
+    line-height: 1.6;
+    color: #334155;
+  }
+  .ql-editor.ql-blank::before {
+    left: 40px !important;
+    font-style: italic;
+    color: #cbd5e1;
+  }
+`;
 
 interface Client {
   id: string;
@@ -206,6 +244,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
 
   return (
     <form onSubmit={(e) => { e.preventDefault(); }} className="space-y-10 max-w-5xl pb-20 mx-auto">
+      <style dangerouslySetInnerHTML={{ __html: EDITOR_STYLE }} />
       {/* 1. Header Information */}
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-8">
         <h2 className="text-xl font-black flex items-center text-slate-900 tracking-tight">
@@ -285,19 +324,22 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
                     </button>
                   )}
                 </div>
-                <textarea 
-                  className="w-full p-10 text-[15px] bg-white min-h-[400px] focus:outline-none font-sans leading-relaxed text-slate-700 scrollbar-hide"
-                  value={content}
-                  onChange={(e) => updatePage(idx, e.target.value)}
-                  placeholder={`${t('page')} ${idx + 1}...`}
-                  maxLength={MAX_CHARS}
-                />
+                <div className="bg-white min-h-[450px]">
+                  <ReactQuill 
+                    theme="snow"
+                    value={content}
+                    onChange={(val) => updatePage(idx, val)}
+                    modules={QUILL_MODULES}
+                    className="h-full border-none"
+                    placeholder={`${t('page')} ${idx + 1}...`}
+                  />
+                </div>
                 <div className="px-6 py-2 bg-slate-50 flex justify-between items-center border-t">
                   <div className="text-[10px] text-slate-400 italic">
                     {progress > 90 ? t('pageLimit') : t('standardA4')}
                   </div>
                   <div className="text-[10px] font-bold text-slate-300">
-                    {content.length} / {MAX_CHARS} {t('characters')}
+                    {content.replace(/<[^>]*>/g, '').length} / {MAX_CHARS} {t('characters')}
                   </div>
                 </div>
               </div>

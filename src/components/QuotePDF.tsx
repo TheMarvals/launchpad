@@ -3,13 +3,14 @@ import { useTranslations, useLocale } from 'next-intl';
 
 interface QuotePDFProps {
   quote: any;
+  isTemplate?: boolean;
 }
 
-const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
+const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
   const t = useTranslations('PDF');
   const locale = useLocale();
   // Split proposal into pages
-  const proposalPages = (quote.propuesta || '').split('---PAGE_BREAK---');
+  const proposalPages = isTemplate ? [''] : (quote.propuesta || '').split('---PAGE_BREAK---');
 
   return (
     <div className="pdf-wrapper w-full max-w-[210mm] print:max-w-full mx-auto print:mx-0 space-y-8 print:space-y-0">
@@ -68,7 +69,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
 
             <div className="relative z-10 space-y-10">
               {/* Metadata only on Page 1 */}
-              {pageIdx === 0 && (
+              {pageIdx === 0 && !isTemplate && (
                 <div className="flex justify-between items-start border-b border-slate-100 pb-8">
                   <div className="max-w-[60%]">
                     <div className="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-[8px] font-black uppercase tracking-[0.2em] rounded-md mb-3">
@@ -100,15 +101,10 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
               )}
 
               {/* Proposals for this specific page */}
-              <div className="propuesta-content text-slate-600 leading-relaxed text-justify whitespace-pre-wrap font-sans text-[15px] space-y-4">
-                {pageContent.split('\n').map((line: string, i: number) => {
-                  const isHeader = /^[0-9]+\.\s+/.test(line.trim()) || /^[A-ZÁÉÍÓÚÑ\s]{5,}:$/.test(line.trim());
-                  if (isHeader) {
-                    return <h3 key={i} className="text-slate-900 font-black text-xl uppercase tracking-tight mt-8 mb-4 border-l-4 border-blue-600 pl-4">{line}</h3>;
-                  }
-                  return <p key={i} className="pl-5">{line}</p>;
-                })}
-              </div>
+              <div 
+                className="propuesta-content text-slate-600 leading-relaxed text-justify font-sans text-[15px] space-y-4"
+                dangerouslySetInnerHTML={{ __html: pageContent }}
+              />
             </div>
           </main>
 
@@ -143,7 +139,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
 
           <div className="relative z-10 space-y-12">
             {/* Table */}
-            <div className="space-y-4">
+            {!isTemplate && (
+              <div className="space-y-4">
               <div className="flex items-center">
                 <h3 className="text-slate-900 uppercase text-[11px] font-black tracking-[0.3em] mr-4 whitespace-nowrap">{t('investmentDetail')}</h3>
                 <div className="h-[1px] bg-slate-100 w-full"></div>
@@ -170,14 +167,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
               </div>
             </div>
 
-            {/* Totals & Conditions */}
-            <div className="grid grid-cols-2 gap-8 items-start">
-              <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                <h4 className="text-[9px] font-black uppercase text-slate-400 tracking-[0.3em] mb-3">{t('conditions')}</h4>
-                <p className="text-[10px] text-slate-400 leading-relaxed whitespace-pre-wrap">
-                  {quote.notasCondiciones}
-                </p>
-              </div>
               <div className="space-y-2 p-4 w-64 ml-auto">
                 <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
                   <span>{t('net')}</span>
@@ -204,7 +193,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
                   </div>
                 )}
               </div>
-            </div>
+            )}
           </div>
         </main>
 
@@ -236,6 +225,29 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote }) => {
           -webkit-text-stroke-color: rgba(255, 255, 255, 0.9);
         }
 
+        .propuesta-content h1, .propuesta-content h2, .propuesta-content h3 {
+          color: #0f172a;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: -0.025em;
+          margin-top: 1.5em;
+          margin-bottom: 0.5em;
+          border-left: 4px solid #2563eb;
+          padding-left: 1rem;
+        }
+        .propuesta-content h1 { font-size: 1.5rem; }
+        .propuesta-content h2 { font-size: 1.25rem; }
+        .propuesta-content h3 { font-size: 1.1rem; }
+        .propuesta-content p { margin-bottom: 1em; }
+        .propuesta-content ul, .propuesta-content ol { 
+          margin-bottom: 1em; 
+          padding-left: 1.5rem;
+        }
+        .propuesta-content ul { list-style-type: disc; }
+        .propuesta-content ol { list-style-type: decimal; }
+        .propuesta-content li { margin-bottom: 0.5em; }
+        .propuesta-content strong { color: #1e3a8a; font-weight: 700; }
+        
         @media print {
           @page {
             size: A4;

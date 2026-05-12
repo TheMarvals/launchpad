@@ -189,8 +189,8 @@
       "saveError": "There was an error saving the quote."
     },
     "defaultProposal": {
-      "page1": "1. EXECUTIVE SUMMARY\n\nA comprehensive proposal is presented for the development of advanced technological solutions...",
-      "page2": "2. TECHNICAL PROPOSAL\n\nArchitecture and Platform:\n\n• Development on modern standards\n• Scalability and maintainability"
+      "page1": "<h1>1. EXECUTIVE SUMMARY</h1><p>A comprehensive proposal is presented for the development of advanced technological solutions, focused on optimizing the infrastructure and critical processes of your organization.</p><h2>Main Objectives</h2><ul><li>Implementation of scalable architectures.</li><li>Long-term maintainability.</li><li>Enterprise-grade security.</li></ul>",
+      "page2": "<h1>2. TECHNICAL PROPOSAL</h1><p>Architecture and Platform:</p><ul><li>Development on modern standards (Next.js, Tailwind, Prisma).</li><li>Continuous integration and automated deployment.</li><li>Proactive service monitoring.</li></ul>"
     },
     "defaultNotes": "50% advance payment, 50% upon delivery. Valid for 15 days."
   },

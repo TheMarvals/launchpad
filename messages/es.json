@@ -189,8 +189,8 @@
       "saveError": "Hubo un error al guardar la cotización."
     },
     "defaultProposal": {
-      "page1": "1. RESUMEN EJECUTIVO\n\nSe presenta una propuesta integral para el desarrollo de soluciones tecnológicas avanzadas...",
-      "page2": "2. PROPUESTA TÉCNICA\n\nArquitectura y Plataforma:\n\n• Desarrollo sobre estándares modernos\n• Escalabilidad y mantenibilidad"
+      "page1": "<h1>1. RESUMEN EJECUTIVO</h1><p>Se presenta una propuesta integral para el desarrollo de soluciones tecnológicas avanzadas, enfocadas en optimizar la infraestructura y los procesos críticos de su organización.</p><h2>Objetivos Principales</h2><ul><li>Implementación de arquitecturas escalables.</li><li>Mantenibilidad a largo plazo.</li><li>Seguridad de nivel corporativo.</li></ul>",
+      "page2": "<h1>2. PROPUESTA TÉCNICA</h1><p>Arquitectura y Plataforma:</p><ul><li>Desarrollo sobre estándares modernos (Next.js, Tailwind, Prisma).</li><li>Integración continua y despliegue automatizado.</li><li>Monitorización proactiva de servicios.</li></ul>"
     },
     "defaultNotes": "Pago 50% anticipado, 50% contra entrega. Válido por 15 días."
   },
