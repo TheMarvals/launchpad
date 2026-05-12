@@ -140,59 +140,61 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
           <div className="relative z-10 space-y-12">
             {/* Table */}
             {!isTemplate && (
-              <div className="space-y-4">
-              <div className="flex items-center">
-                <h3 className="text-slate-900 uppercase text-[11px] font-black tracking-[0.3em] mr-4 whitespace-nowrap">{t('investmentDetail')}</h3>
-                <div className="h-[1px] bg-slate-100 w-full"></div>
-              </div>
-              <div className="rounded-2xl overflow-hidden border border-slate-100">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-slate-50 text-left text-[10px] uppercase text-slate-500 tracking-widest font-black border-b border-slate-100">
-                      <th className="p-4">{t('description')}</th>
-                      <th className="p-4 text-right w-20">{t('quantity')}</th>
-                      <th className="p-4 text-right w-28">{t('subtotal')}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {(quote.items || []).map((item: any, idx: number) => (
-                      <tr key={idx} className="text-[13px]">
-                        <td className="p-4 font-bold text-slate-800">{item.descripcion}</td>
-                        <td className="p-4 text-right font-bold text-slate-300">{item.cantidad}</td>
-                        <td className="p-4 p-4 text-right font-black text-slate-900">${(item.subtotal || 0).toLocaleString(locale)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+              <>
+                <div className="space-y-4">
+                  <div className="flex items-center">
+                    <h3 className="text-slate-900 uppercase text-[11px] font-black tracking-[0.3em] mr-4 whitespace-nowrap">{t('investmentDetail')}</h3>
+                    <div className="h-[1px] bg-slate-100 w-full"></div>
+                  </div>
+                  <div className="rounded-2xl overflow-hidden border border-slate-100">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-slate-50 text-left text-[10px] uppercase text-slate-500 tracking-widest font-black border-b border-slate-100">
+                          <th className="p-4">{t('description')}</th>
+                          <th className="p-4 text-right w-20">{t('quantity')}</th>
+                          <th className="p-4 text-right w-28">{t('subtotal')}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-50">
+                        {(quote.items || []).map((item: any, idx: number) => (
+                          <tr key={idx} className="text-[13px]">
+                            <td className="p-4 font-bold text-slate-800">{item.descripcion}</td>
+                            <td className="p-4 text-right font-bold text-slate-300">{item.cantidad}</td>
+                            <td className="p-4 p-4 text-right font-black text-slate-900">${(item.subtotal || 0).toLocaleString(locale)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
 
-              <div className="space-y-2 p-4 w-64 ml-auto">
-                <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
-                  <span>{t('net')}</span>
-                  <span>${(quote.montoNeto || 0).toLocaleString(locale)}</span>
-                </div>
-                <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
-                  <span>{quote.taxName || t('tax')} ({quote.taxPercent ?? 19}%)</span>
-                  <span>${(quote.montoIva || 0).toLocaleString(locale)}</span>
-                </div>
-                {quote.extraFeeAmount > 0 && (
+                <div className="space-y-2 p-4 w-64 ml-auto">
                   <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
-                    <span>{quote.extraFeeName || t('fee')}</span>
-                    <span>${(quote.extraFeeAmount || 0).toLocaleString(locale)}</span>
+                    <span>{t('net')}</span>
+                    <span>${(quote.montoNeto || 0).toLocaleString(locale)}</span>
                   </div>
-                )}
-                <div className="flex justify-between text-lg font-black text-slate-900 border-t border-slate-200 pt-2 mt-2">
-                  <span className="text-[10px] uppercase tracking-widest text-slate-500 self-center">{t('total')}</span>
-                  <span>${(quote.montoTotal || 0).toLocaleString(locale)}</span>
+                  <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
+                    <span>{quote.taxName || t('tax')} ({quote.taxPercent ?? 19}%)</span>
+                    <span>${(quote.montoIva || 0).toLocaleString(locale)}</span>
+                  </div>
+                  {quote.extraFeeAmount > 0 && (
+                    <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
+                      <span>{quote.extraFeeName || t('fee')}</span>
+                      <span>${(quote.extraFeeAmount || 0).toLocaleString(locale)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-lg font-black text-slate-900 border-t border-slate-200 pt-2 mt-2">
+                    <span className="text-[10px] uppercase tracking-widest text-slate-500 self-center">{t('total')}</span>
+                    <span>${(quote.montoTotal || 0).toLocaleString(locale)}</span>
+                  </div>
+                  {quote.paymentMethod && (
+                    <div className="pt-4 mt-4 border-t border-slate-50">
+                      <div className="text-[8px] font-black uppercase text-slate-300 tracking-[0.2em] mb-1">{t('paymentMethod')}</div>
+                      <div className="text-[10px] font-bold text-slate-800">{quote.paymentMethod}</div>
+                    </div>
+                  )}
                 </div>
-                {quote.paymentMethod && (
-                  <div className="pt-4 mt-4 border-t border-slate-50">
-                    <div className="text-[8px] font-black uppercase text-slate-300 tracking-[0.2em] mb-1">{t('paymentMethod')}</div>
-                    <div className="text-[10px] font-bold text-slate-800">{quote.paymentMethod}</div>
-                  </div>
-                )}
-              </div>
+              </>
             )}
           </div>
         </main>
