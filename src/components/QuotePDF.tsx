@@ -280,12 +280,14 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
           }
           .shadow-2xl { box-shadow: none !important; }
           .pdf-page { 
-            width: 100% !important; 
-            height: 100vh !important; 
-            max-height: none !important; 
-            min-height: 100vh !important; 
+            width: 210mm !important; 
+            height: 297mm !important; 
+            max-height: 297mm !important; 
+            min-height: 297mm !important; 
             border: none !important; 
             margin: 0 !important; 
+            padding: 0 !important;
+            page-break-after: always;
           }
         }
       `}} />

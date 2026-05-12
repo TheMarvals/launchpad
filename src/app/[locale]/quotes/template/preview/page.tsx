@@ -21,7 +21,7 @@ export default function QuoteTemplatePreview() {
   };
 
   return (
-    <div className="bg-slate-100 min-h-screen py-10">
+    <div className="m-0 p-0">
       <QuotePDF quote={mockQuote} isTemplate={true} />
     </div>
   );
