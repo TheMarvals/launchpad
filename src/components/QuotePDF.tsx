@@ -13,17 +13,19 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
   const proposalPages = isTemplate ? [''] : (quote.propuesta || '').split('---PAGE_BREAK---');
 
   return (
-    <div className="pdf-wrapper w-full max-w-[210mm] print:max-w-full mx-auto print:mx-0 space-y-8 print:space-y-0">
+    <>
       <style dangerouslySetInnerHTML={{ __html: `
         html, body { margin: 0 !important; padding: 0 !important; }
         @media print {
           @page { margin: 0; size: A4; }
           body { -webkit-print-color-adjust: exact; }
+          .pdf-wrapper { space-y: 0 !important; }
         }
       `}} />
-      {/* Proposal Pages */}
-      {proposalPages.map((pageContent: string, pageIdx: number) => (
-        <div key={pageIdx} className="pdf-page w-full h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
+      <div className="pdf-wrapper w-full max-w-[210mm] print:max-w-full mx-auto print:mx-0">
+        {/* Proposal Pages */}
+        {proposalPages.map((pageContent: string, pageIdx: number) => (
+          <div key={pageIdx} className="pdf-page w-full h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
           {/* Header - First Page vs Subsequent Pages */}
           {pageIdx === 0 ? (
             <header className="relative w-full p-10 pb-12 text-white shrink-0 overflow-hidden" style={{ background: '#050212' }}>
