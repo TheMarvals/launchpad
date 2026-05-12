@@ -14,9 +14,16 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
 
   return (
     <div className="pdf-wrapper w-full max-w-[210mm] print:max-w-full mx-auto print:mx-0 space-y-8 print:space-y-0">
+      <style dangerouslySetInnerHTML={{ __html: `
+        html, body { margin: 0 !important; padding: 0 !important; }
+        @media print {
+          @page { margin: 0; size: A4; }
+          body { -webkit-print-color-adjust: exact; }
+        }
+      `}} />
       {/* Proposal Pages */}
       {proposalPages.map((pageContent: string, pageIdx: number) => (
-        <div key={pageIdx} className="pdf-page w-full min-h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
+        <div key={pageIdx} className="pdf-page w-full h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
           {/* Header - First Page vs Subsequent Pages */}
           {pageIdx === 0 ? (
             <header className="relative w-full p-10 pb-12 text-white shrink-0 overflow-hidden" style={{ background: '#050212' }}>
@@ -121,8 +128,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
         </div>
       ))}
 
-      {/* FINAL PAGE: Economic data and conditions */}
-      <div className="pdf-page w-full min-h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
+      {!isTemplate && (
+        <div className="pdf-page w-full h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
         <header className="relative w-full p-8 border-b border-slate-50 shrink-0 flex justify-between items-center bg-white">
           <div className="relative inline-block">
             <h1 className="text-3xl font-black mb-0 stroke-text leading-none tracking-tighter" style={{ WebkitTextStrokeColor: '#000000', WebkitTextStrokeWidth: '1.5px' }}>MARVAL</h1>
@@ -199,7 +206,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
           </div>
         </main>
 
-        <footer className="absolute bottom-0 left-0 w-full p-6 text-slate-300 text-center shrink-0" style={{ background: '#050212', boxShadow: '0 0 0 10px #050212' }}>
+        <footer className="absolute bottom-0 left-0 w-full p-6 text-slate-300 text-center shrink-0" style={{ background: '#050212' }}>
           <div className="text-[12px] font-black uppercase tracking-[0.6em] text-white">MARVAL</div>
           <div className="h-px w-8 bg-blue-500 mx-auto my-3 opacity-30"></div>
           <div className="text-[8px] font-bold opacity-40 space-x-6 uppercase tracking-widest">
@@ -208,7 +215,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
             <span>e.marval@themarvals.com</span>
           </div>
         </footer>
-      </div>
+        </div>
+      )}
 
       <style dangerouslySetInnerHTML={{
         __html: `
