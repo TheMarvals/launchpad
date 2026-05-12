@@ -289,7 +289,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
           }
         }
       `}} />
-    </div>
+      </div>
+    </>
   );
 };
 
