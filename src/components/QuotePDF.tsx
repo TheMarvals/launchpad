@@ -53,7 +53,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
                   </div>
                   <div className="space-y-1.5 border-r-2 border-blue-500/30 pr-4">
                     <div className="text-[9px] font-bold text-slate-300">RUT: 27.087.979-9</div>
-                    <div className="text-[9px] font-bold text-slate-300">TELF: +569 994438833</div>
+                    <div className="text-[9px] font-bold text-slate-300">TELF: +569 94438833</div>
                     <div className="text-[9px] font-bold text-slate-300 lowercase">e.marval@themarvals.com</div>
                   </div>
                 </div>
