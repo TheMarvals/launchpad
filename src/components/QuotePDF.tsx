@@ -25,7 +25,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
       <div className="pdf-wrapper w-full max-w-[210mm] print:max-w-full mx-auto print:mx-0">
         {/* Proposal Pages */}
         {proposalPages.map((pageContent: string, pageIdx: number) => (
-          <div key={pageIdx} className="pdf-page w-full h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
+          <div key={pageIdx} className="pdf-page w-full h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page print:overflow-hidden">
           {/* Header - First Page vs Subsequent Pages */}
           {pageIdx === 0 ? (
             <header className="relative w-full p-10 pb-12 text-white shrink-0 overflow-hidden" style={{ background: '#050212' }}>
@@ -70,7 +70,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
           )}
 
           {/* Page Content */}
-          <main className="flex-grow p-12 pb-32 relative">
+          <main className="flex-grow px-10 pt-10 pb-20 relative overflow-hidden">
             {/* Watermark - Giant and Very Subtle */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
               <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#1e3a8a', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>MARVAL</h1>
@@ -131,7 +131,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
       ))}
 
       {!isTemplate && (
-        <div className="pdf-page w-full h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
+        <div className="pdf-page w-full h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page print:overflow-hidden">
         <header className="relative w-full p-8 border-b border-slate-50 shrink-0 flex justify-between items-center bg-white">
           <div className="relative inline-block">
             <h1 className="text-3xl font-black mb-0 stroke-text leading-none tracking-tighter" style={{ WebkitTextStrokeColor: '#000000', WebkitTextStrokeWidth: '1.5px' }}>MARVAL</h1>
@@ -140,7 +140,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
           <div className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-300">{proposalPages.length + 1} / {proposalPages.length + 1}</div>
         </header>
 
-        <main className="flex-grow p-12 pb-32 relative">
+        <main className="flex-grow px-10 pt-10 pb-20 relative overflow-hidden">
           {/* Watermark - Giant and Very Subtle */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
             <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#1e3a8a', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>MARVAL</h1>
@@ -250,6 +250,12 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
         .propuesta-content h1 { font-size: 1.5rem; }
         .propuesta-content h2 { font-size: 1.25rem; }
         .propuesta-content h3 { font-size: 1.1rem; }
+        .propuesta-content {
+          overflow-wrap: break-word;
+          word-wrap: break-word;
+          word-break: break-word;
+          hyphens: auto;
+        }
         .propuesta-content p { margin-bottom: 1em; }
         .propuesta-content ul, .propuesta-content ol { 
           margin-bottom: 1em; 
