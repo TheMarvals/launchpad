@@ -308,6 +308,19 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
                         </div>
                       )}
                     </div>
+
+                    {/* Notes & Conditions */}
+                    {quote.notasCondiciones && (
+                      <div className="space-y-3 mt-8">
+                        <div className="flex items-center">
+                          <h3 className="text-slate-900 uppercase text-[11px] font-black tracking-[0.3em] mr-4 whitespace-nowrap">Notas y Condiciones</h3>
+                          <div className="h-[1px] bg-slate-100 w-full"></div>
+                        </div>
+                        <div className="text-[11px] text-slate-500 leading-relaxed whitespace-pre-line">
+                          {quote.notasCondiciones}
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
