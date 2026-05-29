@@ -68,51 +68,52 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
             </header>
           )}
 
-          {/* Page Content */}
-          <main className="flex-grow px-10 pt-10 pb-20 relative overflow-hidden">
+          <main className="flex-grow flex flex-col px-10 pt-10 pb-24 relative overflow-hidden">
             {/* Watermark - Giant and Very Subtle */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
               <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#1e3a8a', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>MARVAL</h1>
             </div>
 
-            <div className="relative z-10 space-y-10">
-              {/* Metadata only on Page 1 */}
-              {pageIdx === 0 && !isTemplate && (
-                <div className="flex justify-between items-start border-b border-slate-100 pb-8">
-                  <div className="max-w-[60%]">
-                    <div className="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-[8px] font-black uppercase tracking-[0.2em] rounded-md mb-3">
-                      Información del Cliente
-                    </div>
-                    <h3 className="font-black text-2xl uppercase tracking-tighter text-slate-900 leading-tight mb-2">
-                      {quote.client?.razonSocial || 'CLIENTE DE PRUEBA'}
-                    </h3>
-                    <div className="space-y-0.5 text-xs font-bold text-slate-400">
-                      <div>RUT: {quote.client?.rut || '---'}</div>
-                      <div className="font-medium italic opacity-80 text-[11px]">{quote.client?.giro || 'Servicios Informáticos'}</div>
-                    </div>
-                  </div>
-                  <div className="text-right space-y-4">
-                    <div className="space-y-1">
-                    <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Documento</div>
-                      <div className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">
-                        Cotización <span className="text-blue-600">#{String(quote.correlativo || 0).padStart(4, '0')}</span>
+            <div className="relative z-10 flex-grow overflow-hidden flex flex-col">
+              <div className="space-y-10">
+                {/* Metadata only on Page 1 */}
+                {pageIdx === 0 && !isTemplate && (
+                  <div className="flex justify-between items-start border-b border-slate-100 pb-8">
+                    <div className="max-w-[60%]">
+                      <div className="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-[8px] font-black uppercase tracking-[0.2em] rounded-md mb-3">
+                        Información del Cliente
+                      </div>
+                      <h3 className="font-black text-2xl uppercase tracking-tighter text-slate-900 leading-tight mb-2">
+                        {quote.client?.razonSocial || 'CLIENTE DE PRUEBA'}
+                      </h3>
+                      <div className="space-y-0.5 text-xs font-bold text-slate-400">
+                        <div>RUT: {quote.client?.rut || '---'}</div>
+                        <div className="font-medium italic opacity-80 text-[11px]">{quote.client?.giro || 'Servicios Informáticos'}</div>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-right">
-                      <div className="text-[9px] font-black text-slate-300 uppercase">Emisión</div>
-                      <div className="text-xs font-black text-slate-800">{new Date(quote.fechaEmision || Date.now()).toLocaleDateString(locale)}</div>
-                      <div className="text-[9px] font-black text-slate-300 uppercase">Validez</div>
-                      <div className="text-xs font-black text-blue-600">{quote.fechaValidez ? new Date(quote.fechaValidez).toLocaleDateString(locale) : 'Por definir'}</div>
+                    <div className="text-right space-y-4">
+                      <div className="space-y-1">
+                      <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Documento</div>
+                        <div className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">
+                          Cotización <span className="text-blue-600">#{String(quote.correlativo || 0).padStart(4, '0')}</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-right">
+                        <div className="text-[9px] font-black text-slate-300 uppercase">Emisión</div>
+                        <div className="text-xs font-black text-slate-800">{new Date(quote.fechaEmision || Date.now()).toLocaleDateString(locale)}</div>
+                        <div className="text-[9px] font-black text-slate-300 uppercase">Validez</div>
+                        <div className="text-xs font-black text-blue-600">{quote.fechaValidez ? new Date(quote.fechaValidez).toLocaleDateString(locale) : 'Por definir'}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Proposals for this specific page */}
-              <div 
-                className="propuesta-content text-slate-600 leading-relaxed text-justify font-sans text-[15px] space-y-4"
-                dangerouslySetInnerHTML={{ __html: pageContent }}
-              />
+                {/* Proposals for this specific page */}
+                <div 
+                  className="propuesta-content text-slate-600 leading-relaxed text-justify font-sans text-[15px] space-y-4"
+                  dangerouslySetInnerHTML={{ __html: pageContent.replace(/&nbsp;/g, ' ') }}
+                />
+              </div>
             </div>
           </main>
 
@@ -249,11 +250,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
         .propuesta-content h1 { font-size: 1.5rem; }
         .propuesta-content h2 { font-size: 1.25rem; }
         .propuesta-content h3 { font-size: 1.1rem; }
-        .propuesta-content {
-          overflow-wrap: break-word;
-          word-wrap: break-word;
-          word-break: break-word;
-          hyphens: auto;
+        .propuesta-content, .propuesta-content * {
+          white-space: pre-wrap !important;
+          overflow-wrap: break-word !important;
+          word-break: break-word !important;
+          max-width: 100%;
         }
         .propuesta-content p { margin-bottom: 1em; }
         .propuesta-content ul, .propuesta-content ol { 
