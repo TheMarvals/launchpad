@@ -382,6 +382,28 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
           .propuesta-content ol { list-style-type: decimal; }
           .propuesta-content li { margin-bottom: 0.5em; }
           .propuesta-content strong { color: #1e3a8a; font-weight: 700; }
+          
+          /* Table Styles */
+          .propuesta-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5em;
+            font-size: 0.9em;
+          }
+          .propuesta-content th, .propuesta-content td {
+            border: 1px solid #cbd5e1;
+            padding: 8px 12px;
+            vertical-align: top;
+          }
+          .propuesta-content th {
+            font-weight: 900;
+            background-color: #f8fafc;
+            color: #0f172a;
+            text-transform: uppercase;
+          }
+          .propuesta-content td * {
+            margin-bottom: 0 !important;
+          }
 
           .forced-page-break {
             display: none;
