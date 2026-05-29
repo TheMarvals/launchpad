@@ -93,15 +93,13 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
   const [extraFeeAmount, setExtraFeeAmount] = useState(initialData?.extraFeeAmount?.toString() || '0');
   const [paymentMethod, setPaymentMethod] = useState(initialData?.paymentMethod || '');
 
-  // Multi-page Proposal State
-  const [pages, setPages] = useState<string[]>(() => {
+  // Proposal content — single editor, auto-paginates in QuotePDF
+  const [propuesta, setPropuesta] = useState<string>(() => {
     if (initialData?.propuesta) {
-      return initialData.propuesta.split('---PAGE_BREAK---');
+      // Migrate old PAGE_BREAK format: join pages into a single string
+      return initialData.propuesta.replace(/---PAGE_BREAK---/g, '');
     }
-    return [
-      t('defaultProposal.page1'),
-      t('defaultProposal.page2')
-    ];
+    return t('defaultProposal.page1');
   });
 
   const [notasCondiciones, setNotasCondiciones] = useState(initialData?.notasCondiciones || t('defaultNotes'));
@@ -115,21 +113,6 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  const addPage = () => {
-    setPages([...pages, '']);
-  };
-
-  const updatePage = (index: number, content: string) => {
-    const newPages = [...pages];
-    newPages[index] = content;
-    setPages(newPages);
-  };
-
-  const removePage = (index: number) => {
-    if (pages.length > 1) {
-      setPages(pages.filter((_: any, i: number) => i !== index));
-    }
-  };
 
   const addItem = () => {
     setItems([...items, { descripcion: '', cantidad: 1, precioUnitario: 0 }]);
@@ -162,14 +145,12 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
         subtotal: Number(item.cantidad) * Number(item.precioUnitario)
       }));
 
-      // Join pages with a unique separator
-      const combinedPropuesta = pages.join('---PAGE_BREAK---');
 
       const payload = {
         clientId,
         fechaValidez,
         notasCondiciones,
-        propuesta: combinedPropuesta,
+        propuesta,
         estado,
         taxName,
         taxPercent,
@@ -210,7 +191,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
     extraFeeAmount: fee,
     paymentMethod,
     notasCondiciones,
-    propuesta: pages.join('---PAGE_BREAK---'),
+    propuesta,
     client: selectedClient || { razonSocial: 'CLIENTE NO SELECCIONADO', rut: '---' },
     items: items.map(it => ({ ...it, subtotal: Number(it.cantidad) * Number(it.precioUnitario) }))
   };
@@ -278,73 +259,26 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
         </div>
       </div>
 
-      {/* 2. Multi-page Proposal Editor */}
+      {/* 2. Proposal Editor — single editor, auto-paginated in preview */}
       <div className="space-y-6">
-        <div className="flex justify-between items-end">
-          <h2 className="text-xl font-black flex items-center text-slate-900 tracking-tight">
-            <span className="material-icons mr-3 text-blue-600 bg-blue-50 p-2 rounded-lg">edit_note</span> {t('proposalTitle')}
-          </h2>
-            <button 
-              type="button" 
-              onClick={addPage}
-              className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all flex items-center"
-            >
-              <span className="material-icons mr-2 text-sm">add</span> {t('newPage')}
-            </button>
-        </div>
+        <h2 className="text-xl font-black flex items-center text-slate-900 tracking-tight">
+          <span className="material-icons mr-3 text-blue-600 bg-blue-50 p-2 rounded-lg">edit_note</span> {t('proposalTitle')}
+        </h2>
+        <p className="text-sm text-slate-400 -mt-2">
+          Escribe toda la propuesta aquí. Las páginas se generarán automáticamente en la vista previa.
+        </p>
 
-        <div className="space-y-12">
-          {pages.map((content, idx) => {
-            const MAX_CHARS = 1130;
-            const progress = (content.length / MAX_CHARS) * 100;
-            const isNearLimit = progress > 85;
-
-            return (
-              <div key={idx} className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden group">
-                <div className="bg-slate-50 px-6 py-3 border-b flex justify-between items-center">
-                  <div className="flex items-center space-x-4">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('page')} {idx + 1} {t('of')} {pages.length}</span>
-                    <div className="h-1 w-24 bg-slate-200 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full transition-all duration-300 ${progress > 100 ? 'bg-red-500' : isNearLimit ? 'bg-amber-500' : 'bg-blue-500'}`}
-                        style={{ width: `${Math.min(progress, 100)}%` }}
-                      />
-                    </div>
-                    <span className={`text-[9px] font-bold ${progress > 100 ? 'text-red-500' : isNearLimit ? 'text-amber-500' : 'text-slate-400'}`}>
-                      {Math.round(progress)}% {t('capacity')}
-                    </span>
-                  </div>
-                  {pages.length > 1 && (
-                    <button 
-                      type="button" 
-                      onClick={() => removePage(idx)}
-                      className="text-red-400 hover:text-red-600 transition-colors"
-                    >
-                      <span className="material-icons text-sm">delete_forever</span>
-                    </button>
-                  )}
-                </div>
-                <div className="bg-white min-h-[450px]">
-                  <ReactQuill 
-                    theme="snow"
-                    value={content}
-                    onChange={(val) => updatePage(idx, val)}
-                    modules={QUILL_MODULES}
-                    className="h-full border-none"
-                    placeholder={`${t('page')} ${idx + 1}...`}
-                  />
-                </div>
-                <div className="px-6 py-2 bg-slate-50 flex justify-between items-center border-t">
-                  <div className="text-[10px] text-slate-400 italic">
-                    {progress > 90 ? t('pageLimit') : t('standardA4')}
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-300">
-                    {content.replace(/<[^>]*>/g, '').length} / {MAX_CHARS} {t('characters')}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+          <div className="bg-white min-h-[500px]">
+            <ReactQuill 
+              theme="snow"
+              value={propuesta}
+              onChange={setPropuesta}
+              modules={QUILL_MODULES}
+              className="h-full border-none"
+              placeholder="Escribe la propuesta completa..."
+            />
+          </div>
         </div>
       </div>
 
