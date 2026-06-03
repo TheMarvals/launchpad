@@ -5,7 +5,24 @@ export async function GET(request: NextRequest) {
   const protocol = request.nextUrl.protocol;
   const host = request.nextUrl.host;
   const baseUrl = `${protocol}//${host}`;
-  const previewUrl = `${baseUrl}/quotes/template/preview`;
+
+  // Detect locale from query parameter, cookie, or referer
+  const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value;
+  const localeParam = request.nextUrl.searchParams.get('locale');
+  const referer = request.headers.get('referer');
+  let refererLocale = '';
+  if (referer) {
+    try {
+      const refererUrl = new URL(referer);
+      const pathParts = refererUrl.pathname.split('/');
+      if (['en', 'es'].includes(pathParts[1])) {
+        refererLocale = pathParts[1];
+      }
+    } catch (e) {}
+  }
+  const locale = localeParam || cookieLocale || refererLocale || 'es';
+
+  const previewUrl = `${baseUrl}/${locale}/quotes/template/preview`;
 
   try {
     const browser = await puppeteer.launch({
