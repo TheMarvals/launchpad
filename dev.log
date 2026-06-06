@@ -100,3 +100,11 @@
  GET /en 200 in 135ms (next.js: 17ms, proxy.ts: 18ms, application-code: 100ms)
  GET /en 200 in 123ms (next.js: 14ms, proxy.ts: 17ms, application-code: 93ms)
  GET /en 200 in 84ms (next.js: 16ms, proxy.ts: 29ms, application-code: 39ms)
+✓ Compiled in 48ms
+ GET /en 200 in 540ms (next.js: 211ms, proxy.ts: 63ms, application-code: 266ms)
+ GET /en 200 in 229ms (next.js: 21ms, proxy.ts: 67ms, application-code: 140ms)
+ GET /en 200 in 152ms (next.js: 17ms, proxy.ts: 32ms, application-code: 103ms)
+ GET /en 200 in 126ms (next.js: 11ms, proxy.ts: 24ms, application-code: 91ms)
+ GET /en 200 in 218ms (next.js: 10ms, proxy.ts: 15ms, application-code: 192ms)
+ GET /en 200 in 233ms (next.js: 76ms, proxy.ts: 16ms, application-code: 141ms)
+ GET /en 200 in 127ms (next.js: 18ms, proxy.ts: 39ms, application-code: 69ms)

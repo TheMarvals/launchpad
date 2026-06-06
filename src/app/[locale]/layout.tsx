@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: "LAUNCHPAD · Admin Panel",
   description: "Plataforma administrativa y centro de productividad integral de LAUNCHPAD.",
   icons: {
-    icon: '/favicon.png',
+    icon: '/favicon.jpg',
   },
 };
 
