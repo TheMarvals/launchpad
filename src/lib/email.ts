@@ -86,9 +86,12 @@ function baseTemplate(content: string, locale: string = 'es') {
         <!-- Header -->
         <tr>
           <td style="padding:0 0 24px 0;text-align:center;">
-            <div style="font-size:28px;font-weight:900;letter-spacing:-1.5px;color:transparent;font-family:'Outfit','Segoe UI',Arial,sans-serif;text-transform:uppercase;-webkit-text-stroke:1.5px ${theme.ink};">
-              LAUNCHPAD
-            </div>
+            <img
+              src="${process.env.SITE_ORIGIN ? process.env.SITE_ORIGIN + '/lp_logo.png' : '/lp_logo.png'}"
+              width="280"
+              alt="LAUNCHPAD"
+              style="display:block;margin:0 auto;max-width:100%;height:auto;"
+            />
             <div style="width:32px;height:2px;background:${theme.secondary};margin:8px auto;"></div>
             <div style="font-size:9px;text-transform:uppercase;letter-spacing:3px;color:${theme.muted};font-weight:600;">by Masterminds</div>
           </td>
