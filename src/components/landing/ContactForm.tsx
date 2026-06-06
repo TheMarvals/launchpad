@@ -30,7 +30,7 @@ export default function ContactForm() {
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           placeholder={t('namePlaceholder')}
           required
-          className="w-full bg-canvas border border-hairline text-ink text-sm h-[48px] px-sm placeholder:text-muted focus:border-primary focus:shadow-[0_0_0_2px_rgba(0,98,255,0.15)] outline-none transition-all duration-300 rounded-sm"
+          className="w-full bg-canvas border border-hairline text-ink text-sm h-[48px] px-sm placeholder:text-muted focus:border-primary focus:shadow-[0_0_0_2px_rgba(168,85,247,0.15)] outline-none transition-all duration-300 rounded-sm"
         />
       </div>
       <div className="relative">
@@ -40,7 +40,7 @@ export default function ContactForm() {
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           placeholder={t('emailPlaceholder')}
           required
-          className="w-full bg-canvas border border-hairline text-ink text-sm h-[48px] px-sm placeholder:text-muted focus:border-primary focus:shadow-[0_0_0_2px_rgba(0,98,255,0.15)] outline-none transition-all duration-300 rounded-sm"
+          className="w-full bg-canvas border border-hairline text-ink text-sm h-[48px] px-sm placeholder:text-muted focus:border-primary focus:shadow-[0_0_0_2px_rgba(168,85,247,0.15)] outline-none transition-all duration-300 rounded-sm"
         />
       </div>
       <div className="relative">
@@ -50,7 +50,7 @@ export default function ContactForm() {
           onChange={(e) => setForm({ ...form, company: e.target.value })}
           placeholder={t('companyPlaceholder')}
           required
-          className="w-full bg-canvas border border-hairline text-ink text-sm h-[48px] px-sm placeholder:text-muted focus:border-primary focus:shadow-[0_0_0_2px_rgba(0,98,255,0.15)] outline-none transition-all duration-300 rounded-sm"
+          className="w-full bg-canvas border border-hairline text-ink text-sm h-[48px] px-sm placeholder:text-muted focus:border-primary focus:shadow-[0_0_0_2px_rgba(168,85,247,0.15)] outline-none transition-all duration-300 rounded-sm"
         />
       </div>
       <div className="relative">
@@ -60,7 +60,7 @@ export default function ContactForm() {
           placeholder={t('challengePlaceholder')}
           required
           rows={5}
-          className="w-full bg-canvas border border-hairline text-ink text-sm px-sm py-xs placeholder:text-muted focus:border-primary focus:shadow-[0_0_0_2px_rgba(0,98,255,0.15)] outline-none transition-all duration-300 resize-none rounded-sm"
+          className="w-full bg-canvas border border-hairline text-ink text-sm px-sm py-xs placeholder:text-muted focus:border-primary focus:shadow-[0_0_0_2px_rgba(168,85,247,0.15)] outline-none transition-all duration-300 resize-none rounded-sm"
         />
       </div>
       
@@ -81,7 +81,7 @@ export default function ContactForm() {
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="group inline-flex items-center gap-xxs bg-secondary hover:bg-secondary-hover text-white px-lg h-[48px] rounded-sm text-xs font-bold uppercase tracking-[0.2em] hover:-translate-y-0.5 transition-all duration-300 shadow-[0_0_10px_rgba(168,85,247,0.12)] hover:shadow-[0_0_16px_rgba(168,85,247,0.2)] disabled:opacity-50 disabled:hover:translate-y-0 cursor-pointer"
+          className="group inline-flex items-center gap-xxs bg-primary hover:bg-primary-hover text-white px-lg h-[48px] rounded-sm text-xs font-bold uppercase tracking-[0.2em] hover:-translate-y-0.5 transition-all duration-300 shadow-[0_0_10px_rgba(168,85,247,0.12)] hover:shadow-[0_0_16px_rgba(168,85,247,0.2)] disabled:opacity-50 disabled:hover:translate-y-0 cursor-pointer"
         >
           {status === 'loading' ? (
             <span className="material-icons animate-spin text-[18px]">sync</span>

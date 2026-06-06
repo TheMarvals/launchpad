@@ -33,12 +33,12 @@ export default function LandingCta({
       case 'dark':
         return base + "bg-transparent hover:bg-surface-card-hover text-ink border border-hairline px-lg h-[52px] rounded-sm text-xs uppercase hover:-translate-y-0.5";
       case 'navbar':
-        return base + "bg-secondary text-white hover:bg-secondary-hover px-[16px] h-[38px] rounded-sm text-xs uppercase tracking-[0.1em] shadow-[0_0_16px_rgba(168,85,247,0.3)] hover:shadow-[0_0_24px_rgba(168,85,247,0.5)]";
+        return base + "bg-primary text-white hover:bg-primary-hover px-[16px] h-[38px] rounded-sm text-xs uppercase tracking-[0.1em] shadow-[0_0_16px_rgba(168,85,247,0.3)] hover:shadow-[0_0_24px_rgba(168,85,247,0.5)]";
       case 'purple':
-        return base + "bg-secondary hover:bg-secondary-hover text-white px-lg h-[52px] rounded-sm text-xs uppercase hover:-translate-y-0.5 shadow-[0_0_24px_rgba(168,85,247,0.4)] hover:shadow-[0_0_40px_rgba(168,85,247,0.6)]";
+        return base + "bg-primary hover:bg-primary-hover text-white px-lg h-[52px] rounded-sm text-xs uppercase hover:-translate-y-0.5 shadow-[0_0_24px_rgba(168,85,247,0.4)] hover:shadow-[0_0_40px_rgba(168,85,247,0.6)]";
       case 'blurple':
       default:
-        return base + "bg-secondary hover:bg-secondary-hover text-white px-lg h-[52px] rounded-sm text-xs uppercase border border-secondary/20 hover:-translate-y-0.5 shadow-[0_0_12px_rgba(168,85,247,0.15)] hover:shadow-[0_0_20px_rgba(168,85,247,0.25)] active:bg-secondary-hover transition-all duration-300";
+        return base + "bg-primary hover:bg-primary-hover text-white px-lg h-[52px] rounded-sm text-xs uppercase border border-primary/20 hover:-translate-y-0.5 shadow-[0_0_12px_rgba(168,85,247,0.15)] hover:shadow-[0_0_20px_rgba(168,85,247,0.25)] active:bg-primary-hover transition-all duration-300";
     }
   };
 

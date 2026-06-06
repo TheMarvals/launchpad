@@ -13,15 +13,15 @@
 
   /* --- Brand Colors (Kinetic Horizon / Modern Tech-Noir) --- */
 
-  /* Electric Blue (Primary) */
-  --color-primary: #0062ff;
-  --color-primary-active: #00dce5;
-  --color-primary-hover: #0053da;
+  /* Electric Violet (Primary) */
+  --color-primary: #a855f7;
+  --color-primary-active: #c084fc;
+  --color-primary-hover: #9333ea;
 
-  /* Electric Violet (Secondary) */
-  --color-secondary: #a855f7;
-  --color-secondary-active: #c084fc;
-  --color-secondary-hover: #9333ea;
+  /* Electric Blue (Secondary) */
+  --color-secondary: #0062ff;
+  --color-secondary-active: #00dce5;
+  --color-secondary-hover: #0053da;
 
   /* Surfaces - Deep Charcoal layered palette */
   --color-canvas: #131314;
@@ -81,10 +81,10 @@
   --radius-2xl: 16px;
   --radius-full: 9999px;
 
-  /* Shadows - Ambient Glows (low-opacity primary blue) */
-  --shadow-small: 0 4px 24px rgba(0, 98, 255, 0.1);
-  --shadow-medium: 0 8px 32px rgba(0, 98, 255, 0.12);
-  --shadow-large: 0 16px 48px rgba(0, 98, 255, 0.15);
+  /* Shadows - Ambient Glows (low-opacity primary violet) */
+  --shadow-small: 0 4px 24px rgba(168, 85, 247, 0.1);
+  --shadow-medium: 0 8px 32px rgba(168, 85, 247, 0.12);
+  --shadow-large: 0 16px 48px rgba(168, 85, 247, 0.15);
   --shadow-none: 0 0 0 rgba(0, 0, 0, 0);
 
   /* Explicitly define standard width scale */
@@ -126,8 +126,8 @@ body::before {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(0, 98, 255, 0.04) 0%, transparent 60%),
-    radial-gradient(ellipse at 50% 100%, rgba(0, 220, 229, 0.03) 0%, transparent 50%);
+    radial-gradient(ellipse at 50% 0%, rgba(168, 85, 247, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(192, 132, 252, 0.03) 0%, transparent 50%);
   pointer-events: none;
 }
 

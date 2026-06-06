@@ -30,7 +30,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         {/* Subtle background grid */}
         <div className="absolute inset-0 pointer-events-none z-0">
           {/* Soft top-right glow */}
-          <div className="absolute -top-[300px] right-[-200px] w-[600px] h-[600px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(0,98,255,0.25) 0%, transparent 70%)' }} />
+          <div className="absolute -top-[300px] right-[-200px] w-[600px] h-[600px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(168,85,247,0.25) 0%, transparent 70%)' }} />
           {/* Soft bottom-left glow */}
           <div className="absolute -bottom-[200px] left-[-200px] w-[400px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(0,220,229,0.2) 0%, transparent 70%)' }} />
         </div>
@@ -116,7 +116,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       {/* ============================== */}
       <section id="expertise" className="px-0 md:px-lg py-xl md:py-xxl border-t border-hairline relative z-10">
         {/* Ambient glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(0,98,255,0.12) 0%, transparent 70%)' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(168,85,247,0.12) 0%, transparent 70%)' }} />
 
         <div className="max-w-[1100px] mx-auto relative px-xs md:px-0">
           {/* Section header */}
@@ -221,7 +221,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       {/* ============================== */}
       <section id="contact" className="px-0 md:px-lg py-xl md:py-xxl border-t border-hairline relative">
         {/* Ambient glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(0,98,255,0.12) 0%, transparent 70%)' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(168,85,247,0.12) 0%, transparent 70%)' }} />
 
         <div className="max-w-[900px] mx-auto relative z-10 px-xs md:px-0">
           <div className="text-center mb-lg">
