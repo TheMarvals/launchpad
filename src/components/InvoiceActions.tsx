@@ -25,7 +25,7 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert('Error al eliminar la factura.');
+      alert(t('deleteError') || 'Error al eliminar la factura.');
     } finally {
       setIsDeleting(false);
       setShowConfirm(false);
@@ -39,7 +39,7 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert('Error al actualizar el estado.');
+      alert(tInv('updateError') || 'Error al actualizar el estado.');
     }
   };
 
@@ -49,7 +49,7 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
         <button 
           onClick={() => setShowStatusMenu(!showStatusMenu)}
           className="text-slate-500 hover:text-blue-600 transition-colors"
-          title="Cambiar Estado"
+          title={t('changeStatus') || 'Cambiar Estado'}
         >
           <span className="material-icons text-[18px]">sync_alt</span>
         </button>

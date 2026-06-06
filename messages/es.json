@@ -48,7 +48,11 @@
       "delete": "Eliminar",
       "confirmDelete": "¿Eliminar?",
       "yes": "Sí",
-      "no": "No"
+      "no": "No",
+      "deleteError": "Error al eliminar",
+      "changeStatus": "Cambiar Estado",
+      "convert": "Convertir a Factura",
+      "convertConfirm": "¿Convertir esta cotización en una factura?"
     }
   },
   "Clients": {
@@ -70,7 +74,15 @@
       "phone": "Teléfono",
       "requiredFields": "Por favor, completa todos los campos obligatorios.",
       "saveError": "Error al guardar el cliente.",
-      "deleteError": "Error al eliminar el cliente."
+      "deleteError": "Error al eliminar el cliente.",
+      "rutPlaceholder": "76.543.210-K",
+      "razonSocialPlaceholder": "EMPRESA SPA",
+      "giroPlaceholder": "Servicios Informáticos",
+      "directionPlaceholder": "Av. Providencia 1234",
+      "communePlaceholder": "Providencia",
+      "cityPlaceholder": "Santiago",
+      "emailPlaceholder": "contacto@empresa.cl",
+      "phonePlaceholder": "+56 9 1234 5678"
     },
     "table": {
       "razonSocial": "Razón Social",
@@ -113,6 +125,7 @@
       "Pagada": "Pagada",
       "Anulada": "Anulada"
     },
+    "updateError": "Error al actualizar el estado.",
     "table": {
       "number": "Nº",
       "client": "Cliente",
@@ -569,7 +582,10 @@
       "success": "Configuración guardada correctamente.",
       "error": "Error al guardar la configuración.",
       "testSuccess": "Mensaje de prueba enviado.",
-      "testError": "Error al enviar mensaje de prueba."
+      "testError": "Error al enviar mensaje de prueba.",
+      "testRequired": "Token y Chat ID son requeridos para probar",
+      "tokenPlaceholder": "123456:ABC-DEF...",
+      "chatIdPlaceholder": "Ej. -100123456789"
     }
   },
   "Login": {
@@ -644,6 +660,22 @@
     "deleteServerSuccess": "Servidor eliminado",
     "noIpAssigned": "No asignada",
     "dueDate": "Vencimiento",
+    "error": "Error",
+    "saved": "Guardado",
+    "saveChanges": "Guardar Cambios",
+    "vpsUpdated": "Datos del VPS actualizados.",
+    "editVps": "Editar VPS",
+    "hostnameLabel": "Hostname (Público)",
+    "hostnamePlaceholder": "Ej: srv1.launchpad.host",
+    "hostnameHelp": "Este nombre se mostrará al cliente en lugar de la IP.",
+    "ipAssignedLabel": "IP Asignada",
+    "providerVpsLabel": "ID del Proveedor (VPS)",
+    "friendlyNamePlaceholderVps": "Ej: Cliente Web",
+    "providerIdPlaceholderVps": "Ej: 893450",
+    "providerIdHelp": "Este ID vincula las acciones (Start, Stop) con la API del proveedor cloud.",
+    "dueDateLabel": "Fecha de Vencimiento (Opcional)",
+    "deleteVpsTitle": "¿Eliminar VPS?",
+    "deleteVpsText": "Esto eliminará permanentemente este servidor VPS.",
     "optional": "opcional",
     "passwordPlaceholder": "Dejar en blanco para mantener actual",
     "of": "de",

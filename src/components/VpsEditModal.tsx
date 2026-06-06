@@ -2,9 +2,11 @@
 
 import React, { useState } from 'react';
 import { updateVpsService } from '@/app/actions/portal';
+import { useTranslations } from 'next-intl';
 import Swal from 'sweetalert2';
 
 export default function VpsEditModal({ server }: { server: any }) {
+  const t = useTranslations('ClientDetails');
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -33,7 +35,7 @@ export default function VpsEditModal({ server }: { server: any }) {
 
     if (res.error) {
       Swal.fire({
-        title: 'Error',
+        title: t('error') || 'Error',
         text: res.error,
         icon: 'error',
         customClass: {
@@ -44,8 +46,8 @@ export default function VpsEditModal({ server }: { server: any }) {
     } else {
       Swal.fire({
         icon: 'success',
-        title: 'Guardado',
-        text: 'Datos del VPS actualizados.',
+        title: t('saved') || 'Guardado',
+        text: t('vpsUpdated') || 'Datos del VPS actualizados.',
         toast: true,
         position: 'bottom-end',
         showConfirmButton: false,
@@ -64,7 +66,7 @@ export default function VpsEditModal({ server }: { server: any }) {
       <button
         onClick={() => setIsOpen(true)}
         className="text-muted hover:text-primary transition-colors"
-        title="Editar VPS"
+        title={t('editVps') || 'Editar VPS'}
       >
         <span className="material-icons text-[18px]">edit</span>
       </button>
@@ -75,7 +77,7 @@ export default function VpsEditModal({ server }: { server: any }) {
             <div className="p-sm border-b border-hairline flex justify-between items-center">
               <h3 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
                 <span className="material-icons mr-xxs text-primary">dns</span>
-                Editar VPS
+                {t('editVps') || 'Editar VPS'}
               </h3>
               <button onClick={() => setIsOpen(false)} className="text-muted hover:text-ink transition-colors">
                 <span className="material-icons">close</span>
@@ -84,7 +86,7 @@ export default function VpsEditModal({ server }: { server: any }) {
 
             <form onSubmit={handleSubmit} className="p-sm space-y-sm">
               <div className="space-y-xxs">
-                <label className="block text-caption-uppercase text-ink font-semibold">Nombre Descriptivo</label>
+                <label className="block text-caption-uppercase text-ink font-semibold">{t('friendlyName')}</label>
                 <input
                   type="text"
                   name="name"
@@ -92,37 +94,37 @@ export default function VpsEditModal({ server }: { server: any }) {
                   onChange={handleChange}
                   required
                   className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
-                  placeholder="Ej: Liceo A1 Web"
+                  placeholder={t('friendlyNamePlaceholderVps') || 'Ej: Liceo A1 Web'}
                 />
               </div>
 
               <div className="space-y-xxs">
-                <label className="block text-caption-uppercase text-ink font-semibold">Hostname (Público)</label>
+                <label className="block text-caption-uppercase text-ink font-semibold">{t('hostnameLabel') || 'Hostname (Público)'}</label>
                 <input
                   type="text"
                   name="hostname"
                   value={formData.hostname}
                   onChange={handleChange}
                   className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
-                  placeholder="Ej: srv1.launchpad.host"
+                  placeholder={t('hostnamePlaceholder') || 'Ej: srv1.launchpad.host'}
                 />
-                <p className="text-xs text-muted mt-[2px]">Este nombre se mostrará al cliente en lugar de la IP.</p>
+                <p className="text-xs text-muted mt-[2px]">{t('hostnameHelp') || 'Este nombre se mostrará al cliente en lugar de la IP.'}</p>
               </div>
 
               <div className="space-y-xxs">
-                <label className="block text-caption-uppercase text-ink font-semibold">IP Asignada</label>
+                <label className="block text-caption-uppercase text-ink font-semibold">{t('ipAssignedLabel') || 'IP Asignada'}</label>
                 <input
                   type="text"
                   name="ipAddress"
                   value={formData.ipAddress}
                   onChange={handleChange}
                   className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
-                  placeholder="Ej: 192.168.1.100"
+                  placeholder={t('ipAddressPlaceholder') || 'Ej: 192.168.1.100'}
                 />
               </div>
 
               <div className="space-y-xxs">
-                <label className="block text-caption-uppercase text-ink font-semibold">ID del Proveedor (VPS)</label>
+                <label className="block text-caption-uppercase text-ink font-semibold">{t('providerVpsLabel') || 'ID del Proveedor (VPS)'}</label>
                 <input
                   type="text"
                   name="providerId"
@@ -130,13 +132,13 @@ export default function VpsEditModal({ server }: { server: any }) {
                   onChange={handleChange}
                   required
                   className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
-                  placeholder="Ej: 893450"
+                  placeholder={t('providerIdPlaceholderVps') || 'Ej: 893450'}
                 />
-                <p className="text-xs text-muted mt-[2px]">Este ID vincula las acciones (Start, Stop) con la API del proveedor cloud.</p>
+                <p className="text-xs text-muted mt-[2px]">{t('providerIdHelp') || 'Este ID vincula las acciones (Start, Stop) con la API del proveedor cloud.'}</p>
               </div>
 
               <div className="space-y-xxs">
-                <label className="block text-caption-uppercase text-ink font-semibold">Fecha de Vencimiento (Opcional)</label>
+                <label className="block text-caption-uppercase text-ink font-semibold">{t('dueDateLabel') || 'Fecha de Vencimiento (Opcional)'}</label>
                 <input
                   type="date"
                   name="dueDate"
@@ -152,7 +154,7 @@ export default function VpsEditModal({ server }: { server: any }) {
                   onClick={() => setIsOpen(false)}
                   className="px-sm py-xxs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors"
                 >
-                  Cancelar
+                  {t('cancel') || 'Cancelar'}
                 </button>
                 <button
                   type="submit"
@@ -162,7 +164,7 @@ export default function VpsEditModal({ server }: { server: any }) {
                   {loading ? (
                     <span className="material-icons animate-spin text-[18px]">sync</span>
                   ) : (
-                    'Guardar Cambios'
+                    t('saveChanges') || 'Guardar Cambios'
                   )}
                 </button>
               </div>

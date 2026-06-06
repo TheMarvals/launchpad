@@ -48,7 +48,11 @@
       "delete": "Delete",
       "confirmDelete": "Delete?",
       "yes": "Yes",
-      "no": "No"
+      "no": "No",
+      "deleteError": "Error deleting",
+      "changeStatus": "Change Status",
+      "convert": "Convert to Invoice",
+      "convertConfirm": "Convert this quote to an invoice?"
     }
   },
   "Clients": {
@@ -70,7 +74,15 @@
       "phone": "Phone",
       "requiredFields": "Please fill in all required fields.",
       "saveError": "Error saving client.",
-      "deleteError": "Error deleting client."
+      "deleteError": "Error deleting client.",
+      "rutPlaceholder": "76.543.210-K",
+      "razonSocialPlaceholder": "Company Name SPA",
+      "giroPlaceholder": "IT Services",
+      "directionPlaceholder": "Av. Providencia 1234",
+      "communePlaceholder": "Providencia",
+      "cityPlaceholder": "Santiago",
+      "emailPlaceholder": "contact@company.com",
+      "phonePlaceholder": "+56 9 1234 5678"
     },
     "table": {
       "razonSocial": "Company Name",
@@ -113,6 +125,7 @@
       "Pagada": "Paid",
       "Anulada": "Voided"
     },
+    "updateError": "Error updating status.",
     "table": {
       "number": "Nº",
       "client": "Client",
@@ -568,7 +581,10 @@
       "success": "Settings saved successfully.",
       "error": "Error saving settings.",
       "testSuccess": "Test message sent.",
-      "testError": "Error sending test message."
+      "testError": "Error sending test message.",
+      "testRequired": "Token and Chat ID are required for testing",
+      "tokenPlaceholder": "123456:ABC-DEF...",
+      "chatIdPlaceholder": "e.g. -100123456789"
     }
   },
   "Login": {
@@ -621,8 +637,24 @@
     "ipAddress": "IP Address",
     "ipAddressPlaceholder": "e.g. 192.168.1.1",
     "cancel": "Cancel",
+    "error": "Error",
+    "saved": "Saved",
     "save": "Save",
+    "saveChanges": "Save Changes",
     "link": "Link",
+    "vpsUpdated": "VPS data updated.",
+    "editVps": "Edit VPS",
+    "hostnameLabel": "Hostname (Public)",
+    "hostnamePlaceholder": "e.g. srv1.launchpad.host",
+    "hostnameHelp": "This name will be shown to the client instead of the IP.",
+    "ipAssignedLabel": "Assigned IP",
+    "providerVpsLabel": "Provider ID (VPS)",
+    "friendlyNamePlaceholderVps": "e.g. ClientName Web",
+    "providerIdPlaceholderVps": "e.g. 893450",
+    "providerIdHelp": "This ID links actions (Start, Stop) with the cloud provider API.",
+    "dueDateLabel": "Due Date (Optional)",
+    "deleteVpsTitle": "Delete VPS?",
+    "deleteVpsText": "This will permanently delete this VPS server.",
     "searchUsers": "Search users...",
     "noSearchResults": "No users found.",
     "searchServers": "Search servers...",

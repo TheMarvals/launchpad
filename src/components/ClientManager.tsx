@@ -157,7 +157,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                   className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.rut}
                   onChange={(e) => updateField('rut', e.target.value)}
-                  placeholder="76.543.210-K"
+                  placeholder={t('form.rutPlaceholder') || '76.543.210-K'}
                   required
                 />
               </div>
@@ -168,7 +168,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                   className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.razonSocial}
                   onChange={(e) => updateField('razonSocial', e.target.value)}
-                  placeholder="EMPRESA SPA"
+                  placeholder={t('form.razonSocialPlaceholder') || 'EMPRESA SPA'}
                   required
                 />
               </div>
@@ -179,7 +179,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                   className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.giro}
                   onChange={(e) => updateField('giro', e.target.value)}
-                  placeholder="Servicios Informáticos"
+                  placeholder={t('form.giroPlaceholder') || 'Servicios Informáticos'}
                   required
                 />
               </div>
@@ -190,7 +190,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                   className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.direccion}
                   onChange={(e) => updateField('direccion', e.target.value)}
-                  placeholder="Av. Providencia 1234"
+                  placeholder={t('form.directionPlaceholder') || 'Av. Providencia 1234'}
                   required
                 />
               </div>
@@ -201,7 +201,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                   className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.comuna}
                   onChange={(e) => updateField('comuna', e.target.value)}
-                  placeholder="Providencia"
+                  placeholder={t('form.communePlaceholder') || 'Providencia'}
                   required
                 />
               </div>
@@ -212,7 +212,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                   className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.ciudad}
                   onChange={(e) => updateField('ciudad', e.target.value)}
-                  placeholder="Santiago"
+                  placeholder={t('form.cityPlaceholder') || 'Santiago'}
                   required
                 />
               </div>
@@ -223,7 +223,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                   className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.email}
                   onChange={(e) => updateField('email', e.target.value)}
-                  placeholder="contacto@empresa.cl"
+                  placeholder={t('form.emailPlaceholder') || 'contacto@empresa.cl'}
                 />
               </div>
               <div className="space-y-xxs">
@@ -233,7 +233,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                   className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.telefono}
                   onChange={(e) => updateField('telefono', e.target.value)}
-                  placeholder="+56 9 1234 5678"
+                  placeholder={t('form.phonePlaceholder') || '+56 9 1234 5678'}
                 />
               </div>
             </div>

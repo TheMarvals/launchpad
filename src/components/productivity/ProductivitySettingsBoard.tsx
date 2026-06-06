@@ -51,7 +51,7 @@ export default function ProductivitySettingsBoard({ initialSettings }: SettingsP
 
   const handleTest = async () => {
     if (!settings.telegramBotToken || !settings.telegramChatId) {
-      Swal.fire('Error', 'Token and Chat ID are required for testing', 'error');
+      Swal.fire('Error', t('telegram.testRequired') || 'Token and Chat ID are required for testing', 'error');
       return;
     }
     setIsTesting(true);
@@ -106,7 +106,7 @@ export default function ProductivitySettingsBoard({ initialSettings }: SettingsP
                 type="password"
                 value={settings.telegramBotToken || ''}
                 onChange={(e) => setSettings({ ...settings, telegramBotToken: e.target.value })}
-                placeholder="123456:ABC-DEF..."
+                placeholder={t('telegram.tokenPlaceholder') || '123456:ABC-DEF...'}
                 className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors text-sm"
               />
             </div>
@@ -116,7 +116,7 @@ export default function ProductivitySettingsBoard({ initialSettings }: SettingsP
                 type="text"
                 value={settings.telegramChatId || ''}
                 onChange={(e) => setSettings({ ...settings, telegramChatId: e.target.value })}
-                placeholder="Ej. -100123456789"
+                placeholder={t('telegram.chatIdPlaceholder') || 'Ej. -100123456789'}
                 className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors text-sm"
               />
             </div>

@@ -23,7 +23,7 @@ export default function QuoteActions({ quoteId }: QuoteActionsProps) {
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert('Error al eliminar la cotización.');
+      alert(t('deleteError') || 'Error al eliminar la cotización.');
     } finally {
       setIsDeleting(false);
       setShowConfirm(false);
@@ -51,14 +51,14 @@ export default function QuoteActions({ quoteId }: QuoteActionsProps) {
 
       <button
         onClick={async () => {
-          if (confirm('¿Convertir esta cotización en una factura?')) {
+          if (confirm(t('convertConfirm') || '¿Convertir esta cotización en una factura?')) {
             const { convertQuoteToInvoice } = await import('@/app/actions/invoices');
             await convertQuoteToInvoice(quoteId);
             router.push('/dashboard/invoices');
           }
         }}
         className="text-slate-500 hover:text-green-600 transition-colors"
-        title="Convertir a Factura"
+        title={t('convert') || 'Convertir a Factura'}
       >
         <span className="material-icons text-[18px]">receipt_long</span>
       </button>
