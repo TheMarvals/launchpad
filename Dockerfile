@@ -60,6 +60,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy Prisma schema and migrations so we can run db push at startup
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 
@@ -70,4 +71,4 @@ EXPOSE 3011
 ENV PORT=3011
 
 # Run Prisma db push to ensure schema is up to date, then start the app
-CMD ["sh", "-c", "node node_modules/.bin/prisma db push --skip-generate 2>/dev/null || true && node server.js"]
+CMD ["sh", "-c", "npx prisma db push --skip-generate 2>/dev/null || true && node server.js"]
