@@ -1,0 +1,15 @@
+
+> launchpad-admin@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.105:3000
+- Environments: .env
+✓ Ready in 221ms
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+- Experiments (use with caution):
+  · serverActions
+
+ GET /en/dashboard/quotes/new 200 in 1152ms (next.js: 610ms, proxy.ts: 140ms, application-code: 402ms)
+ GET /es 200 in 504ms (next.js: 391ms, proxy.ts: 5ms, application-code: 108ms)

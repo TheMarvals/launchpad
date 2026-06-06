@@ -30,28 +30,29 @@ export default function GenericModal({
       />
 
       {/* Modal Content */}
-      <div className={`relative bg-canvas-elevated w-full ${maxWidth} border border-hairline overflow-hidden`}>
-        <div className="p-sm">
-          <div className="flex justify-between items-center pb-xs border-b border-hairline">
-            <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider">{title}</h2>
-            <button 
-              onClick={onClose}
-              className="text-muted hover:text-ink transition-all"
-            >
-              <span className="material-icons">close</span>
-            </button>
-          </div>
-
-          <div className="pt-sm space-y-sm">
-            {children}
-          </div>
-
-          {footer && (
-            <div className="pt-4 flex space-x-3">
-              {footer}
-            </div>
-          )}
+      <div className={`relative bg-canvas-elevated w-full ${maxWidth} border border-hairline flex flex-col max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)]`}>
+        {/* Header */}
+        <div className="px-sm pt-sm pb-xs border-b border-hairline shrink-0 flex justify-between items-center">
+          <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider">{title}</h2>
+          <button 
+            onClick={onClose}
+            className="text-muted hover:text-ink transition-all"
+          >
+            <span className="material-icons">close</span>
+          </button>
         </div>
+
+        {/* Body */}
+        <div className="p-sm overflow-y-auto space-y-sm">
+          {children}
+        </div>
+
+        {/* Footer */}
+        {footer && (
+          <div className="px-sm pb-sm pt-4 shrink-0 flex space-x-3">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );
