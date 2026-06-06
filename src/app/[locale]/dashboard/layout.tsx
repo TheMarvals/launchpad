@@ -36,6 +36,11 @@ export default async function DashboardLayout({
     where: { id: (session.user as any).id },
     select: { permissions: true },
   });
+  // Unread contacts count for sidebar badge
+  const unreadContacts = await prisma.contactSubmission.count({
+    where: { read: false },
+  });
+
   const can = createPermissionChecker(dbUser?.permissions as string[] | undefined);
 
   return (
@@ -108,6 +113,11 @@ export default async function DashboardLayout({
               <li>
                 <Link href="/dashboard/contacts" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
                   <span className="material-icons mr-xxs text-sm opacity-70">mail</span> {t('contacts')}
+                  {unreadContacts > 0 && (
+                    <span className="ml-auto bg-primary text-on-primary text-[9px] font-bold px-[5px] py-[1px] leading-none">
+                      {unreadContacts > 99 ? '99+' : unreadContacts}
+                    </span>
+                  )}
                 </Link>
               </li>
             )}
