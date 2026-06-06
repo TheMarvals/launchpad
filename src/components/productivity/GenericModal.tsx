@@ -30,7 +30,7 @@ export default function GenericModal({
       />
 
       {/* Modal Content */}
-      <div className={`relative bg-canvas-elevated w-full ${maxWidth} border border-hairline flex flex-col max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)]`}>
+      <div className={`relative bg-canvas-elevated w-full ${maxWidth} border border-hairline flex flex-col min-h-0 overflow-hidden max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)]`}>
         {/* Header */}
         <div className="px-sm pt-sm pb-xs border-b border-hairline shrink-0 flex justify-between items-center">
           <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider">{title}</h2>
@@ -43,7 +43,7 @@ export default function GenericModal({
         </div>
 
         {/* Body */}
-        <div className="p-sm overflow-y-auto space-y-sm">
+        <div className="p-sm overflow-y-auto flex-1 min-h-0 space-y-sm [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-hairline [&::-webkit-scrollbar-thumb]:rounded-full [-ms-overflow-style:none] [scrollbar-width:thin]">
           {children}
         </div>
 

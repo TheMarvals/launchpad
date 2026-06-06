@@ -84,7 +84,7 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
     // Warn if removing own access to critical permissions
     const CRITICAL_PERMISSIONS = ['settings', 'dashboard', 'clients', 'quotes'] as const;
     const removedCritical = CRITICAL_PERMISSIONS.filter(
-      (p) => editingAdmin.permissions?.includes(p) && !selectedPermissions.includes(p)
+      (p) => editingAdmin?.permissions?.includes(p) && !selectedPermissions.includes(p)
     );
     if (isEditingSelf && removedCritical.length > 0) {
       const warningText = removedCritical.map((p) => {

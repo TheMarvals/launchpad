@@ -13,3 +13,5 @@
 
  GET /en/dashboard/quotes/new 200 in 1152ms (next.js: 610ms, proxy.ts: 140ms, application-code: 402ms)
  GET /es 200 in 504ms (next.js: 391ms, proxy.ts: 5ms, application-code: 108ms)
+✓ Compiled in 466ms
+✓ Compiled in 93ms
