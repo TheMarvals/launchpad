@@ -104,6 +104,13 @@ export default async function DashboardLayout({
                 </Link>
               </li>
             )}
+            {can(PERMISSIONS.CONTACTS) && (
+              <li>
+                <Link href="/dashboard/contacts" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">mail</span> {t('contacts')}
+                </Link>
+              </li>
+            )}
             {can(PERMISSIONS.SETTINGS) && (
               <li>
                 <Link href="/dashboard/settings" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">

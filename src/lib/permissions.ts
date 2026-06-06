@@ -17,6 +17,7 @@ export const PERMISSIONS = {
   NOTES: 'notes',
   CALENDAR: 'calendar',
   REMINDERS: 'reminders',
+  CONTACTS: 'contacts',
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -47,11 +48,11 @@ export const PERMISSION_GROUPS: { label: string; permissions: { key: Permission;
     permissions: [
       { key: PERMISSIONS.SHOWCASE, labelKey: 'showcase' },
     ],
-  },
-  {
+  },    {
     label: 'Audit',
     permissions: [
       { key: PERMISSIONS.LOGS, labelKey: 'logs' },
+      { key: PERMISSIONS.CONTACTS, labelKey: 'contacts' },
     ],
   },
   {
@@ -63,8 +64,7 @@ export const PERMISSION_GROUPS: { label: string; permissions: { key: Permission;
       { key: PERMISSIONS.CALENDAR, labelKey: 'calendar' },
       { key: PERMISSIONS.REMINDERS, labelKey: 'reminders' },
     ],
-  },
-  {
+  },    {
     label: 'Configuration',
     permissions: [
       { key: PERMISSIONS.SETTINGS, labelKey: 'settings' },

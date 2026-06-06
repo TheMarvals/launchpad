@@ -363,6 +363,16 @@ model ShowcaseImage {
   project   ShowcaseProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
+model ContactSubmission {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  company     String
+  challenge   String   @db.Text
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
 model CompanyProfile {
   id              String   @id @default(uuid())
   userId          String   @unique

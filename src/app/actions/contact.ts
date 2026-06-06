@@ -1,6 +1,8 @@
 'use server';
 
+import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
+import { revalidatePath } from 'next/cache';
 
 function getTransporter() {
   return nodemailer.createTransport({
@@ -34,6 +36,17 @@ export async function submitContactForm(data: {
   }
 
   try {
+    // Save to database
+    await prisma.contactSubmission.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        company: data.company,
+        challenge: data.challenge,
+      },
+    });
+
+    // Send email notification
     await getTransporter().sendMail({
       from: `"LAUNCHPAD Web" <${process.env.USERM}>`,
       to: adminEmail,
