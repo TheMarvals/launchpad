@@ -19,14 +19,14 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
   });
 
   return (
-    <div className="min-h-screen bg-canvas text-ink font-sans flex flex-col">
+    <div className="min-h-screen bg-canvas text-ink font-sans flex flex-col overflow-x-hidden">
       {/* Top Navigation */}
       <LandingNav />
 
       {/* ============================== */}
       {/* Hero Section */}
       {/* ============================== */}
-      <section className="min-h-[90vh] flex flex-col items-center justify-center px-lg py-xl relative overflow-hidden">
+      <section className="min-h-[90vh] flex flex-col items-center justify-center px-0 md:px-lg py-xl relative overflow-hidden">
         {/* Subtle background grid */}
         <div className="absolute inset-0 pointer-events-none z-0">
           {/* Soft top-right glow */}
@@ -53,7 +53,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         </div>
 
         {/* Hero Content */}
-        <div className="max-w-[900px] w-full text-center relative z-10">
+        <div className="max-w-[900px] w-full text-center relative z-10 px-xs md:px-0">
           {/* Pre-title */}
           <p className="animate-fade-in animation-delay-1 text-[clamp(0.55rem,1vw,0.75rem)] uppercase tracking-[0.3em] text-primary-active font-semibold mb-sm">
             {t('tagline')}
@@ -114,11 +114,11 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       {/* ============================== */}
       {/* Expertise Section */}
       {/* ============================== */}
-      <section id="expertise" className="px-lg py-xl md:py-xxl border-t border-hairline relative z-10">
+      <section id="expertise" className="px-0 md:px-lg py-xl md:py-xxl border-t border-hairline relative z-10">
         {/* Ambient glow */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[200px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(0,98,255,0.15) 0%, transparent 70%)' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(0,98,255,0.12) 0%, transparent 70%)' }} />
 
-        <div className="max-w-[1100px] mx-auto relative">
+        <div className="max-w-[1100px] mx-auto relative px-xs md:px-0">
           {/* Section header */}
           <div className="text-center mb-lg">
             <span className="text-[9px] uppercase tracking-[0.2em] text-primary-active font-semibold mb-sm block">
@@ -139,7 +139,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-sm">
             {/* Design & Creative */}
-            <div className="group relative bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 p-lg md:p-xl transition-all duration-400 ease-out rounded-xl hover:-translate-y-1 transform-gpu">
+            <div className="group relative bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 p-sm md:p-xl transition-all duration-400 ease-out rounded-xl hover:-translate-y-1 transform-gpu">
               {/* Top accent line on hover */}
               <div className="absolute top-0 left-5 right-5 h-[1.5px] bg-gradient-to-r from-transparent via-primary-active to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
@@ -163,7 +163,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
             </div>
 
             {/* Engineering & Architecture */}
-            <div className="group relative bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 p-lg md:p-xl transition-all duration-400 ease-out rounded-xl hover:-translate-y-1 transform-gpu">
+            <div className="group relative bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 p-sm md:p-xl transition-all duration-400 ease-out rounded-xl hover:-translate-y-1 transform-gpu">
               <div className="absolute top-0 left-5 right-5 h-[1.5px] bg-gradient-to-r from-transparent via-primary-active to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               <div className="w-11 h-11 rounded-full bg-primary/8 border border-primary/15 flex items-center justify-center mb-sm group-hover:border-primary-active/30 group-hover:bg-primary/12 transition-all duration-300">
@@ -186,7 +186,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
             </div>
 
             {/* Digital Strategy & Growth */}
-            <div className="group relative bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 p-lg md:p-xl transition-all duration-400 ease-out rounded-xl hover:-translate-y-1 transform-gpu">
+            <div className="group relative bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 p-sm md:p-xl transition-all duration-400 ease-out rounded-xl hover:-translate-y-1 transform-gpu">
               <div className="absolute top-0 left-5 right-5 h-[1.5px] bg-gradient-to-r from-transparent via-primary-active to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               <div className="w-11 h-11 rounded-full bg-primary/8 border border-primary/15 flex items-center justify-center mb-sm group-hover:border-primary-active/30 group-hover:bg-primary/12 transition-all duration-300">
@@ -219,12 +219,11 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       {/* ============================== */}
       {/* Contact Section */}
       {/* ============================== */}
-      <section id="contact" className="px-lg py-xl md:py-xxl border-t border-hairline relative overflow-hidden">
-        {/* Background decorations */}
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(0,220,229,0.15) 0%, transparent 70%)' }} />
-        <div className="absolute bottom-0 left-0 w-[200px] h-[200px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(0,98,255,0.2) 0%, transparent 70%)' }} />
+      <section id="contact" className="px-0 md:px-lg py-xl md:py-xxl border-t border-hairline relative">
+        {/* Ambient glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(0,98,255,0.12) 0%, transparent 70%)' }} />
 
-        <div className="max-w-[900px] mx-auto relative z-10">
+        <div className="max-w-[900px] mx-auto relative z-10 px-xs md:px-0">
           <div className="text-center mb-lg">
             <span className="text-[9px] uppercase tracking-[0.2em] text-primary-active font-semibold mb-sm block">
               {t('contactTag')}
@@ -249,8 +248,8 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-hairline px-lg py-sm">
-        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-xs">
+      <footer className="border-t border-hairline px-0 md:px-lg py-sm">
+        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-xs px-xs md:px-0">
           <div className="flex items-center space-x-xxs">
             <h3
               className="text-lg font-black tracking-tighter"

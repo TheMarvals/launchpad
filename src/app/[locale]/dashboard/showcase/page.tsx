@@ -1,6 +1,6 @@
 import React from 'react';
 import { getTranslations } from 'next-intl/server';
-import ShowcaseManager from './ShowcaseManager';
+import ShowcaseManager from '@/components/showcase/ShowcaseManager';
 
 export default async function ShowcasePage() {
   const t = await getTranslations('Showcase');

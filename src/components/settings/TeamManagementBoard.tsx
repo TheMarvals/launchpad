@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { createAdmin, deleteAdmin, updateAdmin, resetAdminPassword } from '@/app/actions/settings';
 import { PERMISSION_GROUPS, ALL_PERMISSIONS, type Permission } from '@/lib/permissions';
@@ -9,9 +9,10 @@ import GenericModal from '../productivity/GenericModal';
 
 interface TeamManagementBoardProps {
   initialAdmins: any[];
+  currentUserId?: string;
 }
 
-export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoardProps) {
+export default function TeamManagementBoard({ initialAdmins, currentUserId }: TeamManagementBoardProps) {
   const t = useTranslations('Settings.team');
   const locale = useLocale();
   const [admins, setAdmins] = useState(initialAdmins);
@@ -28,11 +29,85 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
   const [newPassword, setNewPassword] = useState('');
   
   const [isSaving, setIsSaving] = useState(false);
+  const [permissionSearch, setPermissionSearch] = useState('');
+  const [showCopySelector, setShowCopySelector] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(PERMISSION_GROUPS.map((g) => g.label)));
+
+  const toggleGroup = (label: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) next.delete(label); else next.add(label);
+      return next;
+    });
+  };
+
+  const filteredGroups = useMemo(() => {
+    if (!permissionSearch.trim()) return PERMISSION_GROUPS;
+    const q = permissionSearch.toLowerCase();
+    return PERMISSION_GROUPS.map((group) => ({
+      ...group,
+      permissions: group.permissions.filter((p) =>
+        p.labelKey.toLowerCase().includes(q)
+      ),
+    })).filter((g) => g.permissions.length > 0);
+  }, [permissionSearch]);
+
+  const isEditingSelf = editingAdmin && currentUserId && editingAdmin.id === currentUserId;
+
+  // Toast notification for non-blocking feedback
+  const showToast = (icon: 'success' | 'error', title: string) => {
+    Swal.fire({
+      icon,
+      title,
+      toast: true,
+      position: 'top-end',
+      timer: 2500,
+      showConfirmButton: false,
+      showClass: {
+        popup: 'animate-in fade-in zoom-in-95 duration-200',
+      },
+      hideClass: {
+        popup: 'animate-out fade-out zoom-out-95 duration-150',
+      },
+      customClass: {
+        popup: 'rounded-none border border-hairline bg-canvas-elevated text-ink',
+      },
+    });
+  };
 
   const handleSaveAdmin = async () => {
     if (!formData.name || !formData.email) {
       Swal.fire('Error', t('requiredFields'), 'error');
       return;
+    }
+
+    // Warn if removing own access to critical permissions
+    const CRITICAL_PERMISSIONS = ['settings', 'dashboard', 'clients', 'quotes'] as const;
+    const removedCritical = CRITICAL_PERMISSIONS.filter(
+      (p) => editingAdmin.permissions?.includes(p) && !selectedPermissions.includes(p)
+    );
+    if (isEditingSelf && removedCritical.length > 0) {
+      const warningText = removedCritical.map((p) => {
+        const key = `${p}Warning` as const;
+        return t(`form.${key}`);
+      }).filter(Boolean).join('\n\n') ||
+        'Te quitarás acceso a funciones críticas. ¿Estás seguro?';
+
+      const confirm = await Swal.fire({
+        title: t('form.warning') || 'Advertencia',
+        text: warningText,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: t('form.continue') || 'Continuar',
+        cancelButtonText: t('form.cancel') || 'Cancelar',
+        confirmButtonColor: '#ef4444',
+        customClass: {
+          popup: 'rounded-none border border-hairline bg-canvas-elevated text-ink',
+          confirmButton: 'px-sm py-xs font-semibold uppercase tracking-wider text-xs border border-transparent bg-primary text-on-primary',
+          cancelButton: 'px-sm py-xs font-semibold text-muted uppercase tracking-wider text-xs border border-transparent bg-canvas'
+        }
+      });
+      if (!confirm.isConfirmed) return;
     }
     
     setIsSaving(true);
@@ -48,17 +123,17 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
         setEditingAdmin(null);
         setFormData({ name: '', email: '', password: '' });
         setSelectedPermissions([]);
-        Swal.fire('Success', t('updateSuccess') || 'Admin updated successfully', 'success');
+        showToast('success', t('updateSuccess') || 'Admin updated successfully');
       } else {
         const newAdmin = await createAdmin({ ...formData, permissions: selectedPermissions });
         setAdmins([newAdmin, ...admins]);
         setIsModalOpen(false);
         setFormData({ name: '', email: '', password: '' });
         setSelectedPermissions([]);
-        Swal.fire('Success', t('createSuccess'), 'success');
+        showToast('success', t('createSuccess'));
       }
     } catch (error: any) {
-      Swal.fire('Error', error.message || (editingAdmin ? t('updateError') || 'Error updating admin' : t('createError')), 'error');
+      showToast('error', error.message || (editingAdmin ? t('updateError') || 'Error updating admin' : t('createError')));
     } finally {
       setIsSaving(false);
     }
@@ -74,27 +149,30 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
       await resetAdminPassword(resetAdmin.id, newPassword);
       setIsResetOpen(false);
       setResetAdmin(null);
-      setNewPassword('');
-      Swal.fire('Success', t('passwordResetSuccess') || 'Password reset successfully', 'success');
-    } catch (error: any) {
-      Swal.fire('Error', error.message || t('passwordResetError') || 'Error resetting password', 'error');
+      setNewPassword('');        showToast('success', t('passwordResetSuccess') || 'Password reset successfully');
+      } catch (error: any) {
+        showToast('error', error.message || t('passwordResetError') || 'Error resetting password');
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
+    const isSelf = currentUserId === id;
     const result = await Swal.fire({
-      title: t('deleteTitle'),
-      text: t('deleteText'),
+      title: isSelf ? (t('deleteSelfTitle') || '¿Eliminarte a ti mismo?') : t('deleteTitle'),
+      text: isSelf ? (t('deleteSelfText') || 'Te eliminarás a ti mismo del sistema. Esta acción es irreversible y perderás el acceso inmediatamente.') : t('deleteText'),
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      confirmButtonText: t('deleteConfirm'),
+      confirmButtonColor: '#dc2626',
+      confirmButtonText: isSelf ? (t('deleteSelfConfirm') || 'Sí, eliminarme') : t('deleteConfirm'),
       cancelButtonText: t('deleteCancel'),
+      focusCancel: isSelf,
       customClass: {
         popup: 'rounded-none border border-hairline bg-canvas-elevated text-ink',
-        confirmButton: 'px-sm py-xs font-semibold uppercase tracking-wider text-xs border border-transparent bg-primary text-on-primary',
+        confirmButton: isSelf
+          ? 'px-sm py-xs font-semibold uppercase tracking-wider text-xs border border-transparent bg-semantic-warning text-white'
+          : 'px-sm py-xs font-semibold uppercase tracking-wider text-xs border border-transparent bg-primary text-on-primary',
         cancelButton: 'px-sm py-xs font-semibold text-muted uppercase tracking-wider text-xs border border-transparent bg-canvas'
       }
     });
@@ -103,9 +181,9 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
       try {
         await deleteAdmin(id);
         setAdmins(admins.filter(a => a.id !== id));
-        Swal.fire('Deleted!', t('deleteSuccess'), 'success');
+        showToast('success', isSelf ? (t('deleteSelfSuccess') || 'Te has eliminado') : t('deleteSuccess'));
       } catch (error: any) {
-        Swal.fire('Error', error.message || t('deleteError'), 'error');
+        showToast('error', error.message || t('deleteError'));
       }
     }
   };
@@ -122,6 +200,7 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
             setEditingAdmin(null);
             setFormData({ name: '', email: '', password: '' });
             setSelectedPermissions(ALL_PERMISSIONS);
+            setShowCopySelector(false);
             setIsModalOpen(true);
           }}
           className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center justify-center border border-transparent"
@@ -138,6 +217,7 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
                 <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-xs">{t('table.name')}</th>
                 <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-xs">{t('table.email')}</th>
                 <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-xs">{t('table.status')}</th>
+                <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-xs">{t('table.access') || 'Acceso'}</th>
                 <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-xs">{t('table.joined')}</th>
                 <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-xs text-right">{t('table.actions')}</th>
               </tr>
@@ -145,12 +225,14 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
             <tbody>
               {admins.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-sm py-lg text-center text-muted text-sm">
+                  <td colSpan={6} className="px-sm py-lg text-center text-muted text-sm">
                     {t('empty')}
                   </td>
                 </tr>
               ) : (
-                admins.map((admin) => (
+                admins.map((admin) => {
+                  const perms = admin.permissions || [];
+                  return (
                   <tr key={admin.id} className="border-b border-hairline hover:bg-canvas transition-colors">
                     <td className="px-sm py-xs">
                       <div className="font-semibold text-ink text-sm uppercase tracking-wider">{admin.name}</div>
@@ -161,6 +243,27 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
                         {admin.isActive ? t('status.active') : t('status.inactive')}
                       </span>
                     </td>
+                    <td className="px-sm py-xs">
+                      <div className="flex items-center gap-[2px]">
+                        {PERMISSION_GROUPS.map((group) => {
+                          const groupPerms = group.permissions.map((p) => p.key);
+                          const hasGroup = perms.length === 0 || groupPerms.every((k: string) => perms.includes(k));
+                          const hasPartial = groupPerms.some((k: string) => perms.includes(k));
+                          const enabledPerms = group.permissions.filter((p) => perms.includes(p.key));
+                          const tooltipParts = enabledPerms.map((p) => t(`form.permissionLabels.${p.labelKey}`));
+                          const tooltipText = perms.length === 0
+                            ? `${t(`form.permissionGroups.${group.label.toLowerCase()}`)}: Todo`
+                            : `${t(`form.permissionGroups.${group.label.toLowerCase()}`)}: ${tooltipParts.length > 0 ? tooltipParts.join(', ') : '—'}`;
+                          return (
+                            <span
+                              key={group.label}
+                              className={`w-[6px] h-[6px] rounded-full ${hasGroup ? 'bg-semantic-success' : hasPartial ? 'bg-accent-yellow' : 'bg-hairline'}`}
+                              title={tooltipText}
+                            />
+                          );
+                        })}
+                      </div>
+                    </td>
                     <td className="px-sm py-xs text-muted text-sm">
                       {new Date(admin.createdAt).toLocaleDateString(locale)}
                     </td>
@@ -170,6 +273,7 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
                           setEditingAdmin(admin);
                           setFormData({ name: admin.name, email: admin.email, password: '' });
                           setSelectedPermissions(admin.permissions || ALL_PERMISSIONS);
+                          setShowCopySelector(false);
                           setIsModalOpen(true);
                         }}
                         className="text-muted hover:text-ink transition-colors p-xxs cursor-pointer"
@@ -197,7 +301,8 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
                       </button>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -212,8 +317,18 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
           setEditingAdmin(null);
           setFormData({ name: '', email: '', password: '' });
           setSelectedPermissions([]);
+          setShowCopySelector(false);
         }}
-        title={editingAdmin ? (t('editAdmin') || 'Editar Administrador') : t('newAdmin')}
+        title={
+          <div className="flex items-center gap-xxs">
+            <span>{editingAdmin ? (t('editAdmin') || 'Editar Administrador') : t('newAdmin')}</span>
+            {editingAdmin && currentUserId && editingAdmin.id === currentUserId && (
+              <span className="text-[9px] font-bold uppercase tracking-widest bg-accent-yellow/10 text-accent-yellow border border-accent-yellow/30 px-xxs py-[1px]">
+                {t('form.you') || 'TÚ'}
+              </span>
+            )}
+          </div>
+        }
       >
         <div className="space-y-sm">
           <div className="space-y-xxs">
@@ -252,43 +367,151 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
             </div>
           )}
 
+          {/* Copy permissions from another admin */}
+          {admins.length > 0 && (
+            <div className="space-y-xxs">
+              <div className="flex items-center justify-between">
+                <label className="block text-caption-uppercase text-ink font-semibold">
+                  {t('form.copyFrom') || 'Copiar permisos de'}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowCopySelector(!showCopySelector)}
+                  className="text-[9px] font-bold uppercase tracking-widest text-primary hover:text-primary-hover transition-colors cursor-pointer"
+                >
+                  {showCopySelector ? (t('form.cancel') || 'Cancelar') : (t('form.copyFromBtn') || 'Copiar desde...')}
+                </button>
+              </div>
+              {showCopySelector && (
+                <div className="max-h-[160px] overflow-y-auto border border-hairline bg-canvas p-xs space-y-[2px]">
+                  {admins
+                    .filter((a) => !editingAdmin || a.id !== editingAdmin.id)
+                    .map((admin) => (
+                      <button
+                        key={admin.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedPermissions(admin.permissions || ALL_PERMISSIONS);
+                          setShowCopySelector(false);
+                          showToast('success', t('form.permissionsCopied') || 'Permisos copiados');
+                        }}
+                        className="w-full text-left px-xs py-xxs text-xs text-muted hover:text-ink hover:bg-canvas-elevated transition-colors cursor-pointer border-b border-hairline/50 last:border-0"
+                      >
+                        <span className="font-semibold uppercase tracking-wider">{admin.name}</span>
+                        <span className="ml-xxs opacity-60">{admin.email}</span>
+                      </button>
+                    ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Permissions */}
           <div className="space-y-xs">
-            <label className="block text-caption-uppercase text-ink font-semibold">
-              {t('permissions')}
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-caption-uppercase text-ink font-semibold">
+                {t('form.permissions')}
+              </label>
+              <div className="flex gap-xxs">
+                <button
+                  type="button"
+                  onClick={() => setSelectedPermissions(ALL_PERMISSIONS)}
+                  className="text-[9px] font-bold uppercase tracking-widest text-primary hover:text-primary-hover transition-colors cursor-pointer"
+                >
+                  {t('form.selectAllGlobal') || 'Todo'}
+                </button>
+                <span className="text-[9px] text-muted/30">|</span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPermissions([])}
+                  className="text-[9px] font-bold uppercase tracking-widest text-muted hover:text-ink transition-colors cursor-pointer"
+                >
+                  {t('form.deselectAllGlobal') || 'Ninguno'}
+                </button>
+              </div>
+            </div>
+            {/* Search filter */}
+            <div className="relative mb-xxs">
+              <span className="material-icons absolute left-xxs top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">search</span>
+              <input
+                type="text"
+                value={permissionSearch}
+                onChange={(e) => setPermissionSearch(e.target.value)}
+                placeholder={t('form.searchPermissions') || 'Buscar permisos...'}
+                className="w-full pl-lg pr-xs py-xxs border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors text-xs"
+              />
+            </div>
             <div className="space-y-xxs">
-              {PERMISSION_GROUPS.map((group) => (
-                <div key={group.label} className="border border-hairline bg-canvas p-xs">
-                  <p className="text-[9px] uppercase tracking-widest text-muted font-bold mb-xxs">
-                    {t(`permissionGroups.${group.label.toLowerCase()}`)}
-                  </p>
-                  <div className="grid grid-cols-2 gap-xxs">
-                    {group.permissions.map((perm) => (
-                      <label
-                        key={perm.key}
-                        className="flex items-center gap-xxs cursor-pointer group"
+              {filteredGroups.map((group) => {
+                const groupKeys = group.permissions.map((p) => p.key);
+                const isExpanded = expandedGroups.has(group.label);
+                const allSelected = groupKeys.every((k) => selectedPermissions.includes(k));
+                const someSelected = groupKeys.some((k) => selectedPermissions.includes(k));
+                return (
+                  <div key={group.label} className="border border-hairline bg-canvas p-xs">
+                    <div className="flex items-center justify-between gap-xxs">
+                      <button
+                        type="button"
+                        onClick={() => toggleGroup(group.label)}
+                        className="flex items-center gap-[2px] cursor-pointer group"
                       >
+                        <span className={`material-icons text-sm text-muted transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+                          expand_more
+                        </span>
+                        <p className="text-[9px] uppercase tracking-widest text-muted font-bold group-hover:text-ink transition-colors">
+                          {t(`form.permissionGroups.${group.label.toLowerCase()}`)}
+                        </p>
+                      </button>
+                      <label className="flex items-center gap-[2px] cursor-pointer group text-[9px] uppercase tracking-widest text-muted hover:text-ink transition-colors">
                         <input
                           type="checkbox"
-                          checked={selectedPermissions.includes(perm.key)}
+                          checked={allSelected}
+                          ref={(el) => { if (el) el.indeterminate = someSelected && !allSelected; }}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              setSelectedPermissions([...selectedPermissions, perm.key]);
+                              setSelectedPermissions([...new Set([...selectedPermissions, ...groupKeys])]);
                             } else {
-                              setSelectedPermissions(selectedPermissions.filter(p => p !== perm.key));
+                              const groupKeysStr = groupKeys as string[];
+                              setSelectedPermissions(selectedPermissions.filter((p) => !groupKeysStr.includes(p)));
                             }
                           }}
-                          className="w-4 h-4 rounded-sm border-hairline bg-canvas text-primary focus:ring-primary/30 cursor-pointer"
+                          className="w-3 h-3 rounded-sm border-hairline bg-canvas text-primary focus:ring-primary/30 cursor-pointer"
                         />
-                        <span className="text-xs text-ink group-hover:text-primary transition-colors">
-                          {t(`permissionLabels.${perm.labelKey}`)}
+                        <span>{t('form.selectAll') || 'Todo'}</span>
+                        <span className="text-muted/60 ml-[1px]">
+                          {groupKeys.filter((k) => selectedPermissions.includes(k)).length}/{groupKeys.length}
                         </span>
                       </label>
-                    ))}
+                    </div>
+                    {isExpanded && (
+                      <div className="grid grid-cols-2 gap-xxs mt-xxs">
+                        {group.permissions.map((perm) => (
+                          <label
+                            key={perm.key}
+                            className="flex items-center gap-xxs cursor-pointer group"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedPermissions.includes(perm.key)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedPermissions([...selectedPermissions, perm.key]);
+                                } else {
+                                  setSelectedPermissions(selectedPermissions.filter(p => p !== perm.key));
+                                }
+                              }}
+                              className="w-4 h-4 rounded-sm border-hairline bg-canvas text-primary focus:ring-primary/30 cursor-pointer"
+                            />
+                            <span className="text-xs text-ink group-hover:text-primary transition-colors">
+                              {t(`form.permissionLabels.${perm.labelKey}`)}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -299,6 +522,7 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
                 setEditingAdmin(null);
                 setFormData({ name: '', email: '', password: '' });
                 setSelectedPermissions([]);
+                setShowCopySelector(false);
               }}
               className="px-sm py-xxs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors cursor-pointer"
             >

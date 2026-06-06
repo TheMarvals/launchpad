@@ -95,7 +95,7 @@ export async function updateShowcaseProject(
 
 export async function deleteShowcaseProject(id: string) {
   await prisma.showcaseProject.delete({ where: { id } });
-  revalidatePath('/dashboard/showcase');
+  revalidatePath('/dashboard/settings');
   revalidatePath('/', 'layout');
 }
 
@@ -128,14 +128,14 @@ export async function addShowcaseImage(
     },
   });
 
-  revalidatePath('/dashboard/showcase');
+  revalidatePath('/dashboard/settings');
   revalidatePath('/', 'layout');
   return image;
 }
 
 export async function deleteShowcaseImage(id: string) {
   await prisma.showcaseImage.delete({ where: { id } });
-  revalidatePath('/dashboard/showcase');
+  revalidatePath('/dashboard/settings');
   revalidatePath('/', 'layout');
 }
 
@@ -150,7 +150,7 @@ export async function setFeaturedImage(id: string, projectId: string) {
     where: { id },
     data: { isFeatured: true },
   });
-  revalidatePath('/dashboard/showcase');
+  revalidatePath('/dashboard/settings');
   revalidatePath('/', 'layout');
 }
 
@@ -161,6 +161,6 @@ export async function reorderImages(images: { id: string; order: number }[]) {
       data: { order: img.order },
     });
   }
-  revalidatePath('/dashboard/showcase');
+  revalidatePath('/dashboard/settings');
   revalidatePath('/', 'layout');
 }

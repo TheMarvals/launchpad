@@ -5,7 +5,7 @@ import { ReactNode } from 'react';
 interface GenericModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
   maxWidth?: string;

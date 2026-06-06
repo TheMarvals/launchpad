@@ -92,6 +92,8 @@ export async function createAdmin(data: { name: string; email: string; password?
   });
   
   revalidatePath('/dashboard/settings');
+  revalidatePath('/dashboard');
+  revalidatePath('/');
   return admin;
 }
 
@@ -107,6 +109,7 @@ export async function deleteAdmin(id: string) {
   });
   
   revalidatePath('/dashboard/settings');
+  revalidatePath('/dashboard');
   return { success: true };
 }
 
@@ -135,6 +138,8 @@ export async function updateAdmin(id: string, data: { name: string; email: strin
   });
   
   revalidatePath('/dashboard/settings');
+  revalidatePath('/dashboard');
+  revalidatePath('/');
   return admin;
 }
 

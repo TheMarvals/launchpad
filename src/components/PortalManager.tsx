@@ -151,7 +151,7 @@ export function AddVpsModal({ clientId, onClose }: { clientId: string, onClose: 
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Ej: Hosting Liceo"
+                placeholder={t('friendlyNamePlaceholder') || 'Ej: Hosting Liceo'}
                 required
                 className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
               />
@@ -162,7 +162,7 @@ export function AddVpsModal({ clientId, onClose }: { clientId: string, onClose: 
                 type="text"
                 value={providerId}
                 onChange={e => setProviderId(e.target.value)}
-                placeholder="Ej: 123456"
+                placeholder={t('providerIdPlaceholder') || 'Ej: 123456'}
                 required
                 className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
               />
@@ -173,7 +173,7 @@ export function AddVpsModal({ clientId, onClose }: { clientId: string, onClose: 
                 type="text"
                 value={ipAddress}
                 onChange={e => setIpAddress(e.target.value)}
-                placeholder="Ej: 192.168.1.1"
+                placeholder={t('ipAddressPlaceholder') || 'Ej: 192.168.1.1'}
                 className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
               />
             </div>

@@ -3,7 +3,9 @@ import { Link } from '@/i18n/routing';
 import { auth, signOut } from '@/lib/auth';
 import { redirect } from '@/i18n/routing';
 import { getTranslations } from 'next-intl/server';
-import { hasPermission, PERMISSIONS } from '@/lib/permissions';
+import { PERMISSIONS } from '@/lib/permissions';
+import { createPermissionChecker } from '@/lib/permissions-utils';
+import { prisma } from '@/lib/prisma';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
 
 export default async function DashboardLayout({
@@ -29,10 +31,12 @@ export default async function DashboardLayout({
     .toUpperCase()
     .slice(0, 2) || 'U';
 
-  const userPermissions = (session.user as any).permissions as string[] | undefined;
-  // Empty/undefined permissions = full access (backwards compat for existing admins after migration)
-  const hasFullAccess = !userPermissions || userPermissions.length === 0;
-  const can = (perm: string) => hasFullAccess || hasPermission(userPermissions, perm as any);
+  // Fetch permissions directly from DB so changes take effect without re-login
+  const dbUser = await prisma.user.findUnique({
+    where: { id: (session.user as any).id },
+    select: { permissions: true },
+  });
+  const can = createPermissionChecker(dbUser?.permissions as string[] | undefined);
 
   return (
     <div className="flex min-h-screen bg-canvas text-ink font-sans">

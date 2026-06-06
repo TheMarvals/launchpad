@@ -13,11 +13,11 @@ export default function LandingNav() {
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-hairline/40">
-        <div className="max-w-[1200px] mx-auto px-lg h-16 flex items-center justify-between">
+        <div className="max-w-[1200px] mx-auto px-xs md:px-lg h-16 flex items-center justify-between">
           {/* Brand */}
           <Link href="/" className="flex items-center gap-xxs no-underline">
             <span
-              className="text-xl font-black tracking-tighter leading-none"
+              className="text-base md:text-xl font-black tracking-tighter leading-none"
               style={{
                 WebkitTextFillColor: 'transparent',
                 WebkitTextStrokeColor: '#ffffff',
@@ -30,14 +30,14 @@ export default function LandingNav() {
           </Link>
 
           {/* Right side */}
-          <div className="flex items-center gap-sm">
+          <div className="flex items-center gap-xxs md:gap-sm">
             <LocaleSwitcher />
             <button
               onClick={() => setShowGate(true)}
               className="flex items-center gap-1 text-[11px] font-medium text-muted hover:text-primary-active transition-all duration-300 tracking-wider uppercase cursor-pointer group"
             >
-              <span className="material-icons text-[14px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
-              {t('clientAccess')}
+              <span className="material-icons text-[16px] md:text-[14px]">lock</span>
+              <span className="hidden md:inline group-hover:translate-x-0.5 transition-transform">{t('clientAccess')}</span>
             </button>
           </div>
         </div>

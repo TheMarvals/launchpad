@@ -117,11 +117,11 @@ export default function ShowcaseCarousel({ projects }: Props) {
   };
 
   return (
-    <section className="px-lg py-xl md:py-xxl border-t border-hairline relative">
+    <section className="px-0 md:px-lg py-xl md:py-xxl border-t border-hairline relative">
       {/* Ambient section glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(0,98,255,0.12) 0%, transparent 70%)' }} />
 
-      <div className="max-w-[1100px] mx-auto relative z-10">
+      <div className="max-w-[1100px] mx-auto relative z-10 px-xs md:px-0">
         {/* Animated title */}
         <div className="text-center mb-lg">
           <div className="inline-block relative">
@@ -170,7 +170,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
                 >
                   {/* Image with parallax */}
                   <div
-                    className="aspect-[4/3] bg-canvas relative overflow-hidden rounded-t-xl"
+                    className="aspect-[4/3] bg-[#0d0d12] relative overflow-hidden rounded-t-xl"
                     onMouseMove={(e) => handleMouseMove(e, cardsRef.current[idx])}
                     onMouseLeave={() => handleMouseLeave(cardsRef.current[idx])}
                   >
@@ -240,7 +240,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
           style={{ animation: 'fadeIn 250ms ease-out' }}
         >
           <div
-            className="bg-surface-card border border-hairline w-full max-w-[900px] max-h-[90vh] flex flex-col overflow-hidden rounded-xl shadow-large"
+            className="bg-[#0d0d12] border border-hairline w-full max-w-[900px] max-h-[90vh] flex flex-col overflow-hidden rounded-xl shadow-large"
             onClick={(e) => e.stopPropagation()}
             style={{ animation: 'slideUp 350ms ease-out' }}
           >
@@ -282,13 +282,13 @@ export default function ShowcaseCarousel({ projects }: Props) {
                     <>
                       <button
                         onClick={prevImage}
-                        className="absolute left-sm top-1/2 -translate-y-1/2 w-[44px] h-[44px] rounded-sm bg-surface-card border border-hairline text-ink hover:text-primary-active hover:bg-surface-card-hover flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-medium cursor-pointer"
+                        className="absolute left-sm top-1/2 -translate-y-1/2 w-[44px] h-[44px] rounded-sm bg-[#0d0d12] border border-hairline text-ink hover:text-primary-active hover:bg-[#0d0d12]/80 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-medium cursor-pointer"
                       >
                         <span className="material-icons text-xl">chevron_left</span>
                       </button>
                       <button
                         onClick={nextImage}
-                        className="absolute right-sm top-1/2 -translate-y-1/2 w-[44px] h-[44px] rounded-sm bg-surface-card border border-hairline text-ink hover:text-primary-active hover:bg-surface-card-hover flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-medium cursor-pointer"
+                        className="absolute right-sm top-1/2 -translate-y-1/2 w-[44px] h-[44px] rounded-sm bg-[#0d0d12] border border-hairline text-ink hover:text-primary-active hover:bg-[#0d0d12]/80 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-medium cursor-pointer"
                       >
                         <span className="material-icons text-xl">chevron_right</span>
                       </button>
