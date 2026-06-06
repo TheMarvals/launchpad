@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
     return new Response(pdf as any, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment; filename="marval-template-blank.pdf"',
+        'Content-Disposition': 'attachment; filename="launchpad-template-blank.pdf"',
       },
     });
   } catch (error: any) {

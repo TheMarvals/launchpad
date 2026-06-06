@@ -4,9 +4,11 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createTicket } from '@/app/actions/tickets';
 import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 
 export default function NewTicketPage() {
   const router = useRouter();
+  const t = useTranslations('ClientPortal');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -31,45 +33,45 @@ export default function NewTicketPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <div className="flex items-center space-x-4 mb-2">
-        <Link href="/client-portal/tickets" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors shadow-sm">
+    <div className="max-w-3xl mx-auto space-y-md">
+      <div className="flex items-center space-x-xs mb-xxs">
+        <Link href="/client-portal/tickets" className="w-[40px] h-[40px] bg-canvas-elevated border border-hairline flex items-center justify-center text-muted hover:text-ink hover:bg-canvas transition-colors">
           <span className="material-icons">arrow_back</span>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Crear Nuevo Ticket</h1>
-          <p className="text-gray-500 text-sm mt-1">Describe tu problema detalladamente para que podamos ayudarte mejor.</p>
+          <h1 className="text-title-md font-medium text-ink tracking-tight">{t('tickets.new.pageTitle')}</h1>
+          <p className="text-body text-muted text-sm mt-[2px]">{t('tickets.new.pageSubtitle')}</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 md:p-8">
+      <div className="bg-canvas-elevated border border-hairline overflow-hidden">
+        <div className="p-sm">
           {error && (
-            <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 flex items-start">
-              <span className="material-icons mr-2 text-[20px]">error_outline</span>
+            <div className="mb-xs p-xs bg-semantic-warning/10 text-semantic-warning border border-semantic-warning/30 flex items-start">
+              <span className="material-icons mr-xxs text-[20px]">error_outline</span>
               <p className="text-sm font-medium">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2 md:col-span-2">
-                <label htmlFor="subject" className="block text-sm font-semibold text-gray-700">
-                  Asunto del Ticket <span className="text-red-500">*</span>
+          <form onSubmit={handleSubmit} className="space-y-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
+              <div className="space-y-xxs md:col-span-2">
+                <label htmlFor="subject" className="block text-caption-uppercase text-ink font-semibold">
+                  {t('tickets.new.subjectLabel')} <span className="text-semantic-warning">*</span>
                 </label>
                 <input
                   type="text"
                   id="subject"
                   name="subject"
                   required
-                  placeholder="Ej: Problemas de conexión con el VPS, Duda sobre facturación..."
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all outline-none"
+                  placeholder={t('tickets.new.subjectPlaceholder')}
+                  className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary transition-all outline-none text-sm"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="priority" className="block text-sm font-semibold text-gray-700">
-                  Nivel de Prioridad <span className="text-red-500">*</span>
+              <div className="space-y-xxs">
+                <label htmlFor="priority" className="block text-caption-uppercase text-ink font-semibold">
+                  {t('tickets.new.priorityLabel')} <span className="text-semantic-warning">*</span>
                 </label>
                 <div className="relative">
                   <select
@@ -77,48 +79,48 @@ export default function NewTicketPage() {
                     name="priority"
                     required
                     defaultValue="MEDIUM"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all outline-none appearance-none"
+                    className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink focus:border-primary transition-all outline-none appearance-none text-sm"
                   >
-                    <option value="LOW">Baja - Consulta general</option>
-                    <option value="MEDIUM">Media - Problema no crítico</option>
-                    <option value="HIGH">Alta - Servicio degradado</option>
-                    <option value="URGENT">Urgente - Servicio totalmente caído</option>
+                    <option value="LOW">{t('tickets.new.priorityLow')}</option>
+                    <option value="MEDIUM">{t('tickets.new.priorityMedium')}</option>
+                    <option value="HIGH">{t('tickets.new.priorityHigh')}</option>
+                    <option value="URGENT">{t('tickets.new.priorityUrgent')}</option>
                   </select>
-                  <span className="material-icons absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
+                  <span className="material-icons absolute right-xs top-1/2 -translate-y-1/2 text-muted pointer-events-none">expand_more</span>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2 border-t border-gray-100 pt-6">
-              <label htmlFor="message" className="block text-sm font-semibold text-gray-700">
-                Descripción del Problema <span className="text-red-500">*</span>
+            <div className="space-y-xxs border-t border-hairline pt-sm">
+              <label htmlFor="message" className="block text-caption-uppercase text-ink font-semibold">
+                {t('tickets.new.messageLabel')} <span className="text-semantic-warning">*</span>
               </label>
-              <p className="text-xs text-gray-500 mb-2">Por favor, incluye toda la información relevante (errores exactos, pasos para reproducirlo, IPs involucradas).</p>
+              <p className="text-caption text-muted mb-xxs">{t('tickets.new.messageHint')}</p>
               <textarea
                 id="message"
                 name="message"
                 required
                 rows={8}
-                placeholder="Describe tu problema aquí..."
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all outline-none resize-y"
+                placeholder={t('tickets.new.messagePlaceholder')}
+                className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary transition-all outline-none resize-y text-sm"
               ></textarea>
             </div>
 
-            <div className="pt-4 flex justify-end">
+            <div className="pt-xs flex justify-end">
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-gray-900 text-white px-8 py-3 rounded-xl font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center min-w-[200px]"
+                className="bg-primary text-on-primary px-sm py-xxs font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 flex items-center justify-center min-w-[200px] text-xs uppercase tracking-wider"
               >
                 {loading ? (
                   <>
-                    <span className="material-icons animate-spin mr-2 text-[20px]">sync</span>
-                    Enviando...
+                    <span className="material-icons animate-spin mr-xxs text-[18px]">sync</span>
+                    {t('tickets.new.sending')}
                   </>
                 ) : (
                   <>
-                    <span className="material-icons mr-2 text-[20px]">send</span>
-                    Crear Ticket
+                    <span className="material-icons mr-xxs text-[18px]">send</span>
+                    {t('tickets.new.submit')}
                   </>
                 )}
               </button>

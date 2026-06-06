@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import QuotePDF from '@/components/QuotePDF';
+import { getCompanyProfile } from '@/app/actions/settings';
 
 interface PreviewPageProps {
   params: Promise<{
@@ -10,6 +11,7 @@ interface PreviewPageProps {
 
 export default async function PreviewPage({ params }: PreviewPageProps) {
   const { id } = await params;
+  const companyProfile = await getCompanyProfile();
 
   // For testing, we can handle a "mock" ID
   if (id === 'test') {
@@ -32,7 +34,7 @@ export default async function PreviewPage({ params }: PreviewPageProps) {
         { descripcion: "Consultoría de Arquitectura Cloud", cantidad: 1, precioUnitario: 400000, subtotal: 400000 }
       ]
     };
-    return <QuotePDF quote={mockQuote} />;
+    return <QuotePDF quote={mockQuote} companyProfile={companyProfile} />;
   }
 
   const quote = await prisma.quote.findUnique({
@@ -47,5 +49,5 @@ export default async function PreviewPage({ params }: PreviewPageProps) {
     notFound();
   }
 
-  return <QuotePDF quote={quote} />;
+  return <QuotePDF quote={quote} companyProfile={companyProfile} />;
 }

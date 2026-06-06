@@ -50,11 +50,11 @@ export default function ServerCard({ server }: { server: any }) {
   };
 
   const handleOpenConsole = () => {
-    window.open(`/client-portal/servers/${server.id}/console`, 'marval_console', 'width=1024,height=768');
+    window.open(`/client-portal/servers/${server.id}/console`, 'launchpad_console', 'width=1024,height=768');
   };
 
   const handleOpenFiles = () => {
-    window.open(`/client-portal/servers/${server.id}/files`, 'marval_files', 'width=1200,height=800');
+    window.open(`/client-portal/servers/${server.id}/files`, 'launchpad_files', 'width=1200,height=800');
   };
 
   const initiateAction = async (action: 'start' | 'stop' | 'restart') => {
@@ -129,101 +129,91 @@ export default function ServerCard({ server }: { server: any }) {
 
   return (
     <>
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
+      <div className="bg-canvas-elevated border border-hairline">
+        <div className="p-sm">
+          <div className="flex items-center justify-between mb-sm">
+            <div className="flex items-center space-x-xxs">
               <button 
                 onClick={handleOpenConsole}
-                className="w-10 h-10 rounded-full bg-[#E95420]/10 flex items-center justify-center hover:bg-[#E95420]/20 transition-all cursor-pointer group"
+                className="w-[40px] h-[40px] bg-[#E95420]/10 flex items-center justify-center hover:bg-[#E95420]/20 transition-all cursor-pointer group"
                 title="Abrir Consola de Emergencia"
               >
                 <span className="material-icons text-[#E95420] text-[20px] group-hover:scale-110 transition-transform">terminal</span>
               </button>
               <button 
                 onClick={handleOpenFiles}
-                className="w-10 h-10 rounded-full bg-blue-600/10 flex items-center justify-center hover:bg-blue-600/20 transition-all cursor-pointer group"
+                className="w-[40px] h-[40px] bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-all cursor-pointer group"
                 title="Gestor de Archivos (SFTP)"
               >
-                <span className="material-icons text-blue-600 text-[20px] group-hover:scale-110 transition-transform">folder_open</span>
+                <span className="material-icons text-primary text-[20px] group-hover:scale-110 transition-transform">folder_open</span>
               </button>
-              <h3 className="font-bold text-gray-900 text-lg tracking-tight">{server.name}</h3>
+              <h3 className="font-semibold text-ink tracking-tight">{server.name}</h3>
             </div>
-            <button className="text-gray-400 hover:text-blue-600 transition-colors">
+            <button className="text-muted hover:text-primary transition-colors">
               <span className="material-icons text-[18px]">edit</span>
             </button>
           </div>
 
-          <div className="space-y-4 mb-6">
+          <div className="space-y-sm">
             <div className="flex items-center text-sm">
-              <span className="material-icons text-gray-400 text-[18px] mr-3">language</span>
-              <span className="text-gray-600 font-medium">Default Data Center</span>
+              <span className="material-icons text-muted text-[18px] mr-xxs">language</span>
+              <span className="text-ink font-medium">Default Data Center</span>
             </div>
             <div className="flex items-center text-sm">
-              <span className="material-icons text-gray-400 text-[18px] mr-3">dns</span>
+              <span className="material-icons text-muted text-[18px] mr-xxs">dns</span>
               <div className="flex flex-col">
-                <span className="text-blue-600 font-bold text-sm tracking-tight">
-                  {server.hostname || `${server.name.toLowerCase().replace(/\s+/g, '-')}.marval.cloud`}
+                <span className="text-primary font-semibold text-sm tracking-tight">
+                  {server.hostname || `${server.name.toLowerCase().replace(/\s+/g, '-')}.launchpad.cloud`}
                 </span>
-                <span className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter mt-0.5">
+                <span className="text-[10px] text-muted font-medium uppercase tracking-tighter mt-[2px]">
                   Host Identificado
                 </span>
               </div>
               <button 
                 onClick={() => {
                   navigator.clipboard.writeText(server.hostname || '');
-                  Swal.fire({
-                    icon: 'success',
-                    title: 'Hostname Copiado',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 1500
-                  });
                 }}
-                className="material-icons text-gray-400 text-[16px] ml-auto hover:text-gray-600 transition-colors" 
+                className="material-icons text-muted text-[16px] ml-auto hover:text-ink transition-colors" 
                 title="Copiar Hostname"
               >
                 content_copy
               </button>
             </div>
-            {/* New Package & Traffic Specs */}
-            {/* New Package & Traffic Specs */}
+            
             {(server.cpu || server.memory || server.storage || server.bandwidth || liveMetrics || isLoadingMetrics) && (
-              <div className="pt-4 border-t border-gray-100 mt-4 space-y-4">
+              <div className="pt-xs border-t border-hairline space-y-sm">
                 
-                {/* Package Info */}
                 {(server.cpu || server.memory || server.storage || liveMetrics || isLoadingMetrics) && (
                   <div className="relative">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between mb-xxs">
                       <div className="flex items-center">
-                        <span className="material-icons text-blue-500 mr-2 text-[20px]">inventory_2</span>
-                        <h4 className="text-sm font-bold text-gray-800 tracking-tight">Package</h4>
+                        <span className="material-icons text-primary mr-xxs text-[20px]">inventory_2</span>
+                        <h4 className="text-sm font-semibold text-ink tracking-tight">Package</h4>
                       </div>
-                      {isLoadingMetrics && <span className="material-icons animate-spin text-gray-300 text-[14px]">sync</span>}
+                      {isLoadingMetrics && <span className="material-icons animate-spin text-muted text-[14px]">sync</span>}
                     </div>
-                    <div className="pl-7 space-y-2 text-sm">
+                    <div className="space-y-xxs text-sm">
                       {(server.cpu || liveMetrics?.allocatedCpu) && (
                         <div className="flex items-center">
-                          <span className="text-gray-400 w-16">vCPU</span>
-                          <span className="text-gray-900 font-medium">
+                          <span className="text-muted w-16">vCPU</span>
+                          <span className="text-ink font-medium">
                             {server.cpu || liveMetrics?.allocatedCpu || 'Auto'} 
-                            {liveMetrics && <span className="text-[10px] text-gray-400 ml-2 font-normal">({liveMetrics.cpuUsage}% uso)</span>}
+                            {liveMetrics && <span className="text-[10px] text-muted ml-xxs font-normal">({liveMetrics.cpuUsage}% uso)</span>}
                           </span>
                         </div>
                       )}
                       {(server.memory || liveMetrics?.allocatedRam) && (
                         <div className="flex items-center">
-                          <span className="text-gray-400 w-16">RAM</span>
-                          <span className="text-gray-900 font-medium">{server.memory || (liveMetrics?.allocatedRam ? `${liveMetrics.allocatedRam} MiB` : 'Auto')}</span>
+                          <span className="text-muted w-16">RAM</span>
+                          <span className="text-ink font-medium">{server.memory || (liveMetrics?.allocatedRam ? `${liveMetrics.allocatedRam} MiB` : 'Auto')}</span>
                         </div>
                       )}
                       {(server.storage || liveMetrics?.allocatedDisk) && (
                         <div className="flex items-center">
-                          <span className="text-gray-400 w-16">Disk</span>
-                          <span className="text-gray-900 font-medium">
+                          <span className="text-muted w-16">Disk</span>
+                          <span className="text-ink font-medium">
                             {server.storage || (liveMetrics?.allocatedDisk ? `${liveMetrics.allocatedDisk} GiB` : 'Auto')}
-                            {liveMetrics && liveMetrics.diskBytes > 0 && <span className="text-[10px] text-gray-400 ml-2 font-normal">({formatBytes(liveMetrics.diskBytes)} ocupados)</span>}
+                            {liveMetrics && liveMetrics.diskBytes > 0 && <span className="text-[10px] text-muted ml-xxs font-normal">({formatBytes(liveMetrics.diskBytes)} ocupados)</span>}
                           </span>
                         </div>
                       )}
@@ -231,32 +221,30 @@ export default function ServerCard({ server }: { server: any }) {
                   </div>
                 )}
 
-                {/* Traffic Info */}
                 {(server.bandwidth || liveMetrics || isLoadingMetrics) && (
-                  <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm relative overflow-hidden">
+                  <div className="bg-canvas border border-hairline p-xxs relative overflow-hidden">
                     {isLoadingMetrics && (
-                      <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
-                        <span className="material-icons animate-spin text-blue-500 text-[20px]">sync</span>
+                      <div className="absolute inset-0 bg-canvas/80 backdrop-blur-[1px] z-10 flex items-center justify-center">
+                        <span className="material-icons animate-spin text-primary text-[20px]">sync</span>
                       </div>
                     )}
-                    <div className="flex justify-between items-center mb-2">
-                      <h4 className="text-[13px] font-bold text-gray-900">Total traffic</h4>
-                      <span className="text-[13px] font-bold text-gray-900">
-                        <span className="text-gray-500 font-medium">
+                    <div className="flex justify-between items-center mb-xxs">
+                      <h4 className="text-xs font-semibold text-ink">Total traffic</h4>
+                      <span className="text-xs font-semibold text-ink">
+                        <span className="text-muted font-medium">
                           {liveMetrics ? formatBytes((Number(liveMetrics.networkIncomingBytes) || 0) + (Number(liveMetrics.networkOutgoingBytes) || 0)) : '0.00 TiB'} / 
                         </span>
                         {' '} {liveMetrics?.networkLimitBytes ? formatBytes(liveMetrics.networkLimitBytes) : server.bandwidth}
                       </span>
                     </div>
-                    {/* Progress bar */}
-                    <div className="w-full bg-gray-100 rounded-full h-1 mb-3">
-                      <div className="bg-[#8ac149] h-1 rounded-full transition-all duration-1000 ease-out" style={{ width: `${getTrafficPercentage()}%` }}></div>
+                    <div className="w-full bg-canvas-elevated h-1 mb-xxs">
+                      <div className="bg-semantic-success h-1 transition-all duration-1000 ease-out" style={{ width: `${getTrafficPercentage()}%` }}></div>
                     </div>
-                    <div className="flex justify-between text-xs text-gray-600 mb-3">
-                      <span>Outgoing: <strong className="text-gray-900 font-medium">{liveMetrics ? formatBytes(liveMetrics.networkOutgoingBytes) : '0.00 TiB'}</strong></span>
-                      <span>Incoming: <strong className="text-gray-900 font-medium">{liveMetrics ? formatBytes(liveMetrics.networkIncomingBytes) : '0.00 TiB'}</strong></span>
+                    <div className="flex justify-between text-xs text-muted mb-xxs">
+                      <span>Outgoing: <strong className="text-ink font-medium">{liveMetrics ? formatBytes(liveMetrics.networkOutgoingBytes) : '0.00 TiB'}</strong></span>
+                      <span>Incoming: <strong className="text-ink font-medium">{liveMetrics ? formatBytes(liveMetrics.networkIncomingBytes) : '0.00 TiB'}</strong></span>
                     </div>
-                    <p className="text-[10.5px] text-gray-500 leading-tight">
+                    <p className="text-[10.5px] text-muted leading-tight">
                       Si alcanzas el límite total de tráfico, el ancho de banda de la red será reducido.
                     </p>
                   </div>
@@ -264,18 +252,18 @@ export default function ServerCard({ server }: { server: any }) {
               </div>
             )}
 
-            <div className="flex items-center text-sm pt-3 border-t border-gray-100 mt-3">
-              <span className="material-icons text-blue-400 text-[16px] mr-2">info</span>
-              <p className="text-[10px] text-gray-500 leading-tight">
-                <strong>Configuración DNS:</strong> Si usas Cloudflare, mantén la nube en <span className="text-gray-400 font-bold underline">Gris (DNS Only)</span> para evitar conflictos. Marval Cloud ya provee protección de Capa 7.
+            <div className="flex items-center text-sm pt-xs border-t border-hairline">
+              <span className="material-icons text-primary text-[16px] mr-xxs">info</span>
+              <p className="text-[10px] text-muted leading-tight">
+                <strong>Configuración DNS:</strong> Si usas Cloudflare, mantén la nube en <span className="text-ink font-semibold underline">Gris (DNS Only)</span> para evitar conflictos. Launchpad Cloud ya provee protección de Capa 7.
               </p>
             </div>
 
             {server.dueDate && (
-              <div className="flex items-center text-sm pt-2 border-t border-gray-100">
-                <span className="material-icons text-gray-400 text-[18px] mr-3">event</span>
-                <span className="text-gray-500 font-medium mr-2">Vencimiento:</span>
-                <span className="text-gray-900 font-bold">
+              <div className="flex items-center text-sm pt-xs border-t border-hairline">
+                <span className="material-icons text-muted text-[18px] mr-xxs">event</span>
+                <span className="text-muted font-medium mr-xxs">Vencimiento:</span>
+                <span className="text-ink font-semibold">
                   {new Date(server.dueDate).toLocaleDateString('es-CL', {
                     year: 'numeric',
                     month: 'long',
@@ -287,18 +275,18 @@ export default function ServerCard({ server }: { server: any }) {
           </div>
         </div>
 
-        <div className="bg-gray-50 px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-green-500' : 'bg-red-500'} ${loadingAction ? 'animate-ping' : ''}`}></span>
-            <span className="text-xs font-bold text-gray-700 uppercase tracking-widest">{isRunning ? 'Running' : 'Offline'}</span>
+        <div className="bg-canvas px-sm py-xxs border-t border-hairline flex items-center justify-between">
+          <div className="flex items-center space-x-xxs">
+            <span className={`w-[8px] h-[8px] ${isRunning ? 'bg-semantic-success' : 'bg-semantic-danger'} ${loadingAction ? 'animate-ping' : ''}`}></span>
+            <span className="text-xs font-semibold text-ink uppercase tracking-widest">{isRunning ? 'Running' : 'Offline'}</span>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-xxs">
             <button 
               onClick={() => initiateAction('start')}
               disabled={!!loadingAction || isRunning}
               title="Start" 
-              className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:text-green-600 hover:border-green-200 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-[36px] h-[36px] border border-hairline bg-canvas-elevated flex items-center justify-center text-muted hover:text-semantic-success hover:border-semantic-success/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingAction === 'start' ? <span className="material-icons text-[18px] animate-spin">sync</span> : <span className="material-icons text-[18px]">play_arrow</span>}
             </button>
@@ -306,7 +294,7 @@ export default function ServerCard({ server }: { server: any }) {
             <button 
               onClick={handleOpenConsole}
               title="Consola Web Segura" 
-              className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-700 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm group"
+              className="w-[36px] h-[36px] border border-hairline bg-canvas-elevated flex items-center justify-center text-muted hover:text-primary hover:border-primary/50 transition-all group"
             >
               <span className="material-icons text-[18px] group-hover:scale-110 transition-transform">terminal</span>
             </button>
@@ -315,7 +303,7 @@ export default function ServerCard({ server }: { server: any }) {
               onClick={() => initiateAction('stop')}
               disabled={!!loadingAction || !isRunning}
               title="Stop" 
-              className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:text-red-600 hover:border-red-200 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-[36px] h-[36px] border border-hairline bg-canvas-elevated flex items-center justify-center text-muted hover:text-semantic-warning hover:border-semantic-warning/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingAction === 'stop' ? <span className="material-icons text-[18px] animate-spin">sync</span> : <span className="material-icons text-[18px]">stop</span>}
             </button>
@@ -324,7 +312,7 @@ export default function ServerCard({ server }: { server: any }) {
               onClick={() => initiateAction('restart')}
               disabled={!!loadingAction || !isRunning}
               title="Restart" 
-              className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-[36px] h-[36px] border border-hairline bg-canvas-elevated flex items-center justify-center text-muted hover:text-primary hover:border-primary/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingAction === 'restart' ? <span className="material-icons text-[18px] animate-spin">sync</span> : <span className="material-icons text-[18px]">restart_alt</span>}
             </button>
@@ -334,30 +322,30 @@ export default function ServerCard({ server }: { server: any }) {
 
       {/* OTP Modal */}
       {showOtpModal && (
-        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="p-6">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
+        <div className="fixed inset-0 bg-ink/90 backdrop-blur-md z-50 flex items-center justify-center p-sm">
+          <div className="bg-canvas-elevated border border-hairline w-full max-w-md">
+            <div className="p-sm">
+              <div className="flex items-center space-x-xxs mb-xs">
+                <div className="w-[40px] h-[40px] bg-semantic-warning/10 flex items-center justify-center text-semantic-warning">
                   <span className="material-icons">security</span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Verificación de Seguridad</h3>
+                <h3 className="text-title-sm font-medium text-ink uppercase tracking-wider">Verificación de Seguridad</h3>
               </div>
               
-              <p className="text-sm text-gray-500 mb-6">
+              <p className="text-sm text-muted mb-xs">
                 Por motivos de seguridad, se ha enviado un código de 6 dígitos a tu correo electrónico. 
                 Ingrésalo a continuación para confirmar la acción de <strong className="uppercase">{pendingAction}</strong>.
               </p>
 
               {otpError && (
-                <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm flex items-start">
-                  <span className="material-icons text-[18px] mr-2">error_outline</span>
+                <div className="mb-xs p-xxs bg-semantic-warning/10 text-semantic-warning text-sm flex items-start border border-semantic-warning/30">
+                  <span className="material-icons text-[18px] mr-xxs">error_outline</span>
                   <span>{otpError}</span>
                 </div>
               )}
 
-              <div className="mb-6">
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+              <div className="mb-xs space-y-xxs">
+                <label className="block text-caption-uppercase text-ink font-semibold">
                   Código OTP
                 </label>
                 <input 
@@ -366,21 +354,21 @@ export default function ServerCard({ server }: { server: any }) {
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, ''))}
                   placeholder="000000"
-                  className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-center font-mono text-2xl tracking-[0.5em] py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full bg-canvas border border-hairline text-ink text-center font-mono text-2xl tracking-[0.5em] py-xxs focus:border-primary outline-none transition-colors"
                 />
               </div>
 
-              <div className="flex space-x-3">
+              <div className="flex gap-xxs">
                 <button 
                   onClick={cancelOtp}
-                  className="flex-1 bg-white border border-gray-200 text-gray-700 font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 bg-transparent border border-hairline text-ink font-semibold py-xxs hover:bg-canvas transition-colors"
                 >
                   Cancelar
                 </button>
                 <button 
                   onClick={confirmAction}
                   disabled={otpCode.length !== 6 || loadingAction === 'confirming'}
-                  className="flex-1 bg-gray-900 text-white font-semibold py-2.5 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="flex-1 bg-primary text-on-primary font-semibold py-xxs hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
                   {loadingAction === 'confirming' ? (
                     <span className="material-icons animate-spin text-[20px]">sync</span>

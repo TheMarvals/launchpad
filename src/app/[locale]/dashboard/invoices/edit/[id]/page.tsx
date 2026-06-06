@@ -20,7 +20,7 @@ export default async function EditInvoicePage({
   }
 
   return (
-    <div className="p-8">
+    <div className="space-y-md max-w-5xl mx-auto">
       <InvoiceForm clients={clients} initialData={invoice} />
     </div>
   );

@@ -29,18 +29,18 @@ export default async function QuotesListPage({ searchParams, params }: { searchP
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-end">
+    <div className="space-y-md font-sans">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-xs">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-display-md font-medium tracking-tight text-ink">{t('title')}</h1>
+          <p className="text-body text-muted mt-[4px]">
             {t('subtitle', { count: totalCount })}
           </p>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-row gap-xxs w-full sm:w-auto">
           <a 
             href="/api/quotes/template/pdf"
-            className="bg-white text-blue-900 border-2 border-blue-900 px-6 py-2 rounded-lg font-bold hover:bg-blue-50 transition-all flex items-center shadow-sm active:scale-95"
+            className="flex-1 sm:flex-initial bg-transparent border border-ink text-ink hover:bg-ink/10 px-sm h-[48px] rounded-none text-xs font-bold uppercase tracking-[1.4px] flex items-center justify-center transition-colors cursor-pointer"
             title="Download blank template"
           >
             <span className="material-icons mr-2 text-sm">picture_as_pdf</span>
@@ -48,57 +48,57 @@ export default async function QuotesListPage({ searchParams, params }: { searchP
           </a>
           <Link 
             href="/dashboard/quotes/new" 
-            className="bg-blue-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-800 transition-all shadow-md active:scale-95"
+            className="flex-1 sm:flex-initial bg-primary hover:bg-primary-active text-white px-sm h-[48px] rounded-none text-xs font-bold uppercase tracking-[1.4px] flex items-center justify-center transition-colors cursor-pointer"
           >
             + {t('newQuote')}
           </Link>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-canvas-elevated border border-hairline overflow-hidden">
         {quotes.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="text-left text-xs font-bold text-gray-400 uppercase tracking-wider border-b bg-gray-50">
-                  <th className="px-6 py-4">{t('table.number')}</th>
-                  <th className="px-6 py-4">{t('table.client')}</th>
-                  <th className="px-6 py-4">{t('table.issueDate')}</th>
-                  <th className="px-6 py-4">{t('table.validity')}</th>
-                  <th className="px-6 py-4">{t('table.total')}</th>
-                  <th className="px-6 py-4">{t('table.status')}</th>
-                  <th className="px-6 py-4 text-right">{t('table.actions')}</th>
+                <tr className="bg-canvas border-b border-hairline">
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.number')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.client')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.issueDate')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.validity')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.total')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.status')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-right">{t('table.actions')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y divide-hairline">
                 {quotes.map((quote) => (
-                  <tr key={quote.id} className="text-sm hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-bold text-blue-900">
-                      {String(quote.correlativo).padStart(4, '0')}
+                  <tr key={quote.id} className="hover:bg-canvas/80 transition-colors group">
+                    <td className="px-sm py-xs font-medium text-ink">
+                      Nº {String(quote.correlativo).padStart(4, '0')}
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{quote.client.razonSocial}</div>
-                      <div className="text-xs text-gray-400">{quote.client.rut}</div>
+                    <td className="px-sm py-xs">
+                      <div className="font-medium text-ink text-sm">{quote.client.razonSocial}</div>
+                      <div className="text-xs text-muted">{quote.client.rut}</div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-sm py-xs text-body text-muted">
                       {new Date(quote.fechaEmision).toLocaleDateString(locale)}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-sm py-xs text-body text-muted">
                       {new Date(quote.fechaValidez).toLocaleDateString(locale)}
                     </td>
-                    <td className="px-6 py-4 font-bold">
+                    <td className="px-sm py-xs font-medium text-ink">
                       ${quote.montoTotal.toLocaleString(locale)}
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
-                        quote.estado === 'Aceptada' ? 'bg-green-100 text-green-700' :
-                        quote.estado === 'Borrador' ? 'bg-gray-100 text-gray-600' :
-                        'bg-blue-100 text-blue-700'
+                    <td className="px-sm py-xs">
+                      <span className={`inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border ${
+                        quote.estado === 'Aceptada' ? 'border-semantic-success/30 bg-semantic-success/10 text-semantic-success' :
+                        quote.estado === 'Borrador' ? 'border-hairline bg-canvas-elevated text-muted' :
+                        'border-semantic-info/30 bg-semantic-info/10 text-semantic-info'
                       }`}>
                         {quote.estado}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-sm py-xs text-right">
                       <QuoteActions quoteId={quote.id} />
                     </td>
                   </tr>
@@ -107,31 +107,31 @@ export default async function QuotesListPage({ searchParams, params }: { searchP
             </table>
           </div>
         ) : (
-          <div className="text-center py-20 text-gray-400">
+          <div className="text-center py-20 text-muted">
             {t('noQuotes')}
           </div>
         )}
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50">
-            <div className="text-xs text-gray-400">
+          <div className="flex items-center justify-between p-sm border-t border-hairline">
+            <div className="text-xs text-muted">
               {t('pagination.showing', {
                 start: (currentPage - 1) * ITEMS_PER_PAGE + 1,
                 end: Math.min(currentPage * ITEMS_PER_PAGE, totalCount),
                 total: totalCount
               })}
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-xxs">
               {currentPage > 1 ? (
                 <Link
                   href={`/dashboard/quotes?page=${currentPage - 1}`}
-                  className="px-3 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center"
+                  className="px-sm h-[32px] text-xs font-bold text-ink bg-transparent border border-hairline rounded-none hover:bg-canvas transition-colors flex items-center uppercase tracking-wider"
                 >
                   <span className="material-icons text-sm mr-1">chevron_left</span> {t('pagination.previous')}
                 </Link>
               ) : (
-                <span className="px-3 py-1.5 text-xs font-bold text-slate-300 bg-white border border-slate-100 rounded-lg cursor-not-allowed flex items-center">
+                <span className="px-sm h-[32px] text-xs font-bold text-muted bg-transparent border border-hairline/50 rounded-none cursor-not-allowed flex items-center uppercase tracking-wider">
                   <span className="material-icons text-sm mr-1">chevron_left</span> {t('pagination.previous')}
                 </span>
               )}
@@ -140,10 +140,10 @@ export default async function QuotesListPage({ searchParams, params }: { searchP
                 <Link
                   key={page}
                   href={`/dashboard/quotes?page=${page}`}
-                  className={`w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg transition-colors ${
+                  className={`w-[32px] h-[32px] flex items-center justify-center text-xs font-bold rounded-none transition-colors border ${
                     page === currentPage
-                      ? 'bg-blue-900 text-white shadow-sm'
-                      : 'text-slate-600 bg-white border border-slate-200 hover:bg-slate-50'
+                      ? 'bg-ink text-canvas border-ink'
+                      : 'text-ink bg-transparent border-hairline hover:bg-canvas'
                   }`}
                 >
                   {page}
@@ -153,12 +153,12 @@ export default async function QuotesListPage({ searchParams, params }: { searchP
               {currentPage < totalPages ? (
                 <Link
                   href={`/dashboard/quotes?page=${currentPage + 1}`}
-                  className="px-3 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center"
+                  className="px-sm h-[32px] text-xs font-bold text-ink bg-transparent border border-hairline rounded-none hover:bg-canvas transition-colors flex items-center uppercase tracking-wider"
                 >
                   {t('pagination.next')} <span className="material-icons text-sm ml-1">chevron_right</span>
                 </Link>
               ) : (
-                <span className="px-3 py-1.5 text-xs font-bold text-slate-300 bg-white border border-slate-100 rounded-lg cursor-not-allowed flex items-center">
+                <span className="px-sm h-[32px] text-xs font-bold text-muted bg-transparent border border-hairline/50 rounded-none cursor-not-allowed flex items-center uppercase tracking-wider">
                   {t('pagination.next')} <span className="material-icons text-sm ml-1">chevron_right</span>
                 </span>
               )}

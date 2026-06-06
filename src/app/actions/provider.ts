@@ -1,5 +1,6 @@
 'use server';
 
+import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
@@ -101,17 +102,29 @@ export async function requestServerAction(serverId: string, action: 'start' | 's
         return { error: 'Usuario inválido o sin correo.' };
       }
 
+      // Get locale from cookies
+      const cookieStore = await cookies();
+      const userLocale = cookieStore.get('NEXT_LOCALE')?.value || 'es';
+
       // Generate new OTP and invalidate old ones via helper
       const code = await generateAndSaveOtp(userId, action, serverId);
 
-      // Send unified email
-      const actionText = action === 'start' ? 'Iniciar' : action === 'stop' ? 'Detener' : 'Reiniciar';
+      // Send unified email with locale
+      const actionText = userLocale === 'en'
+        ? (action === 'start' ? 'Start' : action === 'stop' ? 'Stop' : 'Restart')
+        : (action === 'start' ? 'Iniciar' : action === 'stop' ? 'Detener' : 'Reiniciar');
+      const title = userLocale === 'en' ? 'Critical Action Authorization' : 'Autorización de Acción Crítica';
+      const description = userLocale === 'en'
+        ? `You have requested to <strong style="color:#ffffff;">${actionText}</strong> the server <strong style="color:#ffffff;">${server.name}</strong>. To proceed securely, enter the following temporary authorization code in the portal:`
+        : `Has solicitado <strong style="color:#ffffff;">${actionText}</strong> el servidor <strong style="color:#ffffff;">${server.name}</strong>. Para proceder de forma segura, ingresa el siguiente código de autorización temporal en el portal:`;
+
       await sendSecurityOtpEmail(
         user.email,
         code,
         user.name || 'Usuario',
-        "Autorización de Acción Crítica",
-        `Has solicitado <strong style="color:#ffffff;">${actionText}</strong> el servidor <strong style="color:#ffffff;">${server.name}</strong>. Para proceder de forma segura, ingresa el siguiente código de autorización temporal en el portal:`
+        title,
+        description,
+        userLocale
       );
 
       return { success: true, message: 'Código enviado a tu correo' };

@@ -2,15 +2,17 @@
 
 import React, { useState } from 'react';
 import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 
 export function MobileClientNav() {
+  const t = useTranslations('ClientPortal');
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="text-white hover:text-blue-400 transition-colors mr-4"
+        className="text-muted hover:text-ink transition-colors mr-xs"
         title="Menú"
       >
         <span className="material-icons">menu</span>
@@ -26,40 +28,35 @@ export function MobileClientNav() {
 
       {/* Sidebar Panel */}
       <div 
-        className={`fixed inset-y-0 left-0 w-64 bg-[#0a041a] shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out md:hidden flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed inset-y-0 left-0 w-64 bg-canvas border-r border-hairline z-[70] transform transition-transform duration-300 ease-in-out md:hidden flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className="p-6 flex items-center justify-between border-b border-white/10 shrink-0">
-          <h1 className="text-xl font-black tracking-tighter" style={{ WebkitTextStroke: '1px white', color: 'transparent' }}>MARVAL</h1>
-          <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white bg-white/5 rounded-full p-1">
+        <div className="p-sm flex items-center justify-between border-b border-hairline shrink-0">
+          <h1 className="text-xl font-black tracking-tighter stroke-text">LAUNCHPAD</h1>
+          <button onClick={() => setIsOpen(false)} className="text-muted hover:text-ink bg-canvas-elevated p-[4px]">
             <span className="material-icons">close</span>
           </button>
         </div>
 
-        <nav className="flex-grow mt-6 px-4 overflow-y-auto">
-          <ul className="space-y-2">
+        <nav className="flex-grow mt-xs overflow-y-auto">
+          <ul className="space-y-[2px]">
             <li>
-              <Link href="/client-portal" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-colors text-sm font-medium text-white">
-                <span className="material-icons mr-3 text-[18px] text-blue-400">dashboard</span> Resumen
+              <Link href="/client-portal" onClick={() => setIsOpen(false)} className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">dashboard</span> {t('dashboard.navLabel')}
               </Link>
             </li>
             <li>
-              <Link href="/client-portal/servers" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-colors text-sm font-medium text-white">
-                <span className="material-icons mr-3 text-[18px] text-blue-400">dns</span> Mis Servidores
+              <Link href="/client-portal/servers" onClick={() => setIsOpen(false)} className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">dns</span> {t('servers.title')}
               </Link>
             </li>
             <li>
-              <Link href="/client-portal/quotes" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-colors text-sm font-medium text-white">
-                <span className="material-icons mr-3 text-[18px] text-blue-400">description</span> Mis Cotizaciones
+              <Link href="/client-portal/quotes" onClick={() => setIsOpen(false)} className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">description</span> {t('quotes.pageTitle')}
               </Link>
             </li>
             <li>
-              <Link href="/client-portal/invoices" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-colors text-sm font-medium text-white">
-                <span className="material-icons mr-3 text-[18px] text-blue-400">receipt_long</span> Mis Facturas
-              </Link>
-            </li>
-            <li>
-              <Link href="/client-portal/tickets" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-colors text-sm font-medium text-white">
-                <span className="material-icons mr-3 text-[18px] text-blue-400">support_agent</span> Soporte Técnico
+              <Link href="/client-portal/tickets" onClick={() => setIsOpen(false)} className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">support_agent</span> {t('tickets.title')}
               </Link>
             </li>
           </ul>

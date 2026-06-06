@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 import { useState } from 'react';
+import { Link } from '@/i18n/routing';
 import { triggerRemindersNotification } from '@/app/actions/reminders';
 import Swal from 'sweetalert2';
 
@@ -15,12 +16,66 @@ interface RemindersBoardProps {
   failedActions: any[];
 }
 
+const SECTION_CONFIG = [
+  {
+    key: 'vps',
+    icon: 'dns',
+    color: 'text-accent-yellow',
+    bgColor: 'bg-accent-yellow/10',
+    borderColor: 'border-accent-yellow/30',
+  },
+  {
+    key: 'tasks',
+    icon: 'task_alt',
+    color: 'text-semantic-info',
+    bgColor: 'bg-semantic-info/10',
+    borderColor: 'border-semantic-info/30',
+  },
+  {
+    key: 'events',
+    icon: 'event',
+    color: 'text-semantic-success',
+    bgColor: 'bg-semantic-success/10',
+    borderColor: 'border-semantic-success/30',
+  },
+  {
+    key: 'tickets',
+    icon: 'confirmation_number',
+    color: 'text-primary',
+    bgColor: 'bg-primary/10',
+    borderColor: 'border-primary/30',
+  },
+  {
+    key: 'quotes',
+    icon: 'description',
+    color: 'text-accent-yellow',
+    bgColor: 'bg-accent-yellow/10',
+    borderColor: 'border-accent-yellow/30',
+  },
+  {
+    key: 'audit',
+    icon: 'error_outline',
+    color: 'text-semantic-warning',
+    bgColor: 'bg-semantic-warning/10',
+    borderColor: 'border-semantic-warning/30',
+  },
+];
+
 export default function RemindersBoard({ tasks, events, vpsExpirations, openTickets, expiringQuotes, failedActions }: RemindersBoardProps) {
   const t = useTranslations('Reminders');
   const locale = useLocale();
   const [isNotifying, setIsNotifying] = useState(false);
 
-  const isEmpty = tasks.length === 0 && events.length === 0 && vpsExpirations.length === 0 && openTickets.length === 0 && expiringQuotes.length === 0 && failedActions.length === 0;
+  const sections = [
+    { items: vpsExpirations, ...SECTION_CONFIG[0] },
+    { items: tasks, ...SECTION_CONFIG[1] },
+    { items: events, ...SECTION_CONFIG[2] },
+    { items: openTickets, ...SECTION_CONFIG[3] },
+    { items: expiringQuotes, ...SECTION_CONFIG[4] },
+    { items: failedActions, ...SECTION_CONFIG[5] },
+  ];
+
+  const hasAnyItems = sections.some(s => s.items.length > 0);
 
   const handleNotify = async () => {
     setIsNotifying(true);
@@ -36,13 +91,37 @@ export default function RemindersBoard({ tasks, events, vpsExpirations, openTick
         } else if (result.results?.telegram) {
           msg = 'Resumen enviado a Telegram.';
         }
-        Swal.fire('OK', msg, 'success');
+        Swal.fire({
+          title: 'OK',
+          text: msg,
+          icon: 'success',
+          customClass: {
+            popup: 'rounded-none border border-hairline bg-canvas-elevated text-ink',
+            confirmButton: 'px-sm py-xs font-semibold uppercase tracking-wider text-xs border border-transparent bg-primary text-on-primary',
+          }
+        });
       } else {
-        Swal.fire('Error', result.error || 'No se pudo enviar la notificación', 'error');
+        Swal.fire({
+          title: 'Error',
+          text: result.error || 'No se pudo enviar la notificación',
+          icon: 'error',
+          customClass: {
+            popup: 'rounded-none border border-hairline bg-canvas-elevated text-ink',
+            confirmButton: 'px-sm py-xs font-semibold uppercase tracking-wider text-xs border border-transparent bg-primary text-on-primary',
+          }
+        });
       }
     } catch (error) {
       console.error(error);
-      Swal.fire('Error', 'Ocurrió un error inesperado', 'error');
+      Swal.fire({
+        title: 'Error',
+        text: 'Ocurrió un error inesperado',
+        icon: 'error',
+        customClass: {
+          popup: 'rounded-none border border-hairline bg-canvas-elevated text-ink',
+          confirmButton: 'px-sm py-xs font-semibold uppercase tracking-wider text-xs border border-transparent bg-primary text-on-primary',
+        }
+      });
     } finally {
       setIsNotifying(false);
     }
@@ -61,190 +140,183 @@ export default function RemindersBoard({ tasks, events, vpsExpirations, openTick
     return d.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
   };
 
-  return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-[#0a041a] tracking-tight">{t('title')}</h1>
-          <p className="text-gray-500 mt-2 font-medium">{t('subtitle')}</p>
+  const renderSectionItems = (section: typeof sections[0]) => {
+    if (section.items.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-md px-xxs text-center">
+          <span className="material-icons text-muted/30 text-2xl mb-xxs">check_circle</span>
+          <p className="text-xs text-muted/60">{section.key === 'audit' ? 'Sin fallos recientes' : t('noReminders')}</p>
         </div>
-        {!isEmpty && (
+      );
+    }
+
+    return (
+      <div className="space-y-[2px]">
+        {section.items.slice(0, 4).map((item: any) => {
+          if (section.key === 'vps') {
+            return (
+              <Link key={item.id} href={`/dashboard/clients/${item.clientId}`} className="flex items-center gap-xxs p-xxs bg-canvas border border-hairline hover:border-primary/30 transition-all group cursor-pointer">
+                <div className={`w-[6px] h-[6px] shrink-0 ${section.color === 'text-accent-yellow' ? 'bg-accent-yellow' : section.color === 'text-semantic-info' ? 'bg-semantic-info' : section.color === 'text-semantic-success' ? 'bg-semantic-success' : section.color === 'text-primary' ? 'bg-primary' : 'bg-semantic-warning'}`} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-xxs">
+                    <span className="text-xs font-medium text-ink truncate">{item.name}</span>
+                    <span className="text-[10px] font-semibold text-accent-yellow whitespace-nowrap shrink-0">{formatDate(item.dueDate)}</span>
+                  </div>
+                  <span className="text-[10px] text-muted">{item.client.razonSocial}</span>
+                </div>
+                <span className="material-icons text-[14px] text-muted/30 group-hover:text-muted/60 transition-colors shrink-0">chevron_right</span>
+              </Link>
+            );
+          }
+          if (section.key === 'tasks') {
+            return (
+              <Link key={item.id} href={`/dashboard/productivity/tasks/${item.id}`} className="flex items-center gap-xxs p-xxs bg-canvas border border-hairline hover:border-primary/30 transition-all group cursor-pointer">
+                <div className={`w-[6px] h-[6px] shrink-0 ${item.priority === 'urgent' || item.priority === 'high' ? 'bg-semantic-warning' : 'bg-muted/50'}`} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-xxs">
+                    <span className="text-xs font-medium text-ink truncate">{item.title}</span>
+                    <span className="text-[10px] font-semibold text-muted whitespace-nowrap shrink-0">{item.dueDate ? formatDate(item.dueDate) : ''}</span>
+                  </div>
+                  {item.notes && <span className="text-[10px] text-muted line-clamp-1">{item.notes}</span>}
+                </div>
+                <span className="material-icons text-[14px] text-muted/30 group-hover:text-muted/60 transition-colors shrink-0">chevron_right</span>
+              </Link>
+            );
+          }
+          if (section.key === 'events') {
+            return (
+              <Link key={item.id} href={`/dashboard/productivity/calendar/${item.id}`} className="flex items-center gap-xxs p-xxs bg-canvas border border-hairline hover:border-primary/30 transition-all group cursor-pointer">
+                <div className="w-[6px] h-[6px] shrink-0 bg-semantic-success" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-xxs">
+                    <span className="text-xs font-medium text-ink truncate">{item.title}</span>
+                    <span className="text-[10px] font-semibold text-semantic-success whitespace-nowrap shrink-0">{formatDate(item.start)}</span>
+                  </div>
+                  <span className="text-[10px] text-muted">
+                    {new Date(item.start).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+                <span className="material-icons text-[14px] text-muted/30 group-hover:text-muted/60 transition-colors shrink-0">chevron_right</span>
+              </Link>
+            );
+          }
+          if (section.key === 'tickets') {
+            return (
+              <Link key={item.id} href={`/dashboard/tickets/${item.id}`} className="flex items-center gap-xxs p-xxs bg-canvas border border-hairline hover:border-primary/30 transition-all group cursor-pointer">
+                <div className={`w-[6px] h-[6px] shrink-0 ${item.status === 'OPEN' ? 'bg-semantic-warning' : 'bg-muted/50'}`} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-xxs">
+                    <span className="text-xs font-medium text-ink truncate">{item.subject}</span>
+                    <span className={`text-[10px] font-semibold whitespace-nowrap shrink-0 ${
+                      item.status === 'OPEN' ? 'text-semantic-warning' : 'text-muted'
+                    }`}>{item.status}</span>
+                  </div>
+                  <span className="text-[10px] text-muted">{item.client.razonSocial}</span>
+                </div>
+                <span className="material-icons text-[14px] text-muted/30 group-hover:text-muted/60 transition-colors shrink-0">chevron_right</span>
+              </Link>
+            );
+          }
+          if (section.key === 'quotes') {
+            return (
+              <Link key={item.id} href={`/dashboard/quotes/edit/${item.id}`} className="flex items-center gap-xxs p-xxs bg-canvas border border-hairline hover:border-primary/30 transition-all group cursor-pointer">
+                <div className="w-[6px] h-[6px] shrink-0 bg-accent-yellow" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-xxs">
+                    <span className="text-xs font-medium text-ink truncate">#{item.correlativo}</span>
+                    <span className="text-[10px] font-semibold text-accent-yellow whitespace-nowrap shrink-0">{new Date(item.fechaValidez).toLocaleDateString(locale)}</span>
+                  </div>
+                  <span className="text-[10px] text-muted">{item.client.razonSocial}</span>
+                </div>
+                <span className="material-icons text-[14px] text-muted/30 group-hover:text-muted/60 transition-colors shrink-0">chevron_right</span>
+              </Link>
+            );
+          }
+          if (section.key === 'audit') {
+            return (
+              <Link key={item.id} href="/dashboard/logs" className="flex items-center gap-xxs p-xxs bg-canvas border border-hairline hover:border-primary/30 transition-all group cursor-pointer">
+                <div className="w-[6px] h-[6px] shrink-0 bg-semantic-warning" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-xxs">
+                    <span className="text-xs font-medium text-ink truncate">{item.server.name}</span>
+                    <span className="text-[10px] font-semibold text-semantic-warning whitespace-nowrap shrink-0">{item.action.toUpperCase()}</span>
+                  </div>
+                  <span className="text-[10px] text-muted">{item.user.name}</span>
+                </div>
+                <span className="material-icons text-[14px] text-muted/30 group-hover:text-muted/60 transition-colors shrink-0">chevron_right</span>
+              </Link>
+            );
+          }
+          return null;
+        })}
+        {section.items.length > 4 && (
+          <p className="text-[10px] text-muted/50 text-center pt-[2px]">+{section.items.length - 4} más</p>
+        )}
+      </div>
+    );
+  };
+
+  const getSectionTitle = (key: string) => {
+    switch (key) {
+      case 'vps': return t('vps');
+      case 'tasks': return t('tasks');
+      case 'events': return t('events');
+      case 'tickets': return t('tickets');
+      case 'quotes': return t('quotes');
+      case 'audit': return t('audit');
+      default: return key;
+    }
+  };
+
+  return (
+    <div className="space-y-md">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-sm">
+        <div>
+          <h1 className="text-display-sm font-medium tracking-tight text-ink">{t('title')}</h1>
+          <p className="text-body text-muted text-sm mt-[2px]">{t('subtitle')}</p>
+        </div>
+        {hasAnyItems && (
           <button
             onClick={handleNotify}
             disabled={isNotifying}
-            className="bg-[#0088cc] text-white px-6 py-3 rounded-2xl font-bold hover:shadow-lg hover:shadow-[#0088cc]/20 transition-all flex items-center disabled:opacity-50"
+            className="bg-primary text-on-primary px-sm h-[40px] font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center disabled:opacity-50 gap-xxs"
           >
-            <span className="material-icons mr-2">notifications_active</span>
-            {isNotifying ? '...' : 'Enviar Notificaciones'}
+            <span className="material-icons text-sm">notifications_active</span>
+            {isNotifying ? t('sending') : t('sendNotifications')}
           </button>
         )}
       </div>
 
-      {isEmpty ? (
-        <div className="bg-white rounded-[2.5rem] p-12 text-center border-2 border-dashed border-gray-100">
-          <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="material-icons text-green-500 text-4xl">check_circle</span>
+      {!hasAnyItems ? (
+        <div className="bg-canvas-elevated border border-hairline p-md text-center">
+          <div className="w-16 h-16 bg-canvas border border-hairline flex items-center justify-center mx-auto mb-sm">
+            <span className="material-icons text-muted text-3xl">check_circle</span>
           </div>
-          <h3 className="text-xl font-bold text-gray-900">{t('empty')}</h3>
+          <h3 className="text-title-sm font-medium text-ink uppercase tracking-wider">{t('empty')}</h3>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
-          {/* VPS Expirations */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3 px-2">
-              <div className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center text-red-500">
-                <span className="material-icons text-xl">dns</span>
-              </div>
-              <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">{t('vps')}</h2>
-            </div>
-            <div className="space-y-3">
-              {vpsExpirations.length > 0 ? vpsExpirations.map((vps) => (
-                <div key={vps.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all group">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-[10px] uppercase tracking-widest font-bold text-red-500 bg-red-50 px-3 py-1 rounded-full">
-                      {formatDate(vps.dueDate)}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-gray-900 group-hover:text-red-600 transition-colors">{vps.name}</h3>
-                  <p className="text-xs text-gray-400 mt-1">{t('client')}: {vps.client.razonSocial}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-sm">
+          {sections.map((section) => (
+            <div key={section.key} className="bg-canvas-elevated border border-hairline">
+              {/* Section Header */}
+              <div className="flex items-center gap-xxs p-xxs border-b border-hairline bg-canvas">
+                <div className={`w-[32px] h-[32px] ${section.bgColor} flex items-center justify-center`}>
+                  <span className={`material-icons text-sm ${section.color}`}>{section.icon}</span>
                 </div>
-              )) : (
-                <p className="text-sm text-gray-400 px-2 italic">{t('noReminders')}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Tasks */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3 px-2">
-              <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500">
-                <span className="material-icons text-xl">task_alt</span>
+                <span className="text-xs font-semibold text-ink uppercase tracking-wider flex-1 truncate">{getSectionTitle(section.key)}</span>
+                {section.items.length > 0 && (
+                  <span className="text-[10px] font-semibold text-muted bg-canvas-elevated px-xxs py-[1px]">
+                    {section.items.length}
+                  </span>
+                )}
               </div>
-              <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">{t('tasks')}</h2>
-            </div>
-            <div className="space-y-3">
-              {tasks.length > 0 ? tasks.map((task) => (
-                <div key={task.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all group">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-[10px] uppercase tracking-widest font-bold text-blue-500 bg-blue-50 px-3 py-1 rounded-full">
-                      {formatDate(task.dueDate)}
-                    </span>
-                    <span className={`w-2 h-2 rounded-full ${
-                      task.priority === 'high' || task.priority === 'urgent' ? 'bg-red-500' : 'bg-blue-500'
-                    }`} />
-                  </div>
-                  <h3 className="font-bold text-gray-900">{task.title}</h3>
-                  {task.notes && <p className="text-xs text-gray-400 mt-1 line-clamp-1">{task.notes}</p>}
-                </div>
-              )) : (
-                <p className="text-sm text-gray-400 px-2 italic">{t('noReminders')}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Events */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3 px-2">
-              <div className="w-10 h-10 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-500">
-                <span className="material-icons text-xl">event</span>
+              {/* Section Content */}
+              <div className="p-xxs">
+                {renderSectionItems(section)}
               </div>
-              <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">{t('events')}</h2>
             </div>
-            <div className="space-y-3">
-              {events.length > 0 ? events.map((event) => (
-                <div key={event.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all group">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-[10px] uppercase tracking-widest font-bold text-purple-500 bg-purple-50 px-3 py-1 rounded-full">
-                      {formatDate(event.start)}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-gray-900">{event.title}</h3>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {new Date(event.start).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              )) : (
-                <p className="text-sm text-gray-400 px-2 italic">{t('noReminders')}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Tickets */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3 px-2">
-              <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500">
-                <span className="material-icons text-xl">confirmation_number</span>
-              </div>
-              <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">Tickets</h2>
-            </div>
-            <div className="space-y-3">
-              {openTickets.length > 0 ? openTickets.map((ticket) => (
-                <div key={ticket.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all group">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full ${
-                      ticket.status === 'OPEN' ? 'bg-green-50 text-green-500' : 'bg-amber-50 text-amber-500'
-                    }`}>
-                      {ticket.status}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-gray-900">{ticket.subject}</h3>
-                  <p className="text-xs text-gray-400 mt-1">{ticket.client.razonSocial}</p>
-                </div>
-              )) : (
-                <p className="text-sm text-gray-400 px-2 italic">{t('noReminders')}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Quotes */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3 px-2">
-              <div className="w-10 h-10 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-500">
-                <span className="material-icons text-xl">description</span>
-              </div>
-              <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">Cotizaciones</h2>
-            </div>
-            <div className="space-y-3">
-              {expiringQuotes.length > 0 ? expiringQuotes.map((quote) => (
-                <div key={quote.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all group">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-[10px] uppercase tracking-widest font-bold text-teal-500 bg-teal-50 px-3 py-1 rounded-full">
-                      {new Date(quote.fechaValidez).toLocaleDateString(locale)}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-gray-900">#{quote.correlativo}</h3>
-                  <p className="text-xs text-gray-400 mt-1">{quote.client.razonSocial}</p>
-                </div>
-              )) : (
-                <p className="text-sm text-gray-400 px-2 italic">{t('noReminders')}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Failed Actions */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3 px-2">
-              <div className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center text-red-500">
-                <span className="material-icons text-xl">error_outline</span>
-              </div>
-              <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">Audit</h2>
-            </div>
-            <div className="space-y-3">
-              {failedActions.length > 0 ? failedActions.map((action) => (
-                <div key={action.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all group">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-[10px] uppercase tracking-widest font-bold text-red-500 bg-red-50 px-3 py-1 rounded-full">
-                      {action.action.toUpperCase()} FALLIDO
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-gray-900">{action.server.name}</h3>
-                  <p className="text-xs text-gray-400 mt-1">{action.user.name}</p>
-                </div>
-              )) : (
-                <p className="text-sm text-gray-400 px-2 italic">Sin fallos recientes</p>
-              )}
-            </div>
-          </div>
+          ))}
         </div>
       )}
     </div>

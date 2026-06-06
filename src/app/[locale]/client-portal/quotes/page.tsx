@@ -1,10 +1,12 @@
 import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
+import { getTranslations } from 'next-intl/server';
 
 export default async function ClientQuotesPage() {
   const session = await auth();
   const clientId = (session?.user as any)?.clientId;
+  const t = await getTranslations('ClientPortal');
 
   if (!clientId) return null;
 
@@ -14,49 +16,49 @@ export default async function ClientQuotesPage() {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-md">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-gray-900">Mis Cotizaciones</h1>
-        <p className="text-gray-500 mt-1">Historial comercial y propuestas técnicas aprobadas.</p>
+        <h1 className="text-title-md font-medium text-ink tracking-tight">{t('quotes.pageTitle')}</h1>
+        <p className="text-body text-muted mt-[2px]">{t('quotes.pageSubtitle')}</p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-canvas-elevated border border-hairline overflow-hidden">
         {quotes.length > 0 ? (
           <table className="w-full">
             <thead>
-              <tr className="text-left text-xs font-bold text-gray-400 uppercase tracking-wider border-b bg-gray-50">
-                <th className="px-6 py-4">Nº</th>
-                <th className="px-6 py-4">Fecha</th>
-                <th className="px-6 py-4">Estado</th>
-                <th className="px-6 py-4 text-right">Monto Neto</th>
-                <th className="px-6 py-4 text-right">Acción</th>
+              <tr className="text-left text-caption-uppercase text-muted font-semibold border-b border-hairline bg-canvas">
+                <th className="px-sm py-xs">{t('quotes.table.number')}</th>
+                <th className="px-sm py-xs">{t('quotes.table.date')}</th>
+                <th className="px-sm py-xs">{t('quotes.table.status')}</th>
+                <th className="px-sm py-xs text-right">{t('quotes.table.netAmount')}</th>
+                <th className="px-sm py-xs text-right">{t('quotes.table.action')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className="divide-y divide-hairline">
               {quotes.map((quote) => (
-                <tr key={quote.id} className="text-sm hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-bold text-gray-700">COT-{quote.correlativo.toString().padStart(4, '0')}</td>
-                  <td className="px-6 py-4 text-gray-500">{new Date(quote.fechaEmision).toLocaleDateString()}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      quote.estado === 'Aceptada' ? 'bg-green-100 text-green-700' :
-                      quote.estado === 'Rechazada' ? 'bg-red-100 text-red-700' :
-                      'bg-blue-100 text-blue-700'
+                <tr key={quote.id} className="text-sm hover:bg-canvas/80 transition-colors">
+                  <td className="px-sm py-xs font-medium text-ink">COT-{quote.correlativo.toString().padStart(4, '0')}</td>
+                  <td className="px-sm py-xs text-muted">{new Date(quote.fechaEmision).toLocaleDateString()}</td>
+                  <td className="px-sm py-xs">
+                    <span className={`px-xxs py-[2px] text-caption-uppercase font-semibold border ${
+                      quote.estado === 'Aceptada' ? 'bg-semantic-success/10 text-semantic-success border-semantic-success/30' :
+                      quote.estado === 'Rechazada' ? 'bg-semantic-warning/10 text-semantic-warning border-semantic-warning/30' :
+                      'bg-accent-yellow/10 text-accent-yellow border-accent-yellow/30'
                     }`}>
                       {quote.estado}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right font-mono font-medium text-gray-700">
+                  <td className="px-sm py-xs text-right font-mono font-medium text-ink">
                     ${quote.montoNeto.toLocaleString('es-CL')}
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-sm py-xs text-right">
                     <a 
                       href={`/api/quotes/${quote.id}/pdf`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-bold"
+                      className="inline-flex items-center text-primary hover:text-primary/80 transition-colors bg-primary/10 px-xxs py-[4px] text-caption-uppercase font-semibold"
                     >
-                      <span className="material-icons text-[16px] mr-1">picture_as_pdf</span> PDF
+                      <span className="material-icons text-[16px] mr-[2px]">picture_as_pdf</span> {t('quotes.pdf')}
                     </a>
                   </td>
                 </tr>
@@ -64,9 +66,9 @@ export default async function ClientQuotesPage() {
             </tbody>
           </table>
         ) : (
-          <div className="text-center py-20 text-gray-400">
-            <span className="material-icons text-5xl mb-4 block opacity-30">receipt_long</span>
-            No hay cotizaciones registradas aún.
+          <div className="text-center py-xl text-muted">
+            <span className="material-icons text-5xl mb-xs block opacity-30 mx-auto">receipt_long</span>
+            {t('quotes.empty')}
           </div>
         )}
       </div>

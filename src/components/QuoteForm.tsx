@@ -54,6 +54,7 @@ interface Client {
 
 interface QuoteFormProps {
   clients: Client[];
+  companyProfile?: any;
   initialData?: {
     id: string;
     correlativo: number;
@@ -72,7 +73,7 @@ interface QuoteFormProps {
   };
 }
 
-export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
+export default function QuoteForm({ clients, companyProfile, initialData }: QuoteFormProps) {
   const t = useTranslations('QuoteForm');
   const tCommon = useTranslations('Dashboard.recentQuotes');
   const locale = useLocale();
@@ -99,7 +100,7 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
       // Migrate old PAGE_BREAK format: join pages into a single string
       return initialData.propuesta.replace(/---PAGE_BREAK---/g, '');
     }
-    return t('defaultProposal.page1');
+    return t.raw('defaultProposal.page1');
   });
 
   const [notasCondiciones, setNotasCondiciones] = useState(initialData?.notasCondiciones || t('defaultNotes'));
@@ -198,23 +199,24 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
 
   if (showPreview) {
     return (
-      <div className="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-md flex flex-col items-center">
-        <div className="w-full max-w-5xl h-full flex flex-col p-4 md:p-8">
-          <div className="bg-white rounded-t-2xl p-4 border-b flex justify-between items-center shadow-2xl shrink-0">
+      <div className="fixed inset-0 z-50 bg-ink/90 backdrop-blur-md flex flex-col items-center">
+        <div className="w-full max-w-5xl h-full flex flex-col p-md">
+          <div className="bg-canvas p-sm border-b border-hairline flex justify-between items-center shrink-0">
             <div className="flex items-center">
-              <span className="material-icons text-blue-900 mr-2">description</span>
-              <h3 className="font-black text-slate-900 uppercase tracking-tighter text-sm md:text-base">{t('preview')}</h3>
+              <span className="material-icons text-ink mr-xs">description</span>
+              <h3 className="font-medium text-ink uppercase tracking-wider text-sm md:text-base">{t('preview')}</h3>
             </div>
             <button 
+              type="button"
               onClick={() => setShowPreview(false)}
-              className="px-4 py-2 md:px-6 md:py-2 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all flex items-center"
+              className="px-sm h-[40px] bg-transparent border border-hairline text-muted hover:text-ink hover:border-ink transition-colors flex items-center"
             >
-              <span className="material-icons text-sm mr-2">close</span> {t('close')}
+              <span className="material-icons text-sm mr-xxs">close</span> {t('close')}
             </button>
           </div>
-          <div className="flex-grow bg-slate-200/50 overflow-auto p-4 md:p-12 rounded-b-2xl shadow-inner border-x border-b border-white/20">
-            <div className="min-w-[210mm] flex flex-col items-center gap-8">
-              <QuotePDF quote={mockQuote} />
+          <div className="flex-grow bg-canvas overflow-auto p-sm md:p-lg border-x border-b border-hairline">
+            <div className="min-w-[210mm] flex flex-col items-center gap-md">
+              <QuotePDF quote={mockQuote} companyProfile={companyProfile} />
             </div>
             <div className="h-24" /> 
           </div>
@@ -224,33 +226,36 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
   }
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); }} className="space-y-10 max-w-5xl pb-20 mx-auto">
+    <form onSubmit={(e) => { e.preventDefault(); }} className="space-y-md max-w-5xl pb-xl mx-auto font-sans">
       <style dangerouslySetInnerHTML={{ __html: EDITOR_STYLE }} />
       {/* 1. Header Information */}
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-8">
-        <h2 className="text-xl font-black flex items-center text-slate-900 tracking-tight">
-          <span className="material-icons mr-3 text-blue-600 bg-blue-50 p-2 rounded-lg">business</span> {t('title')}
+      <div className="bg-canvas-elevated border border-hairline p-sm space-y-sm">
+        <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
+          <span className="material-icons mr-xxs text-primary">business</span> {t('title')}
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('clientLabel')}</label>
-            <select 
-              className="w-full border-2 border-slate-100 rounded-xl p-3.5 bg-slate-50 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-700"
-              value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
-              required
-            >
-              <option value="">{t('clientPlaceholder')}</option>
-              {clients.map(c => (
-                <option key={c.id} value={c.id}>{c.razonSocial} ({c.rut})</option>
-              ))}
-            </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
+          <div className="space-y-xxs">
+            <label className="block text-caption-uppercase text-ink font-semibold">{t('clientLabel')}</label>
+            <div className="relative">
+              <select 
+                className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors px-xs py-xxs text-sm appearance-none cursor-pointer pr-sm"
+                value={clientId}
+                onChange={(e) => setClientId(e.target.value)}
+                required
+              >
+                <option value="">{t('clientPlaceholder')}</option>
+                {clients.map(c => (
+                  <option key={c.id} value={c.id}>{c.razonSocial} ({c.rut})</option>
+                ))}
+              </select>
+              <span className="material-icons absolute right-xxs top-1/2 -translate-y-1/2 text-muted pointer-events-none text-sm">expand_more</span>
+            </div>
           </div>
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('validityLabel')}</label>
+          <div className="space-y-xxs">
+            <label className="block text-caption-uppercase text-ink font-semibold">{t('validityLabel')}</label>
             <input 
               type="date" 
-              className="w-full border-2 border-slate-100 rounded-xl p-3.5 bg-slate-50 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-700"
+              className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
               value={fechaValidez}
               onChange={(e) => setFechaValidez(e.target.value)}
               required
@@ -259,17 +264,17 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
         </div>
       </div>
 
-      {/* 2. Proposal Editor — single editor, auto-paginated in preview */}
-      <div className="space-y-6">
-        <h2 className="text-xl font-black flex items-center text-slate-900 tracking-tight">
-          <span className="material-icons mr-3 text-blue-600 bg-blue-50 p-2 rounded-lg">edit_note</span> {t('proposalTitle')}
+      {/* 2. Proposal Editor */}
+      <div className="bg-canvas-elevated border border-hairline p-sm space-y-sm">
+        <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
+          <span className="material-icons mr-xxs text-primary">edit_note</span> {t('proposalTitle')}
         </h2>
-        <p className="text-sm text-slate-400 -mt-2">
+        <p className="text-body text-muted text-sm">
           Escribe toda la propuesta aquí. Las páginas se generarán automáticamente en la vista previa.
         </p>
 
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-          <div className="bg-white min-h-[500px]">
+        <div className="border border-hairline overflow-hidden">
+          <div className="bg-canvas min-h-[500px]">
             <ReactQuill 
               theme="snow"
               value={propuesta}
@@ -283,68 +288,68 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
       </div>
 
       {/* 3. Items Table */}
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-8">
+      <div className="bg-canvas-elevated border border-hairline p-sm space-y-sm">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-black flex items-center text-slate-900 tracking-tight">
-            <span className="material-icons mr-3 text-blue-600 bg-blue-50 p-2 rounded-lg">payments</span> {t('economicDetail')}
+          <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
+            <span className="material-icons mr-xxs text-primary">payments</span> {t('economicDetail')}
           </h2>
           <button 
             type="button" 
             onClick={addItem}
-            className="text-blue-600 font-bold text-sm hover:bg-blue-50 px-4 py-2 rounded-lg transition-all flex items-center"
+            className="text-ink font-semibold text-xs uppercase tracking-wider hover:bg-canvas px-sm py-xxs transition-colors flex items-center border border-hairline"
           >
-            <span className="material-icons mr-2 text-sm">add_circle</span> {t('addItem')}
+            <span className="material-icons mr-xxs text-sm">add</span> {t('addItem')}
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-sm border-t border-hairline pt-sm">
           {items.map((item: any, idx: number) => (
-            <div key={idx} className="flex gap-4 items-end border-b border-slate-50 pb-6 last:border-0">
-              <div className="flex-grow space-y-2">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('itemLabel')}</label>
+            <div key={idx} className="flex gap-sm items-end pb-sm">
+              <div className="flex-grow space-y-xxs">
+                <label className="text-caption-uppercase text-ink font-semibold">{t('itemLabel')}</label>
                 <input 
                   type="text" 
-                  className="w-full border-2 border-slate-50 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white transition-all font-medium"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={item.descripcion}
                   onChange={(e) => updateItem(idx, 'descripcion', e.target.value)}
                   required
                 />
               </div>
-              <div className="w-24 space-y-2">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('quantity')}</label>
+              <div className="w-24 space-y-xxs">
+                <label className="text-caption-uppercase text-ink font-semibold">{t('quantity')}</label>
                 <input 
                   type="number" 
                   min="1"
-                  className="w-full border-2 border-slate-50 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white text-center font-bold"
+                  className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors text-center font-semibold px-xs py-xxs text-sm"
                   value={item.cantidad}
                   onChange={(e) => updateItem(idx, 'cantidad', e.target.value)}
                   required
                 />
               </div>
-              <div className="w-40 space-y-2">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('unitPrice')}</label>
+              <div className="w-40 space-y-xxs">
+                <label className="text-caption-uppercase text-ink font-semibold">{t('unitPrice')}</label>
                 <div className="relative">
-                  <span className="absolute left-4 top-3 text-slate-400 font-bold">$</span>
+                  <span className="absolute left-xs top-1/2 -translate-y-1/2 text-muted font-semibold">$</span>
                   <input 
                     type="number" 
                     min="0"
-                    className="w-full border-2 border-slate-50 rounded-xl p-3 pl-8 text-sm bg-slate-50 focus:bg-white font-bold"
+                    className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors font-semibold pl-md px-xs py-xxs text-sm"
                     value={item.precioUnitario}
                     onChange={(e) => updateItem(idx, 'precioUnitario', e.target.value)}
                     required
                   />
                 </div>
               </div>
-              <div className="w-32 text-right self-center pt-6">
-                <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">{t('subtotal')}</div>
-                <div className="font-black text-slate-900">
+              <div className="w-32 text-right self-center pb-xxs">
+                <div className="text-caption-uppercase text-muted mb-xxs">{t('subtotal')}</div>
+                <div className="font-medium text-ink">
                   ${(Number(item.cantidad) * Number(item.precioUnitario) || 0).toLocaleString(locale)}
                 </div>
               </div>
               <button 
                 type="button" 
                 onClick={() => removeItem(idx)}
-                className="mb-1 p-2 text-slate-300 hover:text-red-500 transition-colors"
+                className="mb-xxs p-xxs text-muted hover:text-semantic-warning transition-colors"
               >
                 <span className="material-icons">delete_outline</span>
               </button>
@@ -352,40 +357,40 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-slate-50">
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('taxLabel')}</label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-sm pt-sm border-t border-hairline">
+          <div className="space-y-xxs">
+            <label className="text-caption-uppercase text-ink font-semibold">{t('taxLabel')}</label>
             <input 
               type="text" 
-              className="w-full border-2 border-slate-100 rounded-xl p-3 bg-slate-50 focus:bg-white transition-all font-medium text-sm"
+              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
               value={taxName}
               onChange={(e) => setTaxName(e.target.value)}
               placeholder="Ej. IVA"
             />
           </div>
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('taxPercent')}</label>
+          <div className="space-y-xxs">
+            <label className="text-caption-uppercase text-ink font-semibold">{t('taxPercent')}</label>
             <input 
               type="number" 
               step="0.01"
-              className="w-full border-2 border-slate-100 rounded-xl p-3 bg-slate-50 focus:bg-white transition-all font-medium text-sm"
+              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
               value={taxPercent}
               onChange={(e) => setTaxPercent(e.target.value)}
             />
           </div>
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('extraFeeLabel')}</label>
-            <div className="flex gap-2">
+          <div className="space-y-xxs">
+            <label className="text-caption-uppercase text-ink font-semibold">{t('extraFeeLabel')}</label>
+            <div className="grid grid-cols-3 gap-xxs">
               <input 
                 type="text" 
-                className="flex-grow border-2 border-slate-100 rounded-xl p-3 bg-slate-50 focus:bg-white transition-all font-medium text-sm"
+                className="col-span-2 w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                 value={extraFeeName}
                 onChange={(e) => setExtraFeeName(e.target.value)}
                 placeholder="Ej. PayPal Fee"
               />
               <input 
                 type="number" 
-                className="w-24 border-2 border-slate-100 rounded-xl p-3 bg-slate-50 focus:bg-white transition-all font-medium text-sm"
+                className="col-span-1 w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                 value={extraFeeAmount}
                 onChange={(e) => setExtraFeeAmount(e.target.value)}
               />
@@ -393,85 +398,85 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
           </div>
         </div>
 
-        <div className="flex justify-end pt-8">
-          <div className="w-80 space-y-3 p-6 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 ml-auto shadow-sm">
-            <div className="flex justify-between text-[10px] font-black text-slate-400 tracking-widest uppercase">
+        <div className="flex justify-end pt-md">
+          <div className="w-80 space-y-xxs p-sm bg-canvas border border-hairline ml-auto">
+            <div className="flex justify-between text-caption-uppercase text-muted">
               <span>{t('net')}</span>
-              <span className="text-slate-900 font-bold">${neto.toLocaleString(locale)}</span>
+              <span className="text-ink font-medium">${neto.toLocaleString(locale)}</span>
             </div>
-            <div className="flex justify-between text-[10px] font-black text-slate-400 tracking-widest uppercase">
+            <div className="flex justify-between text-caption-uppercase text-muted">
               <span>{taxName} ({taxPercent}%)</span>
-              <span className="text-slate-900 font-bold">${iva.toLocaleString(locale)}</span>
+              <span className="text-ink font-medium">${iva.toLocaleString(locale)}</span>
             </div>
             {fee > 0 && (
-              <div className="flex justify-between text-[10px] font-black text-slate-400 tracking-widest uppercase">
+              <div className="flex justify-between text-caption-uppercase text-muted">
                 <span>{extraFeeName || t('extraFee')}</span>
-                <span className="text-slate-900 font-bold">${fee.toLocaleString(locale)}</span>
+                <span className="text-ink font-medium">${fee.toLocaleString(locale)}</span>
               </div>
             )}
-            <div className="flex justify-between text-xl pt-4 border-t border-slate-200 font-black">
-              <span className="text-[10px] font-black text-slate-500 self-center tracking-widest uppercase">{t('total')}</span>
-              <span className="text-slate-900">${total.toLocaleString(locale)}</span>
+            <div className="flex justify-between text-xl pt-xs mt-xs border-t border-hairline">
+              <span className="text-caption-uppercase text-muted self-center">{t('total')}</span>
+              <span className="text-ink font-medium">${total.toLocaleString(locale)}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* 4. Notes & Payment Method */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
-            <span className="material-icons text-sm mr-2 text-blue-600">gavel</span> {t('notesTitle')}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
+        <div className="bg-canvas-elevated border border-hairline p-sm space-y-sm">
+          <label className="text-caption-uppercase text-ink font-semibold flex items-center">
+            <span className="material-icons text-sm mr-xxs text-primary">gavel</span> {t('notesTitle')}
           </label>
           <textarea 
-            className="w-full border-2 border-slate-50 rounded-xl p-4 text-sm bg-slate-50 min-h-[150px] focus:bg-white transition-all outline-none"
+            className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm min-h-[150px]"
             value={notasCondiciones}
             onChange={(e) => setNotasCondiciones(e.target.value)}
           />
         </div>
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
-            <span className="material-icons text-sm mr-2 text-blue-600">account_balance_wallet</span> {t('paymentMethodLabel')}
+        <div className="bg-canvas-elevated border border-hairline p-sm space-y-sm">
+          <label className="text-caption-uppercase text-ink font-semibold flex items-center">
+            <span className="material-icons text-sm mr-xxs text-primary">account_balance_wallet</span> {t('paymentMethodLabel')}
           </label>
           <input 
             type="text" 
-            className="w-full border-2 border-slate-50 rounded-xl p-4 text-sm bg-slate-50 focus:bg-white transition-all outline-none"
+            className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value)}
             placeholder={t('paymentMethodPlaceholder')}
           />
-          <p className="text-[10px] text-slate-400 italic">
+          <p className="text-caption text-muted mt-xxs">
             Especifica cómo deseas recibir el pago (Transferencia, PayPal, etc.)
           </p>
         </div>
       </div>
 
       {/* 5. Sticky Actions Bar */}
-      <div className="flex justify-between items-center bg-slate-900 p-6 rounded-3xl shadow-2xl sticky bottom-8 z-30 ring-1 ring-white/10">
-        <div className="flex space-x-6 items-center pl-4">
+      <div className="flex justify-between items-center bg-canvas-elevated p-sm border-t border-hairline sticky bottom-0 z-30">
+        <div className="flex items-center gap-sm pl-xxs">
           <button 
             type="button" 
             onClick={() => router.back()}
-            className="text-slate-400 font-bold hover:text-white transition-colors text-sm"
+            className="text-muted font-semibold hover:text-ink transition-colors text-xs uppercase tracking-wider"
           >
-            {tCommon('no')}
+            Volver
           </button>
-          <div className="h-4 w-px bg-white/10" />
+          <div className="h-xs w-px bg-hairline" />
           <button 
             type="button" 
             onClick={() => setShowPreview(true)}
-            className="text-white font-bold hover:text-blue-400 transition-all flex items-center text-sm"
+            className="text-ink font-semibold hover:text-ink/70 transition-all flex items-center text-xs uppercase tracking-wider"
           >
-            <span className="material-icons mr-2 text-base">visibility</span> {t('preview')}
+            <span className="material-icons mr-xxs text-sm">visibility</span> {t('preview')}
           </button>
         </div>
         
-        <div className="flex space-x-4">
+        <div className="flex gap-xxs">
           <button 
             type="button" 
             onClick={() => handleSubmit('Borrador')}
             disabled={isSubmitting}
-            className="bg-slate-800 text-white px-6 py-4 rounded-2xl font-bold hover:bg-slate-700 transition-all disabled:opacity-50 text-sm border border-white/5"
+            className="bg-transparent border border-hairline text-ink px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-canvas transition-colors disabled:opacity-50"
           >
             {t('saveDraft')}
           </button>
@@ -479,12 +484,12 @@ export default function QuoteForm({ clients, initialData }: QuoteFormProps) {
             type="button" 
             onClick={() => handleSubmit('Enviada')}
             disabled={isSubmitting}
-            className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black text-base hover:bg-blue-500 shadow-xl shadow-blue-600/40 disabled:opacity-50 transition-all transform active:scale-95 flex items-center"
+            className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center disabled:opacity-50"
           >
             {isSubmitting ? (
-              <span className="material-icons animate-spin mr-2">sync</span>
+              <span className="material-icons animate-spin mr-xxs text-sm">sync</span>
             ) : (
-              <span className="material-icons mr-2">send</span>
+              <span className="material-icons mr-xxs text-sm">send</span>
             )}
             {isSubmitting ? t('saving') : isEditing ? t('update') : t('generate')}
           </button>

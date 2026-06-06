@@ -16,23 +16,23 @@ export default function LocaleSwitcher() {
   };
 
   return (
-    <div className="flex items-center space-x-2 bg-white/5 backdrop-blur-md p-1 rounded-xl border border-white/10 shadow-xl">
+    <div className="flex items-center p-1 rounded-none border border-hairline bg-canvas-elevated">
       <button
         onClick={() => onLocaleChange('es')}
-        className={`px-2 py-1 text-xs font-bold rounded-md transition-all ${
+        className={`px-3 py-1 text-xs font-semibold tracking-wider rounded-none transition-all cursor-pointer ${
           locale === 'es'
-            ? 'bg-white text-blue-900 shadow-sm'
-            : 'text-gray-400 hover:text-gray-600'
+            ? 'bg-primary text-on-primary'
+            : 'text-muted hover:text-ink hover:bg-canvas'
         }`}
       >
         ES
       </button>
       <button
         onClick={() => onLocaleChange('en')}
-        className={`px-2 py-1 text-xs font-bold rounded-md transition-all ${
+        className={`px-3 py-1 text-xs font-semibold tracking-wider rounded-none transition-all cursor-pointer ${
           locale === 'en'
-            ? 'bg-white text-blue-900 shadow-sm'
-            : 'text-gray-400 hover:text-gray-600'
+            ? 'bg-primary text-on-primary'
+            : 'text-muted hover:text-ink hover:bg-canvas'
         }`}
       >
         EN

@@ -3,9 +3,10 @@ import { useTranslations, useLocale } from 'next-intl';
 
 interface InvoicePDFProps {
   invoice: any;
+  companyProfile?: any;
 }
 
-const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
+const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
   const t = useTranslations('PDF');
   const tInv = useTranslations('Invoices');
   const locale = useLocale();
@@ -20,7 +21,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
           <div className="relative z-10 flex justify-between items-center">
             <div className="space-y-4">
               <div className="relative inline-block">
-                <h1 className="hero-heading text-[60px] font-black mb-0 stroke-text leading-[0.8] tracking-[-0.05em]">MARVAL</h1>
+                <h1 className="hero-heading text-[60px] font-black mb-0 stroke-text leading-[0.8] tracking-[-0.05em]">{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
                 <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-transparent" />
               </div>
               <div className="flex flex-col space-y-1.5 pt-4">
@@ -34,13 +35,13 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
             </div>
             <div className="text-right flex flex-col items-end">
               <div className="mb-6">
-                <h2 className="text-xl font-black tracking-tight uppercase leading-none text-white">Eduardo Marval</h2>
-                <div className="text-[9px] font-medium text-blue-400/80 uppercase tracking-widest mt-1">Lead Solution Architect</div>
+                <h2 className="text-xl font-black tracking-tight uppercase leading-none text-white">{companyProfile?.name || 'Eduardo Marval'}</h2>
+                <div className="text-[9px] font-medium text-blue-400/80 uppercase tracking-widest mt-1">{companyProfile?.role || 'Lead Solution Architect'}</div>
               </div>
               <div className="space-y-1.5 border-r-2 border-blue-500/30 pr-4">
-                <div className="text-[9px] font-bold text-slate-300">RUT: 27.087.979-9</div>
-                <div className="text-[9px] font-bold text-slate-300">TELF: +569 94438833</div>
-                <div className="text-[9px] font-bold text-slate-300 lowercase">e.marval@themarvals.com</div>
+                <div className="text-[9px] font-bold text-slate-300">{companyProfile?.taxIdLabel || 'TAX ID'}: {companyProfile?.taxId || '27.087.979-9'}</div>
+                <div className="text-[9px] font-bold text-slate-300">TELF: {companyProfile?.phone || '+569 94438833'}</div>
+                <div className="text-[9px] font-bold text-slate-300 lowercase">{companyProfile?.email || 'e.marval@themarvals.com'}</div>
               </div>
             </div>
           </div>
@@ -49,7 +50,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
         <main className="flex-grow p-12 pb-32 relative">
           {/* Watermark */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
-            <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#1e3a8a', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>MARVAL</h1>
+            <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#1e3a8a', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
           </div>
 
           <div className="relative z-10 space-y-10">
@@ -61,9 +62,8 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
                 </div>
                 <h3 className="font-black text-2xl uppercase tracking-tighter text-slate-900 leading-tight mb-2">
                   {invoice.client?.razonSocial || 'CLIENTE'}
-                </h3>
-                <div className="space-y-0.5 text-xs font-bold text-slate-400">
-                  <div>RUT: {invoice.client?.rut || '---'}</div>
+                </h3>                  <div className="space-y-0.5 text-xs font-bold text-slate-400">
+                  <div>{companyProfile?.taxIdLabel || 'TAX ID'}: {invoice.client?.rut || '---'}</div>
                   <div className="font-medium italic opacity-80 text-[11px]">{invoice.client?.giro || 'Servicios Informáticos'}</div>
                 </div>
               </div>
@@ -157,12 +157,12 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
         </main>
 
         <footer className="absolute bottom-0 left-0 w-full p-6 text-slate-300 text-center shrink-0" style={{ background: '#050212' }}>
-          <div className="text-[12px] font-black uppercase tracking-[0.6em] text-white">MARVAL</div>
+          <div className="text-[12px] font-black uppercase tracking-[0.6em] text-white">{companyProfile?.brandNameFooter || 'EDUARDO MARVAL'}</div>
           <div className="h-px w-8 bg-blue-500 mx-auto my-3 opacity-30"></div>
           <div className="text-[8px] font-bold opacity-40 space-x-6 uppercase tracking-widest">
-            <span>ANTONIO BELLET 193 OF 1210 12P, PROVIDENCIA, RM</span>
+            <span>{companyProfile?.address || 'ANTONIO BELLET 193 OF 1210 12P, PROVIDENCIA, RM'}</span>
             <span>•</span>
-            <span>e.marval@themarvals.com</span>
+            <span>{companyProfile?.email || 'e.marval@themarvals.com'}</span>
           </div>
         </footer>
       </div>

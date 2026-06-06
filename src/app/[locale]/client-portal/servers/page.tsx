@@ -1,11 +1,13 @@
 import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
+import { getTranslations } from 'next-intl/server';
 import ServerCard from '@/components/ServerCard';
 
 export default async function ClientServersPage() {
   const session = await auth();
   const clientId = (session?.user as any)?.clientId;
+  const t = await getTranslations('ClientPortal');
 
   if (!clientId) return null;
 
@@ -14,21 +16,21 @@ export default async function ClientServersPage() {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-md">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-gray-900">Mis Servidores</h1>
-        <p className="text-gray-500 mt-1">Gestión de infraestructura Cloud administrada.</p>
+        <h1 className="text-title-md font-medium text-ink tracking-tight">{t('servers.pageTitle')}</h1>
+        <p className="text-body text-muted mt-[2px]">{t('servers.pageSubtitle')}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-xs">
         {servers.map((server) => (
           <ServerCard key={server.id} server={server} />
         ))}
 
         {servers.length === 0 && (
-          <div className="col-span-full bg-white rounded-2xl border border-dashed border-gray-300 p-12 text-center text-gray-500">
-            <span className="material-icons text-5xl mb-4 opacity-20">cloud_off</span>
-            <p>No tienes servidores vinculados a tu cuenta actualmente.</p>
+          <div className="col-span-full bg-canvas-elevated border border-dashed border-hairline p-lg text-center text-muted">
+            <span className="material-icons text-5xl mb-xs opacity-20">cloud_off</span>
+            <p className="text-body">{t('servers.empty')}</p>
           </div>
         )}
       </div>

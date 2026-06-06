@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 interface QuotePDFProps {
   quote: any;
   isTemplate?: boolean;
+  companyProfile?: any;
 }
 
 // Available content height in mm for each page type
@@ -12,7 +13,7 @@ interface QuotePDFProps {
 const FIRST_PAGE_CONTENT_MM = 155;  // 297 - bigHeader(~48) - footer(~22) - clientInfo(~32) - margins(~40)
 const OTHER_PAGE_CONTENT_MM = 220;  // 297 - smallHeader(~22) - footer(~22) - margins(~33)
 
-const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
+const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate, companyProfile }) => {
   const t = useTranslations('PDF');
   const locale = useLocale();
   const measureRef = useRef<HTMLDivElement>(null);
@@ -134,33 +135,33 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
           <div key={pageIdx} className="pdf-page w-full h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
             {/* Header */}
             {pageIdx === 0 ? (
-              <header className="relative w-full p-10 pb-12 text-white shrink-0 overflow-hidden" style={{ background: '#050212' }}>
-                <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-blue-600/20 to-transparent skew-x-[-15deg] translate-x-20" />
-                <div className="absolute -top-24 -left-24 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px]" />
+              <header className="relative w-full p-10 pb-12 text-white shrink-0 overflow-hidden" style={{ background: '#181818' }}>
+                <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/20 to-transparent skew-x-[-15deg] translate-x-20" />
+                <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/10 rounded-full blur-[100px]" />
                 <div className="relative z-10 flex justify-between items-center">
                   <div className="space-y-4">
                     <div className="relative inline-block">
-                      <h1 className="hero-heading text-[60px] font-black mb-0 stroke-text leading-[0.8] tracking-[-0.05em]">MARVAL</h1>
-                      <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-transparent" />
+                      <h1 className="hero-heading text-[60px] font-black mb-0 stroke-text leading-[0.8] tracking-[-0.05em]">{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
+                      <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-primary to-transparent" />
                     </div>
                     <div className="flex flex-col space-y-1.5 pt-4">
-                      <div className="flex items-center text-[8px] font-black tracking-[0.3em] text-blue-400 uppercase">
-                        <span className="w-4 h-[1px] bg-blue-400 mr-3"></span> {t('architecture')}
+                      <div className="flex items-center text-[8px] font-black tracking-[0.3em] text-primary uppercase">
+                        <span className="w-4 h-[1px] bg-primary mr-3"></span> {companyProfile?.systemsTitle || t('architecture')}
                       </div>
                       <div className="flex items-center text-[9px] font-bold tracking-wider text-slate-400 uppercase pl-7">
-                        {t('consulting')}
+                        {companyProfile?.systemsSubtitle || t('consulting')}
                       </div>
                     </div>
                   </div>
                   <div className="text-right flex flex-col items-end">
                     <div className="mb-6">
-                      <h2 className="text-xl font-black tracking-tight uppercase leading-none text-white">Eduardo Marval</h2>
-                      <div className="text-[9px] font-medium text-blue-400/80 uppercase tracking-widest mt-1">Lead Solution Architect</div>
+                      <h2 className="text-xl font-black tracking-tight uppercase leading-none text-white">{companyProfile?.name || 'Eduardo Marval'}</h2>
+                      <div className="text-[9px] font-medium text-primary/80 uppercase tracking-widest mt-1">{companyProfile?.role || 'Lead Solution Architect'}</div>
                     </div>
-                    <div className="space-y-1.5 border-r-2 border-blue-500/30 pr-4">
-                      <div className="text-[9px] font-bold text-slate-300">RUT: 27.087.979-9</div>
-                      <div className="text-[9px] font-bold text-slate-300">TELF: +569 94438833</div>
-                      <div className="text-[9px] font-bold text-slate-300 lowercase">e.marval@themarvals.com</div>
+                    <div className="space-y-1.5 border-r-2 border-[#303030] pr-4">
+                      <div className="text-[9px] font-bold text-slate-300">{companyProfile?.taxIdLabel || 'TAX ID'}: {companyProfile?.taxId || '27.087.979-9'}</div>
+                      <div className="text-[9px] font-bold text-slate-300">TELF: {companyProfile?.phone || '+569 94438833'}</div>
+                      <div className="text-[9px] font-bold text-slate-300 lowercase">{companyProfile?.email || 'e.marval@themarvals.com'}</div>
                     </div>
                   </div>
                 </div>
@@ -168,8 +169,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
             ) : (
               <header className="relative w-full p-8 border-b border-slate-50 shrink-0 flex justify-between items-center bg-white">
                 <div className="relative inline-block">
-                  <h1 className="text-3xl font-black mb-0 stroke-text leading-none tracking-tighter" style={{ WebkitTextStrokeColor: '#000000', WebkitTextStrokeWidth: '1.5px' }}>MARVAL</h1>
-                  <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-600" />
+                  <h1 className="text-3xl font-black mb-0 stroke-text leading-none tracking-tighter" style={{ WebkitTextStrokeColor: '#000000', WebkitTextStrokeWidth: '1.5px' }}>{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
+                  <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-primary" />
                 </div>
                 <div className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-300">{pageIdx + 1} / {totalPages}</div>
               </header>
@@ -179,7 +180,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
             <main className="flex-grow px-10 pt-10 pb-24 relative overflow-hidden">
               {/* Watermark */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
-                <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#1e3a8a', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>MARVAL</h1>
+                <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#181818', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
               </div>
 
               <div className="relative z-10 space-y-8">
@@ -187,14 +188,14 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
                 {pageIdx === 0 && !isTemplate && (
                   <div className="flex justify-between items-start border-b border-slate-100 pb-8">
                     <div className="max-w-[60%]">
-                      <div className="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-[8px] font-black uppercase tracking-[0.2em] rounded-md mb-3">
+                      <div className="inline-block px-2 py-1 bg-surface-strong-light text-slate-800 text-[8px] font-black uppercase tracking-[0.2em] rounded-none mb-3">
                         {t('clientInfo')}
                       </div>
                       <h3 className="font-black text-2xl uppercase tracking-tighter text-slate-900 leading-tight mb-2">
                         {quote.client?.razonSocial || 'CLIENTE DE PRUEBA'}
                       </h3>
                       <div className="space-y-0.5 text-xs font-bold text-slate-400">
-                        <div>RUT: {quote.client?.rut || '---'}</div>
+                        <div>{companyProfile?.taxIdLabel || 'TAX ID'}: {quote.client?.rut || '---'}</div>
                         <div className="font-medium italic opacity-80 text-[11px]">{quote.client?.giro || 'Servicios Informáticos'}</div>
                       </div>
                     </div>
@@ -202,14 +203,14 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
                       <div className="space-y-1">
                         <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{t('document')}</div>
                         <div className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">
-                          {t('quote')} <span className="text-blue-600">#{String(quote.correlativo || 0).padStart(4, '0')}</span>
+                          {t('quote')} <span className="text-primary">#{String(quote.correlativo || 0).padStart(4, '0')}</span>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-right">
                         <div className="text-[9px] font-black text-slate-300 uppercase">{t('issue')}</div>
                         <div className="text-xs font-black text-slate-800">{new Date(quote.fechaEmision || Date.now()).toLocaleDateString(locale)}</div>
                         <div className="text-[9px] font-black text-slate-300 uppercase">{t('validity')}</div>
-                        <div className="text-xs font-black text-blue-600">{quote.fechaValidez ? new Date(quote.fechaValidez).toLocaleDateString(locale) : t('toDefine')}</div>
+                        <div className="text-xs font-black text-primary">{quote.fechaValidez ? new Date(quote.fechaValidez).toLocaleDateString(locale) : t('toDefine')}</div>
                       </div>
                     </div>
                   </div>
@@ -224,13 +225,13 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
             </main>
 
             {/* Footer */}
-            <footer className="absolute bottom-0 left-0 w-full p-6 text-slate-300 text-center shrink-0" style={{ background: '#050212' }}>
-              <div className="text-[12px] font-black uppercase tracking-[0.6em] text-white">EDUARDO MARVAL</div>
-              <div className="h-px w-8 bg-blue-500 mx-auto my-3 opacity-30"></div>
+            <footer className="absolute bottom-0 left-0 w-full p-6 text-slate-300 text-center shrink-0" style={{ background: '#181818' }}>
+              <div className="text-[12px] font-black uppercase tracking-[0.6em] text-white">{companyProfile?.brandNameFooter || 'EDUARDO MARVAL'}</div>
+              <div className="h-px w-8 bg-primary mx-auto my-3 opacity-30"></div>
               <div className="text-[8px] font-bold opacity-40 space-x-6 uppercase tracking-widest">
-                <span>ANTONIO BELLET 193 OF 1210 12P, PROVIDENCIA, RM</span>
+                <span>{companyProfile?.address || 'ANTONIO BELLET 193 OF 1210 12P, PROVIDENCIA, RM'}</span>
                 <span>•</span>
-                <span>e.marval@themarvals.com</span>
+                <span>{companyProfile?.email || 'e.marval@themarvals.com'}</span>
               </div>
             </footer>
           </div>
@@ -241,8 +242,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
           <div className="pdf-page w-full h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
             <header className="relative w-full p-8 border-b border-slate-50 shrink-0 flex justify-between items-center bg-white">
               <div className="relative inline-block">
-                <h1 className="text-3xl font-black mb-0 stroke-text leading-none tracking-tighter" style={{ WebkitTextStrokeColor: '#000000', WebkitTextStrokeWidth: '1.5px' }}>MARVAL</h1>
-                <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-600" />
+                <h1 className="text-3xl font-black mb-0 stroke-text leading-none tracking-tighter" style={{ WebkitTextStrokeColor: '#000000', WebkitTextStrokeWidth: '1.5px' }}>{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
+                <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-primary" />
               </div>
               <div className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-300">{totalPages} / {totalPages}</div>
             </header>
@@ -250,7 +251,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
             <main className="flex-grow px-10 pt-10 pb-20 relative overflow-hidden">
               {/* Watermark */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
-                <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#1e3a8a', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>MARVAL</h1>
+                <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#181818', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
               </div>
 
               <div className="relative z-10 space-y-12">
@@ -327,13 +328,13 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
               </div>
             </main>
 
-            <footer className="absolute bottom-0 left-0 w-full p-6 text-slate-300 text-center shrink-0" style={{ background: '#050212' }}>
-              <div className="text-[12px] font-black uppercase tracking-[0.6em] text-white">MARVAL</div>
-              <div className="h-px w-8 bg-blue-500 mx-auto my-3 opacity-30"></div>
+            <footer className="absolute bottom-0 left-0 w-full p-6 text-slate-300 text-center shrink-0" style={{ background: '#181818' }}>
+              <div className="text-[12px] font-black uppercase tracking-[0.6em] text-white">{companyProfile?.brandNameFooter || 'EDUARDO MARVAL'}</div>
+              <div className="h-px w-8 bg-primary mx-auto my-3 opacity-30"></div>
               <div className="text-[8px] font-bold opacity-40 space-x-6 uppercase tracking-widest">
-                <span>ANTONIO BELLET 193 OF 1210 12P, PROVIDENCIA, RM</span>
+                <span>{companyProfile?.address || 'ANTONIO BELLET 193 OF 1210 12P, PROVIDENCIA, RM'}</span>
                 <span>•</span>
-                <span>e.marval@themarvals.com</span>
+                <span>{companyProfile?.email || 'e.marval@themarvals.com'}</span>
               </div>
             </footer>
           </div>
@@ -359,11 +360,10 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
           .propuesta-content h1, .propuesta-content h2, .propuesta-content h3 {
             color: #0f172a;
             font-weight: 900;
-            text-transform: uppercase;
             letter-spacing: -0.025em;
             margin-top: 1.5em;
             margin-bottom: 0.5em;
-            border-left: 4px solid #2563eb;
+            border-left: 4px solid #da291c;
             padding-left: 1rem;
           }
           .propuesta-content h1 { font-size: 1.5rem; }
@@ -382,7 +382,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate }) => {
           .propuesta-content ul { list-style-type: disc; }
           .propuesta-content ol { list-style-type: decimal; }
           .propuesta-content li { margin-bottom: 0.5em; }
-          .propuesta-content strong { color: #1e3a8a; font-weight: 700; }
+          .propuesta-content strong { color: #181818; font-weight: 900; }
           
           /* Table Styles */
           .propuesta-content table {

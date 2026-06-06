@@ -10,6 +10,7 @@
     "invoices": "Billing",
     "products": "Products",
     "tickets": "Tickets",
+    "showcase": "Showcase",
     "audit": "Audit Logs",
     "productivity": "Productivity",
     "projects": "My Projects",
@@ -25,6 +26,7 @@
     "welcome": "Welcome, {name}",
     "summary": "General overview of your business activity.",
     "newQuote": "New Quote",
+    "newInvoice": "New Invoice",
     "stats": {
       "quotes": "Quotations",
       "invoices": "Invoices",
@@ -147,6 +149,27 @@
       "id": "ID",
       "priority": "Priority",
       "view": "View/Respond"
+    },
+    "detail": {
+      "back": "Back to Inbox",
+      "respond": "Reply to Client",
+      "clientInfo": "Client Information",
+      "razonSocial": "Company Name",
+      "rut": "Tax ID (RUT)",
+      "email": "Primary Email",
+      "notRegistered": "Not registered",
+      "viewProfile": "View complete profile",
+      "priority": {
+        "URGENT": "Urgent",
+        "HIGH": "High",
+        "MEDIUM": "Medium",
+        "LOW": "Low"
+      },
+      "adminStatus": {
+        "OPEN": "Pending",
+        "IN_PROGRESS": "In Progress",
+        "CLOSED": "Resolved"
+      }
     }
   },
   "QuoteForm": {
@@ -276,6 +299,11 @@
       "medium": "Medium",
       "low": "Low"
     },
+    "status": {
+      "todo": "Pending",
+      "in-progress": "In Progress",
+      "done": "Completed"
+    },
     "noDate": "No date",
     "delete": {
       "title": "Delete task?",
@@ -376,6 +404,11 @@
     "tasks": "Pending Tasks",
     "events": "Calendar Events",
     "vps": "VPS Expirations",
+    "tickets": "Tickets",
+    "quotes": "Quotes",
+    "audit": "Audit",
+    "sendNotifications": "Send Notifications",
+    "sending": "...",
     "noReminders": "No upcoming reminders for the next 7 days.",
     "daysLeft": "{days} days",
     "today": "Today",
@@ -385,24 +418,101 @@
   },
   "Audit": {
     "title": "Audit Logs",
-    "subtitle": "History of actions executed on VPS servers (Recent 100).",
+    "subtitle": "History of actions executed on VPS servers.",
     "table": {
       "date": "Date",
       "user": "User",
       "server": "Server",
       "action": "Action",
-      "status": "Status"
+      "status": "Status",
+      "actions": "Actions"
     },
     "status": {
       "success": "SUCCESS",
       "pending": "PENDING OTP",
       "failed": "FAILED"
     },
-    "noLogs": "No actions recorded yet."
+    "noLogs": "No actions recorded yet.",
+    "pagination": {
+      "showing": "Showing {start}–{end} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    }
   },
   "Settings": {
-    "title": "Productivity Settings",
-    "subtitle": "Manage system integrations and notifications.",
+    "title": "System Settings",
+    "subtitle": "Manage company profile, team, and integrations.",
+    "tabs": {
+      "company": "Company Profile",
+      "team": "Admins & Team",
+      "productivity": "Productivity"
+    },
+    "companyProfile": {
+      "title": "Company Profile",
+      "subtitle": "Information used for generating Quotes and Invoices.",
+      "name": "Name / Company Name",
+      "role": "Role / Position",
+      "taxIdLabel": "Tax ID Label",
+      "taxId": "Tax ID Value",
+      "phone": "Phone Number",
+      "email": "Email Address",
+      "address": "Physical Address",
+      "brandNameHeader": "Brand Name — Header (e.g. LAUNCHPAD)",
+      "brandNameFooter": "Brand Name — Footer (e.g. EDUARDO MARVAL)",
+      "systemsTitle": "Systems Title (e.g. SYSTEMS ARCHITECTURE)",
+      "systemsSubtitle": "Systems Subtitle (e.g. IT CONSULTING)",
+      "save": "Save Profile",
+      "success": "Profile updated successfully.",
+      "error": "Failed to update profile."
+    },
+    "team": {
+      "title": "Team Management",
+      "subtitle": "Manage administrators and collaborators.",
+      "newAdmin": "Add Admin",
+      "editAdmin": "Edit Admin",
+      "requiredFields": "Name and email are required.",
+      "createSuccess": "Admin created successfully.",
+      "createError": "Error creating admin.",
+      "updateSuccess": "Admin updated successfully.",
+      "updateError": "Error updating admin.",
+      "deleteTitle": "Delete Admin?",
+      "deleteText": "They will lose access to the system immediately.",
+      "deleteConfirm": "Delete",
+      "deleteCancel": "Cancel",
+      "deleteSuccess": "Admin deleted.",
+      "deleteError": "Error deleting admin.",
+      "deleteAdmin": "Delete Admin",
+      "resetPassword": "Reset Password",
+      "resetPasswordHelp": "Enter a new password for",
+      "passwordRequired": "Password is required.",
+      "passwordResetSuccess": "Password reset successfully.",
+      "passwordResetError": "Error resetting password.",
+      "empty": "No administrators found.",
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "status": "Status",
+        "joined": "Joined",
+        "actions": "Actions"
+      },
+      "form": {
+        "name": "Full Name",
+        "namePlaceholder": "e.g. John Doe",
+        "email": "Email Address",
+        "emailPlaceholder": "e.g. admin@company.com",
+        "password": "Password",
+        "passwordPlaceholder": "Leave blank to use default: Launchpad2026!",
+        "newPasswordPlaceholder": "New Password",
+        "passwordHelp": "If left blank, the default password 'Launchpad2026!' will be assigned.",
+        "save": "Save",
+        "saving": "Saving...",
+        "cancel": "Cancel"
+      }
+    },
     "telegram": {
       "title": "Telegram Integration",
       "subtitle": "Receive automatic reminders for tasks and expirations.",
@@ -426,6 +536,215 @@
     "submitOtp": "Login",
     "back": "Go Back",
     "otpSent": "A 6-digit code has been sent to your email address.",
+    "connectionError": "Connection error. Try again.",
+    "invalidCode": "Incorrect or expired code.",
+    "invalidCredentials": "Invalid credentials.",
+    "serverError": "Server error, please try again.",
+    "footer": "ALL RIGHTS RESERVED"
+  },
+  "Gate": {
+    "title": "Access Platform",
+    "subtitle": "Enter your email to verify access.",
+    "emailLabel": "Email Address",
+    "checking": "Verifying access...",
+    "notFound": "No account found with this email. Check or contact the administrator.",
+    "rateLimited": "Too many attempts. Try again later.",
+    "serverError": "Server error. Try again later.",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "restrictedTitle": "Restricted Access",
+    "restrictedMessage": "You must verify your email from the main page before accessing the login.",
+    "backToHome": "Back to Launchpad"
+  },
+  "ClientDetails": {
+    "back": "Back to Clients",
+    "subtitle": "Portal and Cloud Server Access Management",
+    "users": "Portal Users",
+    "noUsers": "This client has no portal access.",
+    "servers": "Linked Servers",
+    "noServers": "No linked servers.",
+    "addUser": "+ Add User",
+    "addServer": "+ Link VPS",
+    "modalUserTitle": "Create Portal User",
+    "modalServerTitle": "Link VPS Server",
+    "name": "Name",
+    "email": "Email",
+    "password": "Temporary Password",
+    "friendlyName": "Friendly Name",
+    "providerId": "Provider ID",
+    "ipAddress": "IP Address",
+    "cancel": "Cancel",
+    "save": "Save",
+    "link": "Link"
+  },
+  "ClientPortal": {
+    "dashboard": {
+      "title": "Hi, {name}",
+      "subtitle": "Welcome to your LAUNCHPAD cloud management panel.",
+      "navLabel": "Dashboard"
+    },
+    "servers": {
+      "title": "Cloud Servers",
+      "description": "You have {count} server(s) currently running.",
+      "action": "Manage Servers",
+      "pageTitle": "My Servers",
+      "pageSubtitle": "Managed Cloud Infrastructure.",
+      "empty": "You have no servers linked to your account."
+    },
+    "tickets": {
+      "title": "Support",
+      "description": "Manage your inquiries and technical reports.",
+      "action": "Go to Support Center",
+      "pageTitle": "Support Center",
+      "pageSubtitle": "Manage your inquiries and technical reports",
+      "newTicket": "New Ticket",
+      "emptyTitle": "No open tickets",
+      "emptyMessage": "If you have any technical issues or questions about your service, don't hesitate to contact us.",
+      "emptyAction": "Open my first ticket",
+      "table": {
+        "subject": "Subject",
+        "status": "Status",
+        "priority": "Priority",
+        "updated": "Last Updated",
+        "actions": "Action"
+      },
+      "status": {
+        "open": "Open",
+        "inProgress": "In Progress",
+        "closed": "Closed"
+      },
+      "priority": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "urgent": "Urgent"
+      },
+      "detail": {
+        "back": "Back",
+        "created": "Created on {date}",
+        "lastActivity": "Last activity: {time}",
+        "replyTitle": "Write a Reply",
+        "replyButton": "Send Reply",
+        "replyPlaceholder": "Write your message here...",
+        "reopenButton": "Reopen Ticket with Reply",
+        "closedTitle": "Ticket Closed",
+        "closedMessage": "This ticket has been marked as resolved. If the issue persists or you have a new question, please reply to this message to reopen it.",
+        "you": "You"
+      },
+      "new": {
+        "pageTitle": "Create New Ticket",
+        "pageSubtitle": "Describe your problem in detail so we can help you better.",
+        "subjectLabel": "Ticket Subject",
+        "subjectPlaceholder": "E.g.: Connection issues with VPS, Billing question...",
+        "priorityLabel": "Priority Level",
+        "priorityLow": "Low - General inquiry",
+        "priorityMedium": "Medium - Non-critical issue",
+        "priorityHigh": "High - Degraded service",
+        "priorityUrgent": "Urgent - Service completely down",
+        "messageLabel": "Problem Description",
+        "messageHint": "Please include all relevant information (exact errors, steps to reproduce, involved IPs).",
+        "messagePlaceholder": "Describe your problem here...",
+        "submit": "Create Ticket",
+        "sending": "Sending...",
+        "back": "Back"
+      },
+      "statusManager": {
+        "closeQuestion": "Mark as Resolved?",
+        "closeMessage": "If your issue has been resolved, you can close this ticket.",
+        "closeConfirm": "Yes, close ticket",
+        "closeCancel": "Cancel",
+        "closeText": "Mark as resolved",
+        "closedSuccess": "Ticket Closed",
+        "closedThankYou": "Thank you for contacting us.",
+        "supportTeam": "LAUNCHPAD Support"
+      }
+    },
+    "quotes": {
+      "pageTitle": "My Quotes",
+      "pageSubtitle": "Commercial history and approved technical proposals.",
+      "table": {
+        "number": "Nº",
+        "date": "Date",
+        "status": "Status",
+        "netAmount": "Net Amount",
+        "action": "Action"
+      },
+      "empty": "No quotes registered yet.",
+      "pdf": "PDF"
+    }
+  },
+  "Showcase": {
+    "title": "Showcase",
+    "subtitle": "Manage your portfolio projects and gallery images.",
+    "sectionTitle": "Featured Projects",
+    "sectionSubtitle": "Some of the projects we've designed, built, and deployed.",
+    "newProject": "New Project",
+    "editProject": "Edit Project",
+    "deleteConfirm": "Are you sure you want to delete this project?",
+    "active": "Active",
+    "inactive": "Inactive",
+    "hide": "Hide",
+    "show": "Show",
+    "edit": "Edit",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "empty": "No projects yet. Create your first showcase project.",
+    "scrollHint": "Scroll to explore",
+    "viewProject": "View Project",
+    "noImages": "No images in this project yet.",
+    "categories": {
+      "web": "Web",
+      "branding": "Branding",
+      "infra": "Infrastructure",
+      "video": "Video",
+      "app": "App"
+    },
+    "form": {
+      "title": "Project Title",
+      "titlePlaceholder": "e.g. Liceo A1 - Educational Platform",
+      "description": "Description",
+      "descriptionPlaceholder": "Brief description of the project...",
+      "category": "Category",
+      "clientName": "Client Name",
+      "clientPlaceholder": "e.g. Liceo A1",
+      "technologies": "Technologies (comma separated)",
+      "techPlaceholder": "e.g. Next.js, Docker, PostgreSQL",
+      "projectUrl": "Project URL",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "images": {
+      "title": "Gallery Images",
+      "upload": "Click to upload image",
+      "uploading": "Uploading...",
+      "featured": "Featured",
+      "setFeatured": "Set as featured",
+      "delete": "Delete",
+      "add": "Add"
+    }
+  },
+  "Landing": {
+    "brand": "LAUNCHPAD",
+    "tagline": "360° Creative & Technology Agency",
+    "description": "We are a full-service agency that brings ideas to life. From brand identity and video production to web development and cloud infrastructure — we design, build, and grow digital products that make an impact.",
+    "squads": "Our Expertise",
+    "design": {
+      "title": "Design & Creative",
+      "subtitle": "Branding, Video & UX",
+      "description": "We craft visual identities, produce video content, and design user experiences that connect. From concept to final cut — every pixel, frame, and interaction is built with intention."
+    },
+    "engineering": {
+      "title": "Engineering & Architecture",
+      "subtitle": "Web Development & Cloud Infrastructure",
+      "description": "We build websites, web apps, and cloud systems that are fast, reliable, and secure. From Next.js frontends to Docker-orchestrated backends — we turn complex requirements into seamless digital products."
+    },
+    "growth": {
+      "title": "Digital Strategy & Growth",
+      "subtitle": "Campaigns, Content & Conversion",
+      "description": "We amplify your reach through strategic campaigns, content marketing, and conversion optimization. Every decision is data-informed to ensure your brand grows with measurable results."
+    },
+    "cta": "Access Platform",
+    "login": "Login",
     "footer": "ALL RIGHTS RESERVED"
   }
 }

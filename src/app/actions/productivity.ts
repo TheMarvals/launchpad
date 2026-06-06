@@ -18,17 +18,16 @@ async function ensureAdmin() {
 // --- PROJECTS ---
 
 export async function getProjects() {
-  const user = await ensureAdmin();
+  await ensureAdmin();
   return await prisma.project.findMany({
-    where: { userId: user.id },
     orderBy: { updatedAt: 'desc' },
   });
 }
 
 export async function getProject(id: string) {
-  const user = await ensureAdmin();
+  await ensureAdmin();
   return await prisma.project.findUnique({
-    where: { id, userId: user.id },
+    where: { id },
     include: {
       tasks: {
         orderBy: { createdAt: 'desc' },
@@ -57,9 +56,9 @@ export async function createProject(data: {
 }
 
 export async function updateProject(id: string, data: any) {
-  const user = await ensureAdmin();
+  await ensureAdmin();
   const project = await prisma.project.update({
-    where: { id, userId: user.id },
+    where: { id },
     data,
   });
   revalidatePath('/dashboard/productivity/projects');
@@ -67,9 +66,9 @@ export async function updateProject(id: string, data: any) {
 }
 
 export async function deleteProject(id: string) {
-  const user = await ensureAdmin();
+  await ensureAdmin();
   await prisma.project.delete({
-    where: { id, userId: user.id },
+    where: { id },
   });
   revalidatePath('/dashboard/productivity/projects');
   return { success: true };
@@ -77,11 +76,17 @@ export async function deleteProject(id: string) {
 
 // --- TASKS ---
 
+export async function getTask(id: string) {
+  await ensureAdmin();
+  return await prisma.task.findUnique({
+    where: { id },
+  });
+}
+
 export async function getTasks(projectId?: string) {
-  const user = await ensureAdmin();
+  await ensureAdmin();
   return await prisma.task.findMany({
     where: { 
-      userId: user.id,
       ...(projectId ? { projectId } : {}),
     },
     orderBy: [
@@ -111,18 +116,18 @@ export async function createTask(data: {
 }
 
 export async function deleteTask(id: string) {
-  const user = await ensureAdmin();
+  await ensureAdmin();
   await prisma.task.delete({
-    where: { id, userId: user.id },
+    where: { id },
   });
   revalidatePath('/dashboard/productivity/tasks');
   return { success: true };
 }
 
 export async function updateTask(id: string, data: any) {
-  const user = await ensureAdmin();
+  await ensureAdmin();
   const task = await prisma.task.update({
-    where: { id, userId: user.id },
+    where: { id },
     data,
   });
   revalidatePath('/dashboard/productivity/tasks');
@@ -153,16 +158,22 @@ export async function addTimeEntry(data: {
 export async function getNotes() {
   const user = await ensureAdmin();
   return await prisma.personalNote.findMany({
-    where: { userId: user.id },
+    where: {
+      OR: [
+        { userId: user.id },
+        { isPublic: true }
+      ]
+    },
     orderBy: { updatedAt: 'desc' },
   });
 }
 
 export async function createNote(data: {
   title: string;
-  content: string;
+  content?: string;
   category?: string;
   color?: string;
+  isPublic?: boolean;
 }) {
   const user = await ensureAdmin();
   const note = await prisma.personalNote.create({
@@ -195,10 +206,16 @@ export async function deleteNote(id: string) {
 }
 // --- CALENDAR EVENTS ---
 
+export async function getCalendarEvent(id: string) {
+  await ensureAdmin();
+  return await prisma.calendarEvent.findUnique({
+    where: { id },
+  });
+}
+
 export async function getCalendarEvents() {
-  const user = await ensureAdmin();
+  await ensureAdmin();
   return await prisma.calendarEvent.findMany({
-    where: { userId: user.id },
     orderBy: { start: 'asc' },
   });
 }
@@ -223,9 +240,9 @@ export async function createCalendarEvent(data: {
 }
 
 export async function updateCalendarEvent(id: string, data: any) {
-  const user = await ensureAdmin();
+  await ensureAdmin();
   const event = await prisma.calendarEvent.update({
-    where: { id, userId: user.id },
+    where: { id },
     data,
   });
   revalidatePath('/dashboard/productivity/calendar');
@@ -233,9 +250,9 @@ export async function updateCalendarEvent(id: string, data: any) {
 }
 
 export async function deleteCalendarEvent(id: string) {
-  const user = await ensureAdmin();
+  await ensureAdmin();
   await prisma.calendarEvent.delete({
-    where: { id, userId: user.id },
+    where: { id },
   });
   revalidatePath('/dashboard/productivity/calendar');
   return { success: true };
@@ -272,5 +289,5 @@ import { sendTelegramMessage } from '@/lib/telegram';
 
 export async function testTelegram(botToken: string, chatId: string) {
   await ensureAdmin();
-  return await sendTelegramMessage(botToken, chatId, '🧪 <b>MARVAL Productivity</b>\nTest de conexión exitoso.');
+  return await sendTelegramMessage(botToken, chatId, '🧪 <b>LAUNCHPAD Productivity</b>\nTest de conexión exitoso.');
 }

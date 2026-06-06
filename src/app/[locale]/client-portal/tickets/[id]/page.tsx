@@ -4,12 +4,14 @@ import { notFound } from 'next/navigation';
 import { getTicketDetails } from '@/app/actions/tickets';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { getTranslations } from 'next-intl/server';
 import TicketReplyForm from './TicketReplyForm';
 import TicketStatusManager from './TicketStatusManager';
 
 export default async function TicketDetailsPage({ params }: { params: { id: string } }) {
   const { id } = await params;
   const ticket = await getTicketDetails(id);
+  const t = await getTranslations('ClientPortal');
 
   if (!ticket) {
     notFound();
@@ -17,109 +19,147 @@ export default async function TicketDetailsPage({ params }: { params: { id: stri
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'OPEN': return <span className="bg-green-100 text-green-800 border border-green-200 px-3 py-1 rounded-full text-sm font-semibold">Abierto</span>;
-      case 'IN_PROGRESS': return <span className="bg-yellow-100 text-yellow-800 border border-yellow-200 px-3 py-1 rounded-full text-sm font-semibold">En Progreso</span>;
-      case 'CLOSED': return <span className="bg-gray-100 text-gray-800 border border-gray-200 px-3 py-1 rounded-full text-sm font-semibold">Cerrado</span>;
+      case 'OPEN': return <span className="bg-semantic-success/10 text-semantic-success border border-semantic-success/30 px-xxs py-[2px] text-caption-uppercase font-semibold">{t('tickets.status.open')}</span>;
+      case 'IN_PROGRESS': return <span className="bg-accent-yellow/10 text-accent-yellow border border-accent-yellow/30 px-xxs py-[2px] text-caption-uppercase font-semibold">{t('tickets.status.inProgress')}</span>;
+      case 'CLOSED': return <span className="bg-canvas-elevated text-muted border border-hairline px-xxs py-[2px] text-caption-uppercase font-semibold">{t('tickets.status.closed')}</span>;
       default: return null;
     }
   };
 
   const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case 'LOW': return <span className="text-gray-500 font-medium text-sm flex items-center"><span className="material-icons text-[16px] mr-1">flag</span> Baja</span>;
-      case 'MEDIUM': return <span className="text-blue-500 font-medium text-sm flex items-center"><span className="material-icons text-[16px] mr-1">flag</span> Media</span>;
-      case 'HIGH': return <span className="text-orange-500 font-medium text-sm flex items-center"><span className="material-icons text-[16px] mr-1">flag</span> Alta</span>;
-      case 'URGENT': return <span className="text-red-600 font-bold text-sm flex items-center"><span className="material-icons text-[16px] mr-1">flag</span> Urgente</span>;
-      default: return null;
-    }
+    const p = priority;
+    return (
+      <span className={`text-sm flex items-center ${
+        p === 'URGENT' ? 'text-semantic-warning font-bold' :
+        p === 'HIGH' ? 'text-accent-yellow' :
+        p === 'MEDIUM' ? 'text-semantic-info' :
+        'text-muted'
+      }`}>
+        <span className="material-icons text-[16px] mr-xxs">flag</span>
+        {p === 'URGENT' ? t('tickets.priority.urgent') :
+         p === 'HIGH' ? t('tickets.priority.high') :
+         p === 'MEDIUM' ? t('tickets.priority.medium') :
+         t('tickets.priority.low')}
+      </span>
+    );
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
-          <div>
-            <div className="flex items-center space-x-3 mb-2">
-              <Link href="/client-portal/tickets" className="text-gray-400 hover:text-gray-900 transition-colors">
-                <span className="material-icons text-[24px]">arrow_back</span>
-              </Link>
-              <h1 className="text-2xl font-bold text-gray-900">{ticket.subject}</h1>
+    <div className="max-w-3xl mx-auto">
+      {/* Compact Header */}
+      <div className="bg-canvas-elevated border border-hairline px-sm py-xs mb-sm">
+        <div className="flex items-center gap-xxs">
+          <Link href="/client-portal/tickets" className="shrink-0 w-[28px] h-[28px] flex items-center justify-center text-muted hover:text-ink hover:bg-canvas transition-colors">
+            <span className="material-icons text-[18px]">arrow_back</span>
+          </Link>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-xxs">
+              <h1 className="text-sm font-medium text-ink truncate">{ticket.subject}</h1>
+              <span className="text-[10px] text-muted/40 font-mono shrink-0">#{ticket.id.split('-')[0].toUpperCase()}</span>
             </div>
-            <p className="text-gray-500 text-sm font-mono ml-9">Ticket #{ticket.id}</p>
           </div>
-          
-          <div className="flex items-center space-x-3 ml-9 md:ml-0">
+          <div className="flex items-center gap-xxs shrink-0">
             {getPriorityBadge(ticket.priority)}
-            <span className="w-px h-4 bg-gray-200"></span>
             {getStatusBadge(ticket.status)}
           </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-6 ml-9 text-sm text-gray-500 border-t border-gray-100 pt-6">
-          <div className="flex items-center">
-            <span className="material-icons text-[18px] mr-2 text-gray-400">calendar_today</span>
-            Creado el {format(new Date(ticket.createdAt), "d 'de' MMMM, yyyy - HH:mm", { locale: es })}
-          </div>
-          <div className="flex items-center">
-            <span className="material-icons text-[18px] mr-2 text-gray-400">update</span>
-            Última actividad: {format(new Date(ticket.updatedAt), "HH:mm", { locale: es })}
-          </div>
-          
           {ticket.status !== 'CLOSED' && (
-            <div className="ml-auto">
-               <TicketStatusManager ticketId={ticket.id} currentStatus={ticket.status} role="CLIENT" />
-            </div>
+            <TicketStatusManager ticketId={ticket.id} currentStatus={ticket.status} role="CLIENT" />
           )}
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="space-y-6">
-        {ticket.messages.map((msg, index) => {
-          const isAdmin = msg.user.role === 'ADMIN';
-          return (
-            <div key={msg.id} className={`flex ${isAdmin ? 'justify-start' : 'justify-end'}`}>
-              <div className={`max-w-[85%] md:max-w-[75%] rounded-2xl p-6 ${isAdmin ? 'bg-white border border-gray-100 shadow-sm' : 'bg-gray-900 text-white shadow-md'}`}>
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${isAdmin ? 'bg-blue-100 text-blue-700' : 'bg-white/10 text-white'}`}>
-                    {msg.user.name.charAt(0).toUpperCase()}
+      {/* Chat Messages */}
+      <div className="bg-canvas/50 border border-hairline mb-sm">
+        <div className="px-xs py-sm space-y-[3px]">
+          {ticket.messages.map((msg, idx) => {
+            const isAdmin = msg.user.role === 'ADMIN';
+            const prevMsg = idx > 0 ? ticket.messages[idx - 1] : null;
+            const sameSender = prevMsg?.user.role === msg.user.role;
+            
+            return (
+              <div key={msg.id} className={`flex items-end gap-[6px] ${isAdmin ? 'justify-start' : 'justify-end'}`}>
+                {/* Admin Avatar */}
+                {isAdmin ? (
+                  <div className={`shrink-0 transition-opacity duration-200 ${
+                    sameSender ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                  }`}>
+                    <div className="w-[26px] h-[26px] rounded-full bg-canvas-elevated border border-hairline flex items-center justify-center text-[10px] font-bold text-primary" title={t('tickets.statusManager.supportTeam')}>
+                      {msg.user.name.charAt(0).toUpperCase()}
+                    </div>
                   </div>
-                  <div>
-                    <p className={`text-sm font-bold ${isAdmin ? 'text-gray-900' : 'text-white'}`}>
-                      {isAdmin ? 'Soporte MARVAL' : 'Tú'}
+                ) : (
+                  <div className="w-[26px] shrink-0" />
+                )}
+
+                {/* Bubble */}
+                <div className={`relative max-w-[80%] md:max-w-[70%] ${
+                  isAdmin 
+                    ? 'rounded-r-lg rounded-bl-lg bg-canvas-elevated border border-hairline' 
+                    : 'rounded-l-lg rounded-br-lg bg-primary text-on-primary'
+                } ${sameSender ? 'rounded-tl-lg rounded-tr-lg' : ''}`}>
+                  
+                  {/* Sender name (first message in block only) */}
+                  {!sameSender && (
+                    <div className={`px-xs pt-[6px] pb-0 ${isAdmin ? '' : 'text-right'}`}>
+                      <span className={`text-[10px] font-semibold tracking-wide ${isAdmin ? 'text-primary' : 'text-on-primary/65'}`}>
+                        {isAdmin ? t('tickets.statusManager.supportTeam') : t('tickets.detail.you')}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Message content */}
+                  <div className={`px-xs ${sameSender ? 'pt-[7px]' : 'pt-[4px]'} pb-[2px]`}>
+                    <p className={`text-sm leading-relaxed whitespace-pre-wrap break-words ${isAdmin ? 'text-body' : 'text-on-primary/90'}`}>
+                      {msg.message}
                     </p>
-                    <p className={`text-xs ${isAdmin ? 'text-gray-500' : 'text-gray-400'}`}>
-                      {format(new Date(msg.createdAt), "d MMM, HH:mm", { locale: es })}
-                    </p>
+                  </div>
+
+                  {/* Timestamp */}
+                  <div className={`px-xs pb-[5px] flex ${isAdmin ? 'justify-start' : 'justify-end'}`}>
+                    <span className={`text-[10px] ${isAdmin ? 'text-muted/50' : 'text-on-primary/45'}`}>
+                      {format(new Date(msg.createdAt), 'HH:mm', { locale: es })}
+                    </span>
                   </div>
                 </div>
-                <div className={`text-sm leading-relaxed whitespace-pre-wrap ${isAdmin ? 'text-gray-700' : 'text-gray-200'}`}>
-                  {msg.message}
-                </div>
+
+                {/* Client Avatar */}
+                {!isAdmin ? (
+                  <div className={`shrink-0 transition-opacity duration-200 ${
+                    sameSender ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                  }`}>
+                    <div className="w-[26px] h-[26px] rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary" title={t('tickets.detail.you')}>
+                      {msg.user.name.charAt(0).toUpperCase()}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-[26px] shrink-0" />
+                )}
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
-      {/* Reply Form */}
+      {/* Reply Section */}
       {ticket.status !== 'CLOSED' ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mt-8">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-            <span className="material-icons mr-2 text-gray-400">reply</span>
-            Escribir Respuesta
-          </h3>
+        <div className="bg-canvas-elevated border border-hairline p-xs">
+          <div className="flex items-center gap-xxxs mb-xxs">
+            <span className="material-icons text-[14px] text-muted">reply</span>
+            <span className="text-[11px] font-medium text-muted">{t('tickets.detail.you')}</span>
+          </div>
           <TicketReplyForm ticketId={ticket.id} />
         </div>
       ) : (
-        <div className="bg-gray-50 rounded-2xl border border-gray-200 p-8 text-center mt-8">
-          <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="material-icons text-gray-400 text-3xl">lock</span>
+        <div className="bg-canvas/80 border border-hairline p-sm">
+          <div className="flex items-center gap-xxs mb-xxs">
+            <div className="w-[36px] h-[36px] bg-canvas-elevated flex items-center justify-center shrink-0">
+              <span className="material-icons text-muted text-lg">lock</span>
+            </div>
+            <p className="text-sm text-muted leading-relaxed">{t('tickets.detail.closedMessage')}</p>
           </div>
-          <h3 className="text-lg font-bold text-gray-900 mb-2">Ticket Cerrado</h3>
-          <p className="text-gray-500 max-w-md mx-auto mb-6">Este ticket ha sido marcado como resuelto. Si el problema persiste o tienes una nueva consulta, por favor responde a este mensaje para reabrirlo.</p>
-          <TicketReplyForm ticketId={ticket.id} buttonText="Reabrir Ticket con Respuesta" />
+          <div className="pl-[44px]">
+            <TicketReplyForm ticketId={ticket.id} buttonText={t('tickets.detail.reopenButton')} />
+          </div>
         </div>
       )}
     </div>

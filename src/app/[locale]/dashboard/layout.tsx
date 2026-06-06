@@ -29,107 +29,110 @@ export default async function DashboardLayout({
     .slice(0, 2) || 'U';
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-canvas text-ink font-sans">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#0a041a] text-white hidden md:flex flex-col">
-        <div className="p-6">
-          <h1 className="text-2xl fw-bold tracking-tighter stroke-text">MARVAL</h1>
-          <p className="text-[10px] uppercase tracking-widest opacity-60 mt-1">Cotizador</p>
+      <aside className="w-64 bg-canvas border-r border-hairline text-ink hidden md:flex flex-col">
+        <div className="p-sm">
+          <h1 className="text-2xl font-black tracking-tighter stroke-text">LAUNCHPAD</h1>
         </div>
         
-        <nav className="flex-grow mt-6">
-          <ul className="space-y-1">
+        <nav className="flex-grow mt-xs">
+          <ul className="space-y-[2px]">
             <li>
-              <Link href="/dashboard" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">dashboard</span> {t('dashboard')}
+              <Link href="/dashboard" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">dashboard</span> {t('dashboard')}
               </Link>
             </li>
             <li>
-              <Link href="/dashboard/quotes" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">description</span> {t('quotes')}
+              <Link href="/dashboard/quotes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">description</span> {t('quotes')}
               </Link>
             </li>
             <li>
-              <Link href="/dashboard/invoices" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">receipt_long</span> {t('invoices')}
+              <Link href="/dashboard/invoices" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">receipt_long</span> {t('invoices')}
               </Link>
             </li>
             <li>
-              <Link href="/dashboard/clients" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">people</span> {t('clients')}
+              <Link href="/dashboard/clients" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">people</span> {t('clients')}
               </Link>
             </li>
             <li>
-              <Link href="/dashboard/products" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">inventory_2</span> {t('products')}
+              <Link href="/dashboard/showcase" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">collections_bookmark</span> {t('showcase')}
               </Link>
             </li>
             <li>
-              <Link href="/dashboard/tickets" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">support_agent</span> {t('tickets')}
+              <Link href="/dashboard/products" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">inventory_2</span> {t('products')}
               </Link>
             </li>
             <li>
-              <Link href="/dashboard/logs" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">policy</span> {t('audit')}
+              <Link href="/dashboard/tickets" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">support_agent</span> {t('tickets')}
+              </Link>
+            </li>
+            <li>
+              <Link href="/dashboard/logs" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">policy</span> {t('audit')}
+              </Link>
+            </li>
+            <li>
+              <Link href="/dashboard/settings" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">settings</span> {t('settings')}
               </Link>
             </li>
 
-            <div className="px-6 py-4 mt-4">
-              <p className="text-[10px] uppercase tracking-widest opacity-40 font-bold">{t('productivity')}</p>
+            <div className="px-sm py-xxs mt-xxs">
+              <p className="text-caption-uppercase tracking-widest text-muted font-bold">{t('productivity')}</p>
             </div>
             <li>
-              <Link href="/dashboard/productivity/projects" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">folder</span> {t('projects')}
+              <Link href="/dashboard/productivity/projects" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">folder</span> {t('projects')}
               </Link>
             </li>
             <li>
-              <Link href="/dashboard/productivity/tasks" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">task_alt</span> {t('tasks')}
+              <Link href="/dashboard/productivity/tasks" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">task_alt</span> {t('tasks')}
               </Link>
             </li>
             <li>
-              <Link href="/dashboard/productivity/notes" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">note_alt</span> {t('notes')}
+              <Link href="/dashboard/productivity/notes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">note_alt</span> {t('notes')}
               </Link>
             </li>
             <li>
-              <Link href="/dashboard/productivity/calendar" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">calendar_month</span> {t('calendar')}
+              <Link href="/dashboard/productivity/calendar" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">calendar_month</span> {t('calendar')}
               </Link>
             </li>
             <li>
-              <Link href="/dashboard/productivity/reminders" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">notifications_active</span> {t('reminders')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/productivity/settings" className="flex items-center px-6 py-3 hover:bg-white/10 transition-colors">
-                <span className="material-icons mr-3 text-sm opacity-70">settings</span> {t('settings')}
+              <Link href="/dashboard/productivity/reminders" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+                <span className="material-icons mr-xxs text-sm opacity-70">notifications_active</span> {t('reminders')}
               </Link>
             </li>
           </ul>
         </nav>
 
-
-        <div className="p-6 border-t border-white/10 text-[10px] opacity-40 uppercase tracking-widest text-center">
-          © 2026 Marval
+        <div className="p-sm border-t border-hairline text-caption-uppercase text-muted text-center tracking-[0.1em]">
+          © 2026 Launchpad
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-grow flex flex-col h-screen overflow-hidden">
-        <header className="h-16 bg-white border-b flex items-center justify-between px-8 shrink-0">
-          <h2 className="font-bold text-gray-800">{t('dashboard')}</h2>
-          <div className="flex items-center space-x-6">
+      <main className="flex-grow flex flex-col h-screen overflow-hidden bg-canvas">
+        <header className="h-16 bg-canvas border-b border-hairline flex items-center justify-between px-lg shrink-0">
+          <h2 className="text-title-md font-medium text-ink">{t('dashboard')}</h2>
+          <div className="flex items-center space-x-sm">
             <LocaleSwitcher />
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-xxs">
               <div className="text-right hidden sm:block">
-                <div className="text-sm font-bold text-gray-800">{session.user.name}</div>
-                <div className="text-[10px] text-gray-400">{session.user.email}</div>
+                <div className="text-sm font-medium text-ink">{session.user.name}</div>
+                <div className="text-caption text-muted">{session.user.email}</div>
               </div>
 
-              <div className="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold text-xs">
+              <div className="w-[32px] h-[32px] rounded-full bg-canvas-elevated border border-hairline flex items-center justify-center text-ink font-bold text-xs select-none">
                 {initials}
               </div>
             </div>
@@ -142,7 +145,7 @@ export default async function DashboardLayout({
             >
               <button
                 type="submit"
-                className="text-slate-400 hover:text-red-500 transition-colors"
+                className="text-muted hover:text-primary transition-colors flex items-center justify-center cursor-pointer"
                 title={t('logout')}
               >
                 <span className="material-icons text-[20px]">logout</span>
@@ -151,7 +154,7 @@ export default async function DashboardLayout({
           </div>
         </header>
 
-        <div className="flex-grow overflow-y-auto p-8">
+        <div className="flex-grow overflow-y-auto p-lg">
           {children}
         </div>
       </main>

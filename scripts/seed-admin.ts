@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 async function main() {
   const adminEmail = 'admin@themarvals.com';
   const adminPassword = 'MarvalAdmin2026!'; // ← CAMBIA ESTO DESPUÉS DE CREAR EL USUARIO
-  const adminName = 'Admin MARVAL';
+  const adminName = 'Admin LAUNCHPAD';
 
   // Verificar si ya existe
   const existing = await prisma.user.findUnique({ where: { email: adminEmail } });

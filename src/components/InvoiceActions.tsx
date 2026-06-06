@@ -55,22 +55,22 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
         </button>
 
         {showStatusMenu && (
-          <div className="absolute right-0 bottom-full mb-2 bg-white rounded-xl shadow-2xl border border-slate-100 py-2 w-32 z-50 overflow-hidden">
+          <div className="absolute right-0 bottom-full mb-2 bg-canvas-elevated border border-hairline py-2 w-32 z-50 overflow-hidden">
             <button 
               onClick={() => handleStatusChange('Pendiente')}
-              className="w-full text-left px-4 py-2 text-[10px] font-black uppercase tracking-widest text-orange-600 hover:bg-orange-50 transition-colors"
+              className="w-full text-left px-sm py-xxs text-[10px] font-semibold uppercase tracking-widest text-semantic-warning hover:bg-canvas transition-colors"
             >
               {tInv('status.Pendiente')}
             </button>
             <button 
               onClick={() => handleStatusChange('Pagada')}
-              className="w-full text-left px-4 py-2 text-[10px] font-black uppercase tracking-widest text-green-600 hover:bg-green-50 transition-colors"
+              className="w-full text-left px-sm py-xxs text-[10px] font-semibold uppercase tracking-widest text-semantic-success hover:bg-canvas transition-colors"
             >
               {tInv('status.Pagada')}
             </button>
             <button 
               onClick={() => handleStatusChange('Anulada')}
-              className="w-full text-left px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-colors"
+              className="w-full text-left px-sm py-xxs text-[10px] font-semibold uppercase tracking-widest text-muted hover:bg-canvas transition-colors"
             >
               {tInv('status.Anulada')}
             </button>

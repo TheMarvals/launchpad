@@ -112,9 +112,9 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
       confirmButtonText: t('delete.confirm'),
       cancelButtonText: t('delete.cancel'),
       customClass: {
-        popup: 'rounded-[2rem]',
-        confirmButton: 'rounded-xl px-6 py-3 font-bold',
-        cancelButton: 'rounded-xl px-6 py-3 font-bold text-gray-400'
+        popup: 'rounded-none border border-hairline bg-canvas-elevated text-ink',
+        confirmButton: 'px-sm py-xs font-semibold uppercase tracking-wider text-xs border border-transparent bg-primary text-on-primary',
+        cancelButton: 'px-sm py-xs font-semibold text-muted uppercase tracking-wider text-xs border border-transparent bg-canvas'
       }
     });
 
@@ -130,18 +130,20 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
   };
 
   return (
-    <div className="bg-white rounded-[3rem] p-8 shadow-2xl shadow-gray-100 border border-gray-50 overflow-hidden h-[calc(100vh-250px)]">
+    <div className="bg-canvas-elevated p-sm border border-hairline overflow-hidden h-[calc(100vh-250px)]">
       <style jsx global>{`
         .fc { font-family: inherit; }
-        .fc-toolbar-title { font-weight: 900 !important; color: #0a041a !important; font-size: 1.5rem !important; }
-        .fc-button { background-color: #f9fafb !important; border: none !important; color: #9ca3af !important; font-weight: 700 !important; padding: 0.75rem 1.25rem !important; border-radius: 1rem !important; transition: all 0.2s !important; }
-        .fc-button:hover { background-color: #0a041a !important; color: white !important; }
-        .fc-button-active { background-color: #0a041a !important; color: white !important; }
-        .fc-daygrid-day { transition: background-color 0.1s; }
-        .fc-daygrid-day:hover { background-color: #f9fafb; cursor: pointer; }
-        .fc-event { border-radius: 0.5rem !important; padding: 0.25rem 0.5rem !important; font-weight: 600 !important; font-size: 0.8rem !important; border: none !important; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important; }
-        .fc-col-header-cell-cushion { color: #9ca3af !important; text-transform: uppercase !important; font-size: 0.7rem !important; letter-spacing: 0.1em !important; font-weight: 900 !important; padding: 1rem 0 !important; }
-        .fc-day-today { background-color: #f8fafc !important; }
+        .fc-toolbar-title { font-weight: 500 !important; color: var(--color-ink) !important; font-size: 1.5rem !important; text-transform: uppercase !important; font-family: 'Outfit', sans-serif !important; }
+        .fc-button { background-color: transparent !important; border: 1px solid var(--color-hairline) !important; color: var(--color-muted) !important; font-weight: 700 !important; padding: 0.75rem 1.25rem !important; border-radius: 0 !important; transition: all 0.2s !important; text-transform: uppercase !important; font-size: 0.75rem !important; letter-spacing: 0.05em !important; }
+        .fc-button:hover { background-color: var(--color-ink) !important; opacity: 0.8 !important; }
+        .fc-button-active { background-color: var(--color-ink) !important; opacity: 0.8 !important; border-color: var(--color-ink) !important; }
+        .fc-daygrid-day { transition: background-color 0.1s; border-color: var(--color-hairline) !important; }
+        .fc-daygrid-day:hover { background-color: rgba(255,255,255,0.03); cursor: pointer; }
+        .fc-event { border-radius: 0 !important; padding: 0.25rem 0.5rem !important; font-weight: 600 !important; font-size: 0.8rem !important; border: 1px solid rgba(255,255,255,0.1) !important; box-shadow: none !important; }
+        .fc-col-header-cell-cushion { color: var(--color-muted) !important; text-transform: uppercase !important; font-size: 0.7rem !important; letter-spacing: 0.1em !important; font-weight: 700 !important; padding: 1rem 0 !important; }
+        .fc-day-today { background-color: rgba(218, 41, 28, 0.08) !important; }
+        .fc-theme-standard td, .fc-theme-standard th { border-color: var(--color-hairline) !important; }
+        .fc-theme-standard .fc-scrollgrid { border-color: var(--color-hairline) !important; }
       `}</style>
       
       <FullCalendar

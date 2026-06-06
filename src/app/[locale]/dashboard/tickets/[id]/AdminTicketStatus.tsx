@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { updateTicketStatus } from '@/app/actions/tickets';
 
 export default function AdminTicketStatus({ ticketId, currentStatus }: { ticketId: string, currentStatus: string }) {
+  const t = useTranslations('Tickets');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -24,28 +26,28 @@ export default function AdminTicketStatus({ ticketId, currentStatus }: { ticketI
   };
 
   return (
-    <div className="flex items-center space-x-3">
-      <span className="text-sm font-semibold text-gray-700">Cambiar Estado:</span>
+    <div className="flex items-center gap-xxs">
+      <span className="text-caption-uppercase text-muted font-semibold">{t('table.status')}:</span>
       <div className="relative">
         <select
           value={currentStatus}
           onChange={handleStatusChange}
           disabled={loading}
-          className="appearance-none bg-white border border-gray-300 text-gray-700 py-1.5 pl-3 pr-8 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+          className="appearance-none bg-canvas border border-hairline text-ink py-[4px] pl-xxs pr-sm text-xs font-medium focus:outline-none focus:border-primary disabled:opacity-50 cursor-pointer"
         >
-          <option value="OPEN">Pendiente</option>
-          <option value="IN_PROGRESS">En Progreso</option>
-          <option value="CLOSED">Resuelto</option>
+          <option value="OPEN">{t('detail.adminStatus.OPEN')}</option>
+          <option value="IN_PROGRESS">{t('detail.adminStatus.IN_PROGRESS')}</option>
+          <option value="CLOSED">{t('detail.adminStatus.CLOSED')}</option>
         </select>
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1 text-muted">
           {loading ? (
-            <span className="material-icons animate-spin text-[16px]">sync</span>
+            <span className="material-icons animate-spin text-[14px]">sync</span>
           ) : (
-            <span className="material-icons text-[16px]">expand_more</span>
+            <span className="material-icons text-[14px]">expand_more</span>
           )}
         </div>
       </div>
-      {error && <span className="text-xs text-red-500">{error}</span>}
+      {error && <span className="text-caption text-semantic-warning">{error}</span>}
     </div>
   );
 }

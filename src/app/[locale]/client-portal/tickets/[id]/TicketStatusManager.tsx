@@ -3,21 +3,24 @@
 import React, { useState } from 'react';
 import { updateTicketStatus } from '@/app/actions/tickets';
 import Swal from 'sweetalert2';
+import { useTranslations } from 'next-intl';
 
 export default function TicketStatusManager({ ticketId, currentStatus, role }: { ticketId: string, currentStatus: string, role: 'ADMIN' | 'CLIENT' }) {
+  const t = useTranslations('ClientPortal');
   const [loading, setLoading] = useState(false);
 
   const handleCloseTicket = async () => {
     const result = await Swal.fire({
-      title: '¿Marcar como Resuelto?',
-      text: "Si tu problema ha sido solucionado, puedes cerrar este ticket.",
+      title: t('tickets.statusManager.closeQuestion'),
+      text: t('tickets.statusManager.closeMessage'),
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#10b981',
       cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Sí, cerrar ticket',
-      cancelButtonText: 'Cancelar',
-      background: '#ffffff',
+      confirmButtonText: t('tickets.statusManager.closeConfirm'),
+      cancelButtonText: t('tickets.statusManager.closeCancel'),
+      background: '#181818',
+      color: '#ffffff',
     });
 
     if (result.isConfirmed) {
@@ -26,16 +29,17 @@ export default function TicketStatusManager({ ticketId, currentStatus, role }: {
       setLoading(false);
 
       if (res.error) {
-        Swal.fire('Error', res.error, 'error');
+        Swal.fire({ icon: 'error', title: 'Error', text: res.error, background: '#181818', color: '#ffffff' });
       } else {
         Swal.fire({
           icon: 'success',
-          title: 'Ticket Cerrado',
-          text: 'Gracias por ponerte en contacto con nosotros.',
+          title: t('tickets.statusManager.closedSuccess'),
+          text: t('tickets.statusManager.closedThankYou'),
           toast: true,
           position: 'top-end',
           showConfirmButton: false,
-          timer: 3000
+          timer: 3000,
+          background: '#181818',
         });
       }
     }
@@ -48,10 +52,10 @@ export default function TicketStatusManager({ ticketId, currentStatus, role }: {
       <button 
         onClick={handleCloseTicket}
         disabled={loading}
-        className="text-gray-500 hover:text-green-600 font-medium flex items-center transition-colors disabled:opacity-50"
+        className="text-muted hover:text-semantic-success font-medium flex items-center transition-colors disabled:opacity-50 text-sm"
       >
-        <span className="material-icons text-[18px] mr-1">check_circle_outline</span>
-        Marcar como resuelto
+        <span className="material-icons text-[18px] mr-xxs">check_circle_outline</span>
+        {t('tickets.statusManager.closeText')}
       </button>
     );
   }

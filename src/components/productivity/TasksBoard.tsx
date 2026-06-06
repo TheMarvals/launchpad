@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Link } from '@/i18n/routing';
 import { createTask, updateTask, deleteTask } from '@/app/actions/productivity';
 import { useTranslations, useLocale } from 'next-intl';
 import TaskModal from './TaskModal';
@@ -40,9 +41,9 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
       confirmButtonText: t('delete.confirm'),
       cancelButtonText: t('delete.cancel'),
       customClass: {
-        popup: 'rounded-[2rem]',
-        confirmButton: 'rounded-xl px-6 py-3 font-bold',
-        cancelButton: 'rounded-xl px-6 py-3 font-bold text-gray-400'
+        popup: 'rounded-none border border-hairline bg-canvas-elevated text-ink',
+        confirmButton: 'px-sm py-xs font-semibold uppercase tracking-wider text-xs border border-transparent bg-primary text-on-primary',
+        cancelButton: 'px-sm py-xs font-semibold text-muted uppercase tracking-wider text-xs border border-transparent bg-canvas'
       }
     });
 
@@ -63,10 +64,10 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'urgent': return 'text-red-600 bg-red-50';
-      case 'high': return 'text-orange-600 bg-orange-50';
-      case 'medium': return 'text-blue-600 bg-blue-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case 'urgent': return 'border border-primary text-primary';
+  case 'high': return 'border border-primary text-primary';
+  case 'medium': return 'border border-hairline text-muted';
+  default: return 'border border-hairline text-muted';
     }
   };
 
@@ -74,91 +75,97 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-[#0a041a]">{t('title')}</h1>
-          <p className="text-gray-400 font-medium mt-1">{t('subtitle')}</p>
+          <h1 className="text-title-sm font-medium text-ink uppercase tracking-wider">{t('title')}</h1>
+          <p className="text-body text-muted mt-1">{t('subtitle')}</p>
         </div>
         <button 
           onClick={() => { setSelectedTask(null); setIsModalOpen(true); }}
-          className="bg-[#0a041a] text-white px-8 py-4 rounded-[1.5rem] font-bold text-sm hover:scale-105 transition-all shadow-xl shadow-[#0a041a]/10 flex items-center justify-center"
+          className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center justify-center border border-transparent"
         >
           <span className="material-icons mr-2 text-[20px]">add_task</span> {t('newTask')}
         </button>
       </div>
 
-      <div className="bg-white rounded-[3rem] border border-gray-50 shadow-2xl shadow-gray-100 overflow-hidden">
+      <div className="bg-canvas-elevated border border-hairline overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-gray-50">
-                <th className="px-10 py-8 text-[10px] uppercase tracking-widest font-black text-gray-300">{t('table.status')}</th>
-                <th className="px-10 py-8 text-[10px] uppercase tracking-widest font-black text-gray-300">{t('table.task')}</th>
-                <th className="px-10 py-8 text-[10px] uppercase tracking-widest font-black text-gray-300">{t('table.priority')}</th>
-                <th className="px-10 py-8 text-[10px] uppercase tracking-widest font-black text-gray-300">{t('table.dueDate')}</th>
-                <th className="px-10 py-8"></th>
+              <tr className="bg-canvas border-b border-hairline">
+                <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.status')}</th>
+                <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.task')}</th>
+                <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.priority')}</th>
+                <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.dueDate')}</th>
+                <th className="px-sm py-xs"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-hairline">
               {tasks.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-10 py-32 text-center">
+                  <td colSpan={5} className="py-xl px-sm text-center">
                       <div className="flex flex-col items-center">
-                        <div className="w-20 h-20 bg-gray-50 rounded-[1.5rem] flex items-center justify-center mb-4">
-                          <span className="material-icons text-3xl text-gray-200">checklist</span>
+                        <div className="w-[72px] h-[72px] bg-canvas border border-hairline flex items-center justify-center mb-xs">
+                          <span className="material-icons text-3xl text-muted">checklist</span>
                         </div>
-                        <p className="text-gray-400 font-bold text-lg">{t('emptyTitle')}</p>
-                        <p className="text-gray-300 text-sm mt-1">{t('emptyMessage')}</p>
+                        <p className="text-title-sm font-medium text-ink">{t('emptyTitle')}</p>
+                        <p className="text-sm text-muted mt-[4px]">{t('emptyMessage')}</p>
                       </div>
                   </td>
                 </tr>
               ) : (
                 tasks.map((task) => (
-                  <tr key={task.id} className="hover:bg-gray-50/50 transition-all group">
-                    <td className="px-10 py-8">
+                  <tr key={task.id} className="hover:bg-canvas/80 transition-colors group">
+                    <td className="px-sm py-xs">
                       <button 
                         onClick={() => toggleStatus(task)}
-                        className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all transform hover:scale-110 active:scale-95 ${
-                          task.status === 'done' ? 'bg-blue-600 border-blue-600 shadow-lg shadow-blue-200' : 'border-gray-200 hover:border-blue-400 bg-white'
+                        className={`w-8 h-8 border flex items-center justify-center transition-all transform hover:scale-110 active:scale-95 ${
+                          task.status === 'done' ? 'bg-primary border-primary text-white' : 'border-hairline hover:border-primary bg-transparent text-transparent'
                         }`}
                       >
                         {task.status === 'done' && <span className="material-icons text-white text-[18px]">check</span>}
                       </button>
                     </td>
-                    <td className="px-10 py-8">
+                    <td className="px-sm py-xs">
                       <div className="flex flex-col">
-                        <p className={`text-lg font-black text-[#0a041a] transition-all ${task.status === 'done' ? 'line-through opacity-30 italic' : ''}`}>
+                        <p className={`text-sm font-medium text-ink transition-all ${task.status === 'done' ? 'line-through opacity-30' : ''}`}>
                           {task.title}
                         </p>
                         {task.notes && (
-                          <p className={`text-sm text-gray-400 mt-1 max-w-sm line-clamp-1 font-medium ${task.status === 'done' ? 'opacity-30' : ''}`}>
+                          <p className={`text-caption text-muted mt-[2px] max-w-[24rem] line-clamp-1 ${task.status === 'done' ? 'opacity-30' : ''}`}>
                             {task.notes}
                           </p>
                         )}
                       </div>
                     </td>
-                    <td className="px-10 py-8">
-                      <span className={`text-[10px] uppercase tracking-widest font-black px-4 py-1.5 rounded-full ${getPriorityColor(task.priority)}`}>
+                    <td className="px-sm py-xs">
+                      <span className={`inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold ${getPriorityColor(task.priority)}`}>
                         {t(`priority.${task.priority}` as any)}
                       </span>
                     </td>
-                    <td className="px-10 py-8">
-                      <div className="flex items-center text-gray-400 font-bold text-sm">
-                        <span className="material-icons text-[16px] mr-2 opacity-40">calendar_today</span>
+                    <td className="px-sm py-xs">
+                      <div className="flex items-center text-muted font-medium text-sm">
+                        <span className="material-icons text-[16px] mr-xxs opacity-40">calendar_today</span>
                         {task.dueDate ? new Date(task.dueDate).toLocaleDateString(locale, { day: '2-digit', month: 'short' }) : t('noDate')}
                       </div>
                     </td>
-                    <td className="px-10 py-8 text-right">
-                      <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-all">
+                    <td className="px-sm py-xs text-right">
+                      <div className="flex items-center justify-end space-x-xxs opacity-0 group-hover:opacity-100 transition-all">
+                        <Link 
+                          href={`/dashboard/productivity/tasks/${task.id}`}
+                          className="p-xxs text-muted hover:text-primary transition-colors"
+                        >
+                          <span className="material-icons text-[20px]">open_in_new</span>
+                        </Link>
                         <button 
                           onClick={() => { setSelectedTask(task); setIsModalOpen(true); }}
-                          className="p-3 text-gray-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                          className="p-xxs text-muted hover:text-primary transition-colors"
                         >
-                          <span className="material-icons text-[20px]">edit</span>
+                          <span className="material-icons text-[18px]">edit</span>
                         </button>
                         <button 
                           onClick={() => handleDelete(task.id)}
-                          className="p-3 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                          className="p-xxs text-muted hover:text-primary transition-colors"
                         >
-                          <span className="material-icons text-[20px]">delete</span>
+                          <span className="material-icons text-[18px]">delete</span>
                         </button>
                       </div>
                     </td>

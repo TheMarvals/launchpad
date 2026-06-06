@@ -109,27 +109,27 @@ export default function ClientManager({ clients }: ClientManagerProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-sm">
       {/* Action bar */}
       <div className="flex justify-end">
         <button
           onClick={openCreate}
-          className="bg-blue-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-800 transition-colors shadow-lg shadow-blue-900/20 flex items-center"
+          className="bg-primary hover:bg-primary-active text-white px-sm h-[48px] rounded-none text-xs font-bold uppercase tracking-[1.4px] flex items-center justify-center transition-colors cursor-pointer"
         >
-          <span className="material-icons mr-2 text-sm">add</span> {t('newClient')}
+          <span className="material-icons mr-xxs text-sm">add</span> {t('newClient')}
         </button>
       </div>
 
       {/* Create/Edit Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-ink/90 backdrop-blur-md flex items-center justify-center p-md">
           <form
             onSubmit={handleSubmit}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8 space-y-6 max-h-[90vh] overflow-y-auto"
+            className="bg-canvas-elevated border border-hairline w-full max-w-2xl p-sm space-y-sm max-h-[90vh] overflow-y-auto"
           >
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-black text-slate-900 flex items-center">
-                <span className="material-icons mr-3 text-blue-600 bg-blue-50 p-2 rounded-lg">
+            <div className="flex justify-between items-center pb-xs border-b border-hairline">
+              <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
+                <span className="material-icons mr-xxs text-primary">
                   {editingId ? 'edit' : 'person_add'}
                 </span>
                 {editingId ? t('editClient') : t('newClient')}
@@ -137,100 +137,100 @@ export default function ClientManager({ clients }: ClientManagerProps) {
               <button
                 type="button"
                 onClick={() => { setShowForm(false); setError(''); }}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
+                className="text-muted hover:text-ink transition-colors"
               >
                 <span className="material-icons">close</span>
               </button>
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-medium px-4 py-3 rounded-xl">
+              <div className="bg-semantic-warning/10 border border-semantic-warning/30 text-semantic-warning text-sm font-medium px-xs py-xxs">
                 {error}
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.rut')} *</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
+              <div className="space-y-xxs">
+                <label className="text-caption-uppercase text-ink font-semibold">{t('form.rut')} *</label>
                 <input
                   type="text"
-                  className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.rut}
                   onChange={(e) => updateField('rut', e.target.value)}
                   placeholder="76.543.210-K"
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.razonSocial')} *</label>
+              <div className="space-y-xxs">
+                <label className="text-caption-uppercase text-ink font-semibold">{t('form.razonSocial')} *</label>
                 <input
                   type="text"
-                  className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.razonSocial}
                   onChange={(e) => updateField('razonSocial', e.target.value)}
                   placeholder="EMPRESA SPA"
                   required
                 />
               </div>
-              <div className="md:col-span-2 space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.giro')} *</label>
+              <div className="md:col-span-2 space-y-xxs">
+                <label className="text-caption-uppercase text-ink font-semibold">{t('form.giro')} *</label>
                 <input
                   type="text"
-                  className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.giro}
                   onChange={(e) => updateField('giro', e.target.value)}
                   placeholder="Servicios Informáticos"
                   required
                 />
               </div>
-              <div className="md:col-span-2 space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.direction')} *</label>
+              <div className="md:col-span-2 space-y-xxs">
+                <label className="text-caption-uppercase text-ink font-semibold">{t('form.direction')} *</label>
                 <input
                   type="text"
-                  className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.direccion}
                   onChange={(e) => updateField('direccion', e.target.value)}
                   placeholder="Av. Providencia 1234"
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.commune')} *</label>
+              <div className="space-y-xxs">
+                <label className="text-caption-uppercase text-ink font-semibold">{t('form.commune')} *</label>
                 <input
                   type="text"
-                  className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.comuna}
                   onChange={(e) => updateField('comuna', e.target.value)}
                   placeholder="Providencia"
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.city')} *</label>
+              <div className="space-y-xxs">
+                <label className="text-caption-uppercase text-ink font-semibold">{t('form.city')} *</label>
                 <input
                   type="text"
-                  className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.ciudad}
                   onChange={(e) => updateField('ciudad', e.target.value)}
                   placeholder="Santiago"
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.email')}</label>
+              <div className="space-y-xxs">
+                <label className="text-caption-uppercase text-ink font-semibold">{t('form.email')}</label>
                 <input
                   type="email"
-                  className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.email}
                   onChange={(e) => updateField('email', e.target.value)}
                   placeholder="contacto@empresa.cl"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('form.phone')}</label>
+              <div className="space-y-xxs">
+                <label className="text-caption-uppercase text-ink font-semibold">{t('form.phone')}</label>
                 <input
                   type="text"
-                  className="w-full border-2 border-slate-100 rounded-xl p-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   value={form.telefono}
                   onChange={(e) => updateField('telefono', e.target.value)}
                   placeholder="+56 9 1234 5678"
@@ -238,23 +238,23 @@ export default function ClientManager({ clients }: ClientManagerProps) {
               </div>
             </div>
 
-            <div className="flex justify-end space-x-4 pt-4 border-t">
+            <div className="flex justify-end space-x-xxs pt-xs border-t border-hairline">
               <button
                 type="button"
                 onClick={() => { setShowForm(false); setError(''); }}
-                className="px-6 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors"
+                className="bg-transparent border border-hairline text-ink h-[48px] px-sm font-semibold text-xs uppercase tracking-wider hover:bg-canvas transition-colors"
               >
                 {tCommon('no')}
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-500 transition-all disabled:opacity-50 shadow-lg shadow-blue-600/20 flex items-center"
+                className="bg-primary text-on-primary h-[48px] px-md font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center disabled:opacity-50"
               >
                 {isSubmitting ? (
-                  <><span className="material-icons animate-spin mr-2 text-sm">sync</span> ...</>
+                  <><span className="material-icons animate-spin mr-xxs text-sm">sync</span> ...</>
                 ) : (
-                  <><span className="material-icons mr-2 text-sm">{editingId ? 'save' : 'add'}</span> {editingId ? t('updateClient') : t('createClient')}</>
+                  <><span className="material-icons mr-xxs text-sm">{editingId ? 'save' : 'add'}</span> {editingId ? t('updateClient') : t('createClient')}</>
                 )}
               </button>
             </div>
@@ -263,88 +263,92 @@ export default function ClientManager({ clients }: ClientManagerProps) {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {clients.length > 0 ? (
-          <table className="w-full">
-            <thead>
-              <tr className="text-left text-xs font-bold text-gray-400 uppercase tracking-wider border-b bg-gray-50">
-                <th className="px-6 py-4">{t('table.razonSocial')}</th>
-                <th className="px-6 py-4">{t('table.rut')}</th>
-                <th className="px-6 py-4">{t('table.giro')}</th>
-                <th className="px-6 py-4">{t('table.contact')}</th>
-                <th className="px-6 py-4">{t('table.quotes')}</th>
-                <th className="px-6 py-4 text-right">{t('table.actions')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {clients.map((client) => (
-                <tr key={client.id} className="text-sm hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-bold">{client.razonSocial}</td>
-                  <td className="px-6 py-4">{client.rut}</td>
-                  <td className="px-6 py-4 text-xs">{client.giro}</td>
-                  <td className="px-6 py-4">
-                    <div className="text-xs">{client.email || '—'}</div>
-                    <div className="text-xs text-gray-400">{client.telefono || ''}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-full text-[10px] font-bold">
-                      {client._count.quotes}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end space-x-3">
-                      <button
-                        onClick={() => router.push(`/dashboard/clients/${client.id}`)}
-                        className="text-slate-500 hover:text-blue-600 transition-colors mr-1"
-                        title="Portal & VPS"
-                      >
-                        <span className="material-icons text-[18px]">cloud</span>
-                      </button>
-                      <button
-                        onClick={() => openEdit(client)}
-                        className="text-slate-500 hover:text-blue-600 transition-colors"
-                        title={tCommon('edit')}
-                      >
-                        <span className="material-icons text-[18px]">edit</span>
-                      </button>
-
-                      {deletingId === client.id ? (
-                        <div className="flex items-center space-x-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5">
-                          <span className="text-xs font-bold text-red-600 whitespace-nowrap">{tCommon('confirmDelete')}</span>
-                          <button
-                            onClick={() => handleDelete(client.id)}
-                            className="text-xs font-bold text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md transition-colors"
-                          >
-                            {tCommon('yes')}
-                          </button>
-                          <button
-                            onClick={() => setDeletingId(null)}
-                            className="text-xs font-bold text-red-400 hover:text-red-600 px-2 py-1 transition-colors"
-                          >
-                            {tCommon('no')}
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setDeletingId(client.id)}
-                          className="text-slate-400 hover:text-red-500 transition-colors"
-                          title={tCommon('delete')}
-                        >
-                          <span className="material-icons text-[18px]">delete_outline</span>
-                        </button>
-                      )}
-                    </div>
-                  </td>
+      <div className="bg-canvas-elevated border border-hairline overflow-hidden">
+        <div className="overflow-x-auto">
+          {clients.length > 0 ? (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-canvas border-b border-hairline">
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.razonSocial')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.rut')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.giro')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.contact')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.quotes')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-right">{t('table.actions')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div className="text-center py-20 text-gray-400">
-            <span className="material-icons text-5xl mb-4 block opacity-30">people</span>
-            {t('noClients')}
-          </div>
-        )}
+              </thead>
+              <tbody className="divide-y divide-hairline">
+                {clients.map((client) => (
+                  <tr key={client.id} className="hover:bg-canvas/80 transition-colors group">
+                    <td className="px-sm py-xs font-medium text-ink text-sm">{client.razonSocial}</td>
+                    <td className="px-sm py-xs text-body text-muted">{client.rut}</td>
+                    <td className="px-sm py-xs text-body text-muted">{client.giro}</td>
+                    <td className="px-sm py-xs">
+                      <div className="text-sm text-ink">{client.email || '—'}</div>
+                      <div className="text-xs text-muted">{client.telefono || ''}</div>
+                    </td>
+                    <td className="px-sm py-xs">
+                      <span className="inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border border-hairline bg-canvas-elevated text-muted">
+                        {client._count.quotes}
+                      </span>
+                    </td>
+                    <td className="px-sm py-xs text-right">
+                      <div className="flex items-center justify-end space-x-sm opacity-0 group-hover:opacity-100 transition-all">
+                        <button
+                          onClick={() => router.push(`/dashboard/clients/${client.id}`)}
+                          className="p-xxs text-muted hover:text-primary transition-colors"
+                          title="Portal & VPS"
+                        >
+                          <span className="material-icons text-[18px]">cloud</span>
+                        </button>
+                        <button
+                          onClick={() => openEdit(client)}
+                          className="p-xxs text-muted hover:text-primary transition-colors"
+                          title={tCommon('edit')}
+                        >
+                          <span className="material-icons text-[18px]">edit</span>
+                        </button>
+
+                        {deletingId === client.id ? (
+                          <div className="flex items-center space-x-xxs bg-semantic-danger/10 border border-semantic-danger/20 rounded-none px-xxs py-xxs">
+                            <span className="text-[10px] font-bold text-semantic-danger uppercase tracking-wider whitespace-nowrap">{tCommon('confirmDelete')}</span>
+                            <button
+                              onClick={() => handleDelete(client.id)}
+                              className="text-[10px] font-bold text-white bg-semantic-danger hover:bg-semantic-danger/80 px-xxs py-[2px] rounded-none transition-colors"
+                            >
+                              {tCommon('yes')}
+                            </button>
+                            <button
+                              onClick={() => setDeletingId(null)}
+                              className="text-[10px] font-bold text-semantic-danger hover:text-semantic-danger/80 px-xxs py-[2px] transition-colors"
+                            >
+                              {tCommon('no')}
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setDeletingId(client.id)}
+                            className="p-xxs text-muted hover:text-semantic-danger transition-colors"
+                            title={tCommon('delete')}
+                          >
+                            <span className="material-icons text-[18px]">delete_outline</span>
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="text-center py-xl px-sm">
+              <div className="w-[72px] h-[72px] bg-canvas flex items-center justify-center mx-auto mb-xs">
+                <span className="material-icons text-muted text-4xl">people</span>
+              </div>
+              <p className="text-sm text-muted">{t('noClients')}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

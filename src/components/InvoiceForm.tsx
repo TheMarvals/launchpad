@@ -105,118 +105,129 @@ export default function InvoiceForm({ clients, initialData }: InvoiceFormProps) 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 max-w-5xl mx-auto pb-20">
-      <div className="flex justify-between items-center mb-8">
+    <form onSubmit={handleSubmit} className="space-y-md max-w-5xl mx-auto pb-xl font-sans">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-xs mb-md">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tighter">
+          <h1 className="text-display-md font-medium tracking-tight text-ink">
             {isEditing ? t('editInvoice') : t('newInvoice')}
           </h1>
-          <p className="text-slate-500 text-sm">{t('subtitle', { count: 0 })}</p>
+          <p className="text-body text-muted mt-[4px]">{t('subtitle', { count: 0 })}</p>
         </div>
-        <div className="flex gap-3">
-           <button
+        <div className="flex flex-row gap-xxs w-full sm:w-auto">
+          <button
             type="button"
             onClick={() => router.back()}
-            className="px-6 py-2.5 rounded-xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 transition-all text-sm"
+            className="flex-1 sm:flex-initial bg-transparent border border-hairline text-ink hover:bg-canvas px-sm h-[48px] text-xs font-semibold uppercase tracking-wider flex items-center justify-center transition-colors"
           >
             {tForm('close')}
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-8 py-2.5 rounded-xl bg-slate-900 text-white font-black hover:bg-blue-600 transition-all shadow-lg shadow-slate-200 text-sm disabled:opacity-50"
+            className="flex-1 sm:flex-initial bg-primary hover:bg-primary-hover text-on-primary px-sm h-[48px] text-xs font-semibold uppercase tracking-wider flex items-center justify-center transition-colors disabled:opacity-50"
           >
             {isSubmitting ? tForm('saving') : (isEditing ? tForm('update') : t('newInvoice'))}
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-sm">
         {/* Client Selection */}
-        <div className="md:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{tForm('clientLabel')}</label>
-          <select 
-            className="w-full border-2 border-slate-50 rounded-xl p-4 bg-slate-50 focus:bg-white transition-all outline-none font-bold text-slate-700"
-            value={clientId}
-            onChange={(e) => setClientId(e.target.value)}
-            required
-          >
-            <option value="">{tForm('clientPlaceholder')}</option>
-            {clients.map((c: any) => (
-              <option key={c.id} value={c.id}>{c.razonSocial} ({c.rut})</option>
-            ))}
-          </select>
+        <div className="md:col-span-2 bg-canvas-elevated border border-hairline p-sm space-y-sm">
+          <label className="block text-caption-uppercase text-ink font-semibold">{tForm('clientLabel')}</label>
+          <div className="relative">
+            <select 
+              className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors px-xs py-xxs text-sm appearance-none cursor-pointer pr-sm"
+              value={clientId}
+              onChange={(e) => setClientId(e.target.value)}
+              required
+            >
+              <option value="">{tForm('clientPlaceholder')}</option>
+              {clients.map((c: any) => (
+                <option key={c.id} value={c.id}>{c.razonSocial} ({c.rut})</option>
+              ))}
+            </select>
+            <span className="material-icons absolute right-xxs top-1/2 -translate-y-1/2 text-muted pointer-events-none text-sm">expand_more</span>
+          </div>
         </div>
 
         {/* Date & Status */}
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-6">
-          <div className="space-y-4">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t('table.dueDate')}</label>
+        <div className="bg-canvas-elevated border border-hairline p-sm space-y-sm">
+          <div className="space-y-xxs">
+            <label className="block text-caption-uppercase text-ink font-semibold">{t('table.dueDate')}</label>
             <input 
               type="date" 
-              className="w-full border-2 border-slate-50 rounded-xl p-4 bg-slate-50 focus:bg-white transition-all outline-none font-bold text-slate-700"
+              className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
               value={fechaVencimiento}
               onChange={(e) => setFechaVencimiento(e.target.value)}
               required
             />
           </div>
-          <div className="space-y-4">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t('table.status')}</label>
-            <select 
-              className="w-full border-2 border-slate-50 rounded-xl p-4 bg-slate-50 focus:bg-white transition-all outline-none font-bold text-slate-700"
-              value={estado}
-              onChange={(e) => setEstado(e.target.value)}
-            >
-              <option value="Pendiente">{t('status.Pendiente')}</option>
-              <option value="Pagada">{t('status.Pagada')}</option>
-              <option value="Anulada">{t('status.Anulada')}</option>
-            </select>
+          <div className="space-y-xxs">
+            <label className="block text-caption-uppercase text-ink font-semibold">{t('table.status')}</label>
+            <div className="relative">
+              <select 
+                className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors px-xs py-xxs text-sm appearance-none cursor-pointer pr-sm"
+                value={estado}
+                onChange={(e) => setEstado(e.target.value)}
+              >
+                <option value="Pendiente">{t('status.Pendiente')}</option>
+                <option value="Pagada">{t('status.Pagada')}</option>
+                <option value="Anulada">{t('status.Anulada')}</option>
+              </select>
+              <span className="material-icons absolute right-xxs top-1/2 -translate-y-1/2 text-muted pointer-events-none text-sm">expand_more</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Items Section */}
-      <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{tForm('economicDetail')}</h2>
+      <div className="bg-canvas-elevated border border-hairline p-sm">
+        <div className="flex justify-between items-center mb-sm">
+          <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
+            <span className="material-icons mr-xxs text-primary">payments</span> {tForm('economicDetail')}
+          </h2>
           <button 
             type="button" 
             onClick={addItem}
-            className="flex items-center text-blue-600 font-black text-[10px] uppercase tracking-widest hover:text-blue-700 transition-colors bg-blue-50 px-4 py-2 rounded-lg"
+            className="text-ink font-semibold text-xs uppercase tracking-wider hover:bg-canvas px-sm py-xxs transition-colors flex items-center border border-hairline"
           >
-            <span className="material-icons text-sm mr-2">add_circle</span> {tForm('addItem')}
+            <span className="material-icons mr-xxs text-sm">add</span> {tForm('addItem')}
           </button>
         </div>
 
-        <div className="space-y-4 mb-8">
+        <div className="space-y-sm border-t border-hairline pt-sm mb-md">
           {items.map((item: any, index: number) => (
-            <div key={index} className="grid grid-cols-12 gap-4 items-center group">
-              <div className="col-span-6 space-y-2">
+            <div key={index} className="grid grid-cols-12 gap-sm items-end pb-sm">
+              <div className="col-span-6 space-y-xxs">
+                <label className="text-caption-uppercase text-ink font-semibold">{tForm('itemLabel')}</label>
                 <input 
                   type="text" 
-                  className="w-full border-2 border-slate-50 rounded-xl p-3 bg-slate-50 focus:bg-white transition-all font-medium text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   placeholder={tForm('itemLabel')}
                   value={item.descripcion}
                   onChange={(e) => updateItem(index, 'descripcion', e.target.value)}
                   required
                 />
               </div>
-              <div className="col-span-2 space-y-2">
+              <div className="col-span-2 space-y-xxs">
+                <label className="text-caption-uppercase text-ink font-semibold">{tForm('quantity')}</label>
                 <input 
                   type="number" 
-                  className="w-full border-2 border-slate-50 rounded-xl p-3 bg-slate-50 focus:bg-white transition-all font-bold text-center text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors text-center font-semibold px-xs py-xxs text-sm"
                   placeholder={tForm('quantity')}
                   value={item.cantidad}
                   onChange={(e) => updateItem(index, 'cantidad', e.target.value)}
                   required
                 />
               </div>
-              <div className="col-span-3 space-y-2">
+              <div className="col-span-3 space-y-xxs">
+                <label className="text-caption-uppercase text-ink font-semibold">{tForm('unitPrice')}</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                  <span className="absolute left-xs top-1/2 -translate-y-1/2 text-muted font-semibold">$</span>
                   <input 
                     type="number" 
-                    className="w-full border-2 border-slate-50 rounded-xl p-3 pl-7 bg-slate-50 focus:bg-white transition-all font-bold text-sm"
+                    className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors font-semibold pl-md px-xs py-xxs text-sm"
                     placeholder={tForm('unitPrice')}
                     value={item.precioUnitario}
                     onChange={(e) => updateItem(index, 'precioUnitario', e.target.value)}
@@ -224,13 +235,13 @@ export default function InvoiceForm({ clients, initialData }: InvoiceFormProps) 
                   />
                 </div>
               </div>
-              <div className="col-span-1 flex justify-center">
+              <div className="col-span-1 flex justify-center pb-xxs">
                 <button 
                   type="button" 
                   onClick={() => removeItem(index)}
-                  className="text-slate-200 hover:text-red-500 transition-colors p-2"
+                  className="p-xxs text-muted hover:text-semantic-warning transition-colors"
                 >
-                  <span className="material-icons text-sm">delete</span>
+                  <span className="material-icons text-sm">delete_outline</span>
                 </button>
               </div>
             </div>
@@ -238,40 +249,40 @@ export default function InvoiceForm({ clients, initialData }: InvoiceFormProps) 
         </div>
 
         {/* Financial configuration */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-slate-50">
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{tForm('taxLabel')}</label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-sm pt-sm border-t border-hairline">
+          <div className="space-y-xxs">
+            <label className="text-caption-uppercase text-ink font-semibold">{tForm('taxLabel')}</label>
             <input 
               type="text" 
-              className="w-full border-2 border-slate-100 rounded-xl p-3 bg-slate-50 focus:bg-white transition-all font-medium text-sm"
+              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
               value={taxName}
               onChange={(e) => setTaxName(e.target.value)}
               placeholder="Ej. IVA"
             />
           </div>
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{tForm('taxPercent')}</label>
+          <div className="space-y-xxs">
+            <label className="text-caption-uppercase text-ink font-semibold">{tForm('taxPercent')}</label>
             <input 
               type="number" 
               step="0.01"
-              className="w-full border-2 border-slate-100 rounded-xl p-3 bg-slate-50 focus:bg-white transition-all font-medium text-sm"
+              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
               value={taxPercent}
               onChange={(e) => setTaxPercent(e.target.value)}
             />
           </div>
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{tForm('extraFeeLabel')}</label>
-            <div className="flex gap-2">
+          <div className="space-y-xxs">
+            <label className="text-caption-uppercase text-ink font-semibold">{tForm('extraFeeLabel')}</label>
+            <div className="grid grid-cols-12 gap-xxs">
               <input 
                 type="text" 
-                className="flex-grow border-2 border-slate-100 rounded-xl p-3 bg-slate-50 focus:bg-white transition-all font-medium text-sm"
+                className="col-span-8 w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                 value={extraFeeName}
                 onChange={(e) => setExtraFeeName(e.target.value)}
                 placeholder="Ej. PayPal Fee"
               />
               <input 
                 type="number" 
-                className="w-24 border-2 border-slate-100 rounded-xl p-3 bg-slate-50 focus:bg-white transition-all font-medium text-sm"
+                className="col-span-4 w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                 value={extraFeeAmount}
                 onChange={(e) => setExtraFeeAmount(e.target.value)}
               />
@@ -279,55 +290,55 @@ export default function InvoiceForm({ clients, initialData }: InvoiceFormProps) 
           </div>
         </div>
 
-        <div className="flex justify-end pt-8">
-          <div className="w-80 space-y-3 p-6 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 ml-auto shadow-sm">
-            <div className="flex justify-between text-[10px] font-black text-slate-400 tracking-widest uppercase">
+        <div className="flex justify-end pt-md">
+          <div className="w-80 space-y-xxs p-sm bg-canvas border border-hairline ml-auto">
+            <div className="flex justify-between text-caption-uppercase text-muted">
               <span>{tForm('net')}</span>
-              <span className="text-slate-900 font-bold">${neto.toLocaleString(locale)}</span>
+              <span className="text-ink font-medium">${neto.toLocaleString(locale)}</span>
             </div>
-            <div className="flex justify-between text-[10px] font-black text-slate-400 tracking-widest uppercase">
+            <div className="flex justify-between text-caption-uppercase text-muted">
               <span>{taxName} ({taxPercent}%)</span>
-              <span className="text-slate-900 font-bold">${iva.toLocaleString(locale)}</span>
+              <span className="text-ink font-medium">${iva.toLocaleString(locale)}</span>
             </div>
             {fee > 0 && (
-              <div className="flex justify-between text-[10px] font-black text-slate-400 tracking-widest uppercase">
+              <div className="flex justify-between text-caption-uppercase text-muted">
                 <span>{extraFeeName || tForm('extraFee')}</span>
-                <span className="text-slate-900 font-bold">${fee.toLocaleString(locale)}</span>
+                <span className="text-ink font-medium">${fee.toLocaleString(locale)}</span>
               </div>
             )}
-            <div className="flex justify-between text-xl pt-4 border-t border-slate-200 font-black">
-              <span className="text-[10px] font-black text-slate-500 self-center tracking-widest uppercase">{tForm('total')}</span>
-              <span className="text-slate-900">${total.toLocaleString(locale)}</span>
+            <div className="flex justify-between text-xl pt-xs mt-xs border-t border-hairline">
+              <span className="text-caption-uppercase text-muted self-center">{t('total')}</span>
+              <span className="text-ink font-medium">${total.toLocaleString(locale)}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Notes & Payment Method */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
-            <span className="material-icons text-sm mr-2 text-blue-600">note_alt</span> Notas Internas / Detalles
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
+        <div className="bg-canvas-elevated border border-hairline p-sm space-y-sm">
+          <label className="text-caption-uppercase text-ink font-semibold flex items-center">
+            <span className="material-icons text-sm mr-xxs text-primary">note_alt</span> Notas Internas / Detalles
           </label>
           <textarea 
-            className="w-full border-2 border-slate-50 rounded-xl p-4 text-sm bg-slate-50 min-h-[150px] focus:bg-white transition-all outline-none"
+            className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm min-h-[150px]"
             value={notas}
             onChange={(e) => setNotas(e.target.value)}
             placeholder="Escribe notas adicionales para la factura..."
           />
         </div>
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
-            <span className="material-icons text-sm mr-2 text-blue-600">account_balance_wallet</span> {tForm('paymentMethodLabel')}
+        <div className="bg-canvas-elevated border border-hairline p-sm space-y-sm">
+          <label className="text-caption-uppercase text-ink font-semibold flex items-center">
+            <span className="material-icons text-sm mr-xxs text-primary">account_balance_wallet</span> {tForm('paymentMethodLabel')}
           </label>
           <input 
             type="text" 
-            className="w-full border-2 border-slate-50 rounded-xl p-4 text-sm bg-slate-50 focus:bg-white transition-all outline-none"
+            className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value)}
             placeholder={tForm('paymentMethodPlaceholder')}
           />
-          <p className="text-[10px] text-slate-400 italic">
+          <p className="text-caption text-muted mt-xxs">
             Especifica cómo deseas recibir el pago.
           </p>
         </div>

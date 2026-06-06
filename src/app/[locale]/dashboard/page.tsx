@@ -1,20 +1,22 @@
 import React from 'react';
+import { redirect } from '@/i18n/routing';
 import { Link } from '@/i18n/routing';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { getTranslations } from 'next-intl/server';
 import QuoteActions from '@/components/QuoteActions';
-import { getUpcomingReminders } from '@/app/actions/reminders';
-
 export default async function DashboardPage({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   const t = await getTranslations('Dashboard');
   const session = await auth();
+
+  // Redirect non-admin users to their client portal
+  if (session?.user && session.user.role !== 'ADMIN') {
+    redirect({ href: '/client-portal', locale });
+  }
   const quotesCount = await prisma.quote.count();
   const invoicesCount = await prisma.invoice.count();
   const clientsCount = await prisma.client.count();
-  const { tasks, events, vpsExpirations } = await getUpcomingReminders();
-  const remindersCount = tasks.length + events.length + vpsExpirations.length;
   
   const totalInvoiced = await prisma.invoice.aggregate({
     _sum: { montoNeto: true },
@@ -30,68 +32,75 @@ export default async function DashboardPage({params}: {params: Promise<{locale: 
   });
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-end">
+    <div className="space-y-md font-sans">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-xs">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t('welcome', { name: session?.user?.name?.split(' ')[0] || 'Usuario' })}</h1>
-          <p className="text-gray-500 mt-1">{t('summary')}</p>
+          <h1 className="text-display-md font-medium tracking-tight text-ink">
+            {t('welcome', { name: session?.user?.name?.split(' ')[0] || 'Usuario' })}
+          </h1>
+          <p className="text-body text-muted mt-[4px]">{t('summary')}</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-row gap-xxs w-full sm:w-auto">
           <Link 
             href="/dashboard/invoices/new" 
-            className="bg-white text-slate-900 border-2 border-slate-100 px-6 py-2 rounded-lg font-bold hover:bg-slate-50 transition-colors shadow-sm"
+            className="flex-1 sm:flex-initial bg-transparent border border-ink text-ink hover:bg-ink/10 px-sm h-[48px] rounded-none text-xs font-bold uppercase tracking-[1.4px] flex items-center justify-center transition-colors cursor-pointer"
           >
-            + {t('newQuote').replace('Cotización', 'Factura')}
+            + {t('newInvoice')}
           </Link>
           <Link 
             href="/dashboard/quotes/new" 
-            className="bg-blue-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-800 transition-colors shadow-lg shadow-blue-900/20"
+            className="flex-1 sm:flex-initial bg-primary hover:bg-primary-active text-white px-sm h-[48px] rounded-none text-xs font-bold uppercase tracking-[1.4px] flex items-center justify-center transition-colors cursor-pointer"
           >
             + {t('newQuote')}
           </Link>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-xs">
         <StatCard title={t('stats.quotes')} value={quotesCount} icon="description" />
         <StatCard title={t('stats.invoices') || 'Facturas'} value={invoicesCount} icon="receipt_long" color="green" />
         <StatCard title={t('stats.clients')} value={clientsCount} icon="people" />
-        <StatCard title={t('stats.total')} value={`$${totalIncome.toLocaleString(locale)}`} icon="payments" color="emerald" />
+        <StatCard title={t('stats.total')} value={`$${totalIncome.toLocaleString(locale)}`} icon="payments" color="red" />
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <h2 className="text-xl font-bold mb-6">{t('recentQuotes.title')}</h2>
+      {/* Recent Quotes table */}
+      <div className="bg-canvas-elevated border border-hairline overflow-hidden">
+        <div className="px-sm py-xs border-b border-hairline bg-canvas">
+          <h2 className="text-xs font-semibold text-ink uppercase tracking-wider">
+            {t('recentQuotes.title')}
+          </h2>
+        </div>
         
         {recentQuotes.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="text-left text-xs font-bold text-gray-400 uppercase tracking-wider border-b">
-                  <th className="pb-4">{t('recentQuotes.correlative')}</th>
-                  <th className="pb-4">{t('recentQuotes.client')}</th>
-                  <th className="pb-4">{t('recentQuotes.date')}</th>
-                  <th className="pb-4">{t('recentQuotes.total')}</th>
-                  <th className="pb-4">{t('recentQuotes.status')}</th>
-                  <th className="pb-4 text-right">{t('recentQuotes.actions')}</th>
+                <tr className="bg-canvas border-b border-hairline">
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('recentQuotes.correlative')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('recentQuotes.client')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('recentQuotes.date')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('recentQuotes.total')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('recentQuotes.status')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-right">{t('recentQuotes.actions')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y divide-hairline">
                 {recentQuotes.map((quote) => (
-                  <tr key={quote.id} className="text-sm">
-                    <td className="py-4 font-bold text-blue-900">Nº {String(quote.correlativo).padStart(4, '0')}</td>
-                    <td className="py-4">{quote.client.razonSocial}</td>
-                    <td className="py-4">{new Date(quote.fechaEmision).toLocaleDateString(locale)}</td>
-                    <td className="py-4 font-bold">${quote.montoTotal.toLocaleString(locale)}</td>
-                    <td className="py-4">
-                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
-                        quote.estado === 'Aceptada' ? 'bg-green-100 text-green-700' :
-                        quote.estado === 'Borrador' ? 'bg-gray-100 text-gray-600' :
-                        'bg-blue-100 text-blue-700'
+                  <tr key={quote.id} className="hover:bg-canvas/80 transition-colors group">
+                    <td className="px-sm py-xs font-medium text-ink text-sm">Nº {String(quote.correlativo).padStart(4, '0')}</td>
+                    <td className="px-sm py-xs text-ink text-sm">{quote.client.razonSocial}</td>
+                    <td className="px-sm py-xs text-body text-muted">{new Date(quote.fechaEmision).toLocaleDateString(locale)}</td>
+                    <td className="px-sm py-xs font-medium text-ink text-sm">${quote.montoTotal.toLocaleString(locale)}</td>
+                    <td className="px-sm py-xs">
+                      <span className={`inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border ${
+                        quote.estado === 'Aceptada' ? 'border-semantic-success/30 bg-semantic-success/10 text-semantic-success' :
+                        quote.estado === 'Borrador' ? 'border-hairline bg-canvas-elevated text-muted' :
+                        'border-semantic-info/30 bg-semantic-info/10 text-semantic-info'
                       }`}>
                         {quote.estado}
                       </span>
                     </td>
-                    <td className="py-4 text-right">
+                    <td className="px-sm py-xs text-right">
                       <QuoteActions quoteId={quote.id} />
                     </td>
                   </tr>
@@ -100,8 +109,11 @@ export default async function DashboardPage({params}: {params: Promise<{locale: 
             </table>
           </div>
         ) : (
-          <div className="text-center py-12 text-gray-400">
-            {t('recentQuotes.noQuotes')}
+          <div className="text-center py-xl px-sm">
+            <div className="w-[72px] h-[72px] bg-canvas flex items-center justify-center mx-auto mb-xs">
+              <span className="material-icons text-muted text-4xl">description</span>
+            </div>
+            <p className="text-sm text-muted">{t('recentQuotes.noQuotes')}</p>
           </div>
         )}
       </div>
@@ -111,18 +123,13 @@ export default async function DashboardPage({params}: {params: Promise<{locale: 
 
 function StatCard({ title, value, icon, color = 'blue' }: { title: string; value: string | number; icon: string; color?: string }) {
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
-      <div className={`w-12 h-12 rounded-full ${
-        color === 'red' ? 'bg-red-50 text-red-600' : 
-        color === 'green' ? 'bg-green-50 text-green-600' :
-        color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
-        'bg-blue-50 text-blue-900'
-      } flex items-center justify-center`}>
+    <div className="bg-canvas-elevated p-sm rounded-none border border-hairline flex items-center space-x-xxs">
+      <div className={`w-[48px] h-[48px] flex items-center justify-center rounded-none bg-canvas text-primary`}>
         <span className="material-icons">{icon}</span>
       </div>
       <div>
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{title}</p>
-        <p className="text-2xl font-black text-gray-900">{value}</p>
+        <p className="text-caption-uppercase text-muted tracking-wider">{title}</p>
+        <p className="text-xl font-medium text-ink tracking-tight">{value}</p>
       </div>
     </div>
   );

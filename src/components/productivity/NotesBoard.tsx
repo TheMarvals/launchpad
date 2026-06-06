@@ -13,9 +13,11 @@ interface Note {
   color: string;
   category: string | null;
   updatedAt: Date;
+  userId: string;
+  isPublic: boolean;
 }
 
-export default function NotesBoard({ initialNotes }: { initialNotes: any[] }) {
+export default function NotesBoard({ initialNotes, currentUserId }: { initialNotes: any[], currentUserId: string }) {
   const t = useTranslations('Notes');
   const locale = useLocale();
   const [notes, setNotes] = useState<Note[]>(initialNotes);
@@ -53,9 +55,9 @@ export default function NotesBoard({ initialNotes }: { initialNotes: any[] }) {
       confirmButtonText: t('delete.confirm'),
       cancelButtonText: t('delete.cancel'),
       customClass: {
-        popup: 'rounded-[2rem]',
-        confirmButton: 'rounded-xl px-6 py-3 font-bold',
-        cancelButton: 'rounded-xl px-6 py-3 font-bold text-gray-500'
+        popup: 'rounded-none border border-hairline bg-canvas-elevated text-ink',
+        confirmButton: 'px-sm py-xs font-semibold uppercase tracking-wider text-xs border border-transparent bg-primary text-on-primary',
+        cancelButton: 'px-sm py-xs font-semibold text-muted uppercase tracking-wider text-xs border border-transparent bg-canvas'
       }
     });
 
@@ -73,12 +75,12 @@ export default function NotesBoard({ initialNotes }: { initialNotes: any[] }) {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-[#0a041a]">{t('title')}</h1>
-          <p className="text-gray-400 font-medium mt-1">{t('subtitle')}</p>
+          <h1 className="text-title-sm font-medium text-ink uppercase tracking-wider">{t('title')}</h1>
+          <p className="text-body text-muted mt-1">{t('subtitle')}</p>
         </div>
         <button 
           onClick={handleOpenCreate}
-          className="bg-[#0a041a] text-white px-8 py-4 rounded-[1.5rem] font-bold text-sm hover:shadow-2xl hover:shadow-[#0a041a]/30 transition-all flex items-center justify-center group"
+          className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center justify-center border border-transparent group"
         >
           <span className="material-icons mr-2 text-[20px] group-hover:rotate-90 transition-transform">add</span> 
           {t('newNote')}
@@ -87,63 +89,72 @@ export default function NotesBoard({ initialNotes }: { initialNotes: any[] }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {notes.length === 0 ? (
-          <div className="col-span-full py-32 text-center bg-gray-50/50 rounded-[3rem] border-2 border-dashed border-gray-100 flex flex-col items-center justify-center">
-            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-6">
-              <span className="material-icons text-4xl text-gray-200">description</span>
+          <div className="col-span-full py-32 text-center bg-canvas-elevated border border-hairline flex flex-col items-center justify-center">
+            <div className="w-20 h-20 bg-canvas border border-hairline flex items-center justify-center mb-6">
+              <span className="material-icons text-4xl text-muted">description</span>
             </div>
-            <p className="text-gray-400 font-bold text-xl">{t('emptyTitle')}</p>
-            <p className="text-gray-300 mt-2">{t('emptyMessage')}</p>
+            <p className="text-ink font-medium uppercase tracking-wider text-lg">{t('emptyTitle')}</p>
+            <p className="text-muted mt-2">{t('emptyMessage')}</p>
           </div>
         ) : (
           notes.map((note) => (
             <div 
               key={note.id} 
-              className="group bg-white rounded-[2.5rem] p-8 border border-gray-50 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all flex flex-col h-[350px] relative overflow-hidden"
+              className="group bg-canvas-elevated p-sm border border-hairline hover:border-ink transition-all flex flex-col h-[350px] relative overflow-hidden"
             >
               {/* Acciones Rápidas (Hover) */}
-              <div className="absolute top-6 right-6 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
-                <button 
-                  onClick={() => handleOpenEdit(note)}
-                  className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-400 hover:text-blue-600 transition-all"
-                >
-                  <span className="material-icons text-[18px]">edit</span>
-                </button>
-                <button 
-                  onClick={() => handleDelete(note.id)}
-                  className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-400 hover:text-red-500 transition-all"
-                >
-                  <span className="material-icons text-[18px]">delete</span>
-                </button>
-              </div>
+              {note.userId === currentUserId && (
+                <div className="absolute top-6 right-6 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); handleOpenEdit(note); }}
+                    className="w-10 h-10 border border-hairline bg-canvas flex items-center justify-center text-muted hover:text-primary transition-all"
+                  >
+                    <span className="material-icons text-[18px]">edit</span>
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); handleDelete(note.id); }}
+                    className="w-10 h-10 border border-hairline bg-canvas flex items-center justify-center text-muted hover:text-primary transition-all"
+                  >
+                    <span className="material-icons text-[18px]">delete</span>
+                  </button>
+                </div>
+              )}
 
               {/* Tag & Color */}
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: note.color || '#3b82f6' }} />
-                <span className="text-[10px] uppercase tracking-[0.2em] font-black text-gray-300">
-                  {note.category || 'General'}
-                </span>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-4 h-1 rounded-none" style={{ backgroundColor: note.color || '#da291c' }} />
+                  <span className="text-caption-uppercase text-muted">
+                    {note.category || 'General'}
+                  </span>
+                </div>
+                <div className="text-muted flex items-center" title={note.isPublic ? 'Pública' : 'Privada'}>
+                  <span className="material-icons text-[16px]">{note.isPublic ? 'public' : 'lock'}</span>
+                </div>
               </div>
 
               {/* Content */}
               <div 
-                className="flex-grow overflow-hidden cursor-pointer"
-                onClick={() => handleOpenEdit(note)}
+                className={`flex-grow overflow-hidden ${note.userId === currentUserId ? 'cursor-pointer' : ''}`}
+                onClick={() => {
+                  if (note.userId === currentUserId) handleOpenEdit(note);
+                }}
               >
-                <h3 className="text-xl font-bold text-gray-900 mb-4 line-clamp-2 leading-tight">
+                <h3 className="text-title-sm font-medium uppercase text-ink mb-4 line-clamp-2">
                   {note.title}
                 </h3>
-                <p className="text-sm text-gray-500 line-clamp-6 whitespace-pre-wrap leading-relaxed">
+                <p className="text-body text-muted line-clamp-6 whitespace-pre-wrap">
                   {note.content || t('noContent')}
                 </p>
               </div>
 
               {/* Footer */}
-              <div className="mt-8 pt-6 border-t border-gray-50 flex justify-between items-center">
+              <div className="mt-auto pt-xs border-t border-hairline flex justify-between items-center">
                 <div className="flex flex-col">
-                  <span className="text-[9px] uppercase tracking-wider text-gray-300 font-bold">{t('modified')}</span>
-                  <span className="text-[11px] text-gray-400 font-medium">{new Date(note.updatedAt).toLocaleDateString(locale)}</span>
+                  <span className="text-caption-uppercase text-muted mb-1">{t('modified')}</span>
+                  <span className="text-xs text-ink font-medium">{new Date(note.updatedAt).toLocaleDateString(locale)}</span>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-200">
+                <div className="w-10 h-10 border border-hairline bg-canvas flex items-center justify-center text-muted">
                   <span className="material-icons text-[20px]">bookmark_border</span>
                 </div>
               </div>

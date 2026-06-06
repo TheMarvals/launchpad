@@ -1,28 +1,91 @@
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Outfit:wght@200;300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;700;900&display=swap");
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Outfit", "Open Sans", ui-sans-serif, system-ui, sans-serif;
   --font-outfit: "Outfit", sans-serif;
+  
+  /* Brand & Accent Colors */
+  --color-primary: #da291c;
+  --color-primary-active: #b01e0a;
+  --color-primary-hover: #9d2211;
+  --color-ink: #ffffff;
+  --color-body: #969696;
+  --color-body-strong: #ffffff;
+  --color-body-on-light: #181818;
+  --color-muted: #666666;
+  --color-muted-soft: #8f8f8f;
+  --color-hairline: #303030;
+  --color-hairline-on-light: #d2d2d2;
+  --color-hairline-soft: #ebebeb;
+  --color-canvas: #181818;
+  --color-canvas-elevated: #303030;
+  --color-canvas-light: #ffffff;
+  --color-surface-card: #303030;
+  --color-surface-soft-light: #f7f7f7;
+  --color-surface-strong-light: #ebebeb;
+  --color-on-primary: #ffffff;
+  --color-on-dark: #ffffff;
+  --color-on-light: #181818;
+  --color-accent-yellow-hypersail: #fff200;
+  --color-accent-yellow: #f6e500;
+  --color-semantic-info: #4c98b9;
+  --color-semantic-success: #03904a;
+  --color-semantic-warning: #f13a2c;
 
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Font Family (Inter is the humanist fallback for FerrariSans) */
+  --font-sans: "Inter", -apple-system, system-ui, sans-serif;
+  --font-ferrari: "Inter", -apple-system, system-ui, sans-serif;
+
+  /* Spacing Scale (8px token ladder) */
+  --spacing-xxxs: 4px;
+  --spacing-xxs: 8px;
+  --spacing-xs: 16px;
+  --spacing-sm: 24px;
+  --spacing-md: 32px;
+  --spacing-lg: 48px;
+  --spacing-xl: 64px;
+  --spacing-xxl: 96px;
+  --spacing-super: 128px;
+
+  /* Border Radius Scale (dominant is none/0px) */
+  --radius-none: 0px;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* Shadows (no shadows by default, only soft small shadow for active/hovered depth elements) */
+  --shadow-small: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-none: 0 0 0 rgba(0, 0, 0, 0);
+
+  /* Explicitly define standard width scale to prevent custom spacing tokens (sm, md, lg, xl) from overriding max-w-* classes */
+  --width-sm: 24rem;
+  --width-md: 28rem;
+  --width-lg: 32rem;
+  --width-xl: 36rem;
+  --width-2xl: 42rem;
+  --width-3xl: 48rem;
+  --width-4xl: 56rem;
+  --width-5xl: 64rem;
+  --width-6xl: 72rem;
+  --width-7xl: 80rem;
+
+  /* Set background and foreground color mappings */
+  --color-background: var(--canvas);
+  --color-foreground: var(--ink);
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #111111;
+  --background: #181818;
+  --foreground: #ffffff;
 }
 
-/* Force light mode for the dashboard */
-.light-theme {
-  --background: #ffffff;
-  --foreground: #111111;
-}
-
+/* Base style overrides to apply the dark canvas */
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: #181818;
+  color: #ffffff;
   font-family: var(--font-sans);
   margin: 0;
   -webkit-font-smoothing: antialiased;

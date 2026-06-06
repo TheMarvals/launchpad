@@ -1,16 +1,28 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { sendTicketMessage } from '@/app/actions/tickets';
+import { useTranslations } from 'next-intl';
 
-export default function TicketReplyForm({ ticketId, buttonText = "Enviar Respuesta" }: { ticketId: string, buttonText?: string }) {
+export default function TicketReplyForm({ ticketId, buttonText }: { ticketId: string, buttonText?: string }) {
+  const t = useTranslations('ClientPortal');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim()) return;
+  // Auto-resize textarea
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+    }
+  }, [message]);
+
+  const handleSubmit = useCallback(async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!message.trim() || loading) return;
 
     setLoading(true);
     setError('');
@@ -23,39 +35,81 @@ export default function TicketReplyForm({ ticketId, buttonText = "Enviar Respues
       setMessage('');
     }
     setLoading(false);
+  }, [message, loading, ticketId]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit}>
       {error && (
-        <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+        <div className="mb-xxs px-xxs py-[6px] bg-semantic-warning/10 text-semantic-warning text-xs font-medium flex items-center gap-xxxs">
+          <span className="material-icons text-[14px]">error_outline</span>
           {error}
         </div>
       )}
       
-      <textarea
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        required
-        rows={4}
-        placeholder="Escribe tu mensaje aquí..."
-        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all outline-none resize-y text-gray-900"
-      ></textarea>
-      
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={loading || !message.trim()}
-          className="bg-gray-900 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center"
-        >
-          {loading ? (
-            <span className="material-icons animate-spin mr-2 text-[18px]">sync</span>
-          ) : (
-            <span className="material-icons mr-2 text-[18px]">send</span>
-          )}
-          {buttonText}
-        </button>
-      </div>
+      {buttonText ? (
+        <div className="space-y-xxs">
+          <textarea
+            ref={textareaRef}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            required
+            rows={3}
+            placeholder={t('tickets.detail.replyPlaceholder')}
+            className="w-full px-xs py-xxs bg-canvas border border-hairline text-ink placeholder:text-muted focus:border-primary/50 focus:outline-none resize-none text-sm leading-relaxed"
+          />
+          <button
+            type="submit"
+            disabled={loading || !message.trim()}
+            className="w-full py-xxs bg-primary text-on-primary font-semibold hover:bg-primary-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex flex-col items-center gap-[2px]"
+          >
+            {loading ? (
+              <span className="material-icons text-[16px] animate-spin">sync</span>
+            ) : (
+              <span className="material-icons text-[16px]">send</span>
+            )}
+            <span className="text-xs uppercase tracking-wider leading-snug">{buttonText}</span>
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-end gap-xxs bg-canvas border border-hairline focus-within:border-primary/50 transition-colors">
+            <textarea
+              ref={textareaRef}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              required
+              rows={1}
+              placeholder={t('tickets.detail.replyPlaceholder')}
+              className="flex-1 px-xs py-[10px] bg-transparent text-ink placeholder:text-muted focus:outline-none resize-none text-sm leading-relaxed max-h-[160px]"
+            />
+            <button
+              type="submit"
+              disabled={loading || !message.trim()}
+              className="shrink-0 mb-[6px] mr-[6px] w-[36px] h-[36px] flex items-center justify-center bg-primary text-on-primary hover:bg-primary-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              title={t('tickets.detail.replyButton')}
+            >
+              {loading ? (
+                <span className="material-icons text-[18px] animate-spin">sync</span>
+              ) : (
+                <span className="material-icons text-[18px]">send</span>
+              )}
+            </button>
+          </div>
+          <div className="flex justify-between items-center mt-[4px]">
+            <span className="text-caption text-muted/60">{t('tickets.detail.you')}</span>
+            <span className="text-caption text-muted/40">Enter ↵</span>
+          </div>
+        </>
+      )}
     </form>
   );
 }

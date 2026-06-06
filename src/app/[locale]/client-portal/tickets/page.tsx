@@ -3,112 +3,117 @@ import { Link } from '@/i18n/routing';
 import { getClientTickets } from '@/app/actions/tickets';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { getTranslations } from 'next-intl/server';
 
 export default async function TicketsPage() {
   const tickets = await getClientTickets();
+  const t = await getTranslations('ClientPortal');
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'OPEN': return 'bg-green-100 text-green-800 border-green-200';
-      case 'IN_PROGRESS': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'CLOSED': return 'bg-gray-100 text-gray-800 border-gray-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'OPEN': return 'bg-semantic-success/10 text-semantic-success border-semantic-success/30';
+      case 'IN_PROGRESS': return 'bg-accent-yellow/10 text-accent-yellow border-accent-yellow/30';
+      case 'CLOSED': return 'bg-canvas-elevated text-muted border-hairline';
+      default: return 'bg-canvas-elevated text-muted border-hairline';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'OPEN': return 'Abierto';
-      case 'IN_PROGRESS': return 'En Progreso';
-      case 'CLOSED': return 'Cerrado';
+      case 'OPEN': return t('tickets.status.open');
+      case 'IN_PROGRESS': return t('tickets.status.inProgress');
+      case 'CLOSED': return t('tickets.status.closed');
       default: return status;
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'LOW': return 'text-gray-500';
-      case 'MEDIUM': return 'text-blue-500';
-      case 'HIGH': return 'text-orange-500';
-      case 'URGENT': return 'text-red-600 font-bold';
-      default: return 'text-gray-500';
+      case 'LOW': return 'text-muted';
+      case 'MEDIUM': return 'text-semantic-info';
+      case 'HIGH': return 'text-accent-yellow';
+      case 'URGENT': return 'text-semantic-warning font-bold';
+      default: return 'text-muted';
     }
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+    <div className="max-w-6xl mx-auto space-y-md">
+      <div className="flex justify-between items-center bg-canvas-elevated border border-hairline p-sm">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Centro de Soporte</h1>
-          <p className="text-gray-500 mt-1">Gestiona tus consultas y reportes técnicos</p>
+          <h1 className="text-title-md font-medium text-ink tracking-tight">{t('tickets.pageTitle')}</h1>
+          <p className="text-body text-muted mt-[2px]">{t('tickets.pageSubtitle')}</p>
         </div>
         <Link 
           href="/client-portal/tickets/new" 
-          className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center shadow-sm"
+          className="bg-primary text-on-primary px-sm py-xxs font-semibold transition-colors flex items-center text-xs uppercase tracking-wider"
         >
-          <span className="material-icons text-[20px] mr-2">add</span>
-          Nuevo Ticket
+          <span className="material-icons text-[18px] mr-xxs">add</span>
+          {t('tickets.newTicket')}
         </Link>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-canvas-elevated border border-hairline overflow-hidden">
         {tickets.length === 0 ? (
-          <div className="text-center py-16 px-6">
-            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="material-icons text-gray-300 text-4xl">support_agent</span>
+          <div className="text-center py-xl px-sm">
+            <div className="w-[72px] h-[72px] bg-canvas flex items-center justify-center mx-auto mb-xs">
+              <span className="material-icons text-muted text-4xl">support_agent</span>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-1">No tienes tickets abiertos</h3>
-            <p className="text-gray-500 mb-6 max-w-sm mx-auto">Si tienes algún problema técnico o duda sobre tu servicio, no dudes en contactarnos.</p>
+            <h3 className="text-title-sm font-medium text-ink mb-[4px]">{t('tickets.emptyTitle')}</h3>
+            <p className="text-sm text-muted mb-sm max-w-sm mx-auto leading-relaxed">{t('tickets.emptyMessage')}</p>
             <Link 
               href="/client-portal/tickets/new" 
-              className="text-blue-600 font-medium hover:text-blue-700 hover:underline"
+              className="text-primary font-medium hover:text-primary/80 transition-colors text-sm"
             >
-              Abrir mi primer ticket
+              {t('tickets.emptyAction')}
             </Link>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50/50 border-b border-gray-100">
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Asunto</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Prioridad</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Última Actualización</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Acción</th>
+                <tr className="bg-canvas border-b border-hairline">
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('tickets.table.subject')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('tickets.table.status')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('tickets.table.priority')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('tickets.table.updated')}</th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-right">{t('tickets.table.actions')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-hairline">
                 {tickets.map((ticket) => (
-                  <tr key={ticket.id} className="hover:bg-gray-50/50 transition-colors group">
-                    <td className="px-6 py-4">
+                  <tr key={ticket.id} className="hover:bg-canvas/80 transition-colors group">
+                    <td className="px-sm py-xs">
                       <div className="flex flex-col">
-                        <Link href={`/client-portal/tickets/${ticket.id}`} className="font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                        <Link href={`/client-portal/tickets/${ticket.id}`} className="font-medium text-ink hover:text-primary transition-colors text-sm">
                           {ticket.subject}
                         </Link>
-                        <span className="text-xs text-gray-400 font-mono mt-1">#{ticket.id.split('-')[0].toUpperCase()}</span>
+                        <span className="text-caption text-muted font-mono mt-[2px]">#{ticket.id.split('-')[0].toUpperCase()}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(ticket.status)}`}>
+                    <td className="px-sm py-xs">
+                      <span className={`inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border ${getStatusColor(ticket.status)}`}>
                         {getStatusText(ticket.status)}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-1.5">
-                        <span className="material-icons text-[16px] text-gray-400">flag</span>
-                        <span className={`text-sm font-medium ${getPriorityColor(ticket.priority)}`}>
-                          {ticket.priority}
+                    <td className="px-sm py-xs">
+                      <div className="flex items-center space-x-xxxs">
+                        <span className="material-icons text-sm text-muted">flag</span>
+                        <span className={`text-sm ${getPriorityColor(ticket.priority)}`}>
+                          {ticket.priority === 'URGENT' ? t('tickets.priority.urgent') :
+                           ticket.priority === 'HIGH' ? t('tickets.priority.high') :
+                           ticket.priority === 'MEDIUM' ? t('tickets.priority.medium') :
+                           t('tickets.priority.low')}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-sm py-xs text-body text-muted">
                       {format(new Date(ticket.updatedAt), "d 'de' MMM, HH:mm", { locale: es })}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-sm py-xs text-right">
                       <Link 
                         href={`/client-portal/tickets/${ticket.id}`}
-                        className="inline-flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all opacity-0 group-hover:opacity-100"
+                        className="inline-flex items-center justify-center p-xxs text-muted hover:text-primary transition-all opacity-0 group-hover:opacity-100"
                       >
                         <span className="material-icons text-[20px]">chevron_right</span>
                       </Link>

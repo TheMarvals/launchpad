@@ -17,7 +17,7 @@ export default function GenericModal({
   title, 
   children, 
   footer,
-  maxWidth = 'max-w-lg'
+  maxWidth = 'max-w-[32rem]'
 }: GenericModalProps) {
   if (!isOpen) return null;
 
@@ -25,29 +25,29 @@ export default function GenericModal({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-[#0a041a]/40 backdrop-blur-md"
+        className="absolute inset-0 bg-[#181818]/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Modal Content */}
-      <div className={`relative bg-white w-full ${maxWidth} rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-8 duration-300`}>
-        <div className="p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-black text-gray-900 tracking-tight">{title}</h2>
+      <div className={`relative bg-canvas-elevated w-full ${maxWidth} border border-hairline overflow-hidden`}>
+        <div className="p-sm">
+          <div className="flex justify-between items-center pb-xs border-b border-hairline">
+            <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider">{title}</h2>
             <button 
               onClick={onClose}
-              className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-all"
+              className="text-muted hover:text-ink transition-all"
             >
               <span className="material-icons">close</span>
             </button>
           </div>
 
-          <div className="space-y-6">
+          <div className="pt-sm space-y-sm">
             {children}
           </div>
 
           {footer && (
-            <div className="pt-8 flex space-x-3">
+            <div className="pt-4 flex space-x-3">
               {footer}
             </div>
           )}

@@ -1,7 +1,10 @@
 import React from 'react';
 import QuotePDF from '@/components/QuotePDF';
+import { getCompanyProfile } from '@/app/actions/settings';
 
-export default function QuoteTemplatePreview() {
+export default async function QuoteTemplatePreview() {
+  const companyProfile = await getCompanyProfile();
+
   const mockQuote = {
     correlativo: 0,
     fechaEmision: new Date(),
@@ -21,8 +24,10 @@ export default function QuoteTemplatePreview() {
   };
 
   return (
-    <div className="m-0 p-0">
-      <QuotePDF quote={mockQuote} isTemplate={true} />
+    <div className="min-h-screen bg-slate-100 flex justify-center py-8">
+      <div className="w-[210mm] shadow-2xl bg-white overflow-hidden">
+        <QuotePDF quote={mockQuote} isTemplate={true} companyProfile={companyProfile} />
+      </div>
     </div>
   );
 }

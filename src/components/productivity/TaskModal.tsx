@@ -68,80 +68,86 @@ export default function TaskModal({ isOpen, onClose, onSave, projects, initialDa
 
   return (
     <GenericModal isOpen={isOpen} onClose={onClose} title={title}>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.title')}</label>
+      <form onSubmit={handleSubmit} className="space-y-sm">
+        <div className="space-y-xxs">
+          <label className="text-caption-uppercase text-ink font-semibold">{t('form.title')}</label>
           <input
             required
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             placeholder={t('form.titlePlaceholder')}
-            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium placeholder:text-gray-300"
+            className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors text-sm"
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.project')}</label>
-            <select
-              value={formData.projectId}
-              onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
-              className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium appearance-none"
-            >
-              <option value="">{t('form.noProject')}</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+        <div className="grid grid-cols-2 gap-sm">
+          <div className="space-y-xxs">
+            <label className="text-caption-uppercase text-ink font-semibold">{t('form.project')}</label>
+            <div className="relative">
+              <select
+                value={formData.projectId}
+                onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
+                className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors appearance-none text-sm"
+              >
+                <option value="">{t('form.noProject')}</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+              <span className="material-icons absolute right-xxs top-1/2 -translate-y-1/2 text-muted pointer-events-none text-sm">expand_more</span>
+            </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.priority')}</label>
-            <select
-              value={formData.priority}
-              onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-              className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium appearance-none"
-            >
-              <option value="low">{t('priority.low')}</option>
-              <option value="medium">{t('priority.medium')}</option>
-              <option value="high">{t('priority.high')}</option>
-              <option value="urgent">{t('priority.urgent')}</option>
-            </select>
+          <div className="space-y-xxs">
+            <label className="text-caption-uppercase text-ink font-semibold">{t('form.priority')}</label>
+            <div className="relative">
+              <select
+                value={formData.priority}
+                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors appearance-none text-sm"
+              >
+                <option value="low">{t('priority.low')}</option>
+                <option value="medium">{t('priority.medium')}</option>
+                <option value="high">{t('priority.high')}</option>
+                <option value="urgent">{t('priority.urgent')}</option>
+              </select>
+              <span className="material-icons absolute right-xxs top-1/2 -translate-y-1/2 text-muted pointer-events-none text-sm">expand_more</span>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.notes')}</label>
+        <div className="space-y-xxs">
+          <label className="text-caption-uppercase text-ink font-semibold">{t('form.notes')}</label>
           <textarea
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
             placeholder={t('form.notesPlaceholder')}
             rows={3}
-            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium placeholder:text-gray-300 resize-none"
+            className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors resize-none text-sm"
           />
         </div>
 
-        <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-1">{t('form.dueDate')}</label>
+        <div className="space-y-xxs">
+          <label className="text-caption-uppercase text-ink font-semibold">{t('form.dueDate')}</label>
           <input
             type="date"
             value={formData.dueDate}
             onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#0a041a] transition-all text-gray-900 font-medium"
+            className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors text-sm"
           />
         </div>
 
-        <div className="pt-4 flex space-x-3">
+        <div className="pt-xs flex gap-xxs">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-6 py-4 rounded-2xl font-bold text-gray-500 hover:bg-gray-100 transition-all"
+            className="flex-1 bg-transparent border border-hairline text-ink px-xs py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-canvas transition-colors"
           >
             {t('form.cancel')}
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex-[2] bg-[#0a041a] text-white px-6 py-4 rounded-2xl font-bold hover:shadow-lg hover:shadow-[#0a041a]/20 transition-all disabled:opacity-50"
+            className="flex-[2] bg-primary text-on-primary px-xs py-xxs font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 uppercase tracking-wider text-xs"
           >
             {isSubmitting ? t('form.saving') : t('form.save')}
           </button>

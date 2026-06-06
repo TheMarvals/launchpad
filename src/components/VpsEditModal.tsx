@@ -32,7 +32,15 @@ export default function VpsEditModal({ server }: { server: any }) {
     const res = await updateVpsService(server.id, dataToSubmit);
 
     if (res.error) {
-      Swal.fire('Error', res.error, 'error');
+      Swal.fire({
+        title: 'Error',
+        text: res.error,
+        icon: 'error',
+        customClass: {
+          popup: 'rounded-none border border-hairline bg-canvas-elevated text-ink',
+          confirmButton: 'px-sm py-xs font-semibold uppercase tracking-wider text-xs border border-transparent bg-primary text-on-primary',
+        }
+      });
     } else {
       Swal.fire({
         icon: 'success',
@@ -41,7 +49,10 @@ export default function VpsEditModal({ server }: { server: any }) {
         toast: true,
         position: 'bottom-end',
         showConfirmButton: false,
-        timer: 3000
+        timer: 3000,
+        customClass: {
+          popup: 'border border-hairline bg-canvas-elevated text-ink',
+        }
       });
       setIsOpen(false);
     }
@@ -52,102 +63,107 @@ export default function VpsEditModal({ server }: { server: any }) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
+        className="text-muted hover:text-primary transition-colors"
         title="Editar VPS"
       >
         <span className="material-icons text-[18px]">edit</span>
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h3 className="text-xl font-bold text-gray-900 flex items-center">
-                <span className="material-icons text-blue-600 mr-2">dns</span> Editar VPS
+        <div className="fixed inset-0 bg-ink/90 backdrop-blur-md z-50 flex items-center justify-center p-sm">
+          <div className="bg-canvas-elevated border border-hairline w-full max-w-md">
+            <div className="p-sm border-b border-hairline flex justify-between items-center">
+              <h3 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
+                <span className="material-icons mr-xxs text-primary">dns</span>
+                Editar VPS
               </h3>
-              <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setIsOpen(false)} className="text-muted hover:text-ink transition-colors">
                 <span className="material-icons">close</span>
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Nombre Descriptivo</label>
+            <form onSubmit={handleSubmit} className="p-sm space-y-sm">
+              <div className="space-y-xxs">
+                <label className="block text-caption-uppercase text-ink font-semibold">Nombre Descriptivo</label>
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   placeholder="Ej: Liceo A1 Web"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Hostname (Público)</label>
+              <div className="space-y-xxs">
+                <label className="block text-caption-uppercase text-ink font-semibold">Hostname (Público)</label>
                 <input
                   type="text"
                   name="hostname"
                   value={formData.hostname}
                   onChange={handleChange}
-                  className="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  placeholder="Ej: srv1.marval.host"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  placeholder="Ej: srv1.launchpad.host"
                 />
-                <p className="text-xs text-gray-500 mt-1">Este nombre se mostrará al cliente en lugar de la IP.</p>
+                <p className="text-xs text-muted mt-[2px]">Este nombre se mostrará al cliente en lugar de la IP.</p>
               </div>
 
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">IP Asignada</label>
+              <div className="space-y-xxs">
+                <label className="block text-caption-uppercase text-ink font-semibold">IP Asignada</label>
                 <input
                   type="text"
                   name="ipAddress"
                   value={formData.ipAddress}
                   onChange={handleChange}
-                  className="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   placeholder="Ej: 192.168.1.100"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">ID del Proveedor (VPS)</label>
+              <div className="space-y-xxs">
+                <label className="block text-caption-uppercase text-ink font-semibold">ID del Proveedor (VPS)</label>
                 <input
                   type="text"
                   name="providerId"
                   value={formData.providerId}
                   onChange={handleChange}
                   required
-                  className="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-yellow-50"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                   placeholder="Ej: 893450"
                 />
-                <p className="text-xs text-gray-500 mt-1">Este ID vincula las acciones (Start, Stop) con la API del proveedor cloud.</p>
+                <p className="text-xs text-muted mt-[2px]">Este ID vincula las acciones (Start, Stop) con la API del proveedor cloud.</p>
               </div>
 
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Fecha de Vencimiento (Opcional)</label>
+              <div className="space-y-xxs">
+                <label className="block text-caption-uppercase text-ink font-semibold">Fecha de Vencimiento (Opcional)</label>
                 <input
                   type="date"
                   name="dueDate"
                   value={formData.dueDate}
                   onChange={handleChange}
-                  className="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
                 />
               </div>
 
-              <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100">
+              <div className="flex justify-end gap-xs pt-sm border-t border-hairline">
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
+                  className="px-sm py-xxs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center disabled:opacity-50"
+                  className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-all disabled:opacity-50 flex items-center border border-transparent"
                 >
-                  {loading ? 'Guardando...' : 'Guardar Cambios'}
+                  {loading ? (
+                    <span className="material-icons animate-spin text-[18px]">sync</span>
+                  ) : (
+                    'Guardar Cambios'
+                  )}
                 </button>
               </div>
             </form>

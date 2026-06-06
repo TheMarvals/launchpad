@@ -223,7 +223,7 @@ export default function ConsolePage() {
           <div className="w-7 h-7 rounded bg-blue-500/10 flex items-center justify-center">
             <span className="material-icons text-blue-500 text-[16px]">terminal</span>
           </div>
-          <span className="text-slate-200 font-bold tracking-tight text-sm hidden sm:inline">Consola MARVAL</span>
+          <span className="text-slate-200 font-bold tracking-tight text-sm hidden sm:inline">Consola LAUNCHPAD</span>
           <span className="bg-slate-800 text-[9px] text-slate-400 px-2 py-0.5 rounded-full uppercase tracking-widest font-bold hidden md:inline">
             Encrypted
           </span>
@@ -296,7 +296,7 @@ export default function ConsolePage() {
             <span className={`w-1.5 h-1.5 rounded-full ${status === 'Conectado' ? 'bg-green-500' : status === 'Desconectado' ? 'bg-red-500' : 'bg-yellow-500 animate-pulse'}`}></span>
             <span>STATUS: {status.toUpperCase()}</span>
           </div>
-          <span>PROVIDER: MARVAL CLOUD RELAY</span>
+          <span>PROVIDER: LAUNCHPAD CLOUD RELAY</span>
         </div>
         <div className="flex items-center space-x-4 italic">
           <span>Protección de Capa 7 Activa</span>

@@ -65,9 +65,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.bin/prisma ./node_m
 
 USER nextjs
 
-EXPOSE 3010
+EXPOSE 3011
 
-ENV PORT=3010
+ENV PORT=3011
 
 # Run Prisma db push to ensure schema is up to date, then start the app
 CMD ["sh", "-c", "node node_modules/.bin/prisma db push --skip-generate 2>/dev/null || true && node server.js"]

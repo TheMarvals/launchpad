@@ -1,5 +1,5 @@
 {
-  "name": "marval-admin",
+  "name": "launchpad-admin",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -20,6 +20,7 @@
     "@novnc/novnc": "^1.7.0",
     "@prisma/client": "^6.19.3",
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.10.0",
     "date-fns": "^4.1.0",
     "mysql2": "^3.22.3",
     "next": "16.2.4",

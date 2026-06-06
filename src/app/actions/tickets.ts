@@ -1,5 +1,6 @@
 'use server';
 
+import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
@@ -38,6 +39,10 @@ export async function createTicket(data: { subject: string; priority: string; me
     // Obtener info del cliente para el email
     const client = await prisma.client.findUnique({ where: { id: clientId as string } });
 
+    // Detect locale
+    const cookieStore = await cookies();
+    const userLocale = cookieStore.get('NEXT_LOCALE')?.value || 'es';
+
     // Notificar al admin
     console.log(`[Tickets] Intentando notificar al admin sobre el ticket ${ticket.id}`);
     await sendNewTicketNotificationToAdmin({
@@ -49,7 +54,7 @@ export async function createTicket(data: { subject: string; priority: string; me
       clientEmail: session.user.email || '',
       senderName: session.user.name || 'Usuario',
       senderRole: session.user.role || 'CLIENT',
-    }).catch(e => console.error('[Tickets] Error catch sending ticket email to admin:', e));
+    }, userLocale).catch(e => console.error('[Tickets] Error catch sending ticket email to admin:', e));
 
     revalidatePath('/client-portal/tickets');
     revalidatePath('/dashboard/tickets');
@@ -181,6 +186,10 @@ export async function sendTicketMessage(ticketId: string, message: string) {
       }
     });
 
+    // Detect locale from cookie
+    const cookieStore = await cookies();
+    const userLocale = cookieStore.get('NEXT_LOCALE')?.value || 'es';
+
     // Enviar notificaciones
     if (session.user.role === 'ADMIN' && ticket.userId !== session.user.id) {
       // El admin responde a un cliente
@@ -192,10 +201,10 @@ export async function sendTicketMessage(ticketId: string, message: string) {
         message: '', // No usado en el template del cliente
         clientName: ticket.user.name || 'Cliente',
         clientEmail: ticket.user.email || '',
-        senderName: session.user.name || 'Soporte MARVAL',
+        senderName: session.user.name || 'Soporte LAUNCHPAD',
         senderRole: 'ADMIN',
         replyMessage: message,
-      }).catch(e => console.error('[Tickets] Error catch sending reply email to client:', e));
+      }, userLocale).catch(e => console.error('[Tickets] Error catch sending reply email to client:', e));
     } else if (session.user.role === 'CLIENT') {
       // El cliente responde al ticket
       const clientInfo = await prisma.client.findUnique({ where: { id: ticket.clientId } });
@@ -209,7 +218,7 @@ export async function sendTicketMessage(ticketId: string, message: string) {
         clientEmail: session.user.email || '',
         senderName: session.user.name || 'Usuario',
         senderRole: 'CLIENT',
-      }).catch(e => console.error('[Tickets] Error catch sending reply email to admin:', e));
+      }, userLocale).catch(e => console.error('[Tickets] Error catch sending reply email to admin:', e));
     }
 
     revalidatePath(`/client-portal/tickets/${ticketId}`);

@@ -10,6 +10,7 @@
     "invoices": "Facturación",
     "products": "Productos",
     "tickets": "Tickets",
+    "showcase": "Portafolio",
     "audit": "Auditoría",
     "productivity": "Productividad",
     "projects": "Mis Proyectos",
@@ -25,6 +26,7 @@
     "welcome": "Bienvenido, {name}",
     "summary": "Resumen general de tu actividad comercial.",
     "newQuote": "Nueva Cotización",
+    "newInvoice": "Nueva Factura",
     "stats": {
       "quotes": "COTIZACIONES",
       "invoices": "FACTURAS",
@@ -147,6 +149,27 @@
       "id": "ID",
       "priority": "Prioridad",
       "view": "Ver/Responder"
+    },
+    "detail": {
+      "back": "Volver a la Bandeja",
+      "respond": "Responder al Cliente",
+      "clientInfo": "Información del Cliente",
+      "razonSocial": "Razón Social",
+      "rut": "RUT",
+      "email": "Email Principal",
+      "notRegistered": "No registrado",
+      "viewProfile": "Ver perfil completo",
+      "priority": {
+        "URGENT": "Urgente",
+        "HIGH": "Alta",
+        "MEDIUM": "Media",
+        "LOW": "Baja"
+      },
+      "adminStatus": {
+        "OPEN": "Pendiente",
+        "IN_PROGRESS": "En Progreso",
+        "CLOSED": "Resuelto"
+      }
     }
   },
   "QuoteForm": {
@@ -276,6 +299,11 @@
       "medium": "Media",
       "low": "Baja"
     },
+    "status": {
+      "todo": "Pendiente",
+      "in-progress": "En Progreso",
+      "done": "Completada"
+    },
     "noDate": "Sin fecha",
     "delete": {
       "title": "¿Eliminar tarea?",
@@ -376,6 +404,12 @@
     "tasks": "Tareas Pendientes",
     "events": "Eventos de Calendario",
     "vps": "Vencimientos VPS",
+    "tickets": "Tickets",
+    "quotes": "Cotizaciones",
+    "showcase": "Portafolio",
+    "audit": "Auditoría",
+    "sendNotifications": "Enviar Notificaciones",
+    "sending": "...",
     "noReminders": "No hay recordatorios próximos para los siguientes 7 días.",
     "daysLeft": "{days} días",
     "today": "Hoy",
@@ -385,24 +419,101 @@
   },
   "Audit": {
     "title": "Logs de Auditoría",
-    "subtitle": "Historial de acciones ejecutadas sobre los servidores VPS (Top 100 recientes).",
+    "subtitle": "Historial de acciones ejecutadas sobre los servidores VPS.",
     "table": {
       "date": "Fecha",
       "user": "Usuario",
       "server": "Servidor",
       "action": "Acción",
-      "status": "Estado"
+      "status": "Estado",
+      "actions": "Acciones"
     },
     "status": {
       "success": "ÉXITO",
       "pending": "PENDIENTE OTP",
       "failed": "FALLIDO"
     },
-    "noLogs": "No se han registrado acciones aún."
+    "noLogs": "No se han registrado acciones aún.",
+    "pagination": {
+      "showing": "Mostrando {start}–{end} de {total}",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    }
   },
   "Settings": {
-    "title": "Configuración de Productividad",
-    "subtitle": "Gestiona integraciones y notificaciones del sistema.",
+    "title": "Configuración del Sistema",
+    "subtitle": "Gestiona el perfil de la empresa, el equipo e integraciones.",
+    "tabs": {
+      "company": "Perfil de Empresa",
+      "team": "Administradores y Equipo",
+      "productivity": "Productividad"
+    },
+    "companyProfile": {
+      "title": "Perfil de Empresa",
+      "subtitle": "Información utilizada para generar Cotizaciones y Facturas.",
+      "name": "Nombre / Razón Social",
+      "role": "Cargo / Rol",
+      "taxIdLabel": "Etiqueta de Identificación (Ej. RUT)",
+      "taxId": "Número de Identificación",
+      "phone": "Teléfono",
+      "email": "Correo Electrónico",
+      "address": "Dirección Física",
+      "brandNameHeader": "Nombre de Marca — Header (Ej. LAUNCHPAD)",
+      "brandNameFooter": "Nombre de Marca — Footer (Ej. EDUARDO MARVAL)",
+      "systemsTitle": "Título de Sistemas (Ej. SYSTEMS ARCHITECTURE)",
+      "systemsSubtitle": "Subtítulo (Ej. IT CONSULTING)",
+      "save": "Guardar Perfil",
+      "success": "Perfil actualizado correctamente.",
+      "error": "Error al actualizar el perfil."
+    },
+    "team": {
+      "title": "Gestión de Equipo",
+      "subtitle": "Gestiona administradores y colaboradores.",
+      "newAdmin": "Añadir Administrador",
+      "editAdmin": "Editar Administrador",
+      "requiredFields": "Nombre y correo son obligatorios.",
+      "createSuccess": "Administrador creado correctamente.",
+      "createError": "Error al crear administrador.",
+      "updateSuccess": "Administrador actualizado correctamente.",
+      "updateError": "Error al actualizar administrador.",
+      "deleteTitle": "¿Eliminar Administrador?",
+      "deleteText": "Perderá el acceso al sistema inmediatamente.",
+      "deleteConfirm": "Eliminar",
+      "deleteCancel": "Cancelar",
+      "deleteSuccess": "Administrador eliminado.",
+      "deleteError": "Error al eliminar administrador.",
+      "deleteAdmin": "Eliminar Administrador",
+      "resetPassword": "Restablecer Contraseña",
+      "resetPasswordHelp": "Introduce una nueva contraseña para",
+      "passwordRequired": "La contraseña es obligatoria.",
+      "passwordResetSuccess": "Contraseña restablecida correctamente.",
+      "passwordResetError": "Error al restablecer la contraseña.",
+      "empty": "No se encontraron administradores.",
+      "status": {
+        "active": "Activo",
+        "inactive": "Inactivo"
+      },
+      "table": {
+        "name": "Nombre",
+        "email": "Correo",
+        "status": "Estado",
+        "joined": "Se unió",
+        "actions": "Acciones"
+      },
+      "form": {
+        "name": "Nombre Completo",
+        "namePlaceholder": "Ej. Juan Pérez",
+        "email": "Correo Electrónico",
+        "emailPlaceholder": "Ej. admin@empresa.com",
+        "password": "Contraseña",
+        "passwordPlaceholder": "Dejar en blanco para usar: Launchpad2026!",
+        "newPasswordPlaceholder": "Nueva Contraseña",
+        "passwordHelp": "Si se deja en blanco, se asignará la contraseña por defecto 'Launchpad2026!'.",
+        "save": "Guardar",
+        "saving": "Guardando...",
+        "cancel": "Cancelar"
+      }
+    },
     "telegram": {
       "title": "Integración con Telegram",
       "subtitle": "Recibe recordatorios automáticos de tareas y vencimientos.",
@@ -426,6 +537,215 @@
     "submitOtp": "Ingresar",
     "back": "Volver Atrás",
     "otpSent": "Se ha enviado un código de 6 dígitos a tu correo electrónico.",
+    "connectionError": "Error de conexión. Intenta de nuevo.",
+    "invalidCode": "Código incorrecto o expirado.",
+    "invalidCredentials": "Credenciales inválidas.",
+    "serverError": "Error del servidor, por favor intenta de nuevo.",
+    "footer": "TODOS LOS DERECHOS RESERVADOS"
+  },
+  "Gate": {
+    "title": "Acceso a la Plataforma",
+    "subtitle": "Ingresa tu email para verificar acceso.",
+    "emailLabel": "Correo Electrónico",
+    "checking": "Verificando acceso...",
+    "notFound": "No encontramos una cuenta asociada a este correo. Verifica o contacta al administrador.",
+    "rateLimited": "Demasiados intentos. Intenta de nuevo más tarde.",
+    "serverError": "Error del servidor. Intenta de nuevo más tarde.",
+    "cancel": "Cancelar",
+    "continue": "Continuar",
+    "restrictedTitle": "Acceso Restringido",
+    "restrictedMessage": "Debes verificar tu correo electrónico desde la página principal antes de acceder al inicio de sesión.",
+    "backToHome": "Volver a Launchpad"
+  },
+  "ClientDetails": {
+    "back": "Volver a Clientes",
+    "subtitle": "Gestión de Accesos al Portal y Servidores Cloud",
+    "users": "Usuarios del Portal",
+    "noUsers": "Este cliente no tiene accesos al portal.",
+    "servers": "Servidores Vinculados",
+    "noServers": "No hay servidores vinculados.",
+    "addUser": "+ Agregar Usuario",
+    "addServer": "+ Vincular VPS",
+    "modalUserTitle": "Crear Usuario del Portal",
+    "modalServerTitle": "Vincular Servidor VPS",
+    "name": "Nombre",
+    "email": "Email",
+    "password": "Contraseña Temporal",
+    "friendlyName": "Nombre Amigable",
+    "providerId": "ID de Proveedor",
+    "ipAddress": "Dirección IP",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "link": "Vincular"
+  },
+  "ClientPortal": {
+    "dashboard": {
+      "title": "Hola, {name}",
+      "subtitle": "Bienvenido a tu panel de gestión en la nube de LAUNCHPAD.",
+      "navLabel": "Panel"
+    },
+    "servers": {
+      "title": "Servidores Cloud",
+      "description": "Tienes {count} servidor(es) corriendo actualmente.",
+      "action": "Administrar Servidores",
+      "pageTitle": "Mis Servidores",
+      "pageSubtitle": "Gestión de infraestructura Cloud administrada.",
+      "empty": "No tienes servidores vinculados a tu cuenta actualmente."
+    },
+    "tickets": {
+      "title": "Soporte",
+      "description": "Gestiona tus consultas y reportes técnicos.",
+      "action": "Ir al Centro de Soporte",
+      "pageTitle": "Centro de Soporte",
+      "pageSubtitle": "Gestiona tus consultas y reportes técnicos",
+      "newTicket": "Nuevo Ticket",
+      "emptyTitle": "No tienes tickets abiertos",
+      "emptyMessage": "Si tienes algún problema técnico o duda sobre tu servicio, no dudes en contactarnos.",
+      "emptyAction": "Abrir mi primer ticket",
+      "table": {
+        "subject": "Asunto",
+        "status": "Estado",
+        "priority": "Prioridad",
+        "updated": "Última Actualización",
+        "actions": "Acción"
+      },
+      "status": {
+        "open": "Abierto",
+        "inProgress": "En Progreso",
+        "closed": "Cerrado"
+      },
+      "priority": {
+        "low": "Baja",
+        "medium": "Media",
+        "high": "Alta",
+        "urgent": "Urgente"
+      },
+      "detail": {
+        "back": "Volver",
+        "created": "Creado el {date}",
+        "lastActivity": "Última actividad: {time}",
+        "replyTitle": "Escribir Respuesta",
+        "replyButton": "Enviar Respuesta",
+        "replyPlaceholder": "Escribe tu mensaje aquí...",
+        "reopenButton": "Reabrir Ticket con Respuesta",
+        "closedTitle": "Ticket Cerrado",
+        "closedMessage": "Este ticket ha sido marcado como resuelto. Si el problema persiste o tienes una nueva consulta, por favor responde a este mensaje para reabrirlo.",
+        "you": "Tú"
+      },
+      "new": {
+        "pageTitle": "Crear Nuevo Ticket",
+        "pageSubtitle": "Describe tu problema detalladamente para que podamos ayudarte mejor.",
+        "subjectLabel": "Asunto del Ticket",
+        "subjectPlaceholder": "Ej: Problemas de conexión con el VPS, Duda sobre facturación...",
+        "priorityLabel": "Nivel de Prioridad",
+        "priorityLow": "Baja - Consulta general",
+        "priorityMedium": "Media - Problema no crítico",
+        "priorityHigh": "Alta - Servicio degradado",
+        "priorityUrgent": "Urgente - Servicio totalmente caído",
+        "messageLabel": "Descripción del Problema",
+        "messageHint": "Por favor, incluye toda la información relevante (errores exactos, pasos para reproducirlo, IPs involucradas).",
+        "messagePlaceholder": "Describe tu problema aquí...",
+        "submit": "Crear Ticket",
+        "sending": "Enviando...",
+        "back": "Volver"
+      },
+      "statusManager": {
+        "closeQuestion": "¿Marcar como Resuelto?",
+        "closeMessage": "Si tu problema ha sido solucionado, puedes cerrar este ticket.",
+        "closeConfirm": "Sí, cerrar ticket",
+        "closeCancel": "Cancelar",
+        "closeText": "Marcar como resuelto",
+        "closedSuccess": "Ticket Cerrado",
+        "closedThankYou": "Gracias por ponerte en contacto con nosotros.",
+        "supportTeam": "Soporte LAUNCHPAD"
+      }
+    },
+    "quotes": {
+      "pageTitle": "Mis Cotizaciones",
+      "pageSubtitle": "Historial comercial y propuestas técnicas aprobadas.",
+      "table": {
+        "number": "Nº",
+        "date": "Fecha",
+        "status": "Estado",
+        "netAmount": "Monto Neto",
+        "action": "Acción"
+      },
+      "empty": "No hay cotizaciones registradas aún.",
+      "pdf": "PDF"
+    }
+  },
+  "Showcase": {
+    "title": "Portafolio",
+    "subtitle": "Gestiona tus proyectos destacados y galería de imágenes.",
+    "sectionTitle": "Proyectos Destacados",
+    "sectionSubtitle": "Algunos de los proyectos que hemos diseñado, construido y desplegado.",
+    "newProject": "Nuevo Proyecto",
+    "editProject": "Editar Proyecto",
+    "deleteConfirm": "¿Estás seguro de eliminar este proyecto?",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "hide": "Ocultar",
+    "show": "Mostrar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "loading": "Cargando...",
+    "empty": "Aún no hay proyectos. Crea tu primer proyecto destacado.",
+    "scrollHint": "Desliza para explorar",
+    "viewProject": "Ver Proyecto",
+    "noImages": "Este proyecto aún no tiene imágenes.",
+    "categories": {
+      "web": "Web",
+      "branding": "Branding",
+      "infra": "Infraestructura",
+      "video": "Video",
+      "app": "App"
+    },
+    "form": {
+      "title": "Título del Proyecto",
+      "titlePlaceholder": "Ej. Liceo A1 - Plataforma Educativa",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Breve descripción del proyecto...",
+      "category": "Categoría",
+      "clientName": "Nombre del Cliente",
+      "clientPlaceholder": "Ej. Liceo A1",
+      "technologies": "Tecnologías (separadas por coma)",
+      "techPlaceholder": "Ej. Next.js, Docker, PostgreSQL",
+      "projectUrl": "URL del Proyecto",
+      "save": "Guardar",
+      "cancel": "Cancelar"
+    },
+    "images": {
+      "title": "Galería de Imágenes",
+      "upload": "Haz clic para subir imagen",
+      "uploading": "Subiendo...",
+      "featured": "Destacada",
+      "setFeatured": "Marcar como destacada",
+      "delete": "Eliminar",
+      "add": "Agregar"
+    }
+  },
+  "Landing": {
+    "brand": "LAUNCHPAD",
+    "tagline": "Agencia 360° Creativa y Tecnológica",
+    "description": "Somos una agencia de servicios completos que da vida a las ideas. Desde identidad de marca y producción de video hasta desarrollo web e infraestructura cloud — diseñamos, construimos y hacemos crecer productos digitales que generan impacto.",
+    "squads": "Nuestra Especialidad",
+    "design": {
+      "title": "Design & Creative",
+      "subtitle": "Branding, Video & UX",
+      "description": "Creamos identidades visuales, producimos contenido audiovisual y diseñamos experiencias de usuario que conectan. Del concepto al corte final — cada píxel, cada frame y cada interacción está construida con intención."
+    },
+    "engineering": {
+      "title": "Engineering & Architecture",
+      "subtitle": "Desarrollo Web e Infraestructura Cloud",
+      "description": "Construimos sitios web, aplicaciones web y sistemas cloud rápidos, confiables y seguros. Desde frontends con Next.js hasta backends orquestados con Docker — convertimos requerimientos complejos en productos digitales impecables."
+    },
+    "growth": {
+      "title": "Digital Strategy & Growth",
+      "subtitle": "Campañas, Contenido y Conversión",
+      "description": "Amplificamos tu alcance a través de campañas estratégicas, marketing de contenido y optimización de conversión. Cada decisión está respaldada por datos para asegurar que tu marca crezca con resultados medibles."
+    },
+    "cta": "Acceder a la Plataforma",
+    "login": "Iniciar Sesión",
     "footer": "TODOS LOS DERECHOS RESERVADOS"
   }
 }

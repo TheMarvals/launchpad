@@ -35,9 +35,9 @@ export default function ProjectsBoard({ initialProjects }: { initialProjects: an
       confirmButtonText: t('delete.confirm'),
       cancelButtonText: t('delete.cancel'),
       customClass: {
-        popup: 'rounded-[2rem]',
-        confirmButton: 'rounded-xl px-6 py-3 font-bold',
-        cancelButton: 'rounded-xl px-6 py-3 font-bold text-gray-400'
+        popup: 'rounded-none border border-hairline bg-canvas-elevated text-ink',
+        confirmButton: 'px-sm py-xs font-semibold uppercase tracking-wider text-xs border border-transparent bg-primary text-on-primary',
+        cancelButton: 'px-sm py-xs font-semibold text-muted uppercase tracking-wider text-xs border border-transparent bg-canvas'
       }
     });
 
@@ -55,12 +55,12 @@ export default function ProjectsBoard({ initialProjects }: { initialProjects: an
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-[#0a041a]">{t('title')}</h1>
-          <p className="text-gray-400 font-medium mt-1">{t('subtitle')}</p>
+          <h1 className="text-title-sm font-medium text-ink uppercase tracking-wider">{t('title')}</h1>
+          <p className="text-body text-muted mt-1">{t('subtitle')}</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-[#0a041a] text-white px-8 py-4 rounded-[1.5rem] font-bold text-sm hover:scale-105 transition-all shadow-xl shadow-[#0a041a]/10 flex items-center justify-center"
+          className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center justify-center border border-transparent"
         >
           <span className="material-icons mr-2 text-[20px]">add</span> {t('newProject')}
         </button>
@@ -68,55 +68,55 @@ export default function ProjectsBoard({ initialProjects }: { initialProjects: an
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {projects.length === 0 ? (
-          <div className="col-span-full py-32 text-center bg-white rounded-[3rem] border border-gray-100 shadow-sm">
-            <div className="w-24 h-24 bg-gray-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
-              <span className="material-icons text-4xl text-gray-200">folder_off</span>
+          <div className="col-span-full py-32 text-center bg-canvas-elevated border border-hairline">
+            <div className="w-24 h-24 bg-canvas border border-hairline flex items-center justify-center mx-auto mb-6">
+              <span className="material-icons text-4xl text-muted">folder_off</span>
             </div>
-            <p className="text-gray-400 font-bold text-lg">{t('emptyTitle')}</p>
-            <p className="text-gray-300 text-sm mt-1">{t('emptyMessage')}</p>
+            <p className="text-ink font-medium uppercase tracking-wider text-lg">{t('emptyTitle')}</p>
+            <p className="text-muted text-sm mt-1">{t('emptyMessage')}</p>
           </div>
         ) : (
           projects.map((project) => (
-            <div key={project.id} className="group bg-white rounded-[2.5rem] p-8 border border-gray-50 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all relative overflow-hidden">
+            <div key={project.id} className="group bg-canvas-elevated p-sm border border-hairline hover:border-ink transition-all relative overflow-hidden">
               {/* Color Accent */}
               <div 
-                className="absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full opacity-10" 
+                className="absolute top-0 left-0 right-0 h-1" 
                 style={{ backgroundColor: project.color }}
               />
               
-              <div className="flex justify-between items-start mb-6">
+              <div className="flex justify-between items-start mb-6 mt-2">
                 <div 
-                  className="p-4 rounded-[1.2rem] shadow-sm transition-colors"
+                  className="p-2 border border-hairline transition-colors"
                   style={{ backgroundColor: `${project.color}15`, color: project.color }}
                 >
                   <span className="material-icons">folder</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className={`text-[10px] uppercase tracking-widest font-black px-4 py-1.5 rounded-full ${
-                    project.status === 'active' ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-500'
+                  <span className={`text-caption-uppercase px-2 py-1 rounded-none border ${
+                    project.status === 'active' ? 'border-primary text-primary' : 'border-muted text-muted'
                   }`}>
                     {t(`status.${project.status}` as any)}
                   </span>
                   <button 
                     onClick={(e) => handleDelete(project.id, e)}
-                    className="p-2 text-gray-300 hover:text-red-500 transition-colors"
+                    className="p-2 text-muted hover:text-primary transition-colors"
                   >
                     <span className="material-icons text-[18px]">delete</span>
                   </button>
                 </div>
               </div>
 
-              <h3 className="text-xl font-black text-[#0a041a] mb-2 truncate group-hover:text-blue-600 transition-colors">{project.name}</h3>
-              <p className="text-sm text-gray-400 font-medium mb-8 line-clamp-2 leading-relaxed">{project.description || t('labels.noDescription')}</p>
+              <h3 className="text-title-sm font-medium uppercase text-ink mb-2 truncate group-hover:text-primary transition-colors">{project.name}</h3>
+              <p className="text-body text-muted mb-8 line-clamp-2">{project.description || t('labels.noDescription')}</p>
 
-              <div className="flex items-center justify-between pt-6 border-t border-gray-50">
+              <div className="flex items-center justify-between pt-xs border-t border-hairline">
                 <div className="flex flex-col">
-                  <span className="text-[10px] uppercase tracking-widest text-gray-300 font-black mb-1">{t('labels.client')}</span>
-                  <span className="text-sm font-bold text-gray-600 truncate max-w-[120px]">{project.clientName || t('labels.internal')}</span>
+                  <span className="text-caption-uppercase text-muted mb-1">{t('labels.client')}</span>
+                  <span className="text-body text-ink font-medium truncate max-w-[120px]">{project.clientName || t('labels.internal')}</span>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] uppercase tracking-widest text-gray-300 font-black mb-1">{t('labels.budget')}</p>
-                  <p className="text-lg font-black text-[#0a041a]">
+                  <p className="text-caption-uppercase text-muted mb-1">{t('labels.budget')}</p>
+                  <p className="text-title-md font-medium text-ink">
                     ${project.budget?.toLocaleString(locale)}
                   </p>
                 </div>
