@@ -510,7 +510,32 @@
         "passwordHelp": "If left blank, the default password 'Launchpad2026!' will be assigned.",
         "save": "Save",
         "saving": "Saving...",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "permissions": "View Access",
+        "permissionGroups": {
+          "management": "Management",
+          "support": "Support",
+          "marketing": "Marketing",
+          "audit": "Audit",
+          "productivity": "Productivity",
+          "configuration": "Configuration"
+        },
+        "permissionLabels": {
+          "dashboard": "Dashboard",
+          "clients": "Clients",
+          "quotes": "Quotes",
+          "invoices": "Billing",
+          "products": "Products",
+          "tickets": "Tickets",
+          "showcase": "Showcase",
+          "logs": "Audit Logs",
+          "settings": "Settings",
+          "projects": "Projects",
+          "tasks": "Tasks",
+          "notes": "Notes",
+          "calendar": "Calendar",
+          "reminders": "Reminders"
+        }
       }
     },
     "telegram": {
@@ -726,25 +751,42 @@
   "Landing": {
     "brand": "LAUNCHPAD",
     "tagline": "360° Creative & Technology Agency",
-    "description": "We are a full-service agency that brings ideas to life. From brand identity and video production to web development and cloud infrastructure — we design, build, and grow digital products that make an impact.",
+    "headline": "We Architect Digital Infrastructure and Scale Corporate Brands.",
+    "subtitle": "We don't just bring ideas to life; we engineer them for performance. From resilient cloud architecture to data-driven marketing campaigns, our full-cycle team designs, builds, and grows digital ecosystems that deliver measurable business impact.",
     "squads": "Our Expertise",
+    "whatWeDo": "What We Do",
     "design": {
       "title": "Design & Creative",
       "subtitle": "Branding, Video & UX",
-      "description": "We craft visual identities, produce video content, and design user experiences that connect. From concept to final cut — every pixel, frame, and interaction is built with intention."
+      "description": "We build digital experiences that drive engagement and reduce cognitive friction. From corporate brand identity to high-impact video production, we ensure your message connects with your target audience seamlessly, turning complex concepts into intuitive user journeys."
     },
     "engineering": {
       "title": "Engineering & Architecture",
       "subtitle": "Web Development & Cloud Infrastructure",
-      "description": "We build websites, web apps, and cloud systems that are fast, reliable, and secure. From Next.js frontends to Docker-orchestrated backends — we turn complex requirements into seamless digital products."
+      "description": "We architect resilient, high-performance digital infrastructure. We handle the complex technical orchestration behind the scenes so your enterprise gets a secure, scalable platform that simply works—guaranteeing operational stability and zero downtime."
     },
     "growth": {
-      "title": "Digital Strategy & Growth",
-      "subtitle": "Campaigns, Content & Conversion",
-      "description": "We amplify your reach through strategic campaigns, content marketing, and conversion optimization. Every decision is data-informed to ensure your brand grows with measurable results."
+      "title": "360 Marketing & Digital Growth",
+      "subtitle": "Campaigns, Content & End-to-End Strategy",
+      "description": "We are a full-cycle digital team that turns your platforms into growth engines. From high-impact 360 campaigns and strategic content creation to conversion rate optimization, we orchestrate every touchpoint of your digital presence to ensure measurable business results and scalable ROI."
     },
-    "cta": "Access Platform",
+    "cta": "Schedule a Discovery Call",
+    "ctaSecondary": "Explore Our Framework",
     "login": "Login",
+    "clientAccess": "Client Access",
+    "contactCta": "Contact Us",
+    "contactTag": "Let's Talk",
+    "contactTitle": "Ready to Create Something Remarkable?",
+    "contactDescription": "From branding and web design to custom development and digital strategy, we partner with ambitious brands to build experiences that inspire, engage, and scale. Tell us about your project, and our creative and technology team will help shape what comes next.",
     "footer": "ALL RIGHTS RESERVED"
+  },
+  "Contact": {
+    "namePlaceholder": "Name",
+    "emailPlaceholder": "Corporate Email",
+    "companyPlaceholder": "Company Name",
+    "challengePlaceholder": "Tell us about your project, idea, or the challenge you're looking to solve...",
+    "submit": "Request a Strategy Audit",
+    "success": "Your request has been submitted successfully! We'll be in touch within 24 hours.",
+    "error": "Error submitting your request. Please try again."
   }
 }

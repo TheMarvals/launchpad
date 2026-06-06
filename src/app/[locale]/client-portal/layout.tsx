@@ -40,22 +40,22 @@ export default async function ClientPortalLayout({
         <nav className="flex-grow mt-xs">
           <ul className="space-y-[2px]">
             <li>
-              <Link href="/client-portal" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+              <Link href="/client-portal" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
                 <span className="material-icons mr-xxs text-sm opacity-70">dashboard</span> {t('dashboard')}
               </Link>
             </li>
             <li>
-              <Link href="/client-portal/servers" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+              <Link href="/client-portal/servers" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
                 <span className="material-icons mr-xxs text-sm opacity-70">dns</span> {t('servers')}
               </Link>
             </li>
             <li>
-              <Link href="/client-portal/quotes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+              <Link href="/client-portal/quotes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
                 <span className="material-icons mr-xxs text-sm opacity-70">receipt_long</span> {t('quotes')}
               </Link>
             </li>
             <li>
-              <Link href="/client-portal/tickets" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
+              <Link href="/client-portal/tickets" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
                 <span className="material-icons mr-xxs text-sm opacity-70">support_agent</span> {t('tickets')}
               </Link>
             </li>

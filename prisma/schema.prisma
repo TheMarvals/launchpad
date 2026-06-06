@@ -11,16 +11,17 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      String   @default("ADMIN") // ADMIN or CLIENT
-  isActive  Boolean  @default(true)
-  clientId  String?  // If role is CLIENT, this links to their company
-  googleId  String?  @unique // For Google OAuth
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  password    String
+  role        String   @default("ADMIN") // ADMIN or CLIENT
+  isActive    Boolean  @default(true)
+  clientId    String?  // If role is CLIENT, this links to their company
+  googleId    String?  @unique // For Google OAuth
+  permissions String[] // Dashboard view permissions for ADMIN users
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   client    Client?  @relation(fields: [clientId], references: [id])
   actionLogs ActionLog[]

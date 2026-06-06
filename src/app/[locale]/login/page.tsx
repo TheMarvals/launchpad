@@ -81,8 +81,8 @@ function LoginForm() {
         </div>
 
         <div className="relative z-10 w-full max-w-[440px] mx-xxs text-center">
-          <div className="bg-canvas-elevated border border-hairline rounded-none p-md md:p-lg shadow-small">
-            <div className="w-[56px] h-[56px] rounded-none bg-semantic-warning/10 flex items-center justify-center mx-auto mb-sm">
+          <div className="bg-surface-card border border-hairline rounded-lg p-md md:p-lg shadow-medium">
+            <div className="w-[56px] h-[56px] rounded-sm bg-semantic-warning/10 flex items-center justify-center mx-auto mb-sm">
               <span className="material-icons text-semantic-warning text-[28px]">lock</span>
             </div>
             <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider mb-xxs">{g('restrictedTitle')}</h2>
@@ -91,7 +91,7 @@ function LoginForm() {
             </p>
             <Link
               href="/"
-              className="inline-flex items-center bg-primary hover:bg-primary-active text-white px-lg h-[48px] rounded-none text-xs font-bold uppercase tracking-[1.4px] transition-colors"
+              className="inline-flex items-center bg-primary hover:bg-primary-hover text-on-primary px-lg h-[48px] rounded-sm text-xs font-bold uppercase tracking-[1.4px] transition-colors"
             >
               <span className="material-icons mr-xxs text-[16px]">arrow_back</span>
               {g('backToHome')}
@@ -175,15 +175,15 @@ function LoginForm() {
           </div>
         </div>
 
-        <form onSubmit={step === 1 ? handleStep1 : handleStep2} className="bg-canvas-elevated border border-hairline rounded-none p-md md:p-lg shadow-small space-y-xs">
+        <form onSubmit={step === 1 ? handleStep1 : handleStep2} className="bg-surface-card border border-hairline rounded-lg p-md md:p-lg shadow-medium space-y-xs">
           {error && (
-            <div className="bg-semantic-warning/10 border border-semantic-warning/20 text-semantic-warning text-sm font-medium px-xs py-xxs rounded-none text-center flex items-center justify-center gap-xxs">
+            <div className="bg-semantic-warning/10 border border-semantic-warning/20 text-semantic-warning text-sm font-medium px-xs py-xxs rounded-sm text-center flex items-center justify-center gap-xxs">
               <span className="material-icons text-[18px]">error_outline</span>
               {error}
             </div>
           )}
           {message && step === 2 && !error && (
-            <div className="bg-semantic-info/10 border border-semantic-info/20 text-semantic-info text-sm font-medium px-xs py-xxs rounded-none text-center flex items-center justify-center gap-xxs">
+            <div className="bg-semantic-info/10 border border-semantic-info/20 text-semantic-info text-sm font-medium px-xs py-xxs rounded-sm text-center flex items-center justify-center gap-xxs">
               <span className="material-icons text-[18px]">mark_email_read</span>
               {t('otpSent')}
             </div>
@@ -201,7 +201,7 @@ function LoginForm() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-canvas border border-hairline rounded-sm p-xxs pl-[40px] text-ink text-sm focus:border-primary focus:ring-1 focus:ring-primary/30 outline-none transition-all placeholder:text-muted/50 h-[48px]"
+                    className="w-full bg-canvas border border-hairline rounded-sm p-xxs pl-[40px] text-ink text-sm focus:border-primary focus:shadow-[0_0_0_2px_rgba(0,98,255,0.15)] outline-none transition-all placeholder:text-muted h-[48px]"
                     placeholder="mail@example.com"
                     required
                     autoFocus
@@ -219,7 +219,7 @@ function LoginForm() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-canvas border border-hairline rounded-sm p-xxs pl-[40px] text-ink text-sm focus:border-primary focus:ring-1 focus:ring-primary/30 outline-none transition-all placeholder:text-muted/50 h-[48px]"
+                    className="w-full bg-canvas border border-hairline rounded-sm p-xxs pl-[40px] text-ink text-sm focus:border-primary focus:shadow-[0_0_0_2px_rgba(0,98,255,0.15)] outline-none transition-all placeholder:text-muted h-[48px]"
                     placeholder="••••••••"
                     required
                   />
@@ -236,8 +236,7 @@ function LoginForm() {
                 <input
                   type="text"
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
-                  className="w-full bg-canvas border border-hairline rounded-sm p-xxs pl-[40px] text-ink text-center font-mono text-xl tracking-[0.5em] focus:border-primary focus:ring-1 focus:ring-primary/30 outline-none transition-all placeholder:text-muted/30 h-[48px]"
+                  onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}                    className="w-full bg-canvas border border-hairline rounded-sm p-xxs pl-[40px] text-ink text-center font-mono text-xl tracking-[0.5em] focus:border-primary focus:shadow-[0_0_0_2px_rgba(0,98,255,0.15)] outline-none transition-all placeholder:text-muted/30 h-[48px]"
                   placeholder="000000"
                   required
                   autoFocus
@@ -249,7 +248,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={isLoading || (step === 2 && otp.length !== 6)}
-            className="w-full bg-primary text-white font-bold text-sm uppercase tracking-[1.4px] hover:bg-primary-active transition-all disabled:opacity-50 h-[48px] rounded-none active:scale-[0.98] flex items-center justify-center cursor-pointer"
+            className="w-full bg-primary text-on-primary font-bold text-sm uppercase tracking-[1.4px] hover:bg-primary-hover transition-all disabled:opacity-50 h-[48px] rounded-sm active:scale-[0.98] flex items-center justify-center cursor-pointer"
           >
             {isLoading ? (
               <><span className="material-icons animate-spin mr-xxs text-sm">sync</span> ...</>

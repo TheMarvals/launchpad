@@ -71,7 +71,7 @@ export default function AccessGateModal({ isOpen, onClose }: AccessGateModalProp
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-xxs"
       onClick={handleBackdropClick}
     >
-      <div className="bg-canvas-elevated border border-hairline rounded-none w-[400px] max-w-full shadow-small overflow-hidden">
+      <div className="bg-surface-card border border-hairline rounded-lg w-[400px] max-w-full shadow-medium overflow-hidden">
         <div className="p-sm">
           <div className="flex items-center justify-between mb-xxs">
             <h3 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
@@ -96,14 +96,14 @@ export default function AccessGateModal({ isOpen, onClose }: AccessGateModalProp
         <form onSubmit={handleSubmit} noValidate>
           <div className="px-sm pb-sm space-y-xxs">
             {error && (
-              <div className="bg-semantic-warning/10 border border-semantic-warning/20 text-semantic-warning text-xs font-medium px-xxs py-xxxs rounded-none flex items-start gap-xxs">
+              <div className="bg-semantic-warning/10 border border-semantic-warning/20 text-semantic-warning text-xs font-medium px-xxs py-xxxs rounded-sm flex items-start gap-xxs">
                 <span className="material-icons text-[16px] shrink-0 mt-[1px]">error_outline</span>
                 <span>{error}</span>
               </div>
             )}
 
             {isLoading && (
-              <div className="bg-semantic-info/10 border border-semantic-info/20 text-semantic-info text-xs font-medium px-xxs py-xxxs rounded-none flex items-center gap-xxs">
+              <div className="bg-semantic-info/10 border border-semantic-info/20 text-semantic-info text-xs font-medium px-xxs py-xxxs rounded-sm flex items-center gap-xxs">
                 <span className="material-icons animate-spin text-[16px]">sync</span>
                 <span>{t('checking')}</span>
               </div>
@@ -119,7 +119,7 @@ export default function AccessGateModal({ isOpen, onClose }: AccessGateModalProp
                     setEmail(e.target.value);
                     if (error) setError('');
                   }}
-                  className="w-full bg-canvas border border-hairline rounded-sm p-xxs pl-[40px] text-ink text-sm focus:border-primary focus:ring-1 focus:ring-primary/30 outline-none transition-all placeholder:text-muted/50 h-[44px]"
+                  className="w-full bg-canvas border border-hairline rounded-sm p-xxs pl-[40px] text-ink text-sm focus:border-primary focus:shadow-[0_0_0_2px_rgba(0,98,255,0.15)] outline-none transition-all placeholder:text-muted h-[44px]"
                   placeholder="mail@example.com"
                   required
                   autoFocus
@@ -134,14 +134,14 @@ export default function AccessGateModal({ isOpen, onClose }: AccessGateModalProp
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="px-sm py-xxs font-bold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors disabled:opacity-30 cursor-pointer"
+              className="px-sm py-xxs font-bold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors disabled:opacity-30 cursor-pointer rounded-sm"
             >
               {t('cancel')}
             </button>
             <button
               type="submit"
               disabled={isLoading || !email}
-              className="bg-primary text-white px-sm py-xxs rounded-none font-bold text-xs uppercase tracking-wider hover:bg-primary/90 transition-all disabled:opacity-50 border border-transparent flex items-center cursor-pointer"
+              className="bg-primary text-on-primary px-sm py-xxs rounded-sm font-bold text-xs uppercase tracking-wider hover:bg-primary-hover transition-all disabled:opacity-50 border border-transparent flex items-center cursor-pointer"
             >
               {isLoading ? (
                 <span className="material-icons animate-spin text-[18px]">sync</span>

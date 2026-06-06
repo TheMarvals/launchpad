@@ -1,40 +1,64 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;700;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;700;900&family=Geist:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 @theme {
+  /* Font Families */
+  --font-sans: "Inter", -apple-system, system-ui, sans-serif;
+  --font-montserrat: "Montserrat", sans-serif;
   --font-outfit: "Outfit", sans-serif;
-  
-  /* Brand & Accent Colors */
-  --color-primary: #da291c;
-  --color-primary-active: #b01e0a;
-  --color-primary-hover: #9d2211;
-  --color-ink: #ffffff;
-  --color-body: #969696;
-  --color-body-strong: #ffffff;
-  --color-body-on-light: #181818;
-  --color-muted: #666666;
-  --color-muted-soft: #8f8f8f;
-  --color-hairline: #303030;
-  --color-hairline-on-light: #d2d2d2;
-  --color-hairline-soft: #ebebeb;
-  --color-canvas: #181818;
-  --color-canvas-elevated: #303030;
-  --color-canvas-light: #ffffff;
-  --color-surface-card: #303030;
+  --font-geist: "Geist", sans-serif;
+
+  /* Deprecated aliases - kept for backward compatibility */
+  --font-ferrari: "Montserrat", sans-serif;
+
+  /* --- Brand Colors (Kinetic Horizon / Modern Tech-Noir) --- */
+
+  /* Electric Blue (Primary) */
+  --color-primary: #0062ff;
+  --color-primary-active: #00dce5;
+  --color-primary-hover: #0053da;
+
+  /* Electric Violet (Secondary) */
+  --color-secondary: #a855f7;
+  --color-secondary-active: #c084fc;
+  --color-secondary-hover: #9333ea;
+
+  /* Surfaces - Deep Charcoal layered palette */
+  --color-canvas: #131314;
+  --color-canvas-elevated: #1c1b1c;
+  --color-surface-card: #201f20;
+  --color-surface-card-hover: #2a2a2b;
+  --color-surface-high: #353436;
+  --color-canvas-light: #f3f3ff;
   --color-surface-soft-light: #f7f7f7;
   --color-surface-strong-light: #ebebeb;
-  --color-on-primary: #ffffff;
-  --color-on-dark: #ffffff;
-  --color-on-light: #181818;
-  --color-accent-yellow-hypersail: #fff200;
-  --color-accent-yellow: #f6e500;
-  --color-semantic-info: #4c98b9;
-  --color-semantic-success: #03904a;
-  --color-semantic-warning: #f13a2c;
 
-  /* Font Family (Inter is the humanist fallback for FerrariSans) */
-  --font-sans: "Inter", -apple-system, system-ui, sans-serif;
-  --font-ferrari: "Inter", -apple-system, system-ui, sans-serif;
+  /* Text colors */
+  --color-ink: #e5e2e3;
+  --color-body: #c2c6d9;
+  --color-body-strong: #e5e2e3;
+  --color-body-on-light: #131314;
+  --color-on-primary: #f3f3ff;
+  --color-on-dark: #e5e2e3;
+  --color-on-light: #131314;
+
+  /* Muted & Outline */
+  --color-muted: #8c90a2;
+  --color-muted-soft: #64748b;
+
+  /* Borders / Hairlines */
+  --color-hairline: #424656;
+  --color-hairline-on-light: #d2d2d2;
+  --color-hairline-soft: rgba(66, 70, 86, 0.4);
+
+  /* Accent */
+  --color-accent-yellow-hypersail: #00dce5;
+  --color-accent-yellow: #00dce5;
+
+  /* Semantic colors */
+  --color-semantic-info: var(--color-primary);
+  --color-semantic-success: #10b981;
+  --color-semantic-warning: #ef4444;
 
   /* Spacing Scale (8px token ladder) */
   --spacing-xxxs: 4px;
@@ -47,20 +71,23 @@
   --spacing-xxl: 96px;
   --spacing-super: 128px;
 
-  /* Border Radius Scale (dominant is none/0px) */
+  /* Border Radius - Soft-Industrial */
   --radius-none: 0px;
   --radius-xs: 2px;
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
   --radius-xl: 12px;
+  --radius-2xl: 16px;
   --radius-full: 9999px;
 
-  /* Shadows (no shadows by default, only soft small shadow for active/hovered depth elements) */
-  --shadow-small: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* Shadows - Ambient Glows (low-opacity primary blue) */
+  --shadow-small: 0 4px 24px rgba(0, 98, 255, 0.1);
+  --shadow-medium: 0 8px 32px rgba(0, 98, 255, 0.12);
+  --shadow-large: 0 16px 48px rgba(0, 98, 255, 0.15);
   --shadow-none: 0 0 0 rgba(0, 0, 0, 0);
 
-  /* Explicitly define standard width scale to prevent custom spacing tokens (sm, md, lg, xl) from overriding max-w-* classes */
+  /* Explicitly define standard width scale */
   --width-sm: 24rem;
   --width-md: 28rem;
   --width-lg: 32rem;
@@ -72,30 +99,57 @@
   --width-6xl: 72rem;
   --width-7xl: 80rem;
 
-  /* Set background and foreground color mappings */
   --color-background: var(--canvas);
   --color-foreground: var(--ink);
 }
 
 :root {
-  --background: #181818;
-  --foreground: #ffffff;
+  --background: #131314;
+  --foreground: #e5e2e3;
 }
 
-/* Base style overrides to apply the dark canvas */
+/* Base styles */
 body {
-  background-color: #181818;
-  color: #ffffff;
+  background-color: #131314;
+  color: #e5e2e3;
   font-family: var(--font-sans);
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
+}
+
+/* Subtle radial vignette instead of grid (avoids 1px line pixelation) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(0, 98, 255, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(0, 220, 229, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(28, 27, 28, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.glass-strong {
+  background: rgba(32, 31, 32, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 @layer utilities {
   .stroke-text {
     color: white;
-    font-family: var(--font-outfit);
+    font-family: "Outfit", sans-serif;
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke-width: 1.4px;
     -webkit-text-stroke-color: white;
@@ -114,46 +168,146 @@ body {
   .hero-heading {
     font-size: 4rem;
   }
+
+  /* Label-Caps utility (Geist) */
+  .label-caps {
+    font-family: "Geist", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+}
+
+/* --- Component Styles --- */
+
+/* Inputs, Selects, Textareas */
+input, select, textarea {
+  background-color: #131314;
+  border: 1px solid #424656;
+  color: #e5e2e3;
+  border-radius: 4px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+
+/* Elevated cards (used via bg-canvas-elevated) */
+.bg-canvas-elevated {
+  background-color: #1c1b1c;
+  border: 1px solid #424656;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bg-canvas-elevated:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+  box-shadow: 0 8px 32px color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+
+/* Surface cards (used via bg-surface-card) */
+.bg-surface-card {
+  background-color: #201f20;
+  border: 1px solid #424656;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* GPU-accelerated blur for background glow elements */
+.ambient-glow {
+  will-change: filter;
+  transform: translateZ(0);
+}
+
+/* Hero entrance animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Animation delays */
+.animation-delay-1 {
+  animation-delay: 0.1s;
+}
+.animation-delay-2 {
+  animation-delay: 0.3s;
+}
+.animation-delay-3 {
+  animation-delay: 0.5s;
+}
+.animation-delay-4 {
+  animation-delay: 0.7s;
+}
+.animation-delay-5 {
+  animation-delay: 0.9s;
 }
 
 /* SweetAlert2 Theme Overrides */
 .swal2-popup {
-  background: var(--color-canvas-elevated) !important;
-  color: var(--color-ink) !important;
-  border: 1px solid var(--color-hairline) !important;
-  border-radius: 0px !important;
+  background: #1c1b1c !important;
+  color: #e5e2e3 !important;
+  border: 1px solid #424656 !important;
+  border-radius: 12px !important;
 }
 
 .swal2-title {
-  color: var(--color-ink) !important;
-  font-family: var(--font-outfit), sans-serif !important;
+  color: #e5e2e3 !important;
+  font-family: "Outfit", sans-serif !important;
   font-weight: 500 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
 }
 
 .swal2-html-container {
-  color: var(--color-body) !important;
-  font-family: var(--font-sans), sans-serif !important;
+  color: #c2c6d9 !important;
+  font-family: "Inter", sans-serif !important;
 }
 
 .swal2-actions {
-  gap: 8px !important;
+  gap: 12px !important;
 }
 
 .swal2-confirm.swal2-styled {
   background-color: var(--color-primary) !important;
-  color: var(--color-on-primary) !important;
-  border-radius: 0px !important;
-  font-family: var(--font-sans), sans-serif !important;
+  color: #f3f3ff !important;
+  border-radius: 4px !important;
+  font-family: "Inter", sans-serif !important;
   font-weight: 600 !important;
-  font-size: 11px !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.1em !important;
-  padding: 8px 16px !important;
+  font-size: 13px !important;
+  padding: 10px 20px !important;
   border: 1px solid transparent !important;
   box-shadow: none !important;
-  transition: background-color 0.2s ease-in-out !important;
+  transition: all 0.2s ease-in-out !important;
 }
 
 .swal2-confirm.swal2-styled:hover {
@@ -161,47 +315,44 @@ body {
 }
 
 .swal2-cancel.swal2-styled {
-  background-color: var(--color-canvas) !important;
-  color: var(--color-body) !important;
-  border-radius: 0px !important;
-  font-family: var(--font-sans), sans-serif !important;
+  background-color: #131314 !important;
+  color: #c2c6d9 !important;
+  border-radius: 4px !important;
+  font-family: "Inter", sans-serif !important;
   font-weight: 600 !important;
-  font-size: 11px !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.1em !important;
-  padding: 8px 16px !important;
-  border: 1px solid var(--color-hairline) !important;
+  font-size: 13px !important;
+  padding: 10px 20px !important;
+  border: 1px solid #424656 !important;
   box-shadow: none !important;
   transition: all 0.2s ease-in-out !important;
 }
 
 .swal2-cancel.swal2-styled:hover {
-  color: var(--color-ink) !important;
-  background-color: var(--color-canvas-elevated) !important;
+  color: #e5e2e3 !important;
+  background-color: #2a2a2b !important;
 }
 
-/* Custom styles for Swal icon colors to look integrated */
 .swal2-icon.swal2-success {
-  border-color: var(--color-semantic-success) !important;
+  border-color: #10b981 !important;
 }
 .swal2-icon.swal2-success .swal2-success-ring {
-  border: 4px solid rgba(3, 144, 74, 0.2) !important;
+  border: 4px solid rgba(16, 185, 129, 0.2) !important;
 }
 .swal2-icon.swal2-success [class^=swal2-success-line] {
-  background-color: var(--color-semantic-success) !important;
+  background-color: #10b981 !important;
 }
 
 .swal2-icon.swal2-error {
-  border-color: var(--color-semantic-warning) !important;
+  border-color: #ef4444 !important;
 }
 .swal2-icon.swal2-error [class^=swal2-x-mark-line] {
-  background-color: var(--color-semantic-warning) !important;
+  background-color: #ef4444 !important;
 }
 
 .swal2-icon.swal2-warning {
-  border-color: var(--color-semantic-warning) !important;
-  color: var(--color-semantic-warning) !important;
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
 }
 .swal2-icon.swal2-warning .swal2-icon-content {
-  color: var(--color-semantic-warning) !important;
+  color: #ef4444 !important;
 }

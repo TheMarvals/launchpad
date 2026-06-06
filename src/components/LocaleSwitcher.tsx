@@ -21,7 +21,7 @@ export default function LocaleSwitcher() {
         onClick={() => onLocaleChange('es')}
         className={`px-3 py-1 text-xs font-semibold tracking-wider rounded-none transition-all cursor-pointer ${
           locale === 'es'
-            ? 'bg-primary text-on-primary'
+            ? 'bg-secondary text-white'
             : 'text-muted hover:text-ink hover:bg-canvas'
         }`}
       >
@@ -31,7 +31,7 @@ export default function LocaleSwitcher() {
         onClick={() => onLocaleChange('en')}
         className={`px-3 py-1 text-xs font-semibold tracking-wider rounded-none transition-all cursor-pointer ${
           locale === 'en'
-            ? 'bg-primary text-on-primary'
+            ? 'bg-secondary text-white'
             : 'text-muted hover:text-ink hover:bg-canvas'
         }`}
       >

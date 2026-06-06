@@ -55,12 +55,13 @@ export async function getAdmins() {
       email: true,
       createdAt: true,
       isActive: true,
+      permissions: true,
     },
     orderBy: { createdAt: 'desc' },
   });
 }
 
-export async function createAdmin(data: { name: string; email: string; password?: string }) {
+export async function createAdmin(data: { name: string; email: string; password?: string; permissions?: string[] }) {
   await ensureAdmin();
   
   const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
@@ -78,6 +79,7 @@ export async function createAdmin(data: { name: string; email: string; password?
       password: hashedPassword,
       role: 'ADMIN',
       isActive: true,
+      permissions: data.permissions || [],
     },
     select: {
       id: true,
@@ -85,6 +87,7 @@ export async function createAdmin(data: { name: string; email: string; password?
       email: true,
       createdAt: true,
       isActive: true,
+      permissions: true,
     }
   });
   
@@ -107,7 +110,7 @@ export async function deleteAdmin(id: string) {
   return { success: true };
 }
 
-export async function updateAdmin(id: string, data: { name: string; email: string }) {
+export async function updateAdmin(id: string, data: { name: string; email: string; permissions?: string[] }) {
   await ensureAdmin();
   const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
   if (existingUser && existingUser.id !== id) {
@@ -119,6 +122,7 @@ export async function updateAdmin(id: string, data: { name: string; email: strin
     data: {
       name: data.name,
       email: data.email,
+      ...(data.permissions !== undefined ? { permissions: data.permissions } : {}),
     },
     select: {
       id: true,
@@ -126,6 +130,7 @@ export async function updateAdmin(id: string, data: { name: string; email: strin
       email: true,
       createdAt: true,
       isActive: true,
+      permissions: true,
     }
   });
   

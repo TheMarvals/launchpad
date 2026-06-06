@@ -3,6 +3,7 @@ import { Link } from '@/i18n/routing';
 import { auth, signOut } from '@/lib/auth';
 import { redirect } from '@/i18n/routing';
 import { getTranslations } from 'next-intl/server';
+import { hasPermission, PERMISSIONS } from '@/lib/permissions';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
 
 export default async function DashboardLayout({
@@ -28,6 +29,11 @@ export default async function DashboardLayout({
     .toUpperCase()
     .slice(0, 2) || 'U';
 
+  const userPermissions = (session.user as any).permissions as string[] | undefined;
+  // Empty/undefined permissions = full access (backwards compat for existing admins after migration)
+  const hasFullAccess = !userPermissions || userPermissions.length === 0;
+  const can = (perm: string) => hasFullAccess || hasPermission(userPermissions, perm as any);
+
   return (
     <div className="flex min-h-screen bg-canvas text-ink font-sans">
       {/* Sidebar */}
@@ -38,80 +44,108 @@ export default async function DashboardLayout({
         
         <nav className="flex-grow mt-xs">
           <ul className="space-y-[2px]">
-            <li>
-              <Link href="/dashboard" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">dashboard</span> {t('dashboard')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/quotes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">description</span> {t('quotes')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/invoices" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">receipt_long</span> {t('invoices')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/clients" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">people</span> {t('clients')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/showcase" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">collections_bookmark</span> {t('showcase')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/products" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">inventory_2</span> {t('products')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/tickets" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">support_agent</span> {t('tickets')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/logs" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">policy</span> {t('audit')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/settings" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">settings</span> {t('settings')}
-              </Link>
-            </li>
+            {can(PERMISSIONS.DASHBOARD) && (
+              <li>
+                <Link href="/dashboard" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">dashboard</span> {t('dashboard')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.QUOTES) && (
+              <li>
+                <Link href="/dashboard/quotes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">description</span> {t('quotes')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.INVOICES) && (
+              <li>
+                <Link href="/dashboard/invoices" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">receipt_long</span> {t('invoices')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.CLIENTS) && (
+              <li>
+                <Link href="/dashboard/clients" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">people</span> {t('clients')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.SHOWCASE) && (
+              <li>
+                <Link href="/dashboard/showcase" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">collections_bookmark</span> {t('showcase')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.PRODUCTS) && (
+              <li>
+                <Link href="/dashboard/products" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">inventory_2</span> {t('products')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.TICKETS) && (
+              <li>
+                <Link href="/dashboard/tickets" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">support_agent</span> {t('tickets')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.LOGS) && (
+              <li>
+                <Link href="/dashboard/logs" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">policy</span> {t('audit')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.SETTINGS) && (
+              <li>
+                <Link href="/dashboard/settings" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">settings</span> {t('settings')}
+                </Link>
+              </li>
+            )}
 
             <div className="px-sm py-xxs mt-xxs">
               <p className="text-caption-uppercase tracking-widest text-muted font-bold">{t('productivity')}</p>
             </div>
-            <li>
-              <Link href="/dashboard/productivity/projects" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">folder</span> {t('projects')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/productivity/tasks" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">task_alt</span> {t('tasks')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/productivity/notes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">note_alt</span> {t('notes')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/productivity/calendar" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">calendar_month</span> {t('calendar')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/productivity/reminders" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-none text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">notifications_active</span> {t('reminders')}
-              </Link>
-            </li>
+            {can(PERMISSIONS.PROJECTS) && (
+              <li>
+                <Link href="/dashboard/productivity/projects" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">folder</span> {t('projects')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.TASKS) && (
+              <li>
+                <Link href="/dashboard/productivity/tasks" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">task_alt</span> {t('tasks')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.NOTES) && (
+              <li>
+                <Link href="/dashboard/productivity/notes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">note_alt</span> {t('notes')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.CALENDAR) && (
+              <li>
+                <Link href="/dashboard/productivity/calendar" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">calendar_month</span> {t('calendar')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.REMINDERS) && (
+              <li>
+                <Link href="/dashboard/productivity/reminders" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">notifications_active</span> {t('reminders')}
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
 

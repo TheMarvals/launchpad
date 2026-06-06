@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { createAdmin, deleteAdmin, updateAdmin, resetAdminPassword } from '@/app/actions/settings';
+import { PERMISSION_GROUPS, ALL_PERMISSIONS, type Permission } from '@/lib/permissions';
 import Swal from 'sweetalert2';
 import GenericModal from '../productivity/GenericModal';
 
@@ -19,6 +20,7 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<any | null>(null);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   
   // Password Reset Modal state
   const [isResetOpen, setIsResetOpen] = useState(false);
@@ -36,17 +38,23 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
     setIsSaving(true);
     try {
       if (editingAdmin) {
-        const updated = await updateAdmin(editingAdmin.id, { name: formData.name, email: formData.email });
+        const updated = await updateAdmin(editingAdmin.id, {
+          name: formData.name,
+          email: formData.email,
+          permissions: selectedPermissions,
+        });
         setAdmins(admins.map(a => a.id === editingAdmin.id ? updated : a));
         setIsModalOpen(false);
         setEditingAdmin(null);
         setFormData({ name: '', email: '', password: '' });
+        setSelectedPermissions([]);
         Swal.fire('Success', t('updateSuccess') || 'Admin updated successfully', 'success');
       } else {
-        const newAdmin = await createAdmin(formData);
+        const newAdmin = await createAdmin({ ...formData, permissions: selectedPermissions });
         setAdmins([newAdmin, ...admins]);
         setIsModalOpen(false);
         setFormData({ name: '', email: '', password: '' });
+        setSelectedPermissions([]);
         Swal.fire('Success', t('createSuccess'), 'success');
       }
     } catch (error: any) {
@@ -113,6 +121,7 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
           onClick={() => {
             setEditingAdmin(null);
             setFormData({ name: '', email: '', password: '' });
+            setSelectedPermissions(ALL_PERMISSIONS);
             setIsModalOpen(true);
           }}
           className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center justify-center border border-transparent"
@@ -160,6 +169,7 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
                         onClick={() => {
                           setEditingAdmin(admin);
                           setFormData({ name: admin.name, email: admin.email, password: '' });
+                          setSelectedPermissions(admin.permissions || ALL_PERMISSIONS);
                           setIsModalOpen(true);
                         }}
                         className="text-muted hover:text-ink transition-colors p-xxs cursor-pointer"
@@ -201,6 +211,7 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
           setIsModalOpen(false);
           setEditingAdmin(null);
           setFormData({ name: '', email: '', password: '' });
+          setSelectedPermissions([]);
         }}
         title={editingAdmin ? (t('editAdmin') || 'Editar Administrador') : t('newAdmin')}
       >
@@ -241,12 +252,53 @@ export default function TeamManagementBoard({ initialAdmins }: TeamManagementBoa
             </div>
           )}
 
+          {/* Permissions */}
+          <div className="space-y-xs">
+            <label className="block text-caption-uppercase text-ink font-semibold">
+              {t('permissions')}
+            </label>
+            <div className="space-y-xxs">
+              {PERMISSION_GROUPS.map((group) => (
+                <div key={group.label} className="border border-hairline bg-canvas p-xs">
+                  <p className="text-[9px] uppercase tracking-widest text-muted font-bold mb-xxs">
+                    {t(`permissionGroups.${group.label.toLowerCase()}`)}
+                  </p>
+                  <div className="grid grid-cols-2 gap-xxs">
+                    {group.permissions.map((perm) => (
+                      <label
+                        key={perm.key}
+                        className="flex items-center gap-xxs cursor-pointer group"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedPermissions.includes(perm.key)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedPermissions([...selectedPermissions, perm.key]);
+                            } else {
+                              setSelectedPermissions(selectedPermissions.filter(p => p !== perm.key));
+                            }
+                          }}
+                          className="w-4 h-4 rounded-sm border-hairline bg-canvas text-primary focus:ring-primary/30 cursor-pointer"
+                        />
+                        <span className="text-xs text-ink group-hover:text-primary transition-colors">
+                          {t(`permissionLabels.${perm.labelKey}`)}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="pt-xs border-t border-hairline flex justify-end gap-xxs">
             <button
               onClick={() => {
                 setIsModalOpen(false);
                 setEditingAdmin(null);
                 setFormData({ name: '', email: '', password: '' });
+                setSelectedPermissions([]);
               }}
               className="px-sm py-xxs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors cursor-pointer"
             >

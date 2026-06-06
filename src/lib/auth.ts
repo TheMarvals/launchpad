@@ -69,6 +69,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             email: user.email,
             role: user.role,
             clientId: user.clientId,
+            permissions: user.permissions,
           };
         } catch (error: any) {
           console.error('[AUTH] DB ERROR:', error.message);
@@ -83,6 +84,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = (user as any).role;
         token.id = (user as any).id;
         token.clientId = (user as any).clientId;
+        token.permissions = (user as any).permissions ?? [];
       }
       return token;
     },
@@ -91,6 +93,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         (session.user as any).role = token.role;
         (session.user as any).id = token.id;
         (session.user as any).clientId = token.clientId;
+        (session.user as any).permissions = token.permissions;
       }
       return session;
     },

@@ -511,7 +511,32 @@
         "passwordHelp": "Si se deja en blanco, se asignará la contraseña por defecto 'Launchpad2026!'.",
         "save": "Guardar",
         "saving": "Guardando...",
-        "cancel": "Cancelar"
+        "cancel": "Cancelar",
+        "permissions": "Acceso a Vistas",
+        "permissionGroups": {
+          "management": "Gestión",
+          "support": "Soporte",
+          "marketing": "Marketing",
+          "audit": "Auditoría",
+          "productivity": "Productividad",
+          "configuration": "Configuración"
+        },
+        "permissionLabels": {
+          "dashboard": "Panel Principal",
+          "clients": "Clientes",
+          "quotes": "Cotizaciones",
+          "invoices": "Facturación",
+          "products": "Productos",
+          "tickets": "Tickets",
+          "showcase": "Portafolio",
+          "logs": "Auditoría",
+          "settings": "Configuración",
+          "projects": "Proyectos",
+          "tasks": "Tareas",
+          "notes": "Notas",
+          "calendar": "Calendario",
+          "reminders": "Recordatorios"
+        }
       }
     },
     "telegram": {
@@ -727,25 +752,42 @@
   "Landing": {
     "brand": "LAUNCHPAD",
     "tagline": "Agencia 360° Creativa y Tecnológica",
-    "description": "Somos una agencia de servicios completos que da vida a las ideas. Desde identidad de marca y producción de video hasta desarrollo web e infraestructura cloud — diseñamos, construimos y hacemos crecer productos digitales que generan impacto.",
+    "headline": "Diseñamos ecosistemas digitales y escalamos marcas corporativas.",
+    "subtitle": "No solo damos vida a las ideas; las convertimos en experiencias digitales de alto impacto. Desde plataformas escalables y arquitectura cloud resiliente hasta estrategias de marketing basadas en datos, nuestro equipo multidisciplinario diseña, desarrolla y hace crecer ecosistemas digitales que impulsan resultados de negocio medibles.",
     "squads": "Nuestra Especialidad",
+    "whatWeDo": "Lo Que Hacemos",
     "design": {
       "title": "Design & Creative",
       "subtitle": "Branding, Video & UX",
-      "description": "Creamos identidades visuales, producimos contenido audiovisual y diseñamos experiencias de usuario que conectan. Del concepto al corte final — cada píxel, cada frame y cada interacción está construida con intención."
+      "description": "Construimos experiencias digitales que impulsan el engagement y reducen la fricción cognitiva. Desde identidad de marca corporativa hasta producción de video de alto impacto, aseguramos que tu mensaje conecte con tu audiencia objetivo sin fricciones, transformando conceptos complejos en recorridos de usuario intuitivos."
     },
     "engineering": {
       "title": "Engineering & Architecture",
       "subtitle": "Desarrollo Web e Infraestructura Cloud",
-      "description": "Construimos sitios web, aplicaciones web y sistemas cloud rápidos, confiables y seguros. Desde frontends con Next.js hasta backends orquestados con Docker — convertimos requerimientos complejos en productos digitales impecables."
+      "description": "Arquitecturamos infraestructura digital resiliente y de alto rendimiento. Manejamos la orquestación técnica compleja detrás de escena para que tu empresa obtenga una plataforma segura y escalable que simplemente funcione, garantizando estabilidad operativa y cero tiempo de inactividad."
     },
     "growth": {
-      "title": "Digital Strategy & Growth",
-      "subtitle": "Campañas, Contenido y Conversión",
-      "description": "Amplificamos tu alcance a través de campañas estratégicas, marketing de contenido y optimización de conversión. Cada decisión está respaldada por datos para asegurar que tu marca crezca con resultados medibles."
+      "title": "360 Marketing & Digital Growth",
+      "subtitle": "Campañas, Contenido y Estrategia Integral",
+      "description": "Somos un equipo digital de ciclo completo que convierte tus plataformas en motores de crecimiento. Desde campañas 360 de alto impacto y creación estratégica de contenido hasta optimización de tasa de conversión, orquestamos cada punto de contacto de tu presencia digital para asegurar resultados comerciales medibles y un ROI escalable."
     },
-    "cta": "Acceder a la Plataforma",
+    "cta": "Agenda una Llamada de Descubrimiento",
+    "ctaSecondary": "Explora Nuestro Framework",
     "login": "Iniciar Sesión",
+    "clientAccess": "Acceso Clientes",
+    "contactCta": "Contáctanos",
+    "contactTag": "Hablemos",
+    "contactTitle": "¿Listo para Crear Algo Remarkable?",
+    "contactDescription": "Desde branding y diseño web hasta desarrollo a medida y estrategia digital, nos asociamos con marcas ambiciosas para construir experiencias que inspiran, conectan y escalan. Cuéntanos sobre tu proyecto, y nuestro equipo creativo y tecnológico te ayudará a dar forma a lo que viene.",
     "footer": "TODOS LOS DERECHOS RESERVADOS"
+  },
+  "Contact": {
+    "namePlaceholder": "Nombre",
+    "emailPlaceholder": "Correo Corporativo",
+    "companyPlaceholder": "Nombre de la Empresa",
+    "challengePlaceholder": "Cuéntanos sobre tu proyecto, idea o el desafío que buscas resolver...",
+    "submit": "Solicitar una Auditoría Estratégica",
+    "success": "¡Tu solicitud ha sido enviada con éxito! Te contactaremos en las próximas 24 horas.",
+    "error": "Error al enviar la solicitud. Intenta de nuevo."
   }
 }
