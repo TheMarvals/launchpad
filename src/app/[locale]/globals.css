@@ -115,3 +115,93 @@ body {
     font-size: 4rem;
   }
 }
+
+/* SweetAlert2 Theme Overrides */
+.swal2-popup {
+  background: var(--color-canvas-elevated) !important;
+  color: var(--color-ink) !important;
+  border: 1px solid var(--color-hairline) !important;
+  border-radius: 0px !important;
+}
+
+.swal2-title {
+  color: var(--color-ink) !important;
+  font-family: var(--font-outfit), sans-serif !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+.swal2-html-container {
+  color: var(--color-body) !important;
+  font-family: var(--font-sans), sans-serif !important;
+}
+
+.swal2-actions {
+  gap: 8px !important;
+}
+
+.swal2-confirm.swal2-styled {
+  background-color: var(--color-primary) !important;
+  color: var(--color-on-primary) !important;
+  border-radius: 0px !important;
+  font-family: var(--font-sans), sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  padding: 8px 16px !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+  transition: background-color 0.2s ease-in-out !important;
+}
+
+.swal2-confirm.swal2-styled:hover {
+  background-color: var(--color-primary-hover) !important;
+}
+
+.swal2-cancel.swal2-styled {
+  background-color: var(--color-canvas) !important;
+  color: var(--color-body) !important;
+  border-radius: 0px !important;
+  font-family: var(--font-sans), sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  padding: 8px 16px !important;
+  border: 1px solid var(--color-hairline) !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.swal2-cancel.swal2-styled:hover {
+  color: var(--color-ink) !important;
+  background-color: var(--color-canvas-elevated) !important;
+}
+
+/* Custom styles for Swal icon colors to look integrated */
+.swal2-icon.swal2-success {
+  border-color: var(--color-semantic-success) !important;
+}
+.swal2-icon.swal2-success .swal2-success-ring {
+  border: 4px solid rgba(3, 144, 74, 0.2) !important;
+}
+.swal2-icon.swal2-success [class^=swal2-success-line] {
+  background-color: var(--color-semantic-success) !important;
+}
+
+.swal2-icon.swal2-error {
+  border-color: var(--color-semantic-warning) !important;
+}
+.swal2-icon.swal2-error [class^=swal2-x-mark-line] {
+  background-color: var(--color-semantic-warning) !important;
+}
+
+.swal2-icon.swal2-warning {
+  border-color: var(--color-semantic-warning) !important;
+  color: var(--color-semantic-warning) !important;
+}
+.swal2-icon.swal2-warning .swal2-icon-content {
+  color: var(--color-semantic-warning) !important;
+}
