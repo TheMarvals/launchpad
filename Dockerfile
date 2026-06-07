@@ -71,4 +71,4 @@ EXPOSE 3011
 ENV PORT=3011
 
 # Run Prisma db push to ensure schema is up to date, then start the app
-CMD ["sh", "-c", "npx prisma db push --skip-generate 2>/dev/null || true && node server.js"]
+CMD ["sh", "-c", "npx prisma db push --skip-generate || true && node server.js"]

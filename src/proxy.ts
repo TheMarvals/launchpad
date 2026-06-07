@@ -4,7 +4,7 @@ import { routing } from './i18n/routing';
 
 const intlMiddleware = createMiddleware(routing);
 
-export default auth((req) => {
+export default auth(function proxy(req) {
   // Let next-intl handle the routing and locale prefixing first
   return intlMiddleware(req);
 });
@@ -21,6 +21,6 @@ export const config = {
 
     // Enable redirects that add missing locales
     // (e.g. `/pathnames` -> `/en/pathnames`)
-    '/((?!api|_next|_vercel|.*\\..*).*)'
+    '/((?!api|_next|_vercel|.*\\\\..*).*)'
   ]
 };

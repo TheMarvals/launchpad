@@ -8,7 +8,7 @@ import { getTranslations } from 'next-intl/server';
 import TicketReplyForm from './TicketReplyForm';
 import TicketStatusManager from './TicketStatusManager';
 
-export default async function TicketDetailsPage({ params }: { params: { id: string } }) {
+export default async function TicketDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const ticket = await getTicketDetails(id);
   const t = await getTranslations('ClientPortal');
