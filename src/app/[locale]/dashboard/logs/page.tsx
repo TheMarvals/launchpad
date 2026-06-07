@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { Link, redirect } from '@/i18n/routing';
 import { getTranslations } from 'next-intl/server';
+import CsvDownloadButton from '@/components/CsvDownloadButton';
+import FilterPills from '@/components/FilterPills';
+import DateRangeFilter from '@/components/DateRangeFilter';
 
 const ITEMS_PER_PAGE = 15;
 
@@ -11,7 +14,7 @@ export default async function AuditLogsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; desde?: string; hasta?: string; accion?: string; estado?: string; usuario?: string }>;
 }) {
   const { locale } = await params;
   const search = await searchParams;
@@ -23,10 +26,52 @@ export default async function AuditLogsPage({
   }
 
   const currentPage = Math.max(1, parseInt(search.page || '1'));
+  const filterDesde = search.desde || '';
+  const filterHasta = search.hasta || '';
+  const filterAccion = search.accion || '';
+  const filterEstado = search.estado || '';
+  const filterUsuario = search.usuario || '';
 
-  const [logs, totalCount] = await Promise.all([
+  // Get distinct actions for filter pills
+  const [distinctActionsResult, distinctUsersResult] = await Promise.all([
+    prisma.actionLog.findMany({
+      distinct: ['action'],
+      select: { action: true },
+      orderBy: { action: 'asc' },
+    }),
+    prisma.actionLog.findMany({
+      distinct: ['userId'],
+      select: {
+        userId: true,
+        user: { select: { name: true } },
+      },
+      orderBy: { userId: 'asc' },
+    }),
+  ]);
+  const distinctActions = distinctActionsResult.map((a) => a.action);
+  const distinctUsers = distinctUsersResult.map((u) => ({
+    id: u.userId,
+    name: u.user.name,
+  }));
+
+  // Build where clause
+  const where: any = {};
+  if (filterAccion) where.action = filterAccion;
+  if (filterEstado) where.status = filterEstado;
+  if (filterUsuario) where.userId = filterUsuario;
+  if (filterDesde) {
+    where.createdAt = { ...where.createdAt, gte: new Date(filterDesde) };
+  }
+  if (filterHasta) {
+    const hastaEnd = new Date(filterHasta);
+    hastaEnd.setHours(23, 59, 59, 999);
+    where.createdAt = { ...where.createdAt, lte: hastaEnd };
+  }
+
+  const [logs, totalCount, allCount] = await Promise.all([
     prisma.actionLog.findMany({
       orderBy: { createdAt: 'desc' },
+      where,
       include: {
         user: {
           select: { name: true, email: true },
@@ -38,17 +83,95 @@ export default async function AuditLogsPage({
       skip: (currentPage - 1) * ITEMS_PER_PAGE,
       take: ITEMS_PER_PAGE,
     }),
+    prisma.actionLog.count({ where }),
     prisma.actionLog.count(),
   ]);
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
+  // Build export URL params
+  const exportParams = new URLSearchParams();
+  if (search.desde) exportParams.set('desde', search.desde);
+  if (search.hasta) exportParams.set('hasta', search.hasta);
+  if (search.accion) exportParams.set('accion', search.accion);
+  if (search.estado) exportParams.set('estado', search.estado);
+  if (search.usuario) exportParams.set('usuario', search.usuario);
+
+  const hasFilters = filterEstado || filterAccion || filterUsuario || filterDesde || filterHasta;
+
   return (
     <div className="space-y-md font-sans">
-      <div>
-        <h1 className="text-display-md font-medium tracking-tight text-ink">{t('title')}</h1>
-        <p className="text-body text-muted mt-[4px]">{t('subtitle')}</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-xs">
+        <div>
+          <h1 className="text-display-md font-medium tracking-tight text-ink">{t('title')}</h1>
+          <p className="text-body text-muted mt-[4px]">
+            {hasFilters
+              ? `${totalCount} ${locale === 'es' ? 'de' : 'of'} ${allCount} ${locale === 'es' ? 'registros' : 'records'}`
+              : t('subtitle')}
+          </p>
+        </div>
+        <div className="flex flex-row gap-xxs w-full sm:w-auto">
+          <CsvDownloadButton href={`/api/logs/export?${exportParams.toString()}`} locale={locale} />
+        </div>
       </div>
+
+      <Suspense fallback={<div className="h-[36px] border border-hairline" />}>
+        <DateRangeFilter desde={filterDesde} hasta={filterHasta} locale={locale} />
+      </Suspense>
+
+      <FilterPills
+        basePath="/dashboard/logs"
+        filterKey="estado"
+        options={[
+          { value: '', label: locale === 'es' ? 'Todos' : 'All' },
+          { value: 'SUCCESS', label: t('status.success') },
+          { value: 'PENDING', label: t('status.pending') },
+          { value: 'FAILED', label: t('status.failed') },
+        ]}
+        currentFilter={filterEstado}
+        sortField=""
+        sortDir=""
+        locale={locale}
+        extraParams={{ ...(filterAccion ? { accion: filterAccion } : {}), ...(filterUsuario ? { usuario: filterUsuario } : {}) }}
+        totalCount={allCount}
+        filteredCount={totalCount}
+      />
+
+      {distinctActions.length > 0 && (
+        <FilterPills
+          basePath="/dashboard/logs"
+          filterKey="accion"
+          options={[
+            { value: '', label: locale === 'es' ? 'Todas' : 'All' },
+            ...distinctActions.map((action) => ({ value: action, label: action })),
+          ]}
+          currentFilter={filterAccion}
+          sortField=""
+          sortDir=""
+          locale={locale}
+          extraParams={{ ...(filterEstado ? { estado: filterEstado } : {}), ...(filterUsuario ? { usuario: filterUsuario } : {}) }}
+          totalCount={allCount}
+          filteredCount={totalCount}
+        />
+      )}
+
+      {distinctUsers.length > 1 && (
+        <FilterPills
+          basePath="/dashboard/logs"
+          filterKey="usuario"
+          options={[
+            { value: '', label: locale === 'es' ? 'Todos' : 'All' },
+            ...distinctUsers.map((u) => ({ value: u.id, label: u.name })),
+          ]}
+          currentFilter={filterUsuario}
+          sortField=""
+          sortDir=""
+          locale={locale}
+          extraParams={{ ...(filterEstado ? { estado: filterEstado } : {}), ...(filterAccion ? { accion: filterAccion } : {}) }}
+          totalCount={allCount}
+          filteredCount={totalCount}
+        />
+      )}
 
       <div className="bg-canvas-elevated border border-hairline overflow-hidden">
         {logs.length > 0 ? (
@@ -126,7 +249,7 @@ export default async function AuditLogsPage({
                 <div className="flex items-center gap-xxs">
                   {currentPage > 1 ? (
                     <Link
-                      href={`/dashboard/logs?page=${currentPage - 1}`}
+                      href={`/dashboard/logs?page=${currentPage - 1}${exportParams.toString() ? `&${exportParams.toString()}` : ''}`}
                       className="px-sm h-[32px] text-xs font-bold text-ink bg-transparent border border-hairline rounded-none hover:bg-canvas transition-colors flex items-center uppercase tracking-wider"
                     >
                       <span className="material-icons text-sm mr-1">chevron_left</span> {t('pagination.previous')}
@@ -140,7 +263,7 @@ export default async function AuditLogsPage({
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <Link
                       key={page}
-                      href={`/dashboard/logs?page=${page}`}
+                      href={`/dashboard/logs?page=${page}${exportParams.toString() ? `&${exportParams.toString()}` : ''}`}
                       className={`w-[32px] h-[32px] flex items-center justify-center text-xs font-bold rounded-none transition-colors border ${
                         page === currentPage
                           ? 'bg-ink text-canvas border-ink'
@@ -153,7 +276,7 @@ export default async function AuditLogsPage({
 
                   {currentPage < totalPages ? (
                     <Link
-                      href={`/dashboard/logs?page=${currentPage + 1}`}
+                      href={`/dashboard/logs?page=${currentPage + 1}${exportParams.toString() ? `&${exportParams.toString()}` : ''}`}
                       className="px-sm h-[32px] text-xs font-bold text-ink bg-transparent border border-hairline rounded-none hover:bg-canvas transition-colors flex items-center uppercase tracking-wider"
                     >
                       {t('pagination.next')} <span className="material-icons text-sm ml-1">chevron_right</span>

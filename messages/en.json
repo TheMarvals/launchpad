@@ -127,6 +127,11 @@
       "Anulada": "Voided"
     },
     "updateError": "Error updating status.",
+    "pagination": {
+      "showing": "Showing {start}–{end} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    },
     "table": {
       "number": "Nº",
       "client": "Client",
@@ -461,7 +466,9 @@
       "team": "Admins & Team",
       "productivity": "Productivity",
       "showcase": "Showcase",
-      "cleanup": "Cloudinary"
+      "cleanup": "Cloudinary",
+      "partners": "Partners",
+      "prisma": "Prisma"
     },
     "companyProfile": {
       "title": "Company Profile",
@@ -605,6 +612,54 @@
       "testEmailSent": "📧 Test sent",
       "testEmailSentText": "Email sent to {email}. Check your inbox.",
       "testEmailError": "Failed to send email"
+    },
+    "partners": {
+      "title": "Brand Clients (Partners)",
+      "subtitle": "Manage the brand logos displayed on the landing page.",
+      "newPartner": "New Partner",
+      "editPartner": "Edit Partner",
+      "deleteConfirm": "Delete partner?",
+      "deleteYes": "Yes, delete",
+      "cancel": "Cancel",
+      "active": "Active",
+      "inactive": "Inactive",
+      "hide": "Hide",
+      "show": "Show",
+      "edit": "Edit",
+      "delete": "Delete",
+      "loading": "Loading...",
+      "dragHandle": "Drag to reorder",
+      "empty": "No partners yet. Add the first brand logo.",
+      "form": {
+        "name": "Brand Name",
+        "namePlaceholder": "e.g. Company SPA",
+        "logoUrl": "Logo URL (or upload file)",
+        "websiteUrl": "Website (optional)",
+        "save": "Save",
+        "cancel": "Cancel"
+      }
+    },
+    "prisma": {
+      "title": "Prisma Metrics",
+      "subtitle": "Database query monitoring, slow queries, and uptime tracking.",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing...",
+      "unauthorized": "Unauthorized. Only admins can view these metrics.",
+      "error": "Error loading metrics",
+      "totalQueries": "Total Queries",
+      "slowQueries": "Slow Queries",
+      "uptime": "Uptime",
+      "slowQueryList": "Recent Slow Queries",
+      "query": "Query",
+      "duration": "Duration",
+      "timestamp": "Timestamp",
+      "noSlowQueries": "No slow queries detected recently.",
+      "critical": "Critical",
+      "criticalAlertTitle": "⚠ {count} critical query detected",
+      "criticalAlertLine1": "Database queries detected that exceed the critical performance threshold.",
+      "criticalAlertLine2": "Critical threshold: {threshold}. Check the red-marked queries in the table below.",
+      "autoRefreshOn": "Auto-refresh every 30s — on",
+      "autoRefreshOff": "Auto-refresh off"
     },
     "telegram": {
       "title": "Telegram Integration",
@@ -860,6 +915,7 @@
     "show": "Show",
     "edit": "Edit",
     "delete": "Delete",
+    "dragHandle": "Drag to reorder",
     "loading": "Loading...",
     "empty": "No projects yet. Create your first showcase project.",
     "scrollHint": "Scroll to explore",
@@ -921,6 +977,8 @@
     "cta": "Schedule a Discovery Call",
     "ctaSecondary": "Explore Our Framework",
     "login": "Login",
+    "partnersTag": "Trusted By",
+    "partnersTitle": "Brands That Trust Our Agency",
     "clientAccess": "Client Access",
     "contactCta": "Contact Us",
     "contactTag": "Let's Talk",
@@ -945,6 +1003,7 @@
     "loading": "Loading...",
     "empty": "No submissions yet.",
     "selectMessage": "Select a submission to view details",
+    "name": "Name",
     "new": "New",
     "read": "Read",
     "company": "Company",

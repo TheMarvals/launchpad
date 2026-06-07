@@ -10,10 +10,14 @@ export default async function InvoicePreviewPage({
   params: Promise<{ id: string; locale: string }>;
 }) {
   const { id } = await params;
-  const [invoice, companyProfile] = await Promise.all([
-    getInvoiceById(id),
-    getCompanyProfile(),
-  ]);
+  let companyProfile = null;
+  try {
+    companyProfile = await getCompanyProfile();
+  } catch (e) {
+    // Not authenticated — render with defaults
+  }
+
+  const invoice = await getInvoiceById(id);
 
   if (!invoice) {
     notFound();

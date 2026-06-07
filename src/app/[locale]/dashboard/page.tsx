@@ -1,7 +1,7 @@
 import React from 'react';
 import { redirect } from '@/i18n/routing';
 import { Link } from '@/i18n/routing';
-import { prisma } from '@/lib/prisma';
+import { prisma, timedQuery } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { getTranslations } from 'next-intl/server';
 import QuoteActions from '@/components/QuoteActions';
@@ -14,22 +14,28 @@ export default async function DashboardPage({params}: {params: Promise<{locale: 
   if (session?.user && session.user.role !== 'ADMIN') {
     redirect({ href: '/client-portal', locale });
   }
-  const quotesCount = await prisma.quote.count();
-  const invoicesCount = await prisma.invoice.count();
-  const clientsCount = await prisma.client.count();
+  const quotesCount = await timedQuery(prisma.quote.count(), 'quote.count');
+  const invoicesCount = await timedQuery(prisma.invoice.count(), 'invoice.count');
+  const clientsCount = await timedQuery(prisma.client.count(), 'client.count');
   
-  const totalInvoiced = await prisma.invoice.aggregate({
-    _sum: { montoNeto: true },
-    where: { estado: 'Pagada' }
-  });
+  const totalInvoiced = await timedQuery(
+    prisma.invoice.aggregate({
+      _sum: { montoNeto: true },
+      where: { estado: 'Pagada' }
+    }),
+    'invoice.aggregate(montoNeto:Pagada)'
+  );
 
   const totalIncome = totalInvoiced._sum.montoNeto || 0;
   
-  const recentQuotes = await prisma.quote.findMany({
-    take: 5,
-    orderBy: { createdAt: 'desc' },
-    include: { client: true }
-  });
+  const recentQuotes = await timedQuery(
+    prisma.quote.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: { client: true }
+    }),
+    'quote.findMany(take:5, include:client)'
+  );
 
   return (
     <div className="space-y-md font-sans">

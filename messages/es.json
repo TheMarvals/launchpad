@@ -127,6 +127,11 @@
       "Anulada": "Anulada"
     },
     "updateError": "Error al actualizar el estado.",
+    "pagination": {
+      "showing": "Mostrando {start}–{end} de {total}",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    },
     "table": {
       "number": "Nº",
       "client": "Cliente",
@@ -462,7 +467,9 @@
       "team": "Administradores y Equipo",
       "productivity": "Productividad",
       "showcase": "Portafolio",
-      "cleanup": "Cloudinary"
+      "cleanup": "Cloudinary",
+      "partners": "Partners",
+      "prisma": "Prisma"
     },
     "companyProfile": {
       "title": "Perfil de Empresa",
@@ -606,6 +613,54 @@
       "testEmailSent": "📧 Test enviado",
       "testEmailSentText": "Correo enviado a {email}. Revisa tu bandeja de entrada.",
       "testEmailError": "No se pudo enviar el correo"
+    },
+    "partners": {
+      "title": "Marcas Clientes (Partners)",
+      "subtitle": "Gestiona los logos de las marcas que aparecen en la landing page.",
+      "newPartner": "Nuevo Partner",
+      "editPartner": "Editar Partner",
+      "deleteConfirm": "¿Eliminar partner?",
+      "deleteYes": "Sí, eliminar",
+      "cancel": "Cancelar",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "hide": "Ocultar",
+      "show": "Mostrar",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "loading": "Cargando...",
+      "dragHandle": "Arrastrar para reordenar",
+      "empty": "No hay partners aún. Agrega el primer logo de marca.",
+      "form": {
+        "name": "Nombre de la Marca",
+        "namePlaceholder": "Ej. Empresa SPA",
+        "logoUrl": "URL del Logo (o sube archivo)",
+        "websiteUrl": "Sitio Web (opcional)",
+        "save": "Guardar",
+        "cancel": "Cancelar"
+      }
+    },
+    "prisma": {
+      "title": "Métricas de Prisma",
+      "subtitle": "Monitoreo de consultas a la base de datos, queries lentas y tiempo de actividad.",
+      "refresh": "Actualizar",
+      "refreshing": "Actualizando...",
+      "unauthorized": "No autorizado. Solo administradores pueden ver estas métricas.",
+      "error": "Error al cargar métricas",
+      "totalQueries": "Total Consultas",
+      "slowQueries": "Queries Lentas",
+      "uptime": "Tiempo Activo",
+      "slowQueryList": "Queries Lentas Recientes",
+      "query": "Query",
+      "duration": "Duración",
+      "timestamp": "Momento",
+      "noSlowQueries": "No se han detectado queries lentas recientemente.",
+      "critical": "Críticas",
+      "criticalAlertTitle": "⚠ {count} consulta crítica detectada",
+      "criticalAlertLine1": "Se detectaron consultas a la base de datos que superan el umbral crítico de rendimiento.",
+      "criticalAlertLine2": "Umbral crítico: {threshold}. Revisa las queries marcadas en rojo en la tabla.",
+      "autoRefreshOn": "Actualización automática cada 30s — activada",
+      "autoRefreshOff": "Actualización automática desactivada"
     },
     "telegram": {
       "title": "Integración con Telegram",
@@ -861,6 +916,7 @@
     "show": "Mostrar",
     "edit": "Editar",
     "delete": "Eliminar",
+    "dragHandle": "Arrastrar para reordenar",
     "loading": "Cargando...",
     "empty": "Aún no hay proyectos. Crea tu primer proyecto destacado.",
     "scrollHint": "Desliza para explorar",
@@ -922,6 +978,8 @@
     "cta": "Agenda una Llamada de Descubrimiento",
     "ctaSecondary": "Explora Nuestro Framework",
     "login": "Iniciar Sesión",
+    "partnersTag": "Confían en Nosotros",
+    "partnersTitle": "Marcas que Han Confiado en Nuestra Agencia",
     "clientAccess": "Acceso Clientes",
     "contactCta": "Contáctanos",
     "contactTag": "Hablemos",
@@ -946,6 +1004,7 @@
     "loading": "Cargando...",
     "empty": "Aún no hay solicitudes.",
     "selectMessage": "Selecciona una solicitud para ver los detalles",
+    "name": "Nombre",
     "new": "Nuevo",
     "read": "Leído",
     "company": "Empresa",

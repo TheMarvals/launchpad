@@ -11,7 +11,12 @@ interface PreviewPageProps {
 
 export default async function PreviewPage({ params }: PreviewPageProps) {
   const { id } = await params;
-  const companyProfile = await getCompanyProfile();
+  let companyProfile = null;
+  try {
+    companyProfile = await getCompanyProfile();
+  } catch (e) {
+    // Not authenticated — render with defaults
+  }
 
   // For testing, we can handle a "mock" ID
   if (id === 'test') {

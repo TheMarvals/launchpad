@@ -6,8 +6,11 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  connection_limit  = 10       // PgBouncer-compatible pool size
+  // When using PgBouncer with transaction pooling, append ?pgbouncer=true
+  // to the DATABASE_URL and set connection_limit to match PgBouncer pool size.
 }
 
 model User {
@@ -361,6 +364,17 @@ model ShowcaseImage {
   order     Int            @default(0)
 
   project   ShowcaseProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Partner {
+  id        String   @id @default(uuid())
+  name      String
+  logoUrl   String
+  websiteUrl String?
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ContactSubmission {

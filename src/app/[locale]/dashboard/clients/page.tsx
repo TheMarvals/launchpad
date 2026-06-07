@@ -2,8 +2,14 @@ import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import ClientManager from '@/components/ClientManager';
+import CsvDownloadButton from '@/components/CsvDownloadButton';
 
-export default async function ClientsPage() {
+export default async function ClientsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const t = await getTranslations('Clients');
   const clients = await prisma.client.findMany({
     orderBy: { razonSocial: 'asc' },
@@ -18,6 +24,9 @@ export default async function ClientsPage() {
         <div>
           <h1 className="text-display-md font-medium tracking-tight text-ink">{t('title')}</h1>
           <p className="text-body text-muted mt-[4px]">{t('subtitle')}</p>
+        </div>
+        <div className="flex flex-row gap-xxs w-full sm:w-auto">
+          <CsvDownloadButton href="/api/clients/export" locale={locale} />
         </div>
       </div>
 

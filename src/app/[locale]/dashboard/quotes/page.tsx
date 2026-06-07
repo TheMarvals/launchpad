@@ -1,32 +1,94 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Link } from '@/i18n/routing';
-import { prisma } from '@/lib/prisma';
+import { prisma, timedQuery } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import QuoteActions from '@/components/QuoteActions';
+import CsvDownloadButton from '@/components/CsvDownloadButton';
+import SortableHeader from '@/components/SortableHeader';
+import FilterPills from '@/components/FilterPills';
+import TableSearch from '@/components/TableSearch';
+import DateRangeFilter from '@/components/DateRangeFilter';
 
 const ITEMS_PER_PAGE = 10;
 
-interface QuotesListPageProps {
-  searchParams: Promise<{ page?: string }>;
-}
-
-export default async function QuotesListPage({ searchParams, params }: { searchParams: Promise<{ page?: string }>, params: Promise<{locale: string}> }) {
+export default async function QuotesListPage({ searchParams, params }: { searchParams: Promise<{ page?: string; sort?: string; dir?: string; estado?: string; q?: string; desde?: string; hasta?: string }>, params: Promise<{locale: string}> }) {
   const {locale} = await params;
   const t = await getTranslations('Quotes');
   const search = await searchParams;
   const currentPage = Math.max(1, parseInt(search.page || '1'));
+  const sortField = search.sort || 'createdAt';
+  const sortDir = search.dir === 'asc' ? 'asc' : 'desc';
+  const filterEstado = search.estado || '';
+  const searchQuery = search.q || '';
+  const filterDesde = search.desde || '';
+  const filterHasta = search.hasta || '';
 
-  const [quotes, totalCount] = await Promise.all([
-    prisma.quote.findMany({
-      orderBy: { createdAt: 'desc' },
+  // Build orderBy dynamically
+  let orderBy: any = { createdAt: sortDir };
+  if (sortField === 'correlativo') orderBy = { correlativo: sortDir };
+  else if (sortField === 'montoTotal') orderBy = { montoTotal: sortDir };
+  else if (sortField === 'fechaEmision') orderBy = { fechaEmision: sortDir };
+  else if (sortField === 'fechaValidez') orderBy = { fechaValidez: sortDir };
+  else if (sortField === 'estado') orderBy = { estado: sortDir };
+  else if (sortField === 'client') orderBy = { client: { razonSocial: sortDir } };
+
+  // Build where clause for status filter and search
+  const where: any = {};
+  if (filterEstado) where.estado = filterEstado;
+  if (searchQuery) {
+    where.OR = [
+      { client: { razonSocial: { contains: searchQuery, mode: 'insensitive' } } },
+      { client: { rut: { contains: searchQuery, mode: 'insensitive' } } },
+    ];
+  }
+  if (filterDesde) {
+    where.fechaEmision = { ...where.fechaEmision, gte: new Date(filterDesde) };
+  }
+  if (filterHasta) {
+    const hastaEnd = new Date(filterHasta);
+    hastaEnd.setHours(23, 59, 59, 999);
+    where.fechaEmision = { ...where.fechaEmision, lte: hastaEnd };
+  }
+
+  // Search+date-only where (no estado filter) for allCount
+  const searchWhere: any = {};
+  if (searchQuery) {
+    searchWhere.OR = [
+      { client: { razonSocial: { contains: searchQuery, mode: 'insensitive' } } },
+      { client: { rut: { contains: searchQuery, mode: 'insensitive' } } },
+    ];
+  }
+  if (filterDesde) {
+    searchWhere.fechaEmision = { ...searchWhere.fechaEmision, gte: new Date(filterDesde) };
+  }
+  if (filterHasta) {
+    const hastaEnd = new Date(filterHasta);
+    hastaEnd.setHours(23, 59, 59, 999);
+    searchWhere.fechaEmision = { ...searchWhere.fechaEmision, lte: hastaEnd };
+  }
+
+  const [quotes, totalCount, allCount] = await Promise.all([
+    timedQuery(prisma.quote.findMany({
+      orderBy,
+      where,
       include: { client: true },
       skip: (currentPage - 1) * ITEMS_PER_PAGE,
       take: ITEMS_PER_PAGE,
-    }),
-    prisma.quote.count(),
+    }), 'quote.findMany'),
+    timedQuery(prisma.quote.count({ where }), 'quote.count(filtered)'),
+    timedQuery(prisma.quote.count({ where: searchWhere }), 'quote.count(search)'),
   ]);
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+
+  // Build export URL params
+  const exportParams = new URLSearchParams();
+  if (search.sort) exportParams.set('sort', search.sort);
+  if (search.dir) exportParams.set('dir', search.dir);
+  if (search.estado) exportParams.set('estado', search.estado);
+  if (search.q) exportParams.set('q', search.q);
+  if (search.desde) exportParams.set('desde', search.desde);
+  if (search.hasta) exportParams.set('hasta', search.hasta);
 
   return (
     <div className="space-y-md font-sans">
@@ -34,11 +96,13 @@ export default async function QuotesListPage({ searchParams, params }: { searchP
         <div>
           <h1 className="text-display-md font-medium tracking-tight text-ink">{t('title')}</h1>
           <p className="text-body text-muted mt-[4px]">
-            {t('subtitle', { count: totalCount })}
+            {filterEstado 
+              ? `${totalCount} ${locale === 'es' ? 'de' : 'of'} ${allCount} ${t('subtitle', { count: allCount })}`
+              : t('subtitle', { count: allCount })}
           </p>
         </div>
-        <div className="flex flex-row gap-xxs w-full sm:w-auto">
-          <a 
+        <div className="flex flex-row gap-xxs w-full sm:w-auto">            <CsvDownloadButton href={`/api/quotes/export?${exportParams.toString()}`} locale={locale} />
+            <a 
             href="/api/quotes/template/pdf"
             className="flex-1 sm:flex-initial bg-transparent border border-ink text-ink hover:bg-ink/10 px-sm h-[48px] rounded-none text-xs font-bold uppercase tracking-[1.4px] flex items-center justify-center transition-colors cursor-pointer"
             title="Download blank template"
@@ -55,18 +119,45 @@ export default async function QuotesListPage({ searchParams, params }: { searchP
         </div>
       </div>
 
+      <Suspense fallback={<div className="h-[36px] border border-hairline" />}>
+        <TableSearch placeholder={locale === 'es' ? 'Buscar por cliente o RUT...' : 'Search by client or tax ID...'} />
+      </Suspense>
+
+      <Suspense fallback={<div className="h-[36px] border border-hairline" />}>
+        <DateRangeFilter desde={filterDesde} hasta={filterHasta} locale={locale} />
+      </Suspense>
+
+      <div className="flex items-center gap-xxs">
+        <FilterPills
+        basePath="/dashboard/quotes"
+        filterKey="estado"
+        options={[
+          { value: '', label: locale === 'es' ? 'Todas' : 'All' },
+          { value: 'Borrador', label: 'Borrador' },
+          { value: 'Aceptada', label: 'Aceptada' },
+          { value: 'Pendiente', label: 'Pendiente' },
+        ]}
+        currentFilter={filterEstado}
+        sortField={sortField}
+        sortDir={sortDir}
+        locale={locale}
+        totalCount={allCount}
+        filteredCount={totalCount}
+      />
+      </div>
+
       <div className="bg-canvas-elevated border border-hairline overflow-hidden">
         {quotes.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-canvas border-b border-hairline">
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.number')}</th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.client')}</th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.issueDate')}</th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.validity')}</th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.total')}</th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.status')}</th>
+                <tr className="bg-canvas border-b border-hairline group">
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.number')} field="correlativo" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.client')} field="client" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.issueDate')} field="fechaEmision" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.validity')} field="fechaValidez" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.total')} field="montoTotal" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
+                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.status')} field="estado" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
                   <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-right">{t('table.actions')}</th>
                 </tr>
               </thead>
@@ -122,10 +213,9 @@ export default async function QuotesListPage({ searchParams, params }: { searchP
                 total: totalCount
               })}
             </div>
-            <div className="flex items-center gap-xxs">
-              {currentPage > 1 ? (
+            <div className="flex items-center gap-xxs">                  {currentPage > 1 ? (
                 <Link
-                  href={`/dashboard/quotes?page=${currentPage - 1}`}
+                  href={`/dashboard/quotes?page=${currentPage - 1}&sort=${sortField}&dir=${sortDir}`}
                   className="px-sm h-[32px] text-xs font-bold text-ink bg-transparent border border-hairline rounded-none hover:bg-canvas transition-colors flex items-center uppercase tracking-wider"
                 >
                   <span className="material-icons text-sm mr-1">chevron_left</span> {t('pagination.previous')}
@@ -139,7 +229,7 @@ export default async function QuotesListPage({ searchParams, params }: { searchP
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                 <Link
                   key={page}
-                  href={`/dashboard/quotes?page=${page}`}
+                  href={`/dashboard/quotes?page=${page}&sort=${sortField}&dir=${sortDir}`}
                   className={`w-[32px] h-[32px] flex items-center justify-center text-xs font-bold rounded-none transition-colors border ${
                     page === currentPage
                       ? 'bg-ink text-canvas border-ink'
@@ -152,7 +242,7 @@ export default async function QuotesListPage({ searchParams, params }: { searchP
 
               {currentPage < totalPages ? (
                 <Link
-                  href={`/dashboard/quotes?page=${currentPage + 1}`}
+                  href={`/dashboard/quotes?page=${currentPage + 1}&sort=${sortField}&dir=${sortDir}`}
                   className="px-sm h-[32px] text-xs font-bold text-ink bg-transparent border border-hairline rounded-none hover:bg-canvas transition-colors flex items-center uppercase tracking-wider"
                 >
                   {t('pagination.next')} <span className="material-icons text-sm ml-1">chevron_right</span>

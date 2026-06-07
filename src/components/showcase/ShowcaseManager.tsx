@@ -3,6 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { getShowcaseProjects, createShowcaseProject, updateShowcaseProject, deleteShowcaseProject, addShowcaseImage, deleteShowcaseImage, setFeaturedImage } from '@/app/actions/showcase';
+import { reorderItems } from '@/app/actions/reorder';
+import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface Image {
   id: string;
@@ -87,6 +91,28 @@ export default function ShowcaseManager() {
     loadProjects();
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = projects.findIndex(p => p.id === active.id);
+    const newIndex = projects.findIndex(p => p.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    // Optimistic UI update
+    const reordered = arrayMove(projects, oldIndex, newIndex);
+    setProjects(reordered);
+
+    // Persist via server action
+    const current = projects[oldIndex];
+    const target = projects[newIndex];
+    await reorderItems('showcaseProject', current.id, target.id, [
+      { path: '/dashboard/settings' },
+      { path: '/dashboard/showcase' },
+      { path: '/', type: 'layout' },
+    ]);
+  };
+
   const [imageUrlInput, setImageUrlInput] = useState('');
 
   const handleUploadImage = async (projectId: string, file: File) => {
@@ -126,6 +152,106 @@ export default function ShowcaseManager() {
   };
 
   const CATEGORIES = ['web', 'branding', 'infra', 'video', 'app'];
+
+  // Extract a SortableShowcaseCard sub-component
+  function SortableShowcaseCard({ project, t, onEdit, onDelete, onToggleActive }: {
+    project: Project;
+    t: (key: string, values?: any) => string;
+    onEdit: () => void;
+    onDelete: () => void;
+    onToggleActive: () => void;
+  }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: project.id });
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.4 : undefined,
+      position: 'relative' as const,
+      zIndex: isDragging ? 50 : undefined,
+    };
+
+    const featured = project.images.find((img) => img.isFeatured) || project.images[0];
+
+    return (
+      <div ref={setNodeRef} style={style} className="bg-canvas-elevated border border-hairline overflow-hidden group hover:border-primary/30 transition-colors" {...attributes}>
+        {/* Image preview */}
+        <div className="aspect-video bg-canvas relative overflow-hidden">
+          {featured ? (
+            <img src={featured.url} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-muted">
+              <span className="material-icons text-4xl">image</span>
+            </div>
+          )}
+          {/* Status badge */}
+          <span className={`absolute top-xxs right-xxs px-xxs py-[2px] text-[9px] font-bold uppercase tracking-wider border ${project.isActive ? 'bg-semantic-success/10 text-semantic-success border-semantic-success/30' : 'bg-canvas-elevated text-muted border-hairline'}`}>
+            {project.isActive ? t('active') : t('inactive')}
+          </span>
+          {/* Image count */}
+          <span className="absolute bottom-xxs left-xxs bg-ink/60 text-white text-[10px] px-xxs py-[2px] flex items-center gap-[2px]">
+            <span className="material-icons text-[12px]">collections</span>
+            {project.images.length}
+          </span>
+        </div>
+
+        {/* Info */}
+        <div className="p-sm">
+          <div className="flex items-start justify-between mb-xxs">
+            <h3 className="font-medium text-ink text-sm truncate">{project.title}</h3>
+            <span className="text-[9px] uppercase tracking-widest text-muted bg-canvas px-xxs py-[2px] shrink-0 ml-xxs">{t(`categories.${project.category}`)}</span>
+          </div>
+          {project.clientName && (
+            <p className="text-xs text-muted mb-xxs">{project.clientName}</p>
+          )}
+          {project.description && (
+            <p className="text-xs text-muted/70 line-clamp-2 mb-xs">{project.description}</p>
+          )}
+          {project.technologies && (
+            <div className="flex flex-wrap gap-xxxs mb-xs">
+              {project.technologies.split(',').map((tech) => (
+                <span key={tech.trim()} className="text-[9px] uppercase tracking-widest text-muted bg-canvas px-xxs py-[1px]">{tech.trim()}</span>
+              ))}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex items-center justify-between pt-xxs border-t border-hairline">
+            <div className="flex items-center gap-xxs">
+              {/* Drag handle */}
+              <button
+                {...listeners}
+                className="w-[28px] h-[28px] flex items-center justify-center text-muted hover:text-ink cursor-grab active:cursor-grabbing shrink-0 touch-none"
+                title={t('dragHandle')}
+              >
+                <span className="material-icons text-sm">drag_indicator</span>
+              </button>
+              <button
+                onClick={onEdit}
+                className="text-xs text-muted hover:text-ink transition-colors flex items-center gap-[2px] cursor-pointer"
+              >
+                <span className="material-icons text-sm">edit</span>
+                {t('edit')}
+              </button>
+              <button
+                onClick={onDelete}
+                className="text-xs text-muted hover:text-semantic-danger transition-colors flex items-center gap-[2px] cursor-pointer"
+              >
+                <span className="material-icons text-sm">delete</span>
+                {t('delete')}
+              </button>
+            </div>
+            <button
+              onClick={onToggleActive}
+              className={`text-[9px] font-bold uppercase tracking-wider flex items-center gap-[2px] cursor-pointer transition-colors ${project.isActive ? 'text-semantic-warning hover:text-semantic-danger' : 'text-semantic-success hover:text-semantic-success/80'}`}
+            >
+              <span className="material-icons text-sm">{project.isActive ? 'visibility_off' : 'visibility'}</span>
+              {project.isActive ? t('hide') : t('show')}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-sm">
@@ -296,82 +422,22 @@ export default function ShowcaseManager() {
           <p className="text-sm text-muted">{t('empty')}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-xs">
-          {projects.map((project) => {
-            const featured = project.images.find((img) => img.isFeatured) || project.images[0];
-            return (
-              <div key={project.id} className="bg-canvas-elevated border border-hairline overflow-hidden group hover:border-primary/30 transition-colors">
-                {/* Image preview */}
-                <div className="aspect-video bg-canvas relative overflow-hidden">
-                  {featured ? (
-                    <img src={featured.url} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted">
-                      <span className="material-icons text-4xl">image</span>
-                    </div>
-                  )}
-                  {/* Status badge */}
-                  <span className={`absolute top-xxs right-xxs px-xxs py-[2px] text-[9px] font-bold uppercase tracking-wider border ${project.isActive ? 'bg-semantic-success/10 text-semantic-success border-semantic-success/30' : 'bg-canvas-elevated text-muted border-hairline'}`}>
-                    {project.isActive ? t('active') : t('inactive')}
-                  </span>
-                  {/* Image count */}
-                  <span className="absolute bottom-xxs left-xxs bg-ink/60 text-white text-[10px] px-xxs py-[2px] flex items-center gap-[2px]">
-                    <span className="material-icons text-[12px]">collections</span>
-                    {project.images.length}
-                  </span>
-                </div>
-
-                {/* Info */}
-                <div className="p-sm">
-                  <div className="flex items-start justify-between mb-xxs">
-                    <h3 className="font-medium text-ink text-sm truncate">{project.title}</h3>
-                    <span className="text-[9px] uppercase tracking-widest text-muted bg-canvas px-xxs py-[2px] shrink-0 ml-xxs">{t(`categories.${project.category}`)}</span>
-                  </div>
-                  {project.clientName && (
-                    <p className="text-xs text-muted mb-xxs">{project.clientName}</p>
-                  )}
-                  {project.description && (
-                    <p className="text-xs text-muted/70 line-clamp-2 mb-xs">{project.description}</p>
-                  )}
-                  {project.technologies && (
-                    <div className="flex flex-wrap gap-xxxs mb-xs">
-                      {project.technologies.split(',').map((tech) => (
-                        <span key={tech.trim()} className="text-[9px] uppercase tracking-widest text-muted bg-canvas px-xxs py-[1px]">{tech.trim()}</span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  <div className="flex items-center justify-between pt-xxs border-t border-hairline">
-                    <div className="flex gap-xxs">
-                      <button
-                        onClick={() => { setEditingProject(project); setShowForm(true); }}
-                        className="text-xs text-muted hover:text-ink transition-colors flex items-center gap-[2px] cursor-pointer"
-                      >
-                        <span className="material-icons text-sm">edit</span>
-                        {t('edit')}
-                      </button>
-                      <button
-                        onClick={() => handleDelete(project.id)}
-                        className="text-xs text-muted hover:text-semantic-danger transition-colors flex items-center gap-[2px] cursor-pointer"
-                      >
-                        <span className="material-icons text-sm">delete</span>
-                        {t('delete')}
-                      </button>
-                    </div>
-                    <button
-                      onClick={() => handleToggleActive(project)}
-                      className={`text-[9px] font-bold uppercase tracking-wider flex items-center gap-[2px] cursor-pointer transition-colors ${project.isActive ? 'text-semantic-warning hover:text-semantic-danger' : 'text-semantic-success hover:text-semantic-success/80'}`}
-                    >
-                      <span className="material-icons text-sm">{project.isActive ? 'visibility_off' : 'visibility'}</span>
-                      {project.isActive ? t('hide') : t('show')}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={projects.map(p => p.id)} strategy={verticalListSortingStrategy}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-xs">
+              {projects.map((project) => (
+                <SortableShowcaseCard
+                  key={project.id}
+                  project={project}
+                  t={t}
+                  onEdit={() => { setEditingProject(project); setShowForm(true); }}
+                  onDelete={() => handleDelete(project.id)}
+                  onToggleActive={() => handleToggleActive(project)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
     </div>
   );

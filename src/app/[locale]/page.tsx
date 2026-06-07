@@ -4,12 +4,18 @@ import { prisma } from '@/lib/prisma';
 import LandingCta from '@/components/landing/LandingCta';
 import LandingNav from '@/components/landing/LandingNav';
 import ShowcaseCarousel from '@/components/landing/ShowcaseCarousel';
+import PartnersCarousel from '@/components/landing/PartnersCarousel';
 import ContactForm from '@/components/landing/ContactForm';
 
 export default async function LandingPage({ params }: { params: Promise<{ locale: string }> }) {
   const t = await getTranslations('Landing');
   const session = await auth();
   const isAuthenticated = !!session?.user;
+  const partners = await prisma.partner.findMany({
+    where: { isActive: true },
+    orderBy: { order: 'asc' },
+  });
+
   const showcaseProjects = await prisma.showcaseProject.findMany({
     where: { isActive: true },
     orderBy: { order: 'asc' },
@@ -214,6 +220,11 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       {/* Showcase Section */}
       {showcaseProjects.length > 0 && (
         <ShowcaseCarousel projects={JSON.parse(JSON.stringify(showcaseProjects))} />
+      )}
+
+      {/* Partners Section */}
+      {partners.length > 0 && (
+        <PartnersCarousel partners={JSON.parse(JSON.stringify(partners))} />
       )}
 
       {/* ============================== */}

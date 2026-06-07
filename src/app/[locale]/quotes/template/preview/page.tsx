@@ -3,7 +3,12 @@ import QuotePDF from '@/components/QuotePDF';
 import { getCompanyProfile } from '@/app/actions/settings';
 
 export default async function QuoteTemplatePreview() {
-  const companyProfile = await getCompanyProfile();
+  let companyProfile = null;
+  try {
+    companyProfile = await getCompanyProfile();
+  } catch (e) {
+    // Not authenticated — render template with defaults
+  }
 
   const mockQuote = {
     correlativo: 0,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { getContactSubmissions, markAsRead, markAllAsRead, deleteContactSubmission } from '@/app/actions/contacts';
 import Swal from 'sweetalert2';
@@ -69,6 +69,52 @@ export default function ContactsPage() {
     }
   };
 
+  // Sorting state
+  const [sortField, setSortField] = useState<'date' | 'name' | 'read'>('date');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  const handleSort = (field: 'date' | 'name' | 'read') => {
+    if (sortField === field) {
+      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir(field === 'date' ? 'desc' : 'asc');
+    }
+  };
+
+  const sortedSubmissions = useMemo(() => {
+    const sorted = [...submissions];
+    sorted.sort((a, b) => {
+      let cmp = 0;
+      if (sortField === 'date') {
+        cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      } else if (sortField === 'name') {
+        cmp = (a.name || '').localeCompare(b.name || '');
+      } else if (sortField === 'read') {
+        cmp = Number(a.read) - Number(b.read);
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return sorted;
+  }, [submissions, sortField, sortDir]);
+
+  const SortButton = ({ field, label }: { field: 'date' | 'name' | 'read'; label: string }) => {
+    const isActive = sortField === field;
+    return (
+      <button
+        onClick={() => handleSort(field)}
+        className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-[2px] transition-colors cursor-pointer ${
+          isActive ? 'text-ink' : 'text-muted hover:text-ink'
+        }`}
+      >
+        {label}
+        {isActive && (
+          <span className="material-icons text-[12px]">{sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward'}</span>
+        )}
+      </button>
+    );
+  };
+
   const unread = submissions.filter((s) => !s.read).length;
 
   return (
@@ -108,13 +154,20 @@ export default function ContactsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-lg">
         {/* Submissions list */}
-        <div className="space-y-xxs max-h-[75vh] overflow-y-auto pr-xs">
+        <div className="space-y-xxs">
+          {/* Sort controls */}
+          <div className="flex items-center gap-sm px-xs py-xxs border-b border-hairline">
+            <SortButton field="date" label={t('date')} />
+            <SortButton field="name" label={t('name')} />
+            <SortButton field="read" label={t('read')} />
+          </div>
+          <div className="max-h-[68vh] overflow-y-auto pr-xs space-y-xxs">
           {loading ? (
             <div className="text-center py-xl text-muted text-sm">{t('loading')}</div>
           ) : submissions.length === 0 ? (
             <div className="text-center py-xl text-muted text-sm">{t('empty')}</div>
           ) : (
-            submissions.map((sub) => (
+            sortedSubmissions.map((sub) => (
               <button
                 key={sub.id}
                 onClick={() => {
@@ -171,6 +224,7 @@ export default function ContactsPage() {
               </button>
             ))
           )}
+        </div>
         </div>
 
         {/* Detail panel */}

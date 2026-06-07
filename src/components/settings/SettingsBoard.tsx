@@ -7,6 +7,8 @@ import CompanyProfileBoard from './CompanyProfileBoard';
 import TeamManagementBoard from './TeamManagementBoard';
 import ProductivitySettingsBoard from '../productivity/ProductivitySettingsBoard';
 import CloudinaryCleanupBoard from './CloudinaryCleanupBoard';
+import PartnersManager from './PartnersManager';
+import PrismaMetricsBoard from './PrismaMetricsBoard';
 
 interface SettingsBoardProps {
   initialProfile: any;
@@ -94,6 +96,28 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
         >
           {t('tabs.cleanup')}
         </button>
+        <button
+          ref={setTabRef('partners')}
+          onClick={() => setActiveTab('partners')}
+          className={`pb-xxs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
+            activeTab === 'partners' 
+              ? 'border-primary text-primary' 
+              : 'border-transparent text-muted hover:text-ink'
+          }`}
+        >
+          {t('tabs.partners')}
+        </button>
+        <button
+          ref={setTabRef('prisma')}
+          onClick={() => setActiveTab('prisma')}
+          className={`pb-xxs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
+            activeTab === 'prisma' 
+              ? 'border-primary text-primary' 
+              : 'border-transparent text-muted hover:text-ink'
+          }`}
+        >
+          {t('tabs.prisma')}
+        </button>
       </div>
 
       <div>
@@ -108,6 +132,12 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
         )}
         {activeTab === 'cleanup' && (
           <CloudinaryCleanupBoard />
+        )}
+        {activeTab === 'partners' && (
+          <PartnersManager />
+        )}
+        {activeTab === 'prisma' && (
+          <PrismaMetricsBoard />
         )}
       </div>
     </div>
