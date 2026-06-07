@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 
-function getTransporter() {
+export function getTransporter() {
   if (!process.env.HOSTM || !process.env.USERM || !process.env.PASSM) {
     console.error("[Email] Missing SMTP configuration in environment variables (HOSTM, USERM or PASSM).");
   }
@@ -87,7 +87,7 @@ function baseTemplate(content: string, locale: string = 'es') {
         <tr>
           <td style="padding:0 0 24px 0;text-align:center;">
             <img
-              src="${process.env.SITE_ORIGIN ? process.env.SITE_ORIGIN + '/lp_logo.png' : '/lp_logo.png'}"
+              src="${process.env.CLOUDINARY_LOGO_URL || (process.env.SITE_ORIGIN ? process.env.SITE_ORIGIN + '/lp_logo.png' : '/lp_logo.png')}"
               width="280"
               alt="LAUNCHPAD"
               style="display:block;margin:0 auto;max-width:100%;height:auto;"

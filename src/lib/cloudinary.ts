@@ -18,6 +18,39 @@ export async function uploadImage(file: string): Promise<string> {
   return result.secure_url;
 }
 
+export async function listCloudinaryResources(folder: string): Promise<{ publicId: string; url: string; createdAt: Date }[]> {
+  const client = getCloudinary();
+  const results: { publicId: string; url: string; createdAt: Date }[] = [];
+  let nextCursor: string | undefined;
+
+  do {
+    const response: any = await client.api.resources({
+      type: 'upload',
+      prefix: folder,
+      resource_type: 'image',
+      max_results: 500,
+      next_cursor: nextCursor,
+    });
+
+    for (const resource of response.resources) {
+      results.push({
+        publicId: resource.public_id,
+        url: resource.secure_url,
+        createdAt: new Date(resource.created_at),
+      });
+    }
+
+    nextCursor = response.next_cursor;
+  } while (nextCursor);
+
+  return results;
+}
+
+export async function deleteImageByPublicId(publicId: string): Promise<void> {
+  const client = getCloudinary();
+  await client.uploader.destroy(publicId);
+}
+
 export async function deleteImage(url: string): Promise<void> {
   // Extract public_id from Cloudinary URL
   // URL format: /v{version}/{folder}/{filename}.{ext}

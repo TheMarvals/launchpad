@@ -461,7 +461,8 @@
       "company": "Perfil de Empresa",
       "team": "Administradores y Equipo",
       "productivity": "Productividad",
-      "showcase": "Portafolio"
+      "showcase": "Portafolio",
+      "cleanup": "Cloudinary"
     },
     "companyProfile": {
       "title": "Perfil de Empresa",
@@ -571,6 +572,40 @@
           "reminders": "Recordatorios"
         }
       }
+    },
+    "cloudinary": {
+      "title": "Limpieza de Cloudinary",
+      "subtitle": "Escanea y elimina imágenes huérfanas de Cloudinary que ya no están referenciadas en la base de datos.",
+      "scan": "Escanear Cloudinary",
+      "scanning": "Escaneando...",
+      "deleteAll": "Eliminar todas ({count})",
+      "deleting": "Eliminando...",
+      "inCloudinary": "En Cloudinary",
+      "inDatabase": "En Base de Datos",
+      "orphaned": "Huérfanas",
+      "noOrphaned": "No hay imágenes huérfanas. Todo está limpio.",
+      "deleteConfirm": "¿Eliminar imagen?",
+      "deleteConfirmText": "Se eliminará de Cloudinary: {publicId}",
+      "deleteAllConfirm": "¿Eliminar {count} imágenes huérfanas?",
+      "deleteAllConfirmText": "Se eliminarán permanentemente de Cloudinary.",
+      "deleteYes": "Sí, eliminar",
+      "cancel": "Cancelar",
+      "deleted": "Eliminada",
+      "deletedText": "Imagen eliminada de Cloudinary",
+      "cleanComplete": "¡Limpieza completa!",
+      "cleanCompleteText": "{count} imágenes eliminadas de Cloudinary",
+      "partialClean": "Eliminación parcial",
+      "partialCleanText": "{success} eliminadas, {failed} fallaron",
+      "error": "Error",
+      "uploaded": "Subida",
+      "testEmailTitle": "📧 Test Email — Verificación de Logo",
+      "testEmailSubtitle": "Envía un correo de prueba para verificar que el logo se renderiza correctamente en los clientes de correo.",
+      "testEmailPlaceholder": "tu@email.com",
+      "testEmailSend": "Enviar Test",
+      "testEmailSending": "Enviando...",
+      "testEmailSent": "📧 Test enviado",
+      "testEmailSentText": "Correo enviado a {email}. Revisa tu bandeja de entrada.",
+      "testEmailError": "No se pudo enviar el correo"
     },
     "telegram": {
       "title": "Integración con Telegram",

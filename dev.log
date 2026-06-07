@@ -108,3 +108,16 @@
  GET /en 200 in 218ms (next.js: 10ms, proxy.ts: 15ms, application-code: 192ms)
  GET /en 200 in 233ms (next.js: 76ms, proxy.ts: 16ms, application-code: 141ms)
  GET /en 200 in 127ms (next.js: 18ms, proxy.ts: 39ms, application-code: 69ms)
+  Reload env: .env
+  Reload env: .env
+✓ Compiled in 41ms
+✓ Compiled in 235ms
+  Reload env: .env
+✓ Compiled in 68ms
+✓ Compiled in 63ms
+✓ Compiled in 171ms
+✓ Compiled in 52ms
+✓ Compiled in 41ms
+✓ Compiled in 44ms
+✓ Compiled in 41ms
+✓ Compiled in 59ms

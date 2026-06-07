@@ -460,7 +460,8 @@
       "company": "Company Profile",
       "team": "Admins & Team",
       "productivity": "Productivity",
-      "showcase": "Showcase"
+      "showcase": "Showcase",
+      "cleanup": "Cloudinary"
     },
     "companyProfile": {
       "title": "Company Profile",
@@ -570,6 +571,40 @@
           "reminders": "Reminders"
         }
       }
+    },
+    "cloudinary": {
+      "title": "Cloudinary Cleanup",
+      "subtitle": "Scan and remove orphaned Cloudinary images that are no longer referenced in the database.",
+      "scan": "Scan Cloudinary",
+      "scanning": "Scanning...",
+      "deleteAll": "Delete All ({count})",
+      "deleting": "Deleting...",
+      "inCloudinary": "In Cloudinary",
+      "inDatabase": "In Database",
+      "orphaned": "Orphaned",
+      "noOrphaned": "No orphaned images found. Everything is clean.",
+      "deleteConfirm": "Delete image?",
+      "deleteConfirmText": "It will be removed from Cloudinary: {publicId}",
+      "deleteAllConfirm": "Delete {count} orphaned images?",
+      "deleteAllConfirmText": "They will be permanently removed from Cloudinary.",
+      "deleteYes": "Yes, delete",
+      "cancel": "Cancel",
+      "deleted": "Deleted",
+      "deletedText": "Image removed from Cloudinary",
+      "cleanComplete": "Cleanup complete!",
+      "cleanCompleteText": "{count} images removed from Cloudinary",
+      "partialClean": "Partial cleanup",
+      "partialCleanText": "{success} removed, {failed} failed",
+      "error": "Error",
+      "uploaded": "Uploaded",
+      "testEmailTitle": "📧 Test Email — Logo Verification",
+      "testEmailSubtitle": "Send a test email to verify that the logo renders correctly in email clients.",
+      "testEmailPlaceholder": "your@email.com",
+      "testEmailSend": "Send Test",
+      "testEmailSending": "Sending...",
+      "testEmailSent": "📧 Test sent",
+      "testEmailSentText": "Email sent to {email}. Check your inbox.",
+      "testEmailError": "Failed to send email"
     },
     "telegram": {
       "title": "Telegram Integration",

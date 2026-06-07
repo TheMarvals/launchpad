@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import CompanyProfileBoard from './CompanyProfileBoard';
 import TeamManagementBoard from './TeamManagementBoard';
 import ProductivitySettingsBoard from '../productivity/ProductivitySettingsBoard';
+import CloudinaryCleanupBoard from './CloudinaryCleanupBoard';
 
 interface SettingsBoardProps {
   initialProfile: any;
@@ -82,6 +83,17 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
         >
           {t('tabs.productivity')}
         </button>
+        <button
+          ref={setTabRef('cleanup')}
+          onClick={() => setActiveTab('cleanup')}
+          className={`pb-xxs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
+            activeTab === 'cleanup' 
+              ? 'border-primary text-primary' 
+              : 'border-transparent text-muted hover:text-ink'
+          }`}
+        >
+          {t('tabs.cleanup')}
+        </button>
       </div>
 
       <div>
@@ -94,7 +106,9 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
         {activeTab === 'productivity' && (
           <ProductivitySettingsBoard initialSettings={initialProductivitySettings} />
         )}
-
+        {activeTab === 'cleanup' && (
+          <CloudinaryCleanupBoard />
+        )}
       </div>
     </div>
   );

@@ -1,23 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import nodemailer from 'nodemailer';
-import { revalidatePath } from 'next/cache';
-
-function getTransporter() {
-  return nodemailer.createTransport({
-    host: process.env.HOSTM,
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.USERM,
-      pass: process.env.PASSM,
-    },
-    tls: {
-      rejectUnauthorized: false,
-    },
-  });
-}
+import { getTransporter } from '@/lib/email';
 
 export async function submitContactForm(data: {
   name: string;
@@ -56,7 +40,12 @@ export async function submitContactForm(data: {
           <table width="600" cellpadding="0" cellspacing="0" style="margin:0 auto;">
             <tr>
               <td style="text-align:center;padding-bottom:24px;">
-                <div style="font-size:28px;font-weight:900;letter-spacing:-1.5px;color:transparent;font-family:'Outfit',sans-serif;text-transform:uppercase;-webkit-text-stroke:1.5px #ffffff;">LAUNCHPAD</div>
+                <img
+                  src="${process.env.CLOUDINARY_LOGO_URL || (process.env.SITE_ORIGIN ? process.env.SITE_ORIGIN + '/lp_logo.png' : '/lp_logo.png')}"
+                  width="280"
+                  alt="LAUNCHPAD"
+                  style="display:block;margin:0 auto;max-width:100%;height:auto;"
+                />
                 <div style="width:32px;height:2px;background:#a855f7;margin:8px auto;"></div>
                 <div style="font-size:9px;text-transform:uppercase;letter-spacing:3px;color:#8c90a2;font-weight:600;">by Masterminds</div>
               </td>

@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { deleteImage } from '@/lib/cloudinary';
 
 // --- SHOWCASE PROJECTS ---
 
@@ -94,8 +95,19 @@ export async function updateShowcaseProject(
 }
 
 export async function deleteShowcaseProject(id: string) {
+  const project = await prisma.showcaseProject.findUnique({
+    where: { id },
+    include: { images: { select: { url: true } } },
+  });
+
+  if (project) {
+    // Delete all associated images from Cloudinary
+    await Promise.allSettled(project.images.map(img => deleteImage(img.url)));
+  }
+
   await prisma.showcaseProject.delete({ where: { id } });
   revalidatePath('/dashboard/settings');
+  revalidatePath('/dashboard/showcase');
   revalidatePath('/', 'layout');
 }
 
@@ -134,8 +146,20 @@ export async function addShowcaseImage(
 }
 
 export async function deleteShowcaseImage(id: string) {
+  const image = await prisma.showcaseImage.findUnique({
+    where: { id },
+    select: { url: true },
+  });
+
+  if (image) {
+    await deleteImage(image.url).catch(e =>
+      console.error('[Showcase] Failed to delete image from Cloudinary:', e)
+    );
+  }
+
   await prisma.showcaseImage.delete({ where: { id } });
   revalidatePath('/dashboard/settings');
+  revalidatePath('/dashboard/showcase');
   revalidatePath('/', 'layout');
 }
 
