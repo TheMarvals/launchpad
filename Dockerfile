@@ -57,10 +57,15 @@ COPY --from=builder /app/public ./public
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# Copy Prisma schema and migrations so we can run db push at startup
+# Copy Prisma schema, migrations and dependencies so we can run db push at startup
+# @prisma/config requires these hoisted dependencies
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/effect ./node_modules/effect
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/c12 ./node_modules/c12
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/deepmerge-ts ./node_modules/deepmerge-ts
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/empathic ./node_modules/empathic
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
 USER nextjs
