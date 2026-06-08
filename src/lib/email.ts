@@ -1,5 +1,53 @@
 import nodemailer from 'nodemailer';
 
+/** CID used for the embedded logo in email clients */
+const LOGO_CID = 'launchpad_logo';
+
+/** Default fallback logo URL (used when embedding fails) */
+function getLogoFallbackUrl(): string {
+  return process.env.CLOUDINARY_LOGO_URL ||
+    (process.env.SITE_ORIGIN ? process.env.SITE_ORIGIN + '/lp_logo.png' : '/lp_logo.png');
+}
+
+/**
+ * Prepare the logo image tag and optional attachment for email.
+ * Uses CID embedding when possible (more reliable across email clients).
+ */
+export async function prepareLogo(): Promise<{
+  imgTag: string;
+  attachment?: {
+    filename?: string;
+    content?: Buffer;
+    cid?: string;
+  };
+}> {
+  const logoUrl = process.env.CLOUDINARY_LOGO_URL;
+
+  if (logoUrl) {
+    try {
+      const response = await fetch(logoUrl);
+      if (response.ok) {
+        const buffer = Buffer.from(await response.arrayBuffer());
+        return {
+          imgTag: `<img src="cid:${LOGO_CID}" width="280" alt="LAUNCHPAD" style="display:block;margin:0 auto;max-width:100%;height:auto;" />`,
+          attachment: {
+            filename: 'lp_logo.png',
+            content: buffer,
+            cid: LOGO_CID,
+          },
+        };
+      }
+    } catch (e) {
+      console.error('[Email] Failed to fetch logo from Cloudinary, falling back to direct URL:', e);
+    }
+  }
+
+  // Fallback to direct URL
+  return {
+    imgTag: `<img src="${getLogoFallbackUrl()}" width="280" alt="LAUNCHPAD" style="display:block;margin:0 auto;max-width:100%;height:auto;" />`,
+  };
+}
+
 export function getTransporter() {
   if (!process.env.HOSTM || !process.env.USERM || !process.env.PASSM) {
     console.error("[Email] Missing SMTP configuration in environment variables (HOSTM, USERM or PASSM).");
@@ -71,7 +119,13 @@ function t(locale: string, es: string, en: string) {
   return locale === 'en' ? en : es;
 }
 
-function baseTemplate(content: string, locale: string = 'es') {
+function baseTemplate(content: string, locale: string = 'es', logoImgTag?: string) {
+  const logoHtml = logoImgTag || `<img
+              src="${getLogoFallbackUrl()}"
+              width="280"
+              alt="LAUNCHPAD"
+              style="display:block;margin:0 auto;max-width:100%;height:auto;"
+            />`;
   return `<!DOCTYPE html>
 <html lang="${locale}">
 <head>
@@ -86,12 +140,7 @@ function baseTemplate(content: string, locale: string = 'es') {
         <!-- Header -->
         <tr>
           <td style="padding:0 0 24px 0;text-align:center;">
-            <img
-              src="${process.env.CLOUDINARY_LOGO_URL || (process.env.SITE_ORIGIN ? process.env.SITE_ORIGIN + '/lp_logo.png' : '/lp_logo.png')}"
-              width="280"
-              alt="LAUNCHPAD"
-              style="display:block;margin:0 auto;max-width:100%;height:auto;"
-            />
+            ${logoHtml}
             <div style="width:32px;height:2px;background:${theme.secondary};margin:8px auto;"></div>
             <div style="font-size:9px;text-transform:uppercase;letter-spacing:3px;color:${theme.muted};font-weight:600;">by Masterminds</div>
           </td>
@@ -151,11 +200,13 @@ export async function sendNewTicketNotificationToAdmin(data: TicketEmailData, lo
   console.log(`[Email] Preparing new ticket email for admin: ${adminEmail} (locale: ${locale})`);
 
   try {
+    const { imgTag, attachment } = await prepareLogo();
     const info = await getTransporter().sendMail({
       from: `"LAUNCHPAD ${t(locale, 'Soporte', 'Support')}" <${process.env.USERM}>`,
       to: adminEmail,
       subject: `${t(locale, '[Nuevo Ticket]', '[New Ticket]')} ${data.subject} — ${data.clientName}`,
-      html: baseTemplate(content, locale),
+      html: baseTemplate(content, locale, imgTag),
+      ...(attachment ? { attachments: [attachment] } : {}),
     });
     console.log(`[Email] New ticket email sent to admin successfully. MessageID: ${info.messageId}`);
   } catch (err) {
@@ -192,11 +243,13 @@ export async function sendTicketReplyNotificationToClient(data: TicketEmailData 
   console.log(`[Email] Preparing ticket reply email for client: ${data.clientEmail} (locale: ${locale})`);
 
   try {
+    const { imgTag, attachment } = await prepareLogo();
     const info = await getTransporter().sendMail({
       from: `"LAUNCHPAD ${t(locale, 'Soporte', 'Support')}" <${process.env.USERM}>`,
       to: data.clientEmail,
       subject: `Re: ${data.subject} — Ticket #${data.ticketId.slice(-6).toUpperCase()}`,
-      html: baseTemplate(content, locale),
+      html: baseTemplate(content, locale, imgTag),
+      ...(attachment ? { attachments: [attachment] } : {}),
     });
     console.log(`[Email] Reply email sent to client successfully. MessageID: ${info.messageId}`);
   } catch (err) {
@@ -227,11 +280,13 @@ export async function sendSecurityOtpEmail(email: string, code: string, userName
     </p>
   `;
 
+  const { imgTag, attachment } = await prepareLogo();
   await getTransporter().sendMail({
     from: `"LAUNCHPAD ${t(locale, 'Seguridad', 'Security')}" <${process.env.USERM}>`,
     to: email,
     subject: `[LAUNCHPAD] ${title}: ${code}`,
-    html: baseTemplate(content, locale),
+    html: baseTemplate(content, locale, imgTag),
+    ...(attachment ? { attachments: [attachment] } : {}),
   });
 }
 
@@ -386,10 +441,12 @@ export async function sendRemindersEmail(
     </div>
   `;
 
+  const { imgTag, attachment } = await prepareLogo();
   await getTransporter().sendMail({
     from: `"LAUNCHPAD ${t(locale, 'Portal', 'Portal')}" <${process.env.USERM}>`,
     to: toEmail,
     subject: `[LAUNCHPAD] ${t(locale, 'Resumen de Recordatorios', 'Reminders Summary')} — ${new Date().toLocaleDateString(locale)}`,
-    html: baseTemplate(content, locale),
+    html: baseTemplate(content, locale, imgTag),
+    ...(attachment ? { attachments: [attachment] } : {}),
   });
 }

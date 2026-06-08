@@ -1,6 +1,6 @@
 'use server';
 
-import { getTransporter } from '@/lib/email';
+import { getTransporter, prepareLogo } from '@/lib/email';
 
 export async function sendTestEmail(toEmail: string) {
   if (!toEmail || !toEmail.includes('@')) {
@@ -11,6 +11,8 @@ export async function sendTestEmail(toEmail: string) {
     (process.env.SITE_ORIGIN ? process.env.SITE_ORIGIN + '/lp_logo.png' : '/lp_logo.png');
 
   try {
+    const { imgTag, attachment } = await prepareLogo();
+
     await getTransporter().sendMail({
       from: `"LAUNCHPAD Test" <${process.env.USERM}>`,
       to: toEmail,
@@ -29,12 +31,7 @@ export async function sendTestEmail(toEmail: string) {
         <!-- Header with Logo -->
         <tr>
           <td style="padding:0 0 24px 0;text-align:center;">
-            <img
-              src="${logoUrl}"
-              width="280"
-              alt="LAUNCHPAD"
-              style="display:block;margin:0 auto;max-width:100%;height:auto;"
-            />
+            ${imgTag}
             <div style="width:32px;height:2px;background:#a855f7;margin:8px auto;"></div>
             <div style="font-size:9px;text-transform:uppercase;letter-spacing:3px;color:#8c90a2;font-weight:600;">by Masterminds</div>
           </td>
@@ -85,6 +82,7 @@ export async function sendTestEmail(toEmail: string) {
   </table>
 </body>
 </html>`,
+      ...(attachment ? { attachments: [attachment] } : {}),
     });
 
     console.log(`[TestEmail] Test email sent successfully to ${toEmail}`);

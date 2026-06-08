@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { getTransporter } from '@/lib/email';
+import { getTransporter, prepareLogo } from '@/lib/email';
 
 export async function submitContactForm(data: {
   name: string;
@@ -30,7 +30,9 @@ export async function submitContactForm(data: {
       },
     });
 
-    // Send email notification
+    // Send email notification with embedded logo
+    const { imgTag, attachment } = await prepareLogo();
+
     await getTransporter().sendMail({
       from: `"LAUNCHPAD Web" <${process.env.USERM}>`,
       to: adminEmail,
@@ -40,12 +42,7 @@ export async function submitContactForm(data: {
           <table width="600" cellpadding="0" cellspacing="0" style="margin:0 auto;">
             <tr>
               <td style="text-align:center;padding-bottom:24px;">
-                <img
-                  src="${process.env.CLOUDINARY_LOGO_URL || (process.env.SITE_ORIGIN ? process.env.SITE_ORIGIN + '/lp_logo.png' : '/lp_logo.png')}"
-                  width="280"
-                  alt="LAUNCHPAD"
-                  style="display:block;margin:0 auto;max-width:100%;height:auto;"
-                />
+                ${imgTag}
                 <div style="width:32px;height:2px;background:#a855f7;margin:8px auto;"></div>
                 <div style="font-size:9px;text-transform:uppercase;letter-spacing:3px;color:#8c90a2;font-weight:600;">by Masterminds</div>
               </td>
@@ -85,6 +82,7 @@ export async function submitContactForm(data: {
           </table>
         </div>
       `,
+      ...(attachment ? { attachments: [attachment] } : {}),
     });
 
     return { success: true };
