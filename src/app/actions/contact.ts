@@ -1,7 +1,10 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { getTransporter, prepareLogo } from '@/lib/email';
+import { resend } from '@/lib/email';
+import { StrategyAuditEmail } from '@/emails/StrategyAuditEmail';
+import { render } from '@react-email/components';
+import * as React from 'react';
 
 export async function submitContactForm(data: {
   name: string;
@@ -30,60 +33,26 @@ export async function submitContactForm(data: {
       },
     });
 
-    // Send email notification with embedded logo
-    const { imgTag, attachment } = await prepareLogo();
+    // Send email notification using Resend and React Email
+    const html = await render(
+      React.createElement(StrategyAuditEmail, {
+        name: data.name,
+        email: data.email,
+        company: data.company,
+        challenge: data.challenge,
+      })
+    );
 
-    await getTransporter().sendMail({
-      from: `"LAUNCHPAD Web" <${process.env.USERM}>`,
+    const { error } = await resend.emails.send({
+      from: `"LAUNCHPAD Web" <${process.env.USERM || 'onboarding@resend.dev'}>`,
       to: adminEmail,
       subject: `[LAUNCHPAD] Strategy Audit Request from ${data.name} — ${data.company}`,
-      html: `
-        <div style="background:#131314;padding:40px 16px;font-family:'Inter',Arial,sans-serif;">
-          <table width="600" cellpadding="0" cellspacing="0" style="margin:0 auto;">
-            <tr>
-              <td style="text-align:center;padding-bottom:24px;">
-                ${imgTag}
-                <div style="width:32px;height:2px;background:#a855f7;margin:8px auto;"></div>
-                <div style="font-size:9px;text-transform:uppercase;letter-spacing:3px;color:#8c90a2;font-weight:600;">by Masterminds</div>
-              </td>
-            </tr>
-            <tr>
-              <td style="background:#1c1b1c;border:1px solid #424656;padding:32px;border-radius:8px;">
-                <div style="margin-bottom:20px;">
-                  <span style="background:rgba(168,85,247,0.1);color:#a855f7;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 10px;border:1px solid rgba(168,85,247,0.2);border-radius:4px;">📋 New Strategy Audit Request</span>
-                </div>
-                <p style="color:#c2c6d9;font-size:14px;line-height:1.6;margin:0 0 16px 0;">A new strategy audit request has been submitted through the landing page:</p>
-                <table width="100%" cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td style="padding:12px 0;border-bottom:1px solid #424656;">
-                      <div style="color:#8c90a2;font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700;">Name</div>
-                      <div style="color:#e5e2e3;font-size:14px;font-weight:600;margin-top:4px;">${data.name}</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:12px 0;border-bottom:1px solid #424656;">
-                      <div style="color:#8c90a2;font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700;">Corporate Email</div>
-                      <div style="color:#e5e2e3;font-size:14px;font-weight:600;margin-top:4px;">${data.email}</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:12px 0;border-bottom:1px solid #424656;">
-                      <div style="color:#8c90a2;font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700;">Company</div>
-                      <div style="color:#e5e2e3;font-size:14px;font-weight:600;margin-top:4px;">${data.company}</div>
-                    </td>
-                  </tr>
-                </table>
-                <div style="background:#131314;border:1px solid #424656;padding:20px;margin-top:16px;border-radius:4px;">
-                  <div style="color:#8c90a2;font-size:9px;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:8px;">Main Challenge</div>
-                  <p style="color:#c2c6d9;font-size:14px;line-height:1.7;margin:0;white-space:pre-wrap;">${data.challenge}</p>
-                </div>
-              </td>
-            </tr>
-          </table>
-        </div>
-      `,
-      ...(attachment ? { attachments: [attachment] } : {}),
+      html,
     });
+
+    if (error) {
+      throw error;
+    }
 
     return { success: true };
   } catch (error) {

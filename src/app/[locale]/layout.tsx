@@ -8,6 +8,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "LAUNCHPAD · Admin Panel",
   description: "Plataforma administrativa y centro de productividad integral de LAUNCHPAD.",
+  metadataBase: new URL(process.env.SITE_ORIGIN || 'https://thelaunchpad.help'),
   icons: {
     icon: '/favicon.jpg',
   },
