@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { createAdmin, deleteAdmin, updateAdmin, resetAdminPassword } from '@/app/actions/settings';
+import EmptyState from '@/components/EmptyState';
 import { PERMISSION_GROUPS, ALL_PERMISSIONS, type Permission } from '@/lib/permissions';
 import Swal from 'sweetalert2';
 import GenericModal from '../productivity/GenericModal';
@@ -225,8 +226,8 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
             <tbody>
               {admins.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-sm py-lg text-center text-muted text-sm">
-                    {t('empty')}
+                  <td colSpan={6} className="text-center">
+                    <EmptyState variant="people" message={t('empty')} compact />
                   </td>
                 </tr>
               ) : (

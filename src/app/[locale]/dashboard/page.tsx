@@ -5,6 +5,7 @@ import { prisma, timedQuery } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { getTranslations } from 'next-intl/server';
 import QuoteActions from '@/components/QuoteActions';
+import EmptyState from '@/components/EmptyState';
 export default async function DashboardPage({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   const t = await getTranslations('Dashboard');
@@ -115,12 +116,10 @@ export default async function DashboardPage({params}: {params: Promise<{locale: 
             </table>
           </div>
         ) : (
-          <div className="text-center py-xl px-sm">
-            <div className="w-[72px] h-[72px] bg-canvas flex items-center justify-center mx-auto mb-xs">
-              <span className="material-icons text-muted text-4xl">description</span>
-            </div>
-            <p className="text-sm text-muted">{t('recentQuotes.noQuotes')}</p>
-          </div>
+          <EmptyState
+              variant="document"
+              message={t('recentQuotes.noQuotes')}
+            />
         )}
       </div>
     </div>

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
+import EmptyState from '@/components/EmptyState';
 import { toggleUserAccess, deleteClientUser, updateClientUser } from '@/app/actions/portal';
 import Swal from 'sweetalert2';
 
@@ -229,9 +230,11 @@ export default function PortalUsersList({ users: initialUsers, clientId }: { use
           )}
         </>
       ) : (
-        <div className="text-center py-xl text-muted">
-          <p className="text-sm">{search ? (t('noSearchResults') || 'No se encontraron usuarios.') : t('noUsers')}</p>
-        </div>
+        <EmptyState
+          variant={search ? 'search' : 'people'}
+          message={search ? (t('noSearchResults') || 'No se encontraron usuarios.') : t('noUsers')}
+          compact
+        />
       )}
 
       {/* Edit User Modal */}

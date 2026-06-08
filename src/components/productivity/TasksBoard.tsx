@@ -6,6 +6,7 @@ import { createTask, updateTask, deleteTask } from '@/app/actions/productivity';
 import { useTranslations, useLocale } from 'next-intl';
 import TaskModal from './TaskModal';
 import Swal from 'sweetalert2';
+import EmptyState from '@/components/EmptyState';
 
 export default function TasksBoard({ initialTasks, projects }: { initialTasks: any[], projects: any[] }) {
   const t = useTranslations('Tasks');
@@ -102,13 +103,7 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
               {tasks.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-xl px-sm text-center">
-                      <div className="flex flex-col items-center">
-                        <div className="w-[72px] h-[72px] bg-canvas border border-hairline flex items-center justify-center mb-xs">
-                          <span className="material-icons text-3xl text-muted">checklist</span>
-                        </div>
-                        <p className="text-title-sm font-medium text-ink">{t('emptyTitle')}</p>
-                        <p className="text-sm text-muted mt-[4px]">{t('emptyMessage')}</p>
-                      </div>
+                    <EmptyState variant="task" title={t('emptyTitle')} message={t('emptyMessage')} compact />
                   </td>
                 </tr>
               ) : (

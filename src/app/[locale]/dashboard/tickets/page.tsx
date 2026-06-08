@@ -9,6 +9,7 @@ import CsvDownloadButton from '@/components/CsvDownloadButton';
 import FilterPills from '@/components/FilterPills';
 import TableSearch from '@/components/TableSearch';
 import DateRangeFilter from '@/components/DateRangeFilter';
+import EmptyState from '@/components/EmptyState';
 
 export default async function AdminTicketsPage({ 
   params, 
@@ -168,13 +169,11 @@ export default async function AdminTicketsPage({
 
       <div className="bg-canvas-elevated border border-hairline overflow-hidden">
         {tickets.length === 0 ? (
-          <div className="text-center py-xl px-sm">
-            <div className="w-[72px] h-[72px] bg-canvas flex items-center justify-center mx-auto mb-xs">
-              <span className="material-icons text-muted text-4xl">inbox</span>
-            </div>
-            <h3 className="text-title-sm font-medium text-ink mb-[4px]">{t('emptyTitle')}</h3>
-            <p className="text-sm text-muted mb-sm max-w-sm mx-auto leading-relaxed">{t('emptyMessage')}</p>
-          </div>
+          <EmptyState
+            variant="inbox"
+            title={t('emptyTitle')}
+            message={t('emptyMessage')}
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">

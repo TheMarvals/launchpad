@@ -8,6 +8,7 @@ import { getTranslations } from 'next-intl/server';
 import SortableHeader from '@/components/SortableHeader';
 import FilterPills from '@/components/FilterPills';
 import TableSearch from '@/components/TableSearch';
+import EmptyState from '@/components/EmptyState';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -167,19 +168,20 @@ export default async function ClientTicketsPage({
 
       <div className="bg-canvas-elevated border border-hairline overflow-hidden">
         {tickets.length === 0 ? (
-          <div className="text-center py-xl px-sm">
-            <div className="w-[72px] h-[72px] bg-canvas flex items-center justify-center mx-auto mb-xs">
-              <span className="material-icons text-muted text-4xl">support_agent</span>
-            </div>
-            <h3 className="text-title-sm font-medium text-ink mb-[4px]">{t('tickets.emptyTitle')}</h3>
-            <p className="text-sm text-muted mb-sm max-w-sm mx-auto leading-relaxed">{t('tickets.emptyMessage')}</p>
-            <Link
-              href="/client-portal/tickets/new"
-              className="text-primary font-medium hover:text-primary/80 transition-colors text-sm"
-            >
-              {t('tickets.emptyAction')}
-            </Link>
-          </div>
+          <EmptyState
+            variant="inbox"
+            title={t('tickets.emptyTitle')}
+            message={t('tickets.emptyMessage')}
+            action={
+              <Link
+                href="/client-portal/tickets/new"
+                className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors inline-flex items-center"
+              >
+                <span className="material-icons text-[18px] mr-xxs">add</span>
+                {t('tickets.emptyAction')}
+              </Link>
+            }
+          />
         ) : (
           <>
             <div className="overflow-x-auto">

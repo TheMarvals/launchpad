@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Link } from '@/i18n/routing';
 import { triggerRemindersNotification } from '@/app/actions/reminders';
 import Swal from 'sweetalert2';
+import EmptyState from '@/components/EmptyState';
 
 interface RemindersBoardProps {
   tasks: any[];
@@ -289,12 +290,9 @@ export default function RemindersBoard({ tasks, events, vpsExpirations, openTick
       </div>
 
       {!hasAnyItems ? (
-        <div className="bg-canvas-elevated border border-hairline p-md text-center">
-          <div className="w-16 h-16 bg-canvas border border-hairline flex items-center justify-center mx-auto mb-sm">
-            <span className="material-icons text-muted text-3xl">check_circle</span>
-          </div>
-          <h3 className="text-title-sm font-medium text-ink uppercase tracking-wider">{t('empty')}</h3>
-        </div>
+        <div className="bg-canvas-elevated border border-hairline">
+        <EmptyState variant="check" title={t('empty')} />
+      </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-sm">
           {sections.map((section) => (

@@ -5,6 +5,7 @@ import { createNote, updateNote, deleteNote } from '@/app/actions/productivity';
 import { useTranslations, useLocale } from 'next-intl';
 import Swal from 'sweetalert2';
 import NoteModal from './NoteModal';
+import EmptyState from '@/components/EmptyState';
 
 interface Note {
   id: string;
@@ -89,12 +90,8 @@ export default function NotesBoard({ initialNotes, currentUserId }: { initialNot
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {notes.length === 0 ? (
-          <div className="col-span-full py-32 text-center bg-canvas-elevated border border-hairline flex flex-col items-center justify-center">
-            <div className="w-20 h-20 bg-canvas border border-hairline flex items-center justify-center mb-6">
-              <span className="material-icons text-4xl text-muted">description</span>
-            </div>
-            <p className="text-ink font-medium uppercase tracking-wider text-lg">{t('emptyTitle')}</p>
-            <p className="text-muted mt-2">{t('emptyMessage')}</p>
+          <div className="col-span-full bg-canvas-elevated border border-hairline">
+            <EmptyState variant="note" title={t('emptyTitle')} message={t('emptyMessage')} />
           </div>
         ) : (
           notes.map((note) => (

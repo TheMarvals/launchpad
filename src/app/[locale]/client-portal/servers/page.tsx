@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { getTranslations } from 'next-intl/server';
 import ServerCard from '@/components/ServerCard';
+import EmptyState from '@/components/EmptyState';
 
 export default async function ClientServersPage() {
   const session = await auth();
@@ -28,9 +29,8 @@ export default async function ClientServersPage() {
         ))}
 
         {servers.length === 0 && (
-          <div className="col-span-full bg-canvas-elevated border border-dashed border-hairline p-lg text-center text-muted">
-            <span className="material-icons text-5xl mb-xs opacity-20">cloud_off</span>
-            <p className="text-body">{t('servers.empty')}</p>
+          <div className="col-span-full bg-canvas-elevated border border-dashed border-hairline">
+            <EmptyState variant="server" message={t('servers.empty')} />
           </div>
         )}
       </div>

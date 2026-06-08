@@ -10,7 +10,8 @@ export const metadata: Metadata = {
   description: "Plataforma administrativa y centro de productividad integral de LAUNCHPAD.",
   metadataBase: new URL(process.env.SITE_ORIGIN || 'https://thelaunchpad.help'),
   icons: {
-    icon: '/favicon.jpg',
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
   },
 };
 

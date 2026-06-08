@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { getContactSubmissions, markAsRead, markAllAsRead, deleteContactSubmission } from '@/app/actions/contacts';
 import Swal from 'sweetalert2';
+import EmptyState from '@/components/EmptyState';
 
 type Submission = {
   id: string;
@@ -165,7 +166,7 @@ export default function ContactsPage() {
           {loading ? (
             <div className="text-center py-xl text-muted text-sm">{t('loading')}</div>
           ) : submissions.length === 0 ? (
-            <div className="text-center py-xl text-muted text-sm">{t('empty')}</div>
+            <EmptyState variant="mail" message={t('empty')} compact />
           ) : (
             sortedSubmissions.map((sub) => (
               <button

@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server';
 import CsvDownloadButton from '@/components/CsvDownloadButton';
 import FilterPills from '@/components/FilterPills';
 import DateRangeFilter from '@/components/DateRangeFilter';
+import EmptyState from '@/components/EmptyState';
 
 const ITEMS_PER_PAGE = 15;
 
@@ -291,12 +292,7 @@ export default async function AuditLogsPage({
             )}
           </>
         ) : (
-          <div className="text-center py-xl px-sm">
-            <div className="w-[72px] h-[72px] bg-canvas flex items-center justify-center mx-auto mb-xs">
-              <span className="material-icons text-muted text-4xl">policy</span>
-            </div>
-            <p className="text-sm text-muted max-w-sm mx-auto leading-relaxed">{t('noLogs')}</p>
-          </div>
+          <EmptyState variant="shield" message={t('noLogs')} />
         )}
       </div>
     </div>

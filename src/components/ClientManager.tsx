@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient, updateClient, deleteClient } from '@/app/actions/clients';
 import { useTranslations } from 'next-intl';
+import EmptyState from '@/components/EmptyState';
 
 interface Client {
   id: string;
@@ -341,12 +342,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
               </tbody>
             </table>
           ) : (
-            <div className="text-center py-xl px-sm">
-              <div className="w-[72px] h-[72px] bg-canvas flex items-center justify-center mx-auto mb-xs">
-                <span className="material-icons text-muted text-4xl">people</span>
-              </div>
-              <p className="text-sm text-muted">{t('noClients')}</p>
-            </div>
+            <EmptyState variant="people" message={t('noClients')} />
           )}
         </div>
       </div>

@@ -6,6 +6,7 @@ import { createProject, deleteProject } from '@/app/actions/productivity';
 import { useTranslations, useLocale } from 'next-intl';
 import ProjectModal from './ProjectModal';
 import Swal from 'sweetalert2';
+import EmptyState from '@/components/EmptyState';
 
 export default function ProjectsBoard({ initialProjects }: { initialProjects: any[] }) {
   const t = useTranslations('Projects');
@@ -68,12 +69,8 @@ export default function ProjectsBoard({ initialProjects }: { initialProjects: an
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {projects.length === 0 ? (
-          <div className="col-span-full py-32 text-center bg-canvas-elevated border border-hairline">
-            <div className="w-24 h-24 bg-canvas border border-hairline flex items-center justify-center mx-auto mb-6">
-              <span className="material-icons text-4xl text-muted">folder_off</span>
-            </div>
-            <p className="text-ink font-medium uppercase tracking-wider text-lg">{t('emptyTitle')}</p>
-            <p className="text-muted text-sm mt-1">{t('emptyMessage')}</p>
+          <div className="col-span-full bg-canvas-elevated border border-hairline">
+            <EmptyState variant="folder" title={t('emptyTitle')} message={t('emptyMessage')} />
           </div>
         ) : (
           projects.map((project) => (

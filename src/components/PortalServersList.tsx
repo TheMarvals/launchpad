@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
+import EmptyState from '@/components/EmptyState';
 import { deleteVpsService } from '@/app/actions/portal';
 import VpsEditModal from './VpsEditModal';
 import Swal from 'sweetalert2';
@@ -182,9 +183,11 @@ export default function PortalServersList({ servers: initialServers }: { servers
           )}
         </>
       ) : (
-        <div className="text-center py-xl text-muted">
-          <p className="text-sm">{search ? (t('noSearchResultsServers') || 'No se encontraron servidores.') : t('noServers')}</p>
-        </div>
+        <EmptyState
+          variant={search ? 'search' : 'server'}
+          message={search ? (t('noSearchResultsServers') || 'No se encontraron servidores.') : t('noServers')}
+          compact
+        />
       )}
     </div>
   );

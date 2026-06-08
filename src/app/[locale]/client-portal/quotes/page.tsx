@@ -2,6 +2,7 @@ import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { getTranslations } from 'next-intl/server';
+import EmptyState from '@/components/EmptyState';
 
 export default async function ClientQuotesPage() {
   const session = await auth();
@@ -66,10 +67,10 @@ export default async function ClientQuotesPage() {
             </tbody>
           </table>
         ) : (
-          <div className="text-center py-xl text-muted">
-            <span className="material-icons text-5xl mb-xs block opacity-30 mx-auto">receipt_long</span>
-            {t('quotes.empty')}
-          </div>
+          <EmptyState
+              variant="document"
+              message={t('quotes.empty')}
+            />
         )}
       </div>
     </div>

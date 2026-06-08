@@ -2,6 +2,7 @@ import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import CsvDownloadButton from '@/components/CsvDownloadButton';
+import EmptyState from '@/components/EmptyState';
 
 export default async function ProductsPage({
   params,
@@ -75,10 +76,8 @@ export default async function ProductsPage({
             </table>
           </div>
         ) : (
-          <div className="text-center py-xl px-sm">
-            <span className="material-icons text-5xl mb-xs opacity-20 text-muted mx-auto block">inventory_2</span>
-            <p className="text-body text-muted">{t('inDevelopment')}</p>
-            <p className="text-sm text-muted/70 mt-xxs">{t('manualAdd')}</p>
+          <div className="bg-canvas-elevated border border-hairline">
+            <EmptyState variant="product" title={t('inDevelopment')} message={t('manualAdd')} />
           </div>
         )}
       </div>

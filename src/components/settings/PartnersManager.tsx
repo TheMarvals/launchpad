@@ -8,6 +8,7 @@ import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import Swal from 'sweetalert2';
+import EmptyState from '@/components/EmptyState';
 
 interface Partner {
   id: string;
@@ -328,12 +329,7 @@ export default function PartnersManager() {
       {loading ? (
         <div className="text-center py-xl text-muted">{t('loading')}</div>
       ) : partners.length === 0 ? (
-        <div className="text-center py-xl bg-canvas-elevated border border-hairline">
-          <div className="w-[72px] h-[72px] bg-canvas flex items-center justify-center mx-auto mb-xs">
-            <span className="material-icons text-muted text-4xl">business</span>
-          </div>
-          <p className="text-sm text-muted">{t('empty')}</p>
-        </div>
+        <EmptyState variant="people" message={t('empty')} />
       ) : (
         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={partners.map(p => p.id)} strategy={verticalListSortingStrategy}>

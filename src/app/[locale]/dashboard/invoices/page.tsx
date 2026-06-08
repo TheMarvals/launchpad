@@ -8,6 +8,7 @@ import SortableHeader from '@/components/SortableHeader';
 import FilterPills from '@/components/FilterPills';
 import TableSearch from '@/components/TableSearch';
 import DateRangeFilter from '@/components/DateRangeFilter';
+import EmptyState from '@/components/EmptyState';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -161,8 +162,8 @@ export default async function InvoicesPage({
             <tbody className="divide-y divide-hairline">
               {invoices.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-xl text-center text-body text-muted">
-                    {t('noInvoices')}
+                  <td colSpan={7} className="text-center">
+                    <EmptyState variant="document" message={t('noInvoices')} compact />
                   </td>
                 </tr>
               ) : (
