@@ -22,8 +22,14 @@ export async function createQuote(formData: any) {
   const montoIva = Math.round(montoNeto * (percent / 100));
   const montoTotal = montoNeto + montoIva + fee;
 
+  // Determine next correlativo: start from 100 if none exists
+  const maxRes = await prisma.quote.aggregate({ _max: { correlativo: true } });
+  const currentMax = (maxRes._max && maxRes._max.correlativo) ? maxRes._max.correlativo : 0;
+  const nextCorrelativo = currentMax >= 100 ? currentMax + 1 : 100;
+
   const quote = await prisma.quote.create({
     data: {
+      correlativo: nextCorrelativo,
       clientId,
       fechaValidez: new Date(fechaValidez),
       notasCondiciones,
