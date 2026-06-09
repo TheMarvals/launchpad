@@ -10,8 +10,8 @@ interface QuotePDFProps {
 
 // Available content height in mm for each page type
 // Page = 297mm. We subtract header, footer, and padding.
-const FIRST_PAGE_CONTENT_MM = 155;  // 297 - bigHeader(~48) - footer(~22) - clientInfo(~32) - margins(~40)
-const OTHER_PAGE_CONTENT_MM = 220;  // 297 - smallHeader(~22) - footer(~22) - margins(~33)
+const FIRST_PAGE_CONTENT_MM = 190;  // 297 - bigHeader(~55) - footer(~22) - clientInfo(~25) - margins(~20)
+const OTHER_PAGE_CONTENT_MM = 250;  // 297 - smallHeader(~15) - footer(~22) - margins(~10)
 
 const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate, companyProfile }) => {
   const t = useTranslations('PDF');
