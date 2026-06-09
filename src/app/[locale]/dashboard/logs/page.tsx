@@ -177,7 +177,8 @@ export default async function AuditLogsPage({
       <div className="bg-canvas-elevated border border-hairline overflow-hidden">
         {logs.length > 0 ? (
           <>
-            <div className="overflow-x-auto">
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-canvas border-b border-hairline">
@@ -235,6 +236,46 @@ export default async function AuditLogsPage({
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-hairline">
+              {logs.map((log, index) => (
+                <div key={log.id} className="animate-fade-in px-sm py-xs space-y-xxs hover:bg-canvas/50 transition-colors" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="flex items-start justify-between gap-xxs">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-ink text-sm">{log.user.name}</p>
+                      <p className="text-xs text-muted">{log.server.name}</p>
+                    </div>
+                    {log.status === 'SUCCESS' ? (
+                      <span className="shrink-0 px-xxs py-[2px] text-caption-uppercase font-bold bg-semantic-success/10 text-semantic-success border border-semantic-success/30 text-[10px]">
+                        {t('status.success')}
+                      </span>
+                    ) : log.status === 'PENDING' ? (
+                      <span className="shrink-0 px-xxs py-[2px] text-caption-uppercase font-bold bg-accent-yellow/10 text-accent-yellow border border-accent-yellow/30 text-[10px]">
+                        {t('status.pending')}
+                      </span>
+                    ) : (
+                      <span className="shrink-0 px-xxs py-[2px] text-caption-uppercase font-bold bg-semantic-warning/10 text-semantic-warning border border-semantic-warning/30 text-[10px]" title={log.details || ''}>
+                        {t('status.failed')}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted">
+                    <span>{log.user.email}</span>
+                    <span className="px-xxs py-[2px] text-caption-uppercase font-semibold border bg-canvas-elevated text-muted border-hairline text-[10px]">
+                      {log.action}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] text-muted">
+                    <span>{new Date(log.createdAt).toLocaleString(locale, {
+                      day: '2-digit', month: '2-digit',
+                      hour: '2-digit', minute: '2-digit'
+                    })}</span>
+                    <span className="text-muted">{log.server.ipAddress || log.server.providerId}</span>
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Pagination */}

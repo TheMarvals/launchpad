@@ -344,11 +344,23 @@ input:focus, select:focus, textarea:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
   .empty-state-root,
   .empty-state-svg,
   .empty-state-action,
   .animate-pulse-dot,
-  .animate-pulse-ring {
+  .animate-pulse-ring,
+  .animate-fade-in,
+  .animate-fade-in-up,
+  .animate-fade-in-scale {
     animation: none !important;
     transition: none !important;
     transform: none !important;

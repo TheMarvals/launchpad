@@ -175,34 +175,77 @@ export default async function AdminTicketsPage({
             message={t('emptyMessage')}
           />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-canvas border-b border-hairline group">
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.client')} field="client" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/tickets" /></th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.subject')} field="subject" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/tickets" /></th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={locale === 'es' ? 'Prioridad' : 'Priority'} field="priority" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/tickets" /></th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.status')} field="status" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/tickets" /></th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.updated')} field="updatedAt" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/tickets" /></th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-right">{t('table.actions')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-hairline">
-                {tickets.map((ticket) => (
-                  <tr key={ticket.id} className="hover:bg-canvas/80 transition-colors group">
-                    <td className="px-sm py-xs font-medium text-ink text-sm">
-                      {ticket.client.razonSocial}
-                    </td>
-                    <td className="px-sm py-xs">
-                      <div className="flex flex-col">
-                        <Link href={`/dashboard/tickets/${ticket.id}`} className="font-medium text-ink hover:text-primary transition-colors text-sm">
-                          {ticket.subject}
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-canvas border-b border-hairline group">
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.client')} field="client" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/tickets" /></th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.subject')} field="subject" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/tickets" /></th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={locale === 'es' ? 'Prioridad' : 'Priority'} field="priority" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/tickets" /></th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.status')} field="status" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/tickets" /></th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.updated')} field="updatedAt" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/tickets" /></th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-right">{t('table.actions')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-hairline">
+                  {tickets.map((ticket) => (
+                    <tr key={ticket.id} className="hover:bg-canvas/80 transition-colors group">
+                      <td className="px-sm py-xs font-medium text-ink text-sm">
+                        {ticket.client.razonSocial}
+                      </td>
+                      <td className="px-sm py-xs">
+                        <div className="flex flex-col">
+                          <Link href={`/dashboard/tickets/${ticket.id}`} className="font-medium text-ink hover:text-primary transition-colors text-sm">
+                            {ticket.subject}
+                          </Link>
+                          <span className="text-caption text-muted font-mono mt-[2px]">{t('table.id')}: {ticket.id.split('-')[0]}</span>
+                        </div>
+                      </td>
+                      <td className="px-sm py-xs">
+                        <span className={`inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border ${
+                          ticket.priority === 'URGENT' ? 'border-semantic-danger/30 bg-semantic-danger/10 text-semantic-danger' :
+                          ticket.priority === 'HIGH' ? 'border-semantic-warning/30 bg-semantic-warning/10 text-semantic-warning' :
+                          ticket.priority === 'MEDIUM' ? 'border-accent-yellow/30 bg-accent-yellow/10 text-accent-yellow' :
+                          'border-hairline bg-canvas-elevated text-muted'
+                        }`}>
+                          {t(`detail.priority.${ticket.priority}`)}
+                        </span>
+                      </td>
+                      <td className="px-sm py-xs">
+                        <span className={`inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border ${getStatusColor(ticket.status)}`}>
+                          {getStatusText(ticket.status)}
+                        </span>
+                      </td>
+                      <td className="px-sm py-xs text-body text-muted">
+                        {format(new Date(ticket.updatedAt), locale === 'es' ? "d 'de' MMM, HH:mm" : "MMM d, HH:mm", { 
+                          locale: locale === 'es' ? es : enUS 
+                        })}
+                      </td>
+                      <td className="px-sm py-xs text-right">
+                        <Link href={`/dashboard/tickets/${ticket.id}`} className="inline-flex items-center justify-center p-xxs text-muted hover:text-primary transition-all opacity-0 group-hover:opacity-100">
+                          <span className="material-icons text-[20px]">chevron_right</span>
                         </Link>
-                        <span className="text-caption text-muted font-mono mt-[2px]">{t('table.id')}: {ticket.id.split('-')[0]}</span>
-                      </div>
-                    </td>
-                    <td className="px-sm py-xs">
-                      <span className={`inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border ${
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-hairline">
+              {tickets.map((ticket, index) => (
+                <div key={ticket.id} className="animate-fade-in px-sm py-xs space-y-xxs hover:bg-canvas/50 transition-colors" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="flex items-start justify-between gap-xxs">
+                    <div className="min-w-0 flex-1">
+                      <Link href={`/dashboard/tickets/${ticket.id}`} className="font-medium text-ink text-sm hover:text-primary transition-colors">
+                        {ticket.subject}
+                      </Link>
+                      <p className="text-xs text-muted font-mono mt-[1px]">{t('table.id')}: {ticket.id.split('-')[0]}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-[2px] shrink-0">
+                      <span className={`inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border text-[10px] ${
                         ticket.priority === 'URGENT' ? 'border-semantic-danger/30 bg-semantic-danger/10 text-semantic-danger' :
                         ticket.priority === 'HIGH' ? 'border-semantic-warning/30 bg-semantic-warning/10 text-semantic-warning' :
                         ticket.priority === 'MEDIUM' ? 'border-accent-yellow/30 bg-accent-yellow/10 text-accent-yellow' :
@@ -210,27 +253,22 @@ export default async function AdminTicketsPage({
                       }`}>
                         {t(`detail.priority.${ticket.priority}`)}
                       </span>
-                    </td>
-                    <td className="px-sm py-xs">
-                      <span className={`inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border ${getStatusColor(ticket.status)}`}>
+                      <span className={`inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border text-[10px] ${getStatusColor(ticket.status)}`}>
                         {getStatusText(ticket.status)}
                       </span>
-                    </td>
-                    <td className="px-sm py-xs text-body text-muted">
-                      {format(new Date(ticket.updatedAt), locale === 'es' ? "d 'de' MMM, HH:mm" : "MMM d, HH:mm", { 
-                        locale: locale === 'es' ? es : enUS 
-                      })}
-                    </td>
-                    <td className="px-sm py-xs text-right">
-                      <Link href={`/dashboard/tickets/${ticket.id}`} className="inline-flex items-center justify-center p-xxs text-muted hover:text-primary transition-all opacity-0 group-hover:opacity-100">
-                        <span className="material-icons text-[20px]">chevron_right</span>
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                  </div>
+                  <p className="text-ink text-sm font-medium">{ticket.client.razonSocial}</p>
+                  <div className="flex items-center justify-between text-xs text-muted">
+                    <span>{format(new Date(ticket.updatedAt), locale === 'es' ? "d 'de' MMM, HH:mm" : "MMM d, HH:mm", { locale: locale === 'es' ? es : enUS })}</span>
+                    <Link href={`/dashboard/tickets/${ticket.id}`} className="text-primary hover:text-primary-hover font-semibold text-xs uppercase tracking-wider">
+                      {t('table.view')}
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient, updateClient, deleteClient } from '@/app/actions/clients';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import EmptyState from '@/components/EmptyState';
 
 interface Client {
@@ -38,6 +38,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
   const t = useTranslations('Clients');
   const tCommon = useTranslations('Dashboard.recentQuotes');
   const router = useRouter();
+  const locale = useLocale();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -263,88 +264,139 @@ export default function ClientManager({ clients }: ClientManagerProps) {
         </div>
       )}
 
-      {/* Table */}
+      {/* Table / Mobile cards */}
       <div className="bg-canvas-elevated border border-hairline overflow-hidden">
-        <div className="overflow-x-auto">
-          {clients.length > 0 ? (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-canvas border-b border-hairline">
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.razonSocial')}</th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.rut')}</th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.giro')}</th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.contact')}</th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.quotes')}</th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-right">{t('table.actions')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-hairline">
-                {clients.map((client) => (
-                  <tr key={client.id} className="hover:bg-canvas/80 transition-colors group">
-                    <td className="px-sm py-xs font-medium text-ink text-sm">{client.razonSocial}</td>
-                    <td className="px-sm py-xs text-body text-muted">{client.rut}</td>
-                    <td className="px-sm py-xs text-body text-muted">{client.giro}</td>
-                    <td className="px-sm py-xs">
-                      <div className="text-sm text-ink">{client.email || '—'}</div>
-                      <div className="text-xs text-muted">{client.telefono || ''}</div>
-                    </td>
-                    <td className="px-sm py-xs">
-                      <span className="inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border border-hairline bg-canvas-elevated text-muted">
-                        {client._count.quotes}
-                      </span>
-                    </td>
-                    <td className="px-sm py-xs text-right">
-                      <div className="flex items-center justify-end space-x-sm opacity-0 group-hover:opacity-100 transition-all">
-                        <button
-                          onClick={() => router.push(`/dashboard/clients/${client.id}`)}
-                          className="p-xxs text-muted hover:text-primary transition-colors"
-                          title="Portal & VPS"
-                        >
-                          <span className="material-icons text-[18px]">cloud</span>
-                        </button>
-                        <button
-                          onClick={() => openEdit(client)}
-                          className="p-xxs text-muted hover:text-primary transition-colors"
-                          title={tCommon('edit')}
-                        >
-                          <span className="material-icons text-[18px]">edit</span>
-                        </button>
-
-                        {deletingId === client.id ? (
-                          <div className="flex items-center space-x-xxs bg-semantic-danger/10 border border-semantic-danger/20 rounded-none px-xxs py-xxs">
-                            <span className="text-[10px] font-bold text-semantic-danger uppercase tracking-wider whitespace-nowrap">{tCommon('confirmDelete')}</span>
-                            <button
-                              onClick={() => handleDelete(client.id)}
-                              className="text-[10px] font-bold text-white bg-semantic-danger hover:bg-semantic-danger/80 px-xxs py-[2px] rounded-none transition-colors"
-                            >
-                              {tCommon('yes')}
-                            </button>
-                            <button
-                              onClick={() => setDeletingId(null)}
-                              className="text-[10px] font-bold text-semantic-danger hover:text-semantic-danger/80 px-xxs py-[2px] transition-colors"
-                            >
-                              {tCommon('no')}
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => setDeletingId(client.id)}
-                            className="p-xxs text-muted hover:text-semantic-danger transition-colors"
-                            title={tCommon('delete')}
-                          >
-                            <span className="material-icons text-[18px]">delete_outline</span>
-                          </button>
-                        )}
-                      </div>
-                    </td>
+        {clients.length > 0 ? (
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-canvas border-b border-hairline">
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.razonSocial')}</th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.rut')}</th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.giro')}</th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.contact')}</th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{t('table.quotes')}</th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-right">{t('table.actions')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <EmptyState variant="people" message={t('noClients')} />
-          )}
-        </div>
+                </thead>
+                <tbody className="divide-y divide-hairline">
+                  {clients.map((client) => (
+                    <tr key={client.id} className="hover:bg-canvas/80 transition-colors group">
+                      <td className="px-sm py-xs font-medium text-ink text-sm">{client.razonSocial}</td>
+                      <td className="px-sm py-xs text-body text-muted">{client.rut}</td>
+                      <td className="px-sm py-xs text-body text-muted">{client.giro}</td>
+                      <td className="px-sm py-xs">
+                        <div className="text-sm text-ink">{client.email || '—'}</div>
+                        <div className="text-xs text-muted">{client.telefono || ''}</div>
+                      </td>
+                        <td className="px-sm py-xs">
+                        <span className="inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border border-hairline bg-canvas-elevated text-muted">
+                          {client._count.quotes}
+                        </span>
+                      </td>
+                      <td className="px-sm py-xs text-right">
+                        <div className="flex items-center justify-end space-x-sm opacity-0 group-hover:opacity-100 transition-all">
+                          <button
+                            onClick={() => router.push(`/dashboard/clients/${client.id}`)}
+                            className="p-xxs text-muted hover:text-primary transition-colors"
+                            title="Portal & VPS"
+                          >
+                            <span className="material-icons text-[18px]">cloud</span>
+                          </button>
+                          <button
+                            onClick={() => openEdit(client)}
+                            className="p-xxs text-muted hover:text-primary transition-colors"
+                            title={tCommon('edit')}
+                          >
+                            <span className="material-icons text-[18px]">edit</span>
+                          </button>
+
+                          {deletingId === client.id ? (
+                            <div className="flex items-center space-x-xxs bg-semantic-danger/10 border border-semantic-danger/20 rounded-none px-xxs py-xxs">
+                              <span className="text-[10px] font-bold text-semantic-danger uppercase tracking-wider whitespace-nowrap">{tCommon('confirmDelete')}</span>
+                              <button
+                                onClick={() => handleDelete(client.id)}
+                                className="text-[10px] font-bold text-white bg-semantic-danger hover:bg-semantic-danger/80 px-xxs py-[2px] rounded-none transition-colors"
+                              >
+                                {tCommon('yes')}
+                              </button>
+                              <button
+                                onClick={() => setDeletingId(null)}
+                                className="text-[10px] font-bold text-semantic-danger hover:text-semantic-danger/80 px-xxs py-[2px] transition-colors"
+                              >
+                                {tCommon('no')}
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setDeletingId(client.id)}
+                              className="p-xxs text-muted hover:text-semantic-danger transition-colors"
+                              title={tCommon('delete')}
+                            >
+                              <span className="material-icons text-[18px]">delete_outline</span>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-hairline">
+              {clients.map((client, index) => (
+                <div key={client.id} className="animate-fade-in px-sm py-xs space-y-xxs hover:bg-canvas/50 transition-colors" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="flex items-start justify-between gap-xxs">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-ink text-sm">{client.razonSocial}</p>
+                      <p className="text-xs text-muted">{client.rut}</p>
+                    </div>
+                    <span className="shrink-0 inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border border-hairline bg-canvas-elevated text-muted text-[10px]">
+                      {client._count.quotes} {locale === 'es' ? 'cotiz.' : 'quotes'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted">{client.giro}</p>
+                  <div className="flex items-center justify-between text-xs">
+                    <div>
+                      <p className="text-ink">{client.email || '—'}</p>
+                      <p className="text-muted">{client.telefono || ''}</p>
+                    </div>
+                    <div className="flex items-center gap-xxs">
+                      <button
+                        onClick={() => router.push(`/dashboard/clients/${client.id}`)}
+                        className="p-xxs text-muted hover:text-primary transition-colors"
+                        title="Portal & VPS"
+                      >
+                        <span className="material-icons text-[18px]">cloud</span>
+                      </button>
+                      <button
+                        onClick={() => openEdit(client)}
+                        className="p-xxs text-muted hover:text-primary transition-colors"
+                      >
+                        <span className="material-icons text-[18px]">edit</span>
+                      </button>
+                      {deletingId === client.id ? (
+                        <div className="flex items-center gap-[2px]">
+                          <button onClick={() => handleDelete(client.id)} className="text-[9px] font-bold text-semantic-danger uppercase tracking-wider">{tCommon('yes')}</button>
+                          <button onClick={() => setDeletingId(null)} className="text-[9px] font-bold text-muted uppercase tracking-wider">{tCommon('no')}</button>
+                        </div>
+                      ) : (
+                        <button onClick={() => setDeletingId(client.id)} className="p-xxs text-muted hover:text-semantic-danger transition-colors">
+                          <span className="material-icons text-[18px]">delete_outline</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <EmptyState variant="people" message={t('noClients')} />
+        )}
       </div>
     </div>
   );

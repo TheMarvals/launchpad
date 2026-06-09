@@ -31,11 +31,30 @@ export default function ShowcaseCarousel({ projects }: Props) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
+  const [sectionVisible, setSectionVisible] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   // Intersection Observer for staggered card animations
+  useEffect(() => {
+    // Observe section entrance
+    if (sectionRef.current) {
+      const sectionObserver = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setSectionVisible(true);
+            sectionObserver.unobserve(entry.target);
+          }
+        },
+        { threshold: 0.1 }
+      );
+      sectionObserver.observe(sectionRef.current);
+      return () => sectionObserver.disconnect();
+    }
+  }, []);
+
   useEffect(() => {
     if (projects.length === 0) return;
     const observer = new IntersectionObserver(
@@ -190,7 +209,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
   };
 
   return (
-    <section className="px-0 md:px-lg py-xl md:py-xxl border-t border-hairline relative">
+    <section ref={sectionRef} className={`px-0 md:px-lg py-xl md:py-xxl border-t border-hairline relative transition-all duration-700 ease-out ${sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
       {/* Ambient section glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(0,98,255,0.12) 0%, transparent 70%)' }} />
 
@@ -256,7 +275,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
                     ref={(el) => { cardsRef.current[idx] = el; }}
                     data-index={idx}
                     onClick={() => openProject(project)}
-                    className={`group relative w-[280px] md:w-[320px] flex-shrink-0 text-left bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] transition-all duration-400 ease-out cursor-pointer rounded-xl ${
+                    className={`group relative w-[280px] md:w-[320px] flex-shrink-0 text-left bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] transition-all duration-400 ease-out cursor-pointer rounded-xl hover:scale-[1.02] ${
                       isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                     }`}
                     style={{

@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     icon: '/favicon.png',
     shortcut: '/favicon.png',
   },
+
 };
 
 export default async function RootLayout({

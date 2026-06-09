@@ -10,7 +10,7 @@ import {
   Link,
 } from '@react-email/components';
 import * as React from 'react';
-import { theme, main, container, header, logo, separator, subtitle, card, footer, footerText, footerNote } from './StrategyAuditEmail';
+import { theme, main, container, header, logo, separator, subtitle, card, footer, footerText, footerNote, darkModeStyles } from './StrategyAuditEmail';
 
 interface TicketNotificationEmailProps {
   type: 'NEW_TICKET' | 'TICKET_REPLY';
@@ -49,7 +49,11 @@ export const TicketNotificationEmail = ({
 
   return (
     <Html>
-      <Head />
+      <Head>
+        <meta name="color-scheme" content="dark" />
+        <meta name="supported-color-schemes" content="dark" />
+        <style>{darkModeStyles}</style>
+      </Head>
       <Preview>{isNew ? `[${t(locale, 'Nuevo Ticket', 'New Ticket')}] ${subject}` : `Re: ${subject}`}</Preview>
       <Body style={main}>
         <Container style={container}>

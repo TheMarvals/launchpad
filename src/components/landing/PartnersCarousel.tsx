@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 interface Partner {
@@ -16,6 +16,8 @@ interface Props {
 
 export default function PartnersCarousel({ partners }: Props) {
   const t = useTranslations('Landing');
+  const [sectionVisible, setSectionVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Infinite auto-scroll
@@ -54,13 +56,30 @@ export default function PartnersCarousel({ partners }: Props) {
     };
   }, [partners.length]);
 
+  // Intersection Observer for section entrance
+  useEffect(() => {
+    if (sectionRef.current) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setSectionVisible(true);
+            observer.unobserve(entry.target);
+          }
+        },
+        { threshold: 0.1 }
+      );
+      observer.observe(sectionRef.current);
+      return () => observer.disconnect();
+    }
+  }, []);
+
   if (partners.length === 0) return null;
 
   // Duplicate partners for seamless infinite scroll
   const duplicatedPartners = [...partners, ...partners];
 
   return (
-    <section className="py-xl md:py-xxl border-t border-hairline relative overflow-hidden">
+    <section ref={sectionRef} className={`py-xl md:py-xxl border-t border-hairline relative overflow-hidden transition-all duration-700 ease-out ${sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
       {/* Ambient glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[200px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(168,85,247,0.08) 0%, transparent 70%)' }} />
 
@@ -97,7 +116,7 @@ export default function PartnersCarousel({ partners }: Props) {
                   href={partner.websiteUrl || undefined}
                   target={partner.websiteUrl ? '_blank' : undefined}
                   rel={partner.websiteUrl ? 'noopener noreferrer' : undefined}
-                  className="group flex-shrink-0 transition-all duration-300 hover:scale-110"
+                  className="group flex-shrink-0 transition-all duration-300 hover:scale-105"
                   title={partner.name}
                 >
                   <div className="w-[120px] h-[60px] md:w-[160px] md:h-[70px] flex items-center justify-center">

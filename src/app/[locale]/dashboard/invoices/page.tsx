@@ -146,7 +146,9 @@ export default async function InvoicesPage({
       </div>
 
       <div className="bg-canvas-elevated border border-hairline overflow-hidden">
-        <div className="overflow-x-auto">
+        <>
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-canvas border-b border-hairline group">
@@ -209,6 +211,45 @@ export default async function InvoicesPage({
             </tbody>
           </table>
         </div>
+
+        {/* Mobile cards */}
+        <div className="sm:hidden divide-y divide-hairline">
+          {invoices.length === 0 ? (
+            <div className="py-xl">
+              <EmptyState variant="document" message={t('noInvoices')} compact />
+            </div>
+          ) : (
+            invoices.map((invoice, index) => (
+              <div key={invoice.id} className="animate-fade-in px-sm py-xs space-y-xxs hover:bg-canvas/50 transition-colors" style={{ animationDelay: `${index * 0.1}s` }}>
+                <div className="flex items-start justify-between gap-xxs">
+                  <div className="min-w-0 flex-1">
+                    <span className="font-medium text-ink text-sm">Nº {String(invoice.correlativo).padStart(4, '0')}</span>
+                    <p className="text-xs text-muted truncate">{invoice.client.rut}</p>
+                  </div>
+                  <span className={`shrink-0 inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border text-[10px] ${
+                    invoice.estado === 'Pagada' ? 'border-semantic-success/30 bg-semantic-success/10 text-semantic-success' : 
+                    invoice.estado === 'Anulada' ? 'border-hairline bg-canvas-elevated text-muted' : 
+                    'border-semantic-warning/30 bg-semantic-warning/10 text-semantic-warning'
+                  }`}>
+                    {t(`status.${invoice.estado}`)}
+                  </span>
+                </div>
+                <p className="text-ink text-sm font-medium">{invoice.client.razonSocial}</p>
+                <div className="flex items-center justify-between text-xs text-muted">
+                  <span>{new Date(invoice.fechaEmision).toLocaleDateString(locale)}</span>
+                  <span className={`font-medium ${new Date(invoice.fechaVencimiento) < new Date() && invoice.estado === 'Pendiente' ? 'text-semantic-danger' : 'text-ink'}`}>
+                    ${invoice.montoTotal.toLocaleString(locale)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-muted">
+                  <span>{locale === 'es' ? 'Vence:' : 'Due:'} {new Date(invoice.fechaVencimiento).toLocaleDateString(locale)}</span>
+                  <InvoiceActions invoice={invoice} />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        </>
 
         {/* Pagination */}
         {totalPages > 1 && (

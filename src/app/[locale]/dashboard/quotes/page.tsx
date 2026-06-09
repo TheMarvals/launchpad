@@ -148,55 +148,86 @@ export default async function QuotesListPage({ searchParams, params }: { searchP
 
       <div className="bg-canvas-elevated border border-hairline overflow-hidden">
         {quotes.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-canvas border-b border-hairline group">
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.number')} field="correlativo" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.client')} field="client" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.issueDate')} field="fechaEmision" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.validity')} field="fechaValidez" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.total')} field="montoTotal" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.status')} field="estado" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-right">{t('table.actions')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-hairline">
-                {quotes.map((quote) => (
-                  <tr key={quote.id} className="hover:bg-canvas/80 transition-colors group">
-                    <td className="px-sm py-xs font-medium text-ink">
-                      Nº {String(quote.correlativo).padStart(4, '0')}
-                    </td>
-                    <td className="px-sm py-xs">
-                      <div className="font-medium text-ink text-sm">{quote.client.razonSocial}</div>
-                      <div className="text-xs text-muted">{quote.client.rut}</div>
-                    </td>
-                    <td className="px-sm py-xs text-body text-muted">
-                      {new Date(quote.fechaEmision).toLocaleDateString(locale)}
-                    </td>
-                    <td className="px-sm py-xs text-body text-muted">
-                      {new Date(quote.fechaValidez).toLocaleDateString(locale)}
-                    </td>
-                    <td className="px-sm py-xs font-medium text-ink">
-                      ${quote.montoTotal.toLocaleString(locale)}
-                    </td>
-                    <td className="px-sm py-xs">
-                      <span className={`inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border ${
-                        quote.estado === 'Aceptada' ? 'border-semantic-success/30 bg-semantic-success/10 text-semantic-success' :
-                        quote.estado === 'Borrador' ? 'border-hairline bg-canvas-elevated text-muted' :
-                        'border-semantic-info/30 bg-semantic-info/10 text-semantic-info'
-                      }`}>
-                        {quote.estado}
-                      </span>
-                    </td>
-                    <td className="px-sm py-xs text-right">
-                      <QuoteActions quoteId={quote.id} />
-                    </td>
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-canvas border-b border-hairline group">
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.number')} field="correlativo" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.client')} field="client" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.issueDate')} field="fechaEmision" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.validity')} field="fechaValidez" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.total')} field="montoTotal" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold"><SortableHeader label={t('table.status')} field="estado" currentSort={sortField} currentDir={sortDir} basePath="/dashboard/quotes" /></th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-right">{t('table.actions')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-hairline">
+                  {quotes.map((quote) => (
+                    <tr key={quote.id} className="hover:bg-canvas/80 transition-colors group">
+                      <td className="px-sm py-xs font-medium text-ink">
+                        Nº {String(quote.correlativo).padStart(4, '0')}
+                      </td>
+                      <td className="px-sm py-xs">
+                        <div className="font-medium text-ink text-sm">{quote.client.razonSocial}</div>
+                        <div className="text-xs text-muted">{quote.client.rut}</div>
+                      </td>
+                      <td className="px-sm py-xs text-body text-muted">
+                        {new Date(quote.fechaEmision).toLocaleDateString(locale)}
+                      </td>
+                      <td className="px-sm py-xs text-body text-muted">
+                        {new Date(quote.fechaValidez).toLocaleDateString(locale)}
+                      </td>
+                      <td className="px-sm py-xs font-medium text-ink">
+                        ${quote.montoTotal.toLocaleString(locale)}
+                      </td>
+                      <td className="px-sm py-xs">
+                        <span className={`inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border ${
+                          quote.estado === 'Aceptada' ? 'border-semantic-success/30 bg-semantic-success/10 text-semantic-success' :
+                          quote.estado === 'Borrador' ? 'border-hairline bg-canvas-elevated text-muted' :
+                          'border-semantic-info/30 bg-semantic-info/10 text-semantic-info'
+                        }`}>
+                          {quote.estado}
+                        </span>
+                      </td>
+                      <td className="px-sm py-xs text-right">
+                        <QuoteActions quoteId={quote.id} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-hairline">
+              {quotes.map((quote, index) => (
+                <div key={quote.id} className="animate-fade-in px-sm py-xs space-y-xxs hover:bg-canvas/50 transition-colors" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="flex items-start justify-between gap-xxs">
+                    <div className="min-w-0 flex-1">
+                      <span className="font-medium text-ink text-sm">Nº {String(quote.correlativo).padStart(4, '0')}</span>
+                      <p className="text-xs text-muted truncate">{quote.client.rut}</p>
+                    </div>
+                    <span className={`shrink-0 inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border text-[10px] ${
+                      quote.estado === 'Aceptada' ? 'border-semantic-success/30 bg-semantic-success/10 text-semantic-success' :
+                      quote.estado === 'Borrador' ? 'border-hairline bg-canvas-elevated text-muted' :
+                      'border-semantic-info/30 bg-semantic-info/10 text-semantic-info'
+                    }`}>
+                      {quote.estado}
+                    </span>
+                  </div>
+                  <p className="text-ink text-sm font-medium">{quote.client.razonSocial}</p>
+                  <div className="flex items-center justify-between text-xs text-muted">
+                    <span>{new Date(quote.fechaEmision).toLocaleDateString(locale)} → {new Date(quote.fechaValidez).toLocaleDateString(locale)}</span>
+                    <span className="font-semibold text-ink">${quote.montoTotal.toLocaleString(locale)}</span>
+                  </div>
+                  <div className="flex justify-end pt-xxxs">
+                    <QuoteActions quoteId={quote.id} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
           <div className="text-center py-20 text-muted">
             {t('noQuotes')}

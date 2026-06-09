@@ -10,7 +10,7 @@ import {
   Link,
 } from '@react-email/components';
 import * as React from 'react';
-import { theme, main, container, header, logo, separator, subtitle, card, footer, footerText, footerNote } from './StrategyAuditEmail';
+import { theme, main, container, header, logo, separator, subtitle, card, footer, footerText, footerNote, darkModeStyles } from './StrategyAuditEmail';
 
 interface RemindersEmailProps {
   userName: string;
@@ -46,7 +46,11 @@ export const RemindersEmail = ({
 
   return (
     <Html>
-      <Head />
+      <Head>
+        <meta name="color-scheme" content="dark" />
+        <meta name="supported-color-schemes" content="dark" />
+        <style>{darkModeStyles}</style>
+      </Head>
       <Preview>{t(locale, 'Resumen de Recordatorios', 'Reminders Summary')}</Preview>
       <Body style={main}>
         <Container style={container}>

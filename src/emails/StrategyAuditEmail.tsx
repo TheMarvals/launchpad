@@ -27,7 +27,11 @@ export const StrategyAuditEmail = ({
 
   return (
     <Html>
-      <Head />
+      <Head>
+        <meta name="color-scheme" content="dark" />
+        <meta name="supported-color-schemes" content="dark" />
+        <style>{darkModeStyles}</style>
+      </Head>
       <Preview>New Strategy Audit Request from {company}</Preview>
       <Body style={main}>
         <Container style={container}>
@@ -232,3 +236,27 @@ export const footerNote = {
   color: theme.mutedSoft,
   margin: '6px 0 0 0',
 };
+
+export const darkModeStyles = `
+  :root {
+    color-scheme: dark;
+    supported-color-schemes: dark;
+  }
+  body {
+    background-color: #131314 !important;
+    color: #e5e2e3 !important;
+  }
+  @media (prefers-color-scheme: light) {
+    body {
+      background-color: #131314 !important;
+      color: #e5e2e3 !important;
+    }
+    img {
+      filter: none !important;
+    }
+  }
+  [data-ogsc] body, [data-ogsb] body {
+    background-color: #131314 !important;
+    color: #e5e2e3 !important;
+  }
+`;

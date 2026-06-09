@@ -267,7 +267,7 @@ export default function ShowcaseManager() {
 
       {/* Project Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-ink/50 z-50 flex items-center justify-center p-lg" onClick={() => setShowForm(false)}>
+        <div className="fixed inset-0 bg-ink/50 z-50 flex items-center justify-center p-lg">
           <div className="bg-canvas-elevated border border-hairline w-full max-w-[600px] max-h-[85vh] overflow-y-auto p-md" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-sm">
               <h2 className="text-title-sm font-medium text-ink">{editingProject ? t('editProject') : t('newProject')}</h2>
@@ -425,15 +425,16 @@ export default function ShowcaseManager() {
         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={projects.map(p => p.id)} strategy={verticalListSortingStrategy}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-xs">
-              {projects.map((project) => (
-                <SortableShowcaseCard
-                  key={project.id}
-                  project={project}
-                  t={t}
-                  onEdit={() => { setEditingProject(project); setShowForm(true); }}
-                  onDelete={() => handleDelete(project.id)}
-                  onToggleActive={() => handleToggleActive(project)}
-                />
+              {projects.map((project, index) => (
+                <div key={project.id} className="animate-fade-in hover:scale-[1.02] transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <SortableShowcaseCard
+                    project={project}
+                    t={t}
+                    onEdit={() => { setEditingProject(project); setShowForm(true); }}
+                    onDelete={() => handleDelete(project.id)}
+                    onToggleActive={() => handleToggleActive(project)}
+                  />
+                </div>
               ))}
             </div>
           </SortableContext>

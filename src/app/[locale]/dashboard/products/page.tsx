@@ -33,48 +33,79 @@ export default async function ProductsPage({
 
       <div className="bg-canvas-elevated border border-hairline overflow-hidden">
         {products.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-canvas border-b border-hairline">
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{locale === 'es' ? 'Código' : 'Code'}</th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{locale === 'es' ? 'Nombre' : 'Name'}</th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{locale === 'es' ? 'Descripción' : 'Description'}</th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-right">{locale === 'es' ? 'Precio Neto' : 'Net Price'}</th>
-                  <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-center">{locale === 'es' ? 'Exento' : 'Exempt'}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-hairline">
-                {products.map((product) => (
-                  <tr key={product.id} className="hover:bg-canvas/80 transition-colors group">
-                    <td className="px-sm py-xs font-mono text-sm text-muted">
-                      {product.codigo || '—'}
-                    </td>
-                    <td className="px-sm py-xs font-medium text-ink text-sm">
-                      {product.nombre}
-                    </td>
-                    <td className="px-sm py-xs text-body text-muted max-w-xs truncate">
-                      {product.descripcion || '—'}
-                    </td>
-                    <td className="px-sm py-xs text-right font-medium text-ink">
-                      ${product.precioNeto.toLocaleString(locale)}
-                    </td>
-                    <td className="px-sm py-xs text-center">
-                      {product.esExento ? (
-                        <span className="inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border border-semantic-success/30 bg-semantic-success/10 text-semantic-success">
-                          {locale === 'es' ? 'Sí' : 'Yes'}
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border border-hairline bg-canvas-elevated text-muted">
-                          {locale === 'es' ? 'No' : 'No'}
-                        </span>
-                      )}
-                    </td>
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-canvas border-b border-hairline">
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{locale === 'es' ? 'Código' : 'Code'}</th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{locale === 'es' ? 'Nombre' : 'Name'}</th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold">{locale === 'es' ? 'Descripción' : 'Description'}</th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-right">{locale === 'es' ? 'Precio Neto' : 'Net Price'}</th>
+                    <th className="px-sm py-xs text-caption-uppercase text-muted font-semibold text-center">{locale === 'es' ? 'Exento' : 'Exempt'}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-hairline">
+                  {products.map((product) => (
+                    <tr key={product.id} className="hover:bg-canvas/80 transition-colors group">
+                      <td className="px-sm py-xs font-mono text-sm text-muted">
+                        {product.codigo || '—'}
+                      </td>
+                      <td className="px-sm py-xs font-medium text-ink text-sm">
+                        {product.nombre}
+                      </td>
+                      <td className="px-sm py-xs text-body text-muted max-w-xs truncate">
+                        {product.descripcion || '—'}
+                      </td>
+                      <td className="px-sm py-xs text-right font-medium text-ink">
+                        ${product.precioNeto.toLocaleString(locale)}
+                      </td>
+                      <td className="px-sm py-xs text-center">
+                        {product.esExento ? (
+                          <span className="inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border border-semantic-success/30 bg-semantic-success/10 text-semantic-success">
+                            {locale === 'es' ? 'Sí' : 'Yes'}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border border-hairline bg-canvas-elevated text-muted">
+                            {locale === 'es' ? 'No' : 'No'}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-hairline">
+              {products.map((product, index) => (
+                <div key={product.id} className="animate-fade-in px-sm py-xs space-y-xxs hover:bg-canvas/50 transition-colors" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="flex items-start justify-between gap-xxs">
+                    <div className="min-w-0 flex-1">
+                      <span className="font-medium text-ink text-sm">{product.nombre}</span>
+                      <p className="text-xs text-muted font-mono">{product.codigo || '—'}</p>
+                    </div>
+                    {product.esExento ? (
+                      <span className="shrink-0 inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border text-[10px] border-semantic-success/30 bg-semantic-success/10 text-semantic-success">
+                        {locale === 'es' ? 'Exento' : 'Exempt'}
+                      </span>
+                    ) : (
+                      <span className="shrink-0 inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border text-[10px] border-hairline bg-canvas-elevated text-muted">
+                        {locale === 'es' ? 'Gravado' : 'Taxable'}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted line-clamp-2">{product.descripcion || '—'}</p>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted">{locale === 'es' ? 'Precio Neto' : 'Net Price'}</span>
+                    <span className="font-semibold text-ink">${product.precioNeto.toLocaleString(locale)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
           <div className="bg-canvas-elevated border border-hairline">
             <EmptyState variant="product" title={t('inDevelopment')} message={t('manualAdd')} />

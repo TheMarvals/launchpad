@@ -241,7 +241,7 @@ export default function PartnersManager() {
 
       {/* Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-ink/50 z-50 flex items-center justify-center p-lg" onClick={() => setShowForm(false)}>
+        <div className="fixed inset-0 bg-ink/50 z-50 flex items-center justify-center p-lg">
           <div className="bg-canvas-elevated border border-hairline w-full max-w-[500px] p-md" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-sm">
               <h2 className="text-title-sm font-medium text-ink">{editingPartner ? t('editPartner') : t('newPartner')}</h2>
@@ -335,15 +335,16 @@ export default function PartnersManager() {
           <SortableContext items={partners.map(p => p.id)} strategy={verticalListSortingStrategy}>
             <div className="bg-canvas-elevated border border-hairline overflow-hidden">
               <div className="divide-y divide-hairline">
-                {partners.map((partner) => (
-                  <SortablePartnerRow
-                    key={partner.id}
-                    partner={partner}
-                    t={t}
-                    onToggleActive={handleToggleActive}
-                    onEdit={openEditForm}
-                    onDelete={handleDelete}
-                  />
+                {partners.map((partner, index) => (
+                  <div key={partner.id} className="animate-fade-in hover:scale-[1.01] transition-all duration-200" style={{ animationDelay: `${index * 0.1}s` }}>
+                    <SortablePartnerRow
+                      partner={partner}
+                      t={t}
+                      onToggleActive={handleToggleActive}
+                      onEdit={openEditForm}
+                      onDelete={handleDelete}
+                    />
+                  </div>
                 ))}
               </div>
             </div>

@@ -7,6 +7,8 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { createPermissionChecker } from '@/lib/permissions-utils';
 import { prisma } from '@/lib/prisma';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
+import DashboardMobileNav, { MobileNavTrigger } from '@/components/DashboardMobileNav';
+import { MobileNavProvider } from '@/components/MobileNavProvider';
 
 export default async function DashboardLayout({
   children,
@@ -44,6 +46,7 @@ export default async function DashboardLayout({
   const can = createPermissionChecker(dbUser?.permissions as string[] | undefined);
 
   return (
+    <MobileNavProvider>
     <div className="flex min-h-screen bg-canvas text-ink font-sans">
       {/* Sidebar */}
       <aside className="w-64 bg-canvas border-r border-hairline text-ink hidden md:flex flex-col">
@@ -175,10 +178,135 @@ export default async function DashboardLayout({
         </div>
       </aside>
 
+      {/* Mobile Navigation - drawer panel */}
+      <DashboardMobileNav>
+        <nav className="flex-grow mt-xs">
+          <ul className="space-y-[2px]">
+            {can(PERMISSIONS.DASHBOARD) && (
+              <li>
+                <Link href="/dashboard" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">dashboard</span> {t('dashboard')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.QUOTES) && (
+              <li>
+                <Link href="/dashboard/quotes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">description</span> {t('quotes')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.INVOICES) && (
+              <li>
+                <Link href="/dashboard/invoices" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">receipt_long</span> {t('invoices')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.CLIENTS) && (
+              <li>
+                <Link href="/dashboard/clients" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">people</span> {t('clients')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.SHOWCASE) && (
+              <li>
+                <Link href="/dashboard/showcase" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">collections_bookmark</span> {t('showcase')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.PRODUCTS) && (
+              <li>
+                <Link href="/dashboard/products" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">inventory_2</span> {t('products')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.TICKETS) && (
+              <li>
+                <Link href="/dashboard/tickets" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">support_agent</span> {t('tickets')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.LOGS) && (
+              <li>
+                <Link href="/dashboard/logs" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">policy</span> {t('audit')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.CONTACTS) && (
+              <li>
+                <Link href="/dashboard/contacts" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">mail</span> {t('contacts')}
+                  {unreadContacts > 0 && (
+                    <span className="ml-auto bg-primary text-on-primary text-[9px] font-bold px-[5px] py-[1px] leading-none">
+                      {unreadContacts > 99 ? '99+' : unreadContacts}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.SETTINGS) && (
+              <li>
+                <Link href="/dashboard/settings" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">settings</span> {t('settings')}
+                </Link>
+              </li>
+            )}
+
+            <div className="px-sm py-xxs mt-xxs">
+              <p className="text-caption-uppercase tracking-widest text-muted font-bold">{t('productivity')}</p>
+            </div>
+            {can(PERMISSIONS.PROJECTS) && (
+              <li>
+                <Link href="/dashboard/productivity/projects" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">folder</span> {t('projects')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.TASKS) && (
+              <li>
+                <Link href="/dashboard/productivity/tasks" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">task_alt</span> {t('tasks')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.NOTES) && (
+              <li>
+                <Link href="/dashboard/productivity/notes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">note_alt</span> {t('notes')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.CALENDAR) && (
+              <li>
+                <Link href="/dashboard/productivity/calendar" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">calendar_month</span> {t('calendar')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.REMINDERS) && (
+              <li>
+                <Link href="/dashboard/productivity/reminders" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">notifications_active</span> {t('reminders')}
+                </Link>
+              </li>
+            )}
+          </ul>
+        </nav>
+      </DashboardMobileNav>
+
       {/* Main Content */}
       <main className="flex-grow flex flex-col h-screen overflow-hidden bg-canvas">
-        <header className="h-16 bg-canvas border-b border-hairline flex items-center justify-between px-lg shrink-0">
-          <h2 className="text-title-md font-medium text-ink">{t('dashboard')}</h2>
+        <header className="h-16 bg-canvas border-b border-hairline flex items-center justify-between px-sm md:px-lg shrink-0">
+          <div className="flex items-center">
+            <MobileNavTrigger />
+            <h2 className="text-title-md font-medium text-ink hidden sm:block">{t('dashboard')}</h2>
+          </div>
           <div className="flex items-center space-x-sm">
             <LocaleSwitcher />
             <div className="flex items-center space-x-xxs">
@@ -209,10 +337,11 @@ export default async function DashboardLayout({
           </div>
         </header>
 
-        <div className="flex-grow overflow-y-auto p-lg">
+        <div className="flex-grow overflow-y-auto px-sm py-md md:p-lg">
           {children}
         </div>
       </main>
     </div>
+    </MobileNavProvider>
   );
 }
