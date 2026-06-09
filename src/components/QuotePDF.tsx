@@ -269,7 +269,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate, companyProfile }
             )}
 
             {/* Page Content */}
-            <main className="flex-grow px-10 pt-10 pb-24 relative overflow-hidden">
+            <main className="flex-grow px-10 pt-10 pb-12 relative overflow-hidden">
               {/* Watermark */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
                 <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#181818', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
@@ -349,7 +349,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate, companyProfile }
             <div className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-300">{totalPages} / {totalPages}</div>
           </header>
 
-          <main className="flex-grow px-10 pt-10 pb-20 relative overflow-hidden">
+          <main className="flex-grow px-10 pt-10 pb-12 relative overflow-hidden">
             {/* Watermark */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
               <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#181818', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
