@@ -95,11 +95,74 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate, companyProfile }
         continue;
       }
 
-      const style = getComputedStyle(child);
-      const childHeight =
-        child.offsetHeight +
-        parseFloat(style.marginTop || '0') +
-        parseFloat(style.marginBottom || '0');
+      // If this is a table (or contains a table), paginate by rows to avoid splitting rows across pages
+      const tableEl = child.tagName === 'TABLE' ? (child as HTMLTableElement) : (child.querySelector ? child.querySelector('table') as HTMLTableElement : null);
+      if (tableEl) {
+        // Build opening tag with attributes
+        const attrs = Array.from(tableEl.attributes).map(a => `${a.name}="${a.value}"`).join(' ');
+        const tableOpen = `<table ${attrs}>`;
+        const thead = tableEl.querySelector('thead');
+        const tbody = tableEl.querySelector('tbody') || tableEl;
+
+        // Add header (thead) once per split table
+        const headerHTML = thead ? thead.outerHTML : '';
+
+        // Start a tbody for rows
+        const rows = Array.from(tbody.querySelectorAll('tr')) as HTMLTableRowElement[];
+        // If there are no rows, treat whole table as one block
+        if (rows.length === 0) {
+          const style = getComputedStyle(child as HTMLElement);
+          const childHeight = (child as HTMLElement).offsetHeight + parseFloat(style.marginTop || '0') + parseFloat(style.marginBottom || '0');
+          if (currentHeight + childHeight > getMaxHeight(pageIndex) && currentPageHTML) {
+            pages.push(currentPageHTML);
+            currentPageHTML = '';
+            currentHeight = 0;
+            pageIndex++;
+          }
+          currentPageHTML += child.outerHTML;
+          currentHeight += childHeight;
+        } else {
+          // Iterate rows and add them one by one
+          // Prepare table wrapper start
+          for (const row of rows) {
+            const style = getComputedStyle(row as HTMLElement);
+            const rowHeight = row.offsetHeight + parseFloat(style.marginTop || '0') + parseFloat(style.marginBottom || '0');
+
+            // If row itself is taller than a page, still place it on a fresh page (best-effort)
+            if (currentHeight + rowHeight > getMaxHeight(pageIndex) && currentPageHTML) {
+              // Close any open table wrapper and push page
+              pages.push(currentPageHTML);
+              currentPageHTML = '';
+              currentHeight = 0;
+              pageIndex++;
+            }
+
+            // If starting a new page and we need table header, prepend table open + thead
+            if (!currentPageHTML) {
+              currentPageHTML += tableOpen + (headerHTML ? headerHTML : '<tbody>');
+              // If headerHTML exists and body should start, ensure tbody opens
+              if (headerHTML) currentPageHTML += '<tbody>';
+            }
+
+            currentPageHTML += row.outerHTML;
+            currentHeight += rowHeight;
+          }
+
+          // Close table tags for the current page fragment
+          if (currentPageHTML && currentPageHTML.includes('<table')) {
+            // Ensure tbody/tags closed
+            if (!currentPageHTML.trim().endsWith('</table>')) {
+              currentPageHTML += '</tbody></table>';
+            }
+          }
+        }
+
+        continue;
+      }
+
+      // Default block handling
+      const style = getComputedStyle(child as HTMLElement);
+      const childHeight = (child as HTMLElement).offsetHeight + parseFloat(style.marginTop || '0') + parseFloat(style.marginBottom || '0');
 
       // If this child overflows the current page and we already have content, start a new page
       if (currentHeight + childHeight > getMaxHeight(pageIndex) && currentPageHTML) {
@@ -468,7 +531,20 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate, companyProfile }
           }
 
           .forced-page-break {
-            display: none;
+            /* keep the HR invisible but ensure print engines respect page break */
+            display: block;
+            height: 0;
+            margin: 0;
+            padding: 0;
+            border: none;
+            page-break-after: always;
+            break-after: page;
+          }
+
+          /* Avoid breaking inside tables/rows when possible */
+          .propuesta-content table, .propuesta-content thead, .propuesta-content tbody, .propuesta-content tr, .propuesta-content td {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
 
           @media print {
