@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 
 interface Image {
@@ -31,6 +31,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
+  const [isHovering, setIsHovering] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -42,7 +43,8 @@ export default function ShowcaseCarousel({ projects }: Props) {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const index = Number(entry.target.getAttribute('data-index'));
-            setVisibleCards((prev) => new Set(prev).add(index));
+            const originalIdx = index % projects.length;
+            setVisibleCards((prev) => new Set(prev).add(originalIdx));
             observer.unobserve(entry.target);
           }
         });
@@ -50,7 +52,8 @@ export default function ShowcaseCarousel({ projects }: Props) {
       { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
     );
 
-    cardsRef.current.forEach((el) => {
+    // Observe all cards (original + cloned) for staggered entrance
+    Object.values(cardsRef.current).forEach((el) => {
       if (el) observer.observe(el);
     });
 
@@ -81,23 +84,93 @@ export default function ShowcaseCarousel({ projects }: Props) {
     }
   };
 
-  // Auto-scroll carousel every 5 seconds
+  // Scroll by one card width with infinite wrap-around
+  const scrollByCard = useCallback((direction: 'prev' | 'next') => {
+    if (!scrollRef.current) return;
+    const container = scrollRef.current;
+    const card = container.querySelector('button') as HTMLButtonElement | null;
+    if (!card) return;
+    const cardWidth = card.offsetWidth;
+    const style = getComputedStyle(container);
+    const gapMatch = style.gap || style.columnGap || '4px';
+    const gap = parseInt(gapMatch, 10) || 4;
+    const totalCardStep = cardWidth + gap;
+
+    let targetScroll = direction === 'next'
+      ? container.scrollLeft + totalCardStep
+      : container.scrollLeft - totalCardStep;
+
+    // Wrap around for infinite scroll
+    const halfScroll = container.scrollWidth / 2;
+    if (targetScroll >= halfScroll) {
+      targetScroll = targetScroll - halfScroll;
+    } else if (targetScroll < 0) {
+      targetScroll = halfScroll + targetScroll;
+    }
+
+    container.scrollTo({
+      left: targetScroll,
+      behavior: 'smooth',
+    });
+  }, []);
+
+  // Clone projects for seamless infinite scroll
+  const clonedProjects = [...projects, ...projects];
+
+  // Auto-scroll carousel every 5 seconds (paused on hover) — infinite loop
   useEffect(() => {
-    if (projects.length === 0) return;
+    if (projects.length === 0 || isHovering) return;
     const interval = setInterval(() => {
       if (scrollRef.current) {
-        const scrollLeft = scrollRef.current.scrollLeft;
-        const cardWidth = 320 + 4; // 320px card + 4px gap
-        const nextScroll = scrollLeft + cardWidth;
-        const maxScroll = scrollRef.current.scrollWidth - scrollRef.current.clientWidth;
-        scrollRef.current.scrollTo({
-          left: nextScroll > maxScroll ? 0 : nextScroll,
-          behavior: 'smooth',
-        });
+        const container = scrollRef.current;
+        const { scrollLeft, scrollWidth, clientWidth } = container;
+        const maxScroll = scrollWidth - clientWidth;
+        const atEnd = scrollLeft >= maxScroll - 4;
+
+        if (atEnd) {
+          // Instantly snap back to start (scrollLeft is always instant) for seamless infinite loop
+          container.scrollLeft = 0;
+        } else {
+          scrollByCard('next');
+        }
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [projects.length]);
+  }, [projects.length, isHovering, scrollByCard]);
+
+  // Handle mouse wheel with snap-back for infinite scroll
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      const rect = el.getBoundingClientRect();
+      const isOver = e.clientX >= rect.left && e.clientX <= rect.right &&
+                     e.clientY >= rect.top && e.clientY <= rect.bottom;
+      if (!isOver) return;
+
+      const { scrollLeft, scrollWidth, clientWidth } = el;
+      const halfScroll = scrollWidth / 2;
+
+      // Snap back to first half if scrolled into cloned set (scrollLeft assignment is always instant)
+      if (scrollLeft >= halfScroll) {
+        el.scrollLeft = scrollLeft - halfScroll;
+        return;
+      }
+      if (scrollLeft < 0) {
+        el.scrollLeft = halfScroll + scrollLeft;
+        return;
+      }
+
+      if (scrollWidth > clientWidth) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+      }
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, []);
 
   if (projects.length === 0) return null;
 
@@ -143,92 +216,117 @@ export default function ShowcaseCarousel({ projects }: Props) {
           </p>
         </div>
 
-        {/* Carousel */}
+        {/* Carousel wrapper with nav buttons */}
         <div
-          ref={scrollRef}
-          className="overflow-x-auto pt-1 pb-sm scroll-smooth"
-          style={{ scrollbarWidth: 'none' }}
+          className="relative group/carousel"
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
         >
-          <div className="flex gap-xs min-w-max px-[2px]">
-            {projects.map((project, idx) => {
-              const featured = project.images.find((img) => img.isFeatured) || project.images[0];
-              const isVisible = visibleCards.has(idx);
-              return (
-                <button
-                  key={project.id}
-                  ref={(el) => { cardsRef.current[idx] = el; }}
-                  data-index={idx}
-                  onClick={() => openProject(project)}
-                  className={`group relative w-[280px] md:w-[320px] flex-shrink-0 text-left bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] transition-all duration-400 ease-out cursor-pointer rounded-xl ${
-                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                  }`}
-                  style={{
-                    transitionDelay: isVisible ? `${idx * 100}ms` : '0ms',
-                    transitionDuration: '400ms',
-                    transitionProperty: 'opacity, transform, border-color, box-shadow',
-                  }}
-                >
-                  {/* Image with parallax */}
-                  <div
-                    className="aspect-[4/3] bg-[#0d0d12] relative overflow-hidden rounded-t-xl"
-                    onMouseMove={(e) => handleMouseMove(e, cardsRef.current[idx])}
-                    onMouseLeave={() => handleMouseLeave(cardsRef.current[idx])}
+          {/* Previous button (always visible — infinite scroll wraps around) */}
+          <button
+            onClick={() => scrollByCard('prev')}
+            className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-[#0d0d12] border border-hairline/60 text-ink hover:text-primary-active hover:border-primary/30 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-medium hover:shadow-large opacity-0 group-hover/carousel:opacity-100 md:opacity-100 cursor-pointer"
+            aria-label="Previous projects"
+          >
+            <span className="material-icons text-xl">chevron_left</span>
+          </button>
+
+          {/* Next button (always visible — infinite scroll wraps around) */}
+          <button
+            onClick={() => scrollByCard('next')}
+            className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-[#0d0d12] border border-hairline/60 text-ink hover:text-primary-active hover:border-primary/30 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-medium hover:shadow-large opacity-0 group-hover/carousel:opacity-100 md:opacity-100 cursor-pointer"
+            aria-label="Next projects"
+          >
+            <span className="material-icons text-xl">chevron_right</span>
+          </button>
+
+          {/* Carousel track */}
+          <div
+            ref={scrollRef}
+            className="overflow-x-auto pt-1 pb-sm scroll-smooth"
+            style={{ scrollbarWidth: 'none' }}
+          >              <div className="flex gap-xs min-w-max px-[2px]">
+              {clonedProjects.map((project, idx) => {
+                const originalIdx = idx % projects.length;
+                const featured = project.images.find((img) => img.isFeatured) || project.images[0];
+                const isVisible = visibleCards.has(originalIdx);
+                return (
+                  <button
+                    key={`${project.id}-${idx}`}
+                    ref={(el) => { cardsRef.current[idx] = el; }}
+                    data-index={idx}
+                    onClick={() => openProject(project)}
+                    className={`group relative w-[280px] md:w-[320px] flex-shrink-0 text-left bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] transition-all duration-400 ease-out cursor-pointer rounded-xl ${
+                      isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                    }`}
+                    style={{
+                      transitionDelay: isVisible ? `${originalIdx * 100}ms` : '0ms',
+                      transitionDuration: '400ms',
+                      transitionProperty: 'opacity, transform, border-color, box-shadow',
+                    }}
                   >
-                    {featured ? (
-                      <img
-                        src={featured.url}
-                        alt={project.title}
-                        className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted">
-                        <span className="material-icons text-4xl">image</span>
-                      </div>
-                    )}
-                    {/* Category badge */}
-                    <span className="absolute top-3 right-3 px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest label-caps bg-canvas/80 text-primary-active border border-hairline/50 backdrop-blur-md rounded-sm shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
-                      {t(`categories.${project.category}`)}
-                    </span>
-                    {/* Image count */}
-                    {project.images.length > 1 && (
-                      <span className="absolute bottom-3 left-3 bg-canvas/80 text-body-strong border border-hairline/30 text-[9px] px-2 py-0.5 flex items-center gap-[4px] backdrop-blur-md rounded-sm label-caps">
-                        <span className="material-icons text-[11px] text-primary-active">collections</span>
-                        {project.images.length}
+                    {/* Image with parallax */}
+                    <div
+                      className="aspect-[4/3] bg-[#0d0d12] relative overflow-hidden rounded-t-xl"
+                      onMouseMove={(e) => handleMouseMove(e, cardsRef.current[idx])}
+                      onMouseLeave={() => handleMouseLeave(cardsRef.current[idx])}
+                    >
+                      {featured ? (
+                        <img
+                          src={featured.url}
+                          alt={project.title}
+                          className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted">
+                          <span className="material-icons text-4xl">image</span>
+                        </div>
+                      )}
+                      {/* Category badge */}
+                      <span className="absolute top-3 right-3 px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest label-caps bg-canvas/80 text-primary-active border border-hairline/50 backdrop-blur-md rounded-sm shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
+                        {t(`categories.${project.category}`)}
                       </span>
-                    )}
-                  </div>
+                      {/* Image count */}
+                      {project.images.length > 1 && (
+                        <span className="absolute bottom-3 left-3 bg-canvas/80 text-body-strong border border-hairline/30 text-[9px] px-2 py-0.5 flex items-center gap-[4px] backdrop-blur-md rounded-sm label-caps">
+                          <span className="material-icons text-[11px] text-primary-active">collections</span>
+                          {project.images.length}
+                        </span>
+                      )}
+                    </div>
 
-                  {/* Info */}
-                  <div className="p-sm pb-md relative z-10">
-                    <h3 className="text-base font-semibold text-ink mb-xxs truncate group-hover:text-primary-active transition-colors">{project.title}</h3>
-                    {project.clientName && (
-                      <p className="text-xs text-muted/80 mt-[2px] font-medium">{project.clientName}</p>
-                    )}
-                    {project.technologies && (
-                      <div className="flex flex-wrap gap-xxs mt-sm">
-                        {project.technologies.split(',').slice(0, 3).map((tech) => (
-                          <span key={tech.trim()} className="text-[9px] uppercase tracking-widest text-muted-soft bg-muted/5 border border-hairline/20 px-2.5 py-1 rounded-full font-medium transition-all duration-300 group-hover:border-primary-active/30 group-hover:bg-primary/15">{tech.trim()}</span>
-                        ))}
-                        {project.technologies.split(',').length > 3 && (
-                          <span className="text-[8px] text-muted self-center font-bold pl-xxxs">+{project.technologies.split(',').length - 3}</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                    {/* Info */}
+                    <div className="p-sm pb-md relative z-10">
+                      <h3 className="text-base font-semibold text-ink mb-xxs truncate group-hover:text-primary-active transition-colors">{project.title}</h3>
+                      {project.clientName && (
+                        <p className="text-xs text-muted/80 mt-[2px] font-medium">{project.clientName}</p>
+                      )}
+                      {project.technologies && (
+                        <div className="flex flex-wrap gap-xxs mt-sm">
+                          {project.technologies.split(',').slice(0, 3).map((tech) => (
+                            <span key={tech.trim()} className="text-[9px] uppercase tracking-widest text-muted-soft bg-muted/5 border border-hairline/20 px-2.5 py-1 rounded-full font-medium transition-all duration-300 group-hover:border-primary-active/30 group-hover:bg-primary/15">{tech.trim()}</span>
+                          ))}
+                          {project.technologies.split(',').length > 3 && (
+                            <span className="text-[8px] text-muted self-center font-bold pl-xxxs">+{project.technologies.split(',').length - 3}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Animated hover accent line (top) */}
-                  <div className="absolute top-0 left-5 right-5 h-[1.5px] bg-gradient-to-r from-transparent via-primary-active to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                </button>
-              );
-            })}
+                    {/* Animated hover accent line (top) */}
+                    <div className="absolute top-0 left-5 right-5 h-[1.5px] bg-gradient-to-r from-transparent via-primary-active to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        {/* Scroll hint - fades after first scroll */}
-        <div className="flex items-center justify-center gap-xxs mt-sm text-muted">
-          <span className="material-icons text-sm animate-pulse">chevron_left</span>
-          <span className="text-[9px] uppercase tracking-widest font-bold opacity-70">{t('scrollHint')}</span>
-          <span className="material-icons text-sm animate-pulse">chevron_right</span>
+          {/* Scroll hint - fades after first scroll */}
+          <div className="flex items-center justify-center gap-xxs mt-sm text-muted">
+            <span className="material-icons text-sm animate-pulse">chevron_left</span>
+            <span className="text-[9px] uppercase tracking-widest font-bold opacity-70">{t('scrollHint')}</span>
+            <span className="material-icons text-sm animate-pulse">chevron_right</span>
+          </div>
         </div>
       </div>
 

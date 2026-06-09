@@ -906,7 +906,7 @@
     "title": "Portafolio",
     "subtitle": "Gestiona tus proyectos destacados y galería de imágenes.",
     "sectionTitle": "Proyectos Destacados",
-    "sectionSubtitle": "Algunos de los proyectos que hemos diseñado, construido y desplegado.",
+    "sectionSubtitle": "Algunos de los proyectos que hemos diseñado, construido y lanzado.",
     "newProject": "Nuevo Proyecto",
     "editProject": "Editar Proyecto",
     "deleteConfirm": "¿Estás seguro de eliminar este proyecto?",
@@ -955,9 +955,9 @@
   },
   "Landing": {
     "brand": "LAUNCHPAD",
-    "tagline": "Agencia 360° Creativa y Tecnológica",
-    "headline": "Diseñamos ecosistemas digitales y escalamos marcas corporativas.",
-    "subtitle": "No solo damos vida a las ideas; las convertimos en experiencias digitales de alto impacto. Desde plataformas escalables y arquitectura cloud resiliente hasta estrategias de marketing basadas en datos, nuestro equipo multidisciplinario diseña, desarrolla y hace crecer ecosistemas digitales que impulsan resultados de negocio medibles.",
+    "tagline": "Soporte 360° Creativo y Tecnológico",
+    "headline": "Donde las ideas despegan",
+    "subtitle": "Las ideas son solo el comienzo. Diseñamos, construimos y escalamos ecosistemas digitales de alto rendimiento que impulsan un crecimiento medible. Desde arquitectura cloud y plataformas web hasta contenido, automatización y marketing, cada solución está diseñada con los resultados de negocio en mente.",
     "squads": "Nuestra Especialidad",
     "whatWeDo": "Lo Que Hacemos",
     "design": {
@@ -983,8 +983,8 @@
     "clientAccess": "Acceso Clientes",
     "contactCta": "Contáctanos",
     "contactTag": "Hablemos",
-    "contactTitle": "¿Listo para Crear Algo Remarkable?",
-    "contactDescription": "Desde branding y diseño web hasta desarrollo a medida y estrategia digital, nos asociamos con marcas ambiciosas para construir experiencias que inspiran, conectan y escalan. Cuéntanos sobre tu proyecto, y nuestro equipo creativo y tecnológico te ayudará a dar forma a lo que viene.",
+    "contactTitle": "¿Listo para Despegar?",
+    "contactDescription": "Todo proyecto exitoso comienza con la plataforma adecuada. Ya sea que estés construyendo una nueva marca, escalando un producto digital o transformando un negocio existente, creamos los cimientos que hacen posible el crecimiento. Combinando estrategia, diseño y tecnología, ayudamos a equipos ambiciosos a convertir ideas audaces en resultados medibles.",
     "footer": "TODOS LOS DERECHOS RESERVADOS"
   },
   "Contact": {

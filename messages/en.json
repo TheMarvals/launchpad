@@ -232,7 +232,7 @@
     },
     "defaultProposal": {
       "page1": "<h1>1. EXECUTIVE SUMMARY</h1><p>A comprehensive proposal is presented for the development of advanced technological solutions, focused on optimizing the infrastructure and critical processes of your organization.</p><h2>Main Objectives</h2><ul><li>Implementation of scalable architectures.</li><li>Long-term maintainability.</li><li>Enterprise-grade security.</li></ul>",
-      "page2": "<h1>2. TECHNICAL PROPOSAL</h1><p>Architecture and Platform:</p><ul><li>Development on modern standards (Next.js, Tailwind, Prisma).</li><li>Continuous integration and automated deployment.</li><li>Proactive service monitoring.</li></ul>"
+      "page2": "<h1>2. TECHNICAL PROPOSAL</h1><p>Architecture and Platform:</p><ul><li>Development on modern standards (Next.js, Tailwind, Prisma).</li><li>Continuous integration and automated launch.</li><li>Proactive service monitoring.</li></ul>"
     },
     "defaultNotes": "50% advance payment, 50% upon delivery. Valid for 15 days."
   },
@@ -905,7 +905,7 @@
     "title": "Showcase",
     "subtitle": "Manage your portfolio projects and gallery images.",
     "sectionTitle": "Featured Projects",
-    "sectionSubtitle": "Some of the projects we've designed, built, and deployed.",
+    "sectionSubtitle": "Some of the projects we've designed, built, and launched.",
     "newProject": "New Project",
     "editProject": "Edit Project",
     "deleteConfirm": "Are you sure you want to delete this project?",
@@ -954,9 +954,9 @@
   },
   "Landing": {
     "brand": "LAUNCHPAD",
-    "tagline": "360° Creative & Technology Agency",
-    "headline": "We Architect Digital Infrastructure and Scale Corporate Brands.",
-    "subtitle": "We don't just bring ideas to life; we engineer them for performance. From resilient cloud architecture to data-driven marketing campaigns, our full-cycle team designs, builds, and grows digital ecosystems that deliver measurable business impact.",
+    "tagline": "360° Creative & Technology Support",
+    "headline": "Where ideas take off",
+    "subtitle": "Ideas are only the beginning. We design, build, and scale high-performance digital ecosystems that drive measurable growth. From cloud architecture and web platforms to content, automation, and marketing, every solution is engineered with business outcomes in mind.",
     "squads": "Our Expertise",
     "whatWeDo": "What We Do",
     "design": {
@@ -982,8 +982,8 @@
     "clientAccess": "Client Access",
     "contactCta": "Contact Us",
     "contactTag": "Let's Talk",
-    "contactTitle": "Ready to Create Something Remarkable?",
-    "contactDescription": "From branding and web design to custom development and digital strategy, we partner with ambitious brands to build experiences that inspire, engage, and scale. Tell us about your project, and our creative and technology team will help shape what comes next.",
+    "contactTitle": "Ready for Launch?",
+    "contactDescription": "Every successful venture starts with the right launchpad. Whether you're building a new brand, scaling a digital product, or transforming an existing business, we create the foundations that make growth possible. Combining strategy, design, and technology, we help ambitious teams turn bold ideas into measurable results.",
     "footer": "ALL RIGHTS RESERVED"
   },
   "Contact": {
