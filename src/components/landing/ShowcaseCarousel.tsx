@@ -37,10 +37,12 @@ export default function ShowcaseCarousel({ projects }: Props) {
   const [imageTransitioning, setImageTransitioning] = useState(false);
   const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
   const [sectionVisible, setSectionVisible] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<(HTMLButtonElement | null)[]>([]);
+  const autoSpeedRef = useRef<number>(0.6);
+  const pausedRef = useRef<boolean>(false);
+  const rafRef = useRef<number | null>(null);
 
   // Intersection Observer for staggered card animations
   useEffect(() => {
@@ -82,121 +84,96 @@ export default function ShowcaseCarousel({ projects }: Props) {
     return () => observer.disconnect();
   }, [projects.length]);
 
-  // Parallax effect on mouse move for each card
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, card: HTMLButtonElement | null) => {
-    if (!card) return;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = (y - centerY) / 20;
-    const rotateY = (centerX - x) / 20;
-    const img = card.querySelector('img') as HTMLImageElement;
-    if (img) {
-      const scale = 1.08;
-      img.style.transition = 'transform 120ms ease-out';
-      img.style.transform = `scale(${scale}) translate(${(x - centerX) / 30}px, ${(y - centerY) / 30}px)`;
-    }
+  // The showcase carousel image should stay stable while scrolling.
+  const handleMouseMove = (_: React.MouseEvent<HTMLDivElement>, _card: HTMLButtonElement | null) => {
+    return;
   };
 
-  const handleMouseLeave = (card: HTMLButtonElement | null) => {
-    if (!card) return;
-    const img = card.querySelector('img') as HTMLImageElement;
-    if (img) {
-      img.style.transition = 'transform 400ms ease-out';
-      img.style.transform = 'scale(1.02)';
-    }
+  const handleMouseLeave = (_: HTMLButtonElement | null) => {
+    return;
   };
 
   // Scroll by one card width with infinite wrap-around
   const scrollByCard = useCallback((direction: 'prev' | 'next') => {
-    if (!scrollRef.current) return;
     const container = scrollRef.current;
-    const innerFlex = container.querySelector('[data-carousel-track]') as HTMLDivElement | null;
-    const card = container.querySelector('button') as HTMLButtonElement | null;
-    if (!card || !innerFlex) return;
-    const cardWidth = card.offsetWidth;
-    const style = getComputedStyle(innerFlex);
-    const gapMatch = style.gap || style.columnGap || '16px';
-    const gap = parseInt(gapMatch, 10) || 16;
+    if (!container) return;
+
+    const firstCard = cardsRef.current.find(Boolean) as HTMLButtonElement | null;
+    const track = container.querySelector('[data-carousel-track]') as HTMLDivElement | null;
+    if (!firstCard || !track) return;
+
+    const cardWidth = firstCard.offsetWidth;
+    const style = getComputedStyle(track);
+    const gapRaw = style.gap || style.columnGap || '0px';
+    const gap = parseFloat(gapRaw) || 0;
     const totalCardStep = cardWidth + gap;
 
-    let targetScroll = direction === 'next'
-      ? container.scrollLeft + totalCardStep
-      : container.scrollLeft - totalCardStep;
-
-    // Wrap around for infinite scroll
-    const halfScroll = container.scrollWidth / 2;
-    if (targetScroll >= halfScroll) {
-      targetScroll = targetScroll - halfScroll;
-    } else if (targetScroll < 0) {
-      targetScroll = halfScroll + targetScroll;
-    }
-
+    // Pause auto-scroll while animating the manual scroll
+    pausedRef.current = true;
     container.scrollTo({
-      left: targetScroll,
+      left: container.scrollLeft + (direction === 'next' ? totalCardStep : -totalCardStep),
       behavior: 'smooth',
     });
+
+    // Resume auto-scroll after smooth scroll completes (timeout ~= 450ms)
+    setTimeout(() => {
+      pausedRef.current = false;
+    }, 500);
   }, []);
 
   // Clone projects for seamless infinite scroll
   const clonedProjects = [...projects, ...projects];
 
-  // Auto-scroll carousel every 5 seconds (paused on hover) — infinite loop
+  // Continuous auto-scroll with seamless subtraction reset at midpoint
   useEffect(() => {
-    if (projects.length === 0 || isHovering) return;
-    const interval = setInterval(() => {
-      if (scrollRef.current) {
-        const container = scrollRef.current;
-        const { scrollLeft, scrollWidth, clientWidth } = container;
-        const maxScroll = scrollWidth - clientWidth;
-        const atEnd = scrollLeft >= maxScroll - 4;
-
-        if (atEnd) {
-          // Instantly snap back to start (scrollLeft is always instant) for seamless infinite loop
-          container.scrollLeft = 0;
-        } else {
-          scrollByCard('next');
-        }
-      }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [projects.length, isHovering, scrollByCard]);
-
-  // Handle mouse wheel with snap-back for infinite scroll
-  useEffect(() => {
+    if (projects.length === 0) return;
     const el = scrollRef.current;
     if (!el) return;
 
-    const handleWheel = (e: WheelEvent) => {
-      const rect = el.getBoundingClientRect();
-      const isOver = e.clientX >= rect.left && e.clientX <= rect.right &&
-                     e.clientY >= rect.top && e.clientY <= rect.bottom;
-      if (!isOver) return;
+    // use refs so handlers and raf use mutable state
+    autoSpeedRef.current = 0.6;
+    pausedRef.current = false;
 
-      const { scrollLeft, scrollWidth, clientWidth } = el;
-      const halfScroll = scrollWidth / 2;
+    if (process.env.NODE_ENV !== 'production') {
+      console.debug('ShowcaseCarousel init', { scrollWidth: el.scrollWidth, clientWidth: el.clientWidth, projectsLength: projects.length });
+    }
 
-      // Snap back to first half if scrolled into cloned set (scrollLeft assignment is always instant)
-      if (scrollLeft >= halfScroll) {
-        el.scrollLeft = scrollLeft - halfScroll;
-        return;
-      }
-      if (scrollLeft < 0) {
-        el.scrollLeft = halfScroll + scrollLeft;
-        return;
+    const scroll = () => {
+      if (!el) return;
+      if (!pausedRef.current) el.scrollLeft += autoSpeedRef.current;
+
+      // When reaching the duplicated half, subtract half to continue seamlessly
+      const half = el.scrollWidth / 2;
+      if (el.scrollLeft >= half) {
+        el.scrollLeft -= half;
+        if (process.env.NODE_ENV !== 'production') console.debug('ShowcaseCarousel reset', { scrollLeft: el.scrollLeft, half });
       }
 
-      if (scrollWidth > clientWidth) {
-        e.preventDefault();
-        el.scrollLeft += e.deltaY;
-      }
+      rafRef.current = requestAnimationFrame(scroll);
     };
 
-    el.addEventListener('wheel', handleWheel, { passive: false });
-    return () => el.removeEventListener('wheel', handleWheel);
-  }, []);
+    const handleMouseEnter = () => { pausedRef.current = true; };
+    const handleMouseLeave = () => { pausedRef.current = false; };
+    el.addEventListener('mouseenter', handleMouseEnter);
+    el.addEventListener('mouseleave', handleMouseLeave);
+
+    rafRef.current = requestAnimationFrame(scroll);
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      el.removeEventListener('mouseenter', handleMouseEnter);
+      el.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [projects.length]);
+
+  // Inicializar en la mitad del track duplicado para un loop suave
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const el = scrollRef.current;
+    requestAnimationFrame(() => {
+      el.scrollLeft = el.scrollWidth / 2 - el.clientWidth / 2;
+    });
+  }, [projects.length]);
 
   if (projects.length === 0) return null;
 
@@ -255,11 +232,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
         </div>
 
         {/* Carousel wrapper with nav buttons */}
-        <div
-          className="relative group/carousel"
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
-        >
+        <div className="relative group/carousel">
           {/* Previous button (always visible) */}
           <button
             onClick={() => scrollByCard('prev')}
@@ -281,10 +254,10 @@ export default function ShowcaseCarousel({ projects }: Props) {
           {/* Carousel track */}
           <div
             ref={scrollRef}
-            className="overflow-x-auto pt-1 pb-sm scroll-smooth"
+            className="overflow-hidden pt-1 pb-sm"
             style={{ scrollbarWidth: 'none' }}
           >
-          <div className="flex gap-xs min-w-max px-[2px]" data-carousel-track>
+          <div className="flex gap-xs min-w-max px-[2px] snap-x" data-carousel-track>
 
               {clonedProjects.map((project, idx) => {
                 const featured = project.images.find((img) => img.isFeatured) || project.images[0];
@@ -295,7 +268,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
                     ref={(el) => { cardsRef.current[idx] = el; }}
                     data-index={idx}
                     onClick={() => openProject(project)}
-                    className={`group relative w-[280px] md:w-[320px] flex-shrink-0 text-left bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] transition-all duration-400 ease-out cursor-pointer rounded-xl hover:scale-[1.02] ${
+                    className={`group relative w-[280px] md:w-[320px] flex-none overflow-hidden text-left bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] transition-all duration-400 ease-out cursor-pointer rounded-xl snap-start snap-always ${
                       isVisible ? 'opacity-100' : 'opacity-0'
                     }`}
                     style={{
@@ -305,17 +278,13 @@ export default function ShowcaseCarousel({ projects }: Props) {
                     }}
                   >
                     {/* Image with parallax */}
-                    <div
-                      className="aspect-[4/3] bg-[#0d0d12] relative overflow-hidden rounded-t-xl"
-                      onMouseMove={(e) => handleMouseMove(e, cardsRef.current[idx])}
-                      onMouseLeave={() => handleMouseLeave(cardsRef.current[idx])}
-                    >
+                    <div className="aspect-[4/3] bg-[#0d0d12] relative overflow-hidden rounded-t-xl" style={{ padding: 0, margin: '-1px -1px 0 -1px', boxSizing: 'border-box' }}>
                       {featured ? (
                         <img
                           src={featured.url}
                           alt={featured.caption || project.title}
-                          className="w-full h-full object-cover"
-                          style={{ transform: 'scale(1.02)' }}
+                          className="absolute w-full h-full object-cover object-center block"
+                          style={{ inset: '-1px', width: 'calc(100% + 2px)', height: 'calc(100% + 2px)', boxSizing: 'border-box' }}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted">
@@ -402,13 +371,13 @@ export default function ShowcaseCarousel({ projects }: Props) {
             <div className="flex-grow overflow-y-auto">
               {selectedProject.images.length > 0 ? (
                 <div className="relative">
-                  <div className="relative overflow-hidden bg-[#03020a]/50 flex items-center justify-center min-h-[200px]">
+                  <div className="relative overflow-hidden bg-[#03020a]/50 flex items-center justify-center min-h-[200px] max-h-[55vh] aspect-[16/9]">
                     {/* Previous image fading out via CSS keyframe animation */}
                     {prevImageUrl && (
                       <img
                         src={prevImageUrl}
                         alt=""
-                        className="absolute inset-0 w-full max-h-[55vh] object-contain pointer-events-none"
+                        className="absolute inset-0 w-full h-full object-contain pointer-events-none"
                         style={{ animation: 'galleryFadeOut 400ms ease-out forwards' }}
                         onAnimationEnd={handlePrevFadeEnd}
                       />
@@ -418,7 +387,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
                       key={galleryIndex}
                       src={selectedProject.images[galleryIndex].url}
                       alt={selectedProject.images[galleryIndex].caption || selectedProject.title}
-                      className="w-full max-h-[55vh] object-contain"
+                      className="absolute inset-0 w-full h-full object-contain"
                       style={{ animation: prevImageUrl ? 'galleryFadeIn 400ms ease-out' : 'none' }}
                     />
                   </div>
