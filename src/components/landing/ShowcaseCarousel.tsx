@@ -209,7 +209,6 @@ export default function ShowcaseCarousel({ projects }: Props) {
     if (!selectedProject || imageTransitioning) return;
     const currentUrl = selectedProject.images[galleryIndex].url;
     setPrevImageUrl(currentUrl);
-    setImageTransitioning(true);
     
     if (direction === 'next') {
       setGalleryIndex((prev) => (prev + 1) % selectedProject.images.length);
@@ -217,8 +216,13 @@ export default function ShowcaseCarousel({ projects }: Props) {
       setGalleryIndex((prev) => (prev - 1 + selectedProject.images.length) % selectedProject.images.length);
     }
     
-    // Reset transition flag after animation completes
-    setTimeout(() => setImageTransitioning(false), 400);
+    // Trigger the fade-out animation on the old image
+    setImageTransitioning(true);
+  };
+
+  const handlePrevFadeEnd = () => {
+    setPrevImageUrl(null);
+    setImageTransitioning(false);
   };
 
   return (
@@ -395,20 +399,23 @@ export default function ShowcaseCarousel({ projects }: Props) {
               {selectedProject.images.length > 0 ? (
                 <div className="relative">
                   <div className="relative overflow-hidden bg-[#03020a]/50 flex items-center justify-center min-h-[200px]">
-                    {/* Previous image fading out */}
+                    {/* Previous image fading out via CSS keyframe animation */}
                     {prevImageUrl && (
                       <img
                         src={prevImageUrl}
                         alt=""
-                        className="absolute inset-0 w-full max-h-[55vh] object-contain transition-opacity duration-[400ms] ease-out pointer-events-none"
-                        style={{ opacity: imageTransitioning ? 0 : 1 }}
+                        className="absolute inset-0 w-full max-h-[55vh] object-contain pointer-events-none"
+                        style={{ animation: 'galleryFadeOut 400ms ease-out forwards' }}
+                        onAnimationEnd={handlePrevFadeEnd}
                       />
                     )}
-                    {/* Current image (always opaque, revealed as prevImage fades out) */}
+                    {/* Current image fades in */}
                     <img
+                      key={galleryIndex}
                       src={selectedProject.images[galleryIndex].url}
                       alt={selectedProject.images[galleryIndex].caption || selectedProject.title}
                       className="w-full max-h-[55vh] object-contain"
+                      style={{ animation: prevImageUrl ? 'galleryFadeIn 400ms ease-out' : 'none' }}
                     />
                   </div>
                   {selectedProject.images[galleryIndex].caption && (
@@ -436,7 +443,14 @@ export default function ShowcaseCarousel({ projects }: Props) {
                         {selectedProject.images.map((_, idx) => (
                           <button
                             key={idx}
-                            onClick={() => setGalleryIndex(idx)}
+                            onClick={() => {
+                              if (!imageTransitioning && idx !== galleryIndex) {
+                                const currentUrl = selectedProject.images[galleryIndex].url;
+                                setPrevImageUrl(currentUrl);
+                                setGalleryIndex(idx);
+                                setImageTransitioning(true);
+                              }
+                            }}
                             className={`transition-all duration-300 cursor-pointer h-1.5 rounded-full ${
                               idx === galleryIndex ? 'bg-primary-active w-6' : 'bg-muted/30 hover:bg-muted w-1.5'
                             }`}
@@ -493,6 +507,14 @@ export default function ShowcaseCarousel({ projects }: Props) {
         @keyframes slideUp {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes galleryFadeOut {
+          from { opacity: 1; }
+          to { opacity: 0; }
+        }
+        @keyframes galleryFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
       `}</style>
     </section>
