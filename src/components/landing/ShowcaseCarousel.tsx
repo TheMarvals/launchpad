@@ -44,6 +44,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
   const pausedRef = useRef<boolean>(false);
   const rafRef = useRef<number | null>(null);
 
+
   // Intersection Observer for staggered card animations
   useEffect(() => {
     // Observe section entrance
@@ -131,7 +132,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
     if (!el) return;
 
     // use refs so handlers and raf use mutable state
-    autoSpeedRef.current = 0.6;
+    autoSpeedRef.current = 1.0;
     pausedRef.current = false;
 
     if (process.env.NODE_ENV !== 'production') {
@@ -140,12 +141,15 @@ export default function ShowcaseCarousel({ projects }: Props) {
 
     const scroll = () => {
       if (!el) return;
-      if (!pausedRef.current) el.scrollLeft += autoSpeedRef.current;
+      if (!pausedRef.current) {
+        el.scrollLeft += autoSpeedRef.current;
+      }
 
       // When reaching the duplicated half, subtract half to continue seamlessly
       const half = el.scrollWidth / 2;
       if (el.scrollLeft >= half) {
         el.scrollLeft -= half;
+        el.scrollLeft = Math.round(el.scrollLeft);
         if (process.env.NODE_ENV !== 'production') console.debug('ShowcaseCarousel reset', { scrollLeft: el.scrollLeft, half });
       }
 
@@ -171,7 +175,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
     if (!scrollRef.current) return;
     const el = scrollRef.current;
     requestAnimationFrame(() => {
-      el.scrollLeft = el.scrollWidth / 2 - el.clientWidth / 2;
+      el.scrollLeft = Math.round(el.scrollWidth / 2 - el.clientWidth / 2);
     });
   }, [projects.length]);
 
@@ -205,7 +209,8 @@ export default function ShowcaseCarousel({ projects }: Props) {
   };
 
   return (
-    <section ref={sectionRef} className={`px-0 md:px-lg py-xl md:py-xxl border-t border-hairline relative transition-all duration-700 ease-out ${sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+    <>
+      <section ref={sectionRef} className={`px-0 md:px-lg py-xl md:py-xxl border-t border-hairline relative transition-all duration-700 ease-out ${sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
       {/* Ambient section glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(0,98,255,0.12) 0%, transparent 70%)' }} />
 
@@ -268,7 +273,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
                     ref={(el) => { cardsRef.current[idx] = el; }}
                     data-index={idx}
                     onClick={() => openProject(project)}
-                    className={`group relative w-[280px] md:w-[320px] flex-none overflow-hidden text-left bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] transition-all duration-400 ease-out cursor-pointer rounded-xl snap-start snap-always ${
+                    className={`group relative w-[280px] md:w-[320px] flex-none flex flex-col text-left bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] transition-all duration-400 ease-out cursor-pointer rounded-xl snap-start snap-always ${
                       isVisible ? 'opacity-100' : 'opacity-0'
                     }`}
                     style={{
@@ -277,14 +282,13 @@ export default function ShowcaseCarousel({ projects }: Props) {
                       transitionProperty: 'opacity, transform, border-color, box-shadow',
                     }}
                   >
-                    {/* Image with parallax */}
-                    <div className="aspect-[4/3] bg-[#0d0d12] relative overflow-hidden rounded-t-xl" style={{ padding: 0, margin: '-1px -1px 0 -1px', boxSizing: 'border-box' }}>
+                    {/* Image */}
+                    <div className="aspect-[4/3] flex-shrink-0 bg-[#0d0d12] relative overflow-hidden rounded-t-xl -mt-px">
                       {featured ? (
                         <img
                           src={featured.url}
                           alt={featured.caption || project.title}
-                          className="absolute w-full h-full object-cover object-center block"
-                          style={{ inset: '-1px', width: 'calc(100% + 2px)', height: 'calc(100% + 2px)', boxSizing: 'border-box' }}
+                          className="absolute inset-0 w-full h-full object-cover object-center"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted">
@@ -304,8 +308,8 @@ export default function ShowcaseCarousel({ projects }: Props) {
                       )}
                     </div>
 
-                    {/* Info */}
-                    <div className="p-sm pb-md relative z-10">
+                    {/* Info - flex-1 fills remaining space so all cards have equal height */}
+                    <div className="p-sm pb-md relative z-10 flex-1">
                       <h3 className="text-base font-semibold text-ink mb-xxs truncate group-hover:text-primary-active transition-colors">{project.title}</h3>
                       {project.clientName && (
                         <p className="text-xs text-muted/80 mt-[2px] font-medium">{project.clientName}</p>
@@ -338,8 +342,9 @@ export default function ShowcaseCarousel({ projects }: Props) {
           </div>
         </div>
       </div>
+      </section>
 
-      {/* Gallery Modal */}
+      {/* Gallery Modal - outside section to avoid translate clipping fixed positioning */}
       {selectedProject && (
         <div
           className="fixed inset-0 bg-[#03020a]/80 z-[100] flex items-center justify-center p-xs md:p-lg backdrop-blur-md"
@@ -370,7 +375,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
             {/* Gallery */}
             <div className="flex-grow overflow-y-auto">
               {selectedProject.images.length > 0 ? (
-                <div className="relative">
+                <div className="relative group">
                   <div className="relative overflow-hidden bg-[#03020a]/50 flex items-center justify-center min-h-[200px] max-h-[55vh] aspect-[16/9]">
                     {/* Previous image fading out via CSS keyframe animation */}
                     {prevImageUrl && (
@@ -395,14 +400,14 @@ export default function ShowcaseCarousel({ projects }: Props) {
                   {selectedProject.images.length > 1 && (
                     <>
                       <button
-                        onClick={() => navigateImage('prev')}
-                        className="absolute left-sm top-1/2 -translate-y-1/2 w-[44px] h-[44px] rounded-sm bg-[#0d0d12] border border-hairline text-ink hover:text-primary-active hover:bg-[#0d0d12]/80 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-medium cursor-pointer"
+                        onClick={(e) => { e.stopPropagation(); navigateImage('prev'); }}
+                        className="absolute left-sm top-1/2 -translate-y-1/2 w-[44px] h-[44px] rounded-sm bg-black/30 backdrop-blur-sm border border-white/10 text-white/70 hover:text-primary-active hover:bg-black/50 hover:border-primary/30 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-medium opacity-30 group-hover:opacity-100 cursor-pointer"
                       >
                         <span className="material-icons text-xl">chevron_left</span>
                       </button>
                       <button
-                        onClick={() => navigateImage('next')}
-                        className="absolute right-sm top-1/2 -translate-y-1/2 w-[44px] h-[44px] rounded-sm bg-[#0d0d12] border border-hairline text-ink hover:text-primary-active hover:bg-[#0d0d12]/80 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-medium cursor-pointer"
+                        onClick={(e) => { e.stopPropagation(); navigateImage('next'); }}
+                        className="absolute right-sm top-1/2 -translate-y-1/2 w-[44px] h-[44px] rounded-sm bg-black/30 backdrop-blur-sm border border-white/10 text-white/70 hover:text-primary-active hover:bg-black/50 hover:border-primary/30 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-medium opacity-30 group-hover:opacity-100 cursor-pointer"
                       >
                         <span className="material-icons text-xl">chevron_right</span>
                       </button>
@@ -412,7 +417,8 @@ export default function ShowcaseCarousel({ projects }: Props) {
                         {selectedProject.images.map((_, idx) => (
                           <button
                             key={idx}
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               if (!imageTransitioning && idx !== galleryIndex) {
                                 const currentUrl = selectedProject.images[galleryIndex].url;
                                 setPrevImageUrl(currentUrl);
@@ -440,15 +446,16 @@ export default function ShowcaseCarousel({ projects }: Props) {
                     {locale === 'es' ? (selectedProject.descriptionEs || selectedProject.description || selectedProject.descriptionEn) : (selectedProject.descriptionEn || selectedProject.description || selectedProject.descriptionEs)}
                   </p>
                 )}
-                
+
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-sm pt-xs">
                   {selectedProject.technologies && (
                     <div className="flex flex-wrap gap-xxs">
-                      {selectedProject.technologies.split(',').map((tech) => (                          <span key={tech.trim()} className="text-[9px] uppercase tracking-widest text-primary-active bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-sm font-semibold">{tech.trim()}</span>
+                      {selectedProject.technologies.split(',').map((tech) => (
+                        <span key={tech.trim()} className="text-[9px] uppercase tracking-widest text-primary-active bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-sm font-semibold">{tech.trim()}</span>
                       ))}
                     </div>
                   )}
-                  
+
                   {selectedProject.projectUrl && (
                     <a
                       href={selectedProject.projectUrl}
@@ -486,6 +493,6 @@ export default function ShowcaseCarousel({ projects }: Props) {
           to { opacity: 1; }
         }
       `}</style>
-    </section>
+    </>
   );
 }
