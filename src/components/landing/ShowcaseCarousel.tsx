@@ -63,17 +63,15 @@ export default function ShowcaseCarousel({ projects }: Props) {
   useEffect(() => {
     if (projects.length === 0) return;
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      (entries) => {          entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const index = Number(entry.target.getAttribute('data-index'));
-            const originalIdx = index % projects.length;
-            setVisibleCards((prev) => new Set(prev).add(originalIdx));
+            setVisibleCards((prev) => new Set(prev).add(index));
             observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
     );
 
     // Observe all cards (original + cloned) for staggered entrance
@@ -96,7 +94,9 @@ export default function ShowcaseCarousel({ projects }: Props) {
     const rotateY = (centerX - x) / 20;
     const img = card.querySelector('img') as HTMLImageElement;
     if (img) {
-      img.style.transform = `scale(1.1) translate(${(x - centerX) / 30}px, ${(y - centerY) / 30}px)`;
+      const scale = 1.08;
+      img.style.transition = 'transform 120ms ease-out';
+      img.style.transform = `scale(${scale}) translate(${(x - centerX) / 30}px, ${(y - centerY) / 30}px)`;
     }
   };
 
@@ -104,7 +104,8 @@ export default function ShowcaseCarousel({ projects }: Props) {
     if (!card) return;
     const img = card.querySelector('img') as HTMLImageElement;
     if (img) {
-      img.style.transform = '';
+      img.style.transition = 'transform 400ms ease-out';
+      img.style.transform = 'scale(1.02)';
     }
   };
 
@@ -112,12 +113,13 @@ export default function ShowcaseCarousel({ projects }: Props) {
   const scrollByCard = useCallback((direction: 'prev' | 'next') => {
     if (!scrollRef.current) return;
     const container = scrollRef.current;
+    const innerFlex = container.querySelector('[data-carousel-track]') as HTMLDivElement | null;
     const card = container.querySelector('button') as HTMLButtonElement | null;
-    if (!card) return;
+    if (!card || !innerFlex) return;
     const cardWidth = card.offsetWidth;
-    const style = getComputedStyle(container);
-    const gapMatch = style.gap || style.columnGap || '4px';
-    const gap = parseInt(gapMatch, 10) || 4;
+    const style = getComputedStyle(innerFlex);
+    const gapMatch = style.gap || style.columnGap || '16px';
+    const gap = parseInt(gapMatch, 10) || 16;
     const totalCardStep = cardWidth + gap;
 
     let targetScroll = direction === 'next'
@@ -281,11 +283,12 @@ export default function ShowcaseCarousel({ projects }: Props) {
             ref={scrollRef}
             className="overflow-x-auto pt-1 pb-sm scroll-smooth"
             style={{ scrollbarWidth: 'none' }}
-          >              <div className="flex gap-xs min-w-max px-[2px]">
+          >
+          <div className="flex gap-xs min-w-max px-[2px]" data-carousel-track>
+
               {clonedProjects.map((project, idx) => {
-                const originalIdx = idx % projects.length;
                 const featured = project.images.find((img) => img.isFeatured) || project.images[0];
-                const isVisible = visibleCards.has(originalIdx);
+                const isVisible = visibleCards.has(idx);
                 return (
                   <button
                     key={`${project.id}-${idx}`}
@@ -293,11 +296,11 @@ export default function ShowcaseCarousel({ projects }: Props) {
                     data-index={idx}
                     onClick={() => openProject(project)}
                     className={`group relative w-[280px] md:w-[320px] flex-shrink-0 text-left bg-[#0d0d12] border border-hairline/60 hover:border-primary/30 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] transition-all duration-400 ease-out cursor-pointer rounded-xl hover:scale-[1.02] ${
-                      isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                      isVisible ? 'opacity-100' : 'opacity-0'
                     }`}
                     style={{
-                      transitionDelay: isVisible ? `${originalIdx * 100}ms` : '0ms',
-                      transitionDuration: '400ms',
+                      transitionDelay: isVisible ? `${Math.min(idx * 60, 600)}ms` : '0ms',
+                      transitionDuration: '500ms',
                       transitionProperty: 'opacity, transform, border-color, box-shadow',
                     }}
                   >
@@ -311,7 +314,8 @@ export default function ShowcaseCarousel({ projects }: Props) {
                         <img
                           src={featured.url}
                           alt={featured.caption || project.title}
-                          className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
+                          className="w-full h-full object-cover"
+                          style={{ transform: 'scale(1.02)' }}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted">
@@ -418,10 +422,6 @@ export default function ShowcaseCarousel({ projects }: Props) {
                       style={{ animation: prevImageUrl ? 'galleryFadeIn 400ms ease-out' : 'none' }}
                     />
                   </div>
-                  {selectedProject.images[galleryIndex].caption && (
-                    <p className="text-xs text-center text-muted/90 py-xxs px-sm bg-black/20 italic">{selectedProject.images[galleryIndex].caption}</p>
-                  )}
-
                   {/* Gallery navigation */}
                   {selectedProject.images.length > 1 && (
                     <>
