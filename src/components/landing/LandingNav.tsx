@@ -34,7 +34,7 @@ export default function LandingNav() {
             <LocaleSwitcher />
             <button
               onClick={() => setShowGate(true)}
-              className="flex items-center gap-1 text-[11px] font-medium text-muted hover:text-primary-active transition-all duration-300 tracking-wider uppercase cursor-pointer group"
+              className="w-10 h-10 flex items-center justify-center gap-1 text-[11px] font-medium text-muted hover:text-primary-active transition-all duration-300 tracking-wider uppercase cursor-pointer group"
             >
               <span className="material-icons text-[16px] md:text-[14px]">lock</span>
               <span className="hidden md:inline group-hover:translate-x-0.5 transition-transform">{t('clientAccess')}</span>

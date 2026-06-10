@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { updateTicketStatus } from '@/app/actions/tickets';
 import Swal from 'sweetalert2';
+import { swalTheme, swalToastTheme } from '@/lib/swal-theme';
 import { useTranslations } from 'next-intl';
 
 export default function TicketStatusManager({ ticketId, currentStatus, role }: { ticketId: string, currentStatus: string, role: 'ADMIN' | 'CLIENT' }) {
@@ -29,17 +30,14 @@ export default function TicketStatusManager({ ticketId, currentStatus, role }: {
       setLoading(false);
 
       if (res.error) {
-        Swal.fire({ icon: 'error', title: 'Error', text: res.error, background: '#181818', color: '#ffffff' });
+        Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: res.error });
       } else {
         Swal.fire({
+          ...swalToastTheme,
           icon: 'success',
           title: t('tickets.statusManager.closedSuccess'),
           text: t('tickets.statusManager.closedThankYou'),
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
           timer: 3000,
-          background: '#181818',
         });
       }
     }
@@ -52,7 +50,7 @@ export default function TicketStatusManager({ ticketId, currentStatus, role }: {
       <button 
         onClick={handleCloseTicket}
         disabled={loading}
-        className="text-muted hover:text-semantic-success font-medium flex items-center transition-colors disabled:opacity-50 text-sm"
+        className="px-xs py-xs text-muted hover:text-semantic-success font-medium flex items-center transition-colors disabled:opacity-50 text-sm"
       >
         <span className="material-icons text-[18px] mr-xxs">check_circle_outline</span>
         {t('tickets.statusManager.closeText')}

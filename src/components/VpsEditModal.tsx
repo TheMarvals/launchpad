@@ -79,7 +79,7 @@ export default function VpsEditModal({ server }: { server: any }) {
                 <span className="material-icons mr-xxs text-primary">dns</span>
                 {t('editVps') || 'Editar VPS'}
               </h3>
-              <button onClick={() => setIsOpen(false)} className="text-muted hover:text-ink transition-colors">
+              <button onClick={() => setIsOpen(false)} className="w-10 h-10 flex items-center justify-center text-muted hover:text-ink transition-colors">
                 <span className="material-icons">close</span>
               </button>
             </div>
@@ -93,7 +93,7 @@ export default function VpsEditModal({ server }: { server: any }) {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                   placeholder={t('friendlyNamePlaceholderVps') || 'Ej: Liceo A1 Web'}
                 />
               </div>
@@ -105,7 +105,7 @@ export default function VpsEditModal({ server }: { server: any }) {
                   name="hostname"
                   value={formData.hostname}
                   onChange={handleChange}
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                   placeholder={t('hostnamePlaceholder') || 'Ej: srv1.launchpad.host'}
                 />
                 <p className="text-xs text-muted mt-[2px]">{t('hostnameHelp') || 'Este nombre se mostrará al cliente en lugar de la IP.'}</p>
@@ -118,7 +118,7 @@ export default function VpsEditModal({ server }: { server: any }) {
                   name="ipAddress"
                   value={formData.ipAddress}
                   onChange={handleChange}
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                   placeholder={t('ipAddressPlaceholder') || 'Ej: 192.168.1.100'}
                 />
               </div>
@@ -131,7 +131,7 @@ export default function VpsEditModal({ server }: { server: any }) {
                   value={formData.providerId}
                   onChange={handleChange}
                   required
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                   placeholder={t('providerIdPlaceholderVps') || 'Ej: 893450'}
                 />
                 <p className="text-xs text-muted mt-[2px]">{t('providerIdHelp') || 'Este ID vincula las acciones (Start, Stop) con la API del proveedor cloud.'}</p>
@@ -144,7 +144,7 @@ export default function VpsEditModal({ server }: { server: any }) {
                   name="dueDate"
                   value={formData.dueDate}
                   onChange={handleChange}
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                 />
               </div>
 
@@ -152,14 +152,14 @@ export default function VpsEditModal({ server }: { server: any }) {
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="px-sm py-xxs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors"
+                  className="px-sm py-xs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors"
                 >
                   {t('cancel') || 'Cancelar'}
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-all disabled:opacity-50 flex items-center border border-transparent"
+                  className="bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-all disabled:opacity-50 flex items-center border border-transparent"
                 >
                   {loading ? (
                     <span className="material-icons animate-spin text-[18px]">sync</span>

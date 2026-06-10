@@ -6,6 +6,7 @@ import { createProject, deleteProject } from '@/app/actions/productivity';
 import { useTranslations, useLocale } from 'next-intl';
 import ProjectModal from './ProjectModal';
 import Swal from 'sweetalert2';
+import { swalTheme } from '@/lib/swal-theme';
 import EmptyState from '@/components/EmptyState';
 
 export default function ProjectsBoard({ initialProjects }: { initialProjects: any[] }) {
@@ -19,7 +20,7 @@ export default function ProjectsBoard({ initialProjects }: { initialProjects: an
       const newProject = await createProject(data);
       setProjects([newProject, ...projects]);
     } catch (err) {
-      Swal.fire('Error', t('create.error'), 'error');
+      Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: t('create.error') });
     }
   };
 
@@ -47,7 +48,7 @@ export default function ProjectsBoard({ initialProjects }: { initialProjects: an
         await deleteProject(id);
         setProjects(projects.filter(p => p.id !== id));
       } catch (err) {
-        Swal.fire('Error', t('delete.error'), 'error');
+        Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: t('delete.error') });
       }
     }
   };
@@ -61,7 +62,7 @@ export default function ProjectsBoard({ initialProjects }: { initialProjects: an
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center justify-center border border-transparent"
+          className="bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center justify-center border border-transparent"
         >
           <span className="material-icons mr-2 text-[20px]">add</span> {t('newProject')}
         </button>
@@ -96,7 +97,7 @@ export default function ProjectsBoard({ initialProjects }: { initialProjects: an
                   </span>
                   <button 
                     onClick={(e) => handleDelete(project.id, e)}
-                    className="p-2 text-muted hover:text-primary transition-colors"
+                    className="w-10 h-10 flex items-center justify-center text-muted hover:text-primary transition-colors"
                   >
                     <span className="material-icons text-[18px]">delete</span>
                   </button>

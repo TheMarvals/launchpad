@@ -65,7 +65,7 @@ export default function NewTicketPage() {
                   name="subject"
                   required
                   placeholder={t('tickets.new.subjectPlaceholder')}
-                  className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary transition-all outline-none text-sm"
+                  className="w-full px-xs py-xs border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary transition-all outline-none text-sm"
                 />
               </div>
 
@@ -79,7 +79,7 @@ export default function NewTicketPage() {
                     name="priority"
                     required
                     defaultValue="MEDIUM"
-                    className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink focus:border-primary transition-all outline-none appearance-none text-sm"
+                    className="w-full px-xs py-xs border border-hairline bg-canvas text-ink focus:border-primary transition-all outline-none appearance-none text-sm"
                   >
                     <option value="LOW">{t('tickets.new.priorityLow')}</option>
                     <option value="MEDIUM">{t('tickets.new.priorityMedium')}</option>
@@ -102,7 +102,7 @@ export default function NewTicketPage() {
                 required
                 rows={8}
                 placeholder={t('tickets.new.messagePlaceholder')}
-                className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary transition-all outline-none resize-y text-sm"
+                className="w-full px-xs py-xs border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary transition-all outline-none resize-y text-sm"
               ></textarea>
             </div>
 
@@ -110,7 +110,7 @@ export default function NewTicketPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-primary text-on-primary px-sm py-xxs font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 flex items-center justify-center min-w-[200px] text-xs uppercase tracking-wider"
+                className="bg-primary text-on-primary px-sm py-xs font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 flex items-center justify-center min-w-[200px] text-xs uppercase tracking-wider"
               >
                 {loading ? (
                   <>

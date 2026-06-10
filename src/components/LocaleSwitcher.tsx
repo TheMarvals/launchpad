@@ -19,7 +19,7 @@ export default function LocaleSwitcher() {
     <div className="flex items-center p-1 rounded-none border border-hairline bg-canvas-elevated">
       <button
         onClick={() => onLocaleChange('es')}
-        className={`px-3 py-1 text-xs font-semibold tracking-wider rounded-none transition-all cursor-pointer ${
+        className={`px-3 py-xs text-xs font-semibold tracking-wider rounded-none transition-all cursor-pointer ${
           locale === 'es'          ? 'bg-primary text-white'
           : 'text-muted hover:text-ink hover:bg-canvas'
         }`}
@@ -28,7 +28,7 @@ export default function LocaleSwitcher() {
       </button>
       <button
         onClick={() => onLocaleChange('en')}
-        className={`px-3 py-1 text-xs font-semibold tracking-wider rounded-none transition-all cursor-pointer ${
+        className={`px-3 py-xs text-xs font-semibold tracking-wider rounded-none transition-all cursor-pointer ${
           locale === 'en'
             ? 'bg-primary text-white'
             : 'text-muted hover:text-ink hover:bg-canvas'

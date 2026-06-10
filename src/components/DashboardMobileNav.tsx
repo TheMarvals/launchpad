@@ -9,7 +9,7 @@ export function MobileNavTrigger() {
   return (
     <button
       onClick={toggle}
-      className="md:hidden text-muted hover:text-ink transition-colors mr-xs"
+      className="md:hidden w-10 h-10 flex items-center justify-center text-muted hover:text-ink transition-colors mr-xs"
       title="Menú"
     >
       <span className="material-icons text-[22px]">menu</span>
@@ -44,13 +44,17 @@ export default function DashboardMobileNav({ children }: { children: React.React
           <h1 className="text-xl font-black tracking-tighter stroke-text">LAUNCHPAD</h1>
           <button
             onClick={close}
-            className="text-muted hover:text-ink bg-canvas-elevated p-[4px]"
+            className="w-10 h-10 flex items-center justify-center text-muted hover:text-ink bg-canvas-elevated"
           >
             <span className="material-icons text-[20px]">close</span>
           </button>
         </div>
 
-        <nav className="flex-grow overflow-y-auto" onClick={close}>
+        <nav className="flex-grow overflow-y-auto" onClick={() => {
+          // Small delay to let Link navigation start before closing the drawer,
+          // prevents race condition where the closing animation interrupts navigation
+          setTimeout(close, 60);
+        }}>
           {children}
         </nav>
 

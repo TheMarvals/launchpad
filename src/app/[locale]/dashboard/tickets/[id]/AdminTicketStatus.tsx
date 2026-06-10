@@ -33,7 +33,7 @@ export default function AdminTicketStatus({ ticketId, currentStatus }: { ticketI
           value={currentStatus}
           onChange={handleStatusChange}
           disabled={loading}
-          className="appearance-none bg-canvas border border-hairline text-ink py-[4px] pl-xxs pr-sm text-xs font-medium focus:outline-none focus:border-primary disabled:opacity-50 cursor-pointer"
+          className="appearance-none bg-canvas border border-hairline text-ink py-xs pl-xxs pr-sm text-xs font-medium focus:outline-none focus:border-primary disabled:opacity-50 cursor-pointer h-[40px]"
         >
           <option value="OPEN">{t('detail.adminStatus.OPEN')}</option>
           <option value="IN_PROGRESS">{t('detail.adminStatus.IN_PROGRESS')}</option>

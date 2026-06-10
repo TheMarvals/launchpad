@@ -278,7 +278,7 @@ export default function CloudinaryCleanupBoard() {
                   <button
                     onClick={() => handleDeleteOne(img.publicId)}
                     disabled={deleting}
-                    className="w-[32px] h-[32px] flex items-center justify-center text-muted hover:text-semantic-danger hover:bg-semantic-danger/10 transition-colors cursor-pointer disabled:opacity-50"
+                    className="w-[40px] h-[40px] flex items-center justify-center text-muted hover:text-semantic-danger hover:bg-semantic-danger/10 transition-colors cursor-pointer disabled:opacity-50"
                     title="Eliminar"
                   >
                     <span className="material-icons text-sm">delete</span>

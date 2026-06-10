@@ -188,7 +188,7 @@ export default function CompanyProfileBoard({ initialProfile }: CompanyProfileBo
           <button
             type="submit"
             disabled={isSaving}
-            className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors disabled:opacity-50 flex items-center justify-center border border-transparent"
+            className="bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors disabled:opacity-50 flex items-center justify-center border border-transparent"
           >
             {isSaving ? (
               <span className="material-icons animate-spin mr-xxs text-sm">sync</span>

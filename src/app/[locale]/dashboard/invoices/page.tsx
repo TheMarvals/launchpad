@@ -265,12 +265,12 @@ export default async function InvoicesPage({
               {currentPage > 1 ? (
                 <Link
                   href={`/dashboard/invoices?page=${currentPage - 1}&sort=${sortField}&dir=${sortDir}`}
-                  className="px-sm h-[32px] text-xs font-bold text-ink bg-transparent border border-hairline rounded-none hover:bg-canvas transition-colors flex items-center uppercase tracking-wider"
+                  className="px-sm h-10 text-xs font-bold text-ink bg-transparent border border-hairline rounded-none hover:bg-canvas transition-colors flex items-center uppercase tracking-wider"
                 >
                   <span className="material-icons text-sm mr-1">chevron_left</span> {t('pagination.previous')}
                 </Link>
               ) : (
-                <span className="px-sm h-[32px] text-xs font-bold text-muted bg-transparent border border-hairline/50 rounded-none cursor-not-allowed flex items-center uppercase tracking-wider">
+                <span className="px-sm h-10 text-xs font-bold text-muted bg-transparent border border-hairline/50 rounded-none cursor-not-allowed flex items-center uppercase tracking-wider">
                   <span className="material-icons text-sm mr-1">chevron_left</span> {t('pagination.previous')}
                 </span>
               )}
@@ -279,7 +279,7 @@ export default async function InvoicesPage({
                 <Link
                   key={page}
                   href={`/dashboard/invoices?page=${page}&sort=${sortField}&dir=${sortDir}`}
-                  className={`w-[32px] h-[32px] flex items-center justify-center text-xs font-bold rounded-none transition-colors border ${
+                  className={`w-10 h-10 flex items-center justify-center text-xs font-bold rounded-none transition-colors border ${
                     page === currentPage
                       ? 'bg-ink text-canvas border-ink'
                       : 'text-ink bg-transparent border-hairline hover:bg-canvas'
@@ -292,12 +292,12 @@ export default async function InvoicesPage({
               {currentPage < totalPages ? (
                 <Link
                   href={`/dashboard/invoices?page=${currentPage + 1}&sort=${sortField}&dir=${sortDir}`}
-                  className="px-sm h-[32px] text-xs font-bold text-ink bg-transparent border border-hairline rounded-none hover:bg-canvas transition-colors flex items-center uppercase tracking-wider"
+                  className="px-sm h-10 text-xs font-bold text-ink bg-transparent border border-hairline rounded-none hover:bg-canvas transition-colors flex items-center uppercase tracking-wider"
                 >
                   {t('pagination.next')} <span className="material-icons text-sm ml-1">chevron_right</span>
                 </Link>
               ) : (
-                <span className="px-sm h-[32px] text-xs font-bold text-muted bg-transparent border border-hairline/50 rounded-none cursor-not-allowed flex items-center uppercase tracking-wider">
+                <span className="px-sm h-10 text-xs font-bold text-muted bg-transparent border border-hairline/50 rounded-none cursor-not-allowed flex items-center uppercase tracking-wider">
                   {t('pagination.next')} <span className="material-icons text-sm ml-1">chevron_right</span>
                 </span>
               )}

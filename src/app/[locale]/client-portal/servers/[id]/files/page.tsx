@@ -21,15 +21,16 @@ interface FileItem {
 const swalTheme = {
   background: '#0a041a',
   color: '#cbd5e1',
+  width: 'auto',
   confirmButtonColor: '#2563eb',
   cancelButtonColor: '#1e293b',
   customClass: {
-    popup: 'rounded-[2rem] border border-white/10 shadow-2xl backdrop-blur-xl',
-    title: 'text-2xl font-black tracking-tight text-white',
+    popup: 'rounded-[2rem] border border-white/10 shadow-2xl backdrop-blur-xl !w-[90vw] sm:!w-auto',
+    title: 'text-xl sm:text-2xl font-black tracking-tight text-white',
     htmlContainer: 'text-slate-400 text-sm font-medium',
-    confirmButton: 'rounded-xl px-6 py-3 font-black text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95',
-    cancelButton: 'rounded-xl px-6 py-3 font-bold text-xs uppercase tracking-widest transition-all hover:bg-white/5 active:scale-95',
-    input: 'bg-black/40 border border-white/10 rounded-xl text-white px-4 py-3 focus:border-blue-500/50 outline-none transition-all'
+    confirmButton: 'rounded-xl px-4 sm:px-6 py-3 font-black text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95',
+    cancelButton: 'rounded-xl px-4 sm:px-6 py-3 font-bold text-xs uppercase tracking-widest transition-all hover:bg-white/5 active:scale-95',
+    input: 'bg-black/40 border border-white/10 rounded-xl text-white px-3 sm:px-4 py-3 focus:border-blue-500/50 outline-none transition-all'
   }
 };
 
@@ -528,14 +529,14 @@ export default function FileManagerPage() {
                           )}
                           <button 
                             onClick={() => handleRename(file.name)}
-                            className="p-2 hover:bg-white/10 rounded-xl text-slate-500 hover:text-white transition-all border border-transparent hover:border-white/10"
+                            className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl text-slate-500 hover:text-white transition-all border border-transparent hover:border-white/10"
                             title="Rename"
                           >
                             <span className="material-icons text-[18px]">drive_file_rename_outline</span>
                           </button>
                           <button 
                             onClick={() => handleDelete(file.name, file.type)}
-                            className="p-2 hover:bg-red-500/10 rounded-xl text-slate-500 hover:text-red-400 transition-all border border-transparent hover:border-red-500/20"
+                            className="w-10 h-10 flex items-center justify-center hover:bg-red-500/10 rounded-xl text-slate-500 hover:text-red-400 transition-all border border-transparent hover:border-red-500/20"
                             title="Delete"
                           >
                             <span className="material-icons text-[18px]">delete</span>

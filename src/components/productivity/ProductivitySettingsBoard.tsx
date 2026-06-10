@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { updateProductivitySettings, testTelegram } from '@/app/actions/productivity';
 import Swal from 'sweetalert2';
+import { swalTheme } from '@/lib/swal-theme';
 
 interface SettingsProps {
   initialSettings: any;
@@ -51,7 +52,7 @@ export default function ProductivitySettingsBoard({ initialSettings }: SettingsP
 
   const handleTest = async () => {
     if (!settings.telegramBotToken || !settings.telegramChatId) {
-      Swal.fire('Error', t('telegram.testRequired') || 'Token and Chat ID are required for testing', 'error');
+      Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: t('telegram.testRequired') || 'Token and Chat ID are required for testing' });
       return;
     }
     setIsTesting(true);
@@ -127,14 +128,14 @@ export default function ProductivitySettingsBoard({ initialSettings }: SettingsP
               type="button"
               onClick={handleTest}
               disabled={isTesting}
-              className="flex-1 px-xs py-xxs font-semibold text-xs uppercase tracking-wider text-primary border border-primary hover:bg-primary/5 transition-colors disabled:opacity-50"
+              className="flex-1 px-xs py-xs font-semibold text-xs uppercase tracking-wider text-primary border border-primary hover:bg-primary/5 transition-colors disabled:opacity-50"
             >
               {isTesting ? '...' : t('telegram.test')}
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="flex-[2] bg-primary text-on-primary px-xs py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors disabled:opacity-50 flex items-center justify-center border border-transparent"
+              className="flex-[2] bg-primary text-on-primary px-xs py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors disabled:opacity-50 flex items-center justify-center border border-transparent"
             >
               <span className="material-icons mr-xxs text-sm">save</span>
               {isSaving ? '...' : t('telegram.save')}

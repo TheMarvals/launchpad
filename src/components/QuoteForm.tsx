@@ -32,10 +32,16 @@ const EDITOR_STYLE = `
     padding: 8px 24px !important;
   }
   .ql-editor {
-    padding: 40px !important;
-    min-height: 400px;
+    padding: 24px !important;
+    min-height: 300px;
     line-height: 1.6;
     color: #334155;
+  }
+  @media (min-width: 768px) {
+    .ql-editor {
+      padding: 40px !important;
+      min-height: 400px;
+    }
   }
   .ql-editor.ql-blank::before {
     left: 40px !important;
@@ -215,7 +221,7 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
             </button>
           </div>
           <div className="flex-grow bg-canvas overflow-auto p-sm md:p-lg border-x border-b border-hairline">
-            <div className="min-w-[210mm] flex flex-col items-center gap-md">
+            <div className="w-full max-w-[210mm] mx-auto flex flex-col items-center gap-md">
               <QuotePDF quote={mockQuote} companyProfile={companyProfile} />
             </div>
             <div className="h-24" /> 
@@ -238,7 +244,7 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
             <label className="block text-caption-uppercase text-ink font-semibold">{t('clientLabel')}</label>
             <div className="relative">
               <select 
-                className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors px-xs py-xxs text-sm appearance-none cursor-pointer pr-sm"
+                className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors px-xs py-xs text-sm appearance-none cursor-pointer pr-sm"
                 value={clientId}
                 onChange={(e) => setClientId(e.target.value)}
                 required
@@ -255,7 +261,7 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
             <label className="block text-caption-uppercase text-ink font-semibold">{t('validityLabel')}</label>
             <input 
               type="date" 
-              className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+              className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
               value={fechaValidez}
               onChange={(e) => setFechaValidez(e.target.value)}
               required
@@ -296,7 +302,7 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
           <button 
             type="button" 
             onClick={addItem}
-            className="text-ink font-semibold text-xs uppercase tracking-wider hover:bg-canvas px-sm py-xxs transition-colors flex items-center border border-hairline"
+            className="text-ink font-semibold text-xs uppercase tracking-wider hover:bg-canvas px-sm py-xs transition-colors flex items-center border border-hairline"
           >
             <span className="material-icons mr-xxs text-sm">add</span> {t('addItem')}
           </button>
@@ -304,55 +310,78 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
 
         <div className="space-y-sm border-t border-hairline pt-sm">
           {items.map((item: any, idx: number) => (
-            <div key={idx} className="flex gap-sm items-end pb-sm">
-              <div className="flex-grow space-y-xxs">
+            <div key={idx} className="bg-surface-card p-sm md:p-0 md:bg-transparent md:border-none space-y-sm md:space-y-0 md:flex md:gap-sm md:items-end pb-sm border-b border-hairline/20 mb-sm last:border-b-0 last:mb-0 last:pb-0">
+              {/* Description - full width on mobile */}
+              <div className="w-full md:w-auto md:flex-1 space-y-xxs">
                 <label className="text-caption-uppercase text-ink font-semibold">{t('itemLabel')}</label>
                 <input 
                   type="text" 
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                   value={item.descripcion}
                   onChange={(e) => updateItem(idx, 'descripcion', e.target.value)}
                   required
                 />
               </div>
-              <div className="w-24 space-y-xxs">
-                <label className="text-caption-uppercase text-ink font-semibold">{t('quantity')}</label>
-                <input 
-                  type="number" 
-                  min="1"
-                  className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors text-center font-semibold px-xs py-xxs text-sm"
-                  value={item.cantidad}
-                  onChange={(e) => updateItem(idx, 'cantidad', e.target.value)}
-                  required
-                />
-              </div>
-              <div className="w-40 space-y-xxs">
-                <label className="text-caption-uppercase text-ink font-semibold">{t('unitPrice')}</label>
-                <div className="relative">
-                  <span className="absolute left-xs top-1/2 -translate-y-1/2 text-muted font-semibold">$</span>
+              {/* Quantity + Unit Price - side by side on mobile */}
+              <div className="grid grid-cols-2 md:flex md:gap-sm gap-2 items-end">
+                <div className="md:w-24 space-y-xxs">
+                  <label className="text-caption-uppercase text-ink font-semibold">{t('quantity')}</label>
                   <input 
                     type="number" 
-                    min="0"
-                    className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors font-semibold pl-md px-xs py-xxs text-sm"
-                    value={item.precioUnitario}
-                    onChange={(e) => updateItem(idx, 'precioUnitario', e.target.value)}
+                    min="1"
+                    className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors text-center font-semibold px-xs py-xs text-sm"
+                    value={item.cantidad}
+                    onChange={(e) => updateItem(idx, 'cantidad', e.target.value)}
                     required
                   />
                 </div>
-              </div>
-              <div className="w-32 text-right self-center pb-xxs">
-                <div className="text-caption-uppercase text-muted mb-xxs">{t('subtotal')}</div>
-                <div className="font-medium text-ink">
-                  ${(Number(item.cantidad) * Number(item.precioUnitario) || 0).toLocaleString(locale)}
+                <div className="md:w-40 space-y-xxs">
+                  <label className="text-caption-uppercase text-ink font-semibold">{t('unitPrice')}</label>
+                  <div className="relative">
+                    <span className="absolute left-xs top-1/2 -translate-y-1/2 text-muted font-semibold">$</span>
+                    <input 
+                      type="number" 
+                      min="0"
+                      className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors font-semibold pl-md px-xs py-xs text-sm"
+                      value={item.precioUnitario}
+                      onChange={(e) => updateItem(idx, 'precioUnitario', e.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
+                {/* Subtotal - desktop only here */}
+                <div className="hidden md:block md:w-32 text-right self-center pb-xxs">
+                  <div className="text-caption-uppercase text-muted mb-xxs">{t('subtotal')}</div>
+                  <div className="font-medium text-ink">
+                    ${(Number(item.cantidad) * Number(item.precioUnitario) || 0).toLocaleString(locale)}
+                  </div>
+                </div>
+                {/* Delete - desktop only here */}
+                <button 
+                  type="button" 
+                  onClick={() => removeItem(idx)}
+                  className="hidden md:block pb-xxs p-xxs text-muted hover:text-semantic-warning transition-colors self-end"
+                >
+                  <span className="material-icons">delete_outline</span>
+                </button>
               </div>
-              <button 
-                type="button" 
-                onClick={() => removeItem(idx)}
-                className="mb-xxs p-xxs text-muted hover:text-semantic-warning transition-colors"
-              >
-                <span className="material-icons">delete_outline</span>
-              </button>
+              {/* Mobile: subtotal + delete row */}
+              <div className="flex md:hidden justify-between items-center pt-1 border-t border-hairline/10">
+                <div className="flex items-center gap-1">
+                  <span className="text-caption-uppercase text-muted text-xs">{t('subtotal')}</span>
+                  <span className="font-semibold text-ink text-sm">
+                    ${(Number(item.cantidad) * Number(item.precioUnitario) || 0).toLocaleString(locale)}
+                  </span>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={() => removeItem(idx)}
+                  className="p-xxs text-muted hover:text-semantic-warning transition-colors flex items-center gap-1 text-xs font-semibold uppercase tracking-wider"
+                >
+                  <span className="material-icons text-sm">delete_outline</span>
+                  Eliminar
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -362,7 +391,7 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
             <label className="text-caption-uppercase text-ink font-semibold">{t('taxLabel')}</label>
             <input 
               type="text" 
-              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
               value={taxName}
               onChange={(e) => setTaxName(e.target.value)}
               placeholder="Ej. IVA"
@@ -373,7 +402,7 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
             <input 
               type="number" 
               step="0.01"
-              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
               value={taxPercent}
               onChange={(e) => setTaxPercent(e.target.value)}
             />
@@ -399,7 +428,7 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
         </div>
 
         <div className="flex justify-end pt-md">
-          <div className="w-80 space-y-xxs p-sm bg-canvas border border-hairline ml-auto">
+          <div className="w-full md:w-80 space-y-xxs p-sm bg-canvas border border-hairline ml-auto">
             <div className="flex justify-between text-caption-uppercase text-muted">
               <span>{t('net')}</span>
               <span className="text-ink font-medium">${neto.toLocaleString(locale)}</span>
@@ -429,7 +458,7 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
             <span className="material-icons text-sm mr-xxs text-primary">gavel</span> {t('notesTitle')}
           </label>
           <textarea 
-            className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm min-h-[150px]"
+            className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm min-h-[150px]"
             value={notasCondiciones}
             onChange={(e) => setNotasCondiciones(e.target.value)}
           />
@@ -440,7 +469,7 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
           </label>
           <input 
             type="text" 
-            className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+            className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value)}
             placeholder={t('paymentMethodPlaceholder')}
@@ -452,13 +481,14 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
       </div>
 
       {/* 5. Sticky Actions Bar */}
-      <div className="flex justify-between items-center bg-canvas-elevated p-sm border-t border-hairline sticky bottom-0 z-30">
-        <div className="flex items-center gap-sm pl-xxs">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-xs bg-canvas-elevated p-sm border-t border-hairline sticky bottom-0 z-30">
+        <div className="flex items-center justify-between sm:justify-start gap-xxs w-full sm:w-auto">
           <button 
             type="button" 
             onClick={() => router.back()}
-            className="text-muted font-semibold hover:text-ink transition-colors text-xs uppercase tracking-wider"
+            className="text-muted font-semibold hover:text-ink transition-colors text-xs uppercase tracking-wider flex items-center"
           >
+            <span className="material-icons text-sm mr-xxs">arrow_back</span>
             Volver
           </button>
           <div className="h-xs w-px bg-hairline" />
@@ -467,16 +497,17 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
             onClick={() => setShowPreview(true)}
             className="text-ink font-semibold hover:text-ink/70 transition-all flex items-center text-xs uppercase tracking-wider"
           >
-            <span className="material-icons mr-xxs text-sm">visibility</span> {t('preview')}
+            <span className="material-icons mr-xxs text-sm">visibility</span>
+            {t('preview')}
           </button>
         </div>
         
-        <div className="flex gap-xxs">
+        <div className="flex gap-xxs w-full sm:w-auto justify-end">
           <button 
             type="button" 
             onClick={() => handleSubmit('Borrador')}
             disabled={isSubmitting}
-            className="bg-transparent border border-hairline text-ink px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-canvas transition-colors disabled:opacity-50"
+            className="bg-transparent border border-hairline text-ink px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-canvas transition-colors disabled:opacity-50"
           >
             {t('saveDraft')}
           </button>
@@ -484,7 +515,7 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
             type="button" 
             onClick={() => handleSubmit('Enviada')}
             disabled={isSubmitting}
-            className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center disabled:opacity-50"
+            className="bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center disabled:opacity-50"
           >
             {isSubmitting ? (
               <span className="material-icons animate-spin mr-xxs text-sm">sync</span>

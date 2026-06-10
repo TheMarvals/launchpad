@@ -118,7 +118,7 @@ export default async function ClientTicketsPage({
         </div>
         <Link
           href="/client-portal/tickets/new"
-          className="bg-primary text-on-primary px-sm py-xxs font-semibold transition-colors flex items-center text-xs uppercase tracking-wider shrink-0"
+          className="bg-primary text-on-primary px-sm py-xs font-semibold transition-colors flex items-center text-xs uppercase tracking-wider shrink-0"
         >
           <span className="material-icons text-[18px] mr-xxs">add</span>
           {t('tickets.newTicket')}
@@ -184,7 +184,8 @@ export default async function ClientTicketsPage({
           />
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-canvas border-b border-hairline group">
@@ -233,6 +234,36 @@ export default async function ClientTicketsPage({
               </table>
             </div>
 
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-hairline">
+              {tickets.map((ticket, index) => (
+                <div key={ticket.id} className="animate-fade-in px-sm py-xs space-y-xxs hover:bg-canvas/50 transition-colors" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="flex items-start justify-between gap-xxs">
+                    <div className="min-w-0 flex-1">
+                      <Link href={`/client-portal/tickets/${ticket.id}`} className="font-medium text-ink text-sm hover:text-primary transition-colors">
+                        {ticket.subject}
+                      </Link>
+                      <p className="text-xs text-muted font-mono mt-[1px]">#{ticket.id.split('-')[0].toUpperCase()}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-[2px] shrink-0">
+                      <span className={`inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border text-[10px] ${getStatusColor(ticket.status)}`}>
+                        {getStatusText(ticket.status)}
+                      </span>
+                      <span className={`inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border text-[10px] ${getPriorityColor(ticket.priority)}`}>
+                        {getPriorityText(ticket.priority)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted">
+                    <span>{format(new Date(ticket.updatedAt), locale === 'es' ? "d 'de' MMM, HH:mm" : "MMM d, HH:mm", { locale: dateLocale })}</span>
+                    <Link href={`/client-portal/tickets/${ticket.id}`} className="text-primary hover:text-primary-hover font-semibold text-xs uppercase tracking-wider">
+                      {locale === 'es' ? 'Ver' : 'View'}
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between p-sm border-t border-hairline">
@@ -243,12 +274,12 @@ export default async function ClientTicketsPage({
                   {currentPage > 1 ? (
                     <Link
                       href={`/client-portal/tickets?page=${currentPage - 1}&sort=${sortField}&dir=${sortDir}${filterEstado ? `&estado=${filterEstado}` : ''}${filterPrioridad ? `&prioridad=${filterPrioridad}` : ''}${searchQuery ? `&q=${searchQuery}` : ''}`}
-                      className="px-sm h-[32px] text-xs font-bold text-ink bg-transparent border border-hairline rounded-none hover:bg-canvas transition-colors flex items-center uppercase tracking-wider"
+                      className="px-sm h-10 text-xs font-bold text-ink bg-transparent border border-hairline rounded-none hover:bg-canvas transition-colors flex items-center uppercase tracking-wider"
                     >
                       <span className="material-icons text-sm mr-1">chevron_left</span> {locale === 'es' ? 'Anterior' : 'Previous'}
                     </Link>
                   ) : (
-                    <span className="px-sm h-[32px] text-xs font-bold text-muted bg-transparent border border-hairline/50 rounded-none cursor-not-allowed flex items-center uppercase tracking-wider">
+                    <span className="px-sm h-10 text-xs font-bold text-muted bg-transparent border border-hairline/50 rounded-none cursor-not-allowed flex items-center uppercase tracking-wider">
                       <span className="material-icons text-sm mr-1">chevron_left</span> {locale === 'es' ? 'Anterior' : 'Previous'}
                     </span>
                   )}
@@ -257,7 +288,7 @@ export default async function ClientTicketsPage({
                     <Link
                       key={page}
                       href={`/client-portal/tickets?page=${page}&sort=${sortField}&dir=${sortDir}${filterEstado ? `&estado=${filterEstado}` : ''}${filterPrioridad ? `&prioridad=${filterPrioridad}` : ''}${searchQuery ? `&q=${searchQuery}` : ''}`}
-                      className={`w-[32px] h-[32px] flex items-center justify-center text-xs font-bold rounded-none transition-colors border ${
+                      className={`w-10 h-10 flex items-center justify-center text-xs font-bold rounded-none transition-colors border ${
                         page === currentPage
                           ? 'bg-ink text-canvas border-ink'
                           : 'text-ink bg-transparent border-hairline hover:bg-canvas'
@@ -270,12 +301,12 @@ export default async function ClientTicketsPage({
                   {currentPage < totalPages ? (
                     <Link
                       href={`/client-portal/tickets?page=${currentPage + 1}&sort=${sortField}&dir=${sortDir}${filterEstado ? `&estado=${filterEstado}` : ''}${filterPrioridad ? `&prioridad=${filterPrioridad}` : ''}${searchQuery ? `&q=${searchQuery}` : ''}`}
-                      className="px-sm h-[32px] text-xs font-bold text-ink bg-transparent border border-hairline rounded-none hover:bg-canvas transition-colors flex items-center uppercase tracking-wider"
+                      className="px-sm h-10 text-xs font-bold text-ink bg-transparent border border-hairline rounded-none hover:bg-canvas transition-colors flex items-center uppercase tracking-wider"
                     >
                       {locale === 'es' ? 'Siguiente' : 'Next'} <span className="material-icons text-sm ml-1">chevron_right</span>
                     </Link>
                   ) : (
-                    <span className="px-sm h-[32px] text-xs font-bold text-muted bg-transparent border border-hairline/50 rounded-none cursor-not-allowed flex items-center uppercase tracking-wider">
+                    <span className="px-sm h-10 text-xs font-bold text-muted bg-transparent border border-hairline/50 rounded-none cursor-not-allowed flex items-center uppercase tracking-wider">
                       {locale === 'es' ? 'Siguiente' : 'Next'} <span className="material-icons text-sm ml-1">chevron_right</span>
                     </span>
                   )}

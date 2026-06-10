@@ -231,10 +231,10 @@ export default function ConsolePage() {
 
         {/* Controls */}
         <div className="flex items-center space-x-2">
-          <button onClick={handleFullscreen} className="text-slate-500 hover:text-white transition-colors px-1 py-1" title="Fullscreen">
+          <button onClick={handleFullscreen} className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-white transition-colors" title="Fullscreen">
             <span className="material-icons text-[16px]">fullscreen</span>
           </button>
-          <button onClick={() => window.close()} className="text-slate-500 hover:text-white transition-colors px-1 py-1" title="Cerrar">
+          <button onClick={() => window.close()} className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-white transition-colors" title="Cerrar">
             <span className="material-icons text-[16px]">close</span>
           </button>
         </div>

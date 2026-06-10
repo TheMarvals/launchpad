@@ -25,47 +25,86 @@ export default async function ClientQuotesPage() {
 
       <div className="bg-canvas-elevated border border-hairline overflow-hidden">
         {quotes.length > 0 ? (
-          <table className="w-full">
-            <thead>
-              <tr className="text-left text-caption-uppercase text-muted font-semibold border-b border-hairline bg-canvas">
-                <th className="px-sm py-xs">{t('quotes.table.number')}</th>
-                <th className="px-sm py-xs">{t('quotes.table.date')}</th>
-                <th className="px-sm py-xs">{t('quotes.table.status')}</th>
-                <th className="px-sm py-xs text-right">{t('quotes.table.netAmount')}</th>
-                <th className="px-sm py-xs text-right">{t('quotes.table.action')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-hairline">
-              {quotes.map((quote) => (
-                <tr key={quote.id} className="text-sm hover:bg-canvas/80 transition-colors">
-                  <td className="px-sm py-xs font-medium text-ink">COT-{quote.correlativo.toString().padStart(4, '0')}</td>
-                  <td className="px-sm py-xs text-muted">{new Date(quote.fechaEmision).toLocaleDateString()}</td>
-                  <td className="px-sm py-xs">
-                    <span className={`px-xxs py-[2px] text-caption-uppercase font-semibold border ${
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="text-left text-caption-uppercase text-muted font-semibold border-b border-hairline bg-canvas">
+                    <th className="px-sm py-xs">{t('quotes.table.number')}</th>
+                    <th className="px-sm py-xs">{t('quotes.table.date')}</th>
+                    <th className="px-sm py-xs">{t('quotes.table.status')}</th>
+                    <th className="px-sm py-xs text-right">{t('quotes.table.netAmount')}</th>
+                    <th className="px-sm py-xs text-right">{t('quotes.table.action')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-hairline">
+                  {quotes.map((quote) => (
+                    <tr key={quote.id} className="text-sm hover:bg-canvas/80 transition-colors">
+                      <td className="px-sm py-xs font-medium text-ink">COT-{quote.correlativo.toString().padStart(4, '0')}</td>
+                      <td className="px-sm py-xs text-muted">{new Date(quote.fechaEmision).toLocaleDateString()}</td>
+                      <td className="px-sm py-xs">
+                        <span className={`px-xxs py-[2px] text-caption-uppercase font-semibold border ${
+                          quote.estado === 'Aceptada' ? 'bg-semantic-success/10 text-semantic-success border-semantic-success/30' :
+                          quote.estado === 'Rechazada' ? 'bg-semantic-warning/10 text-semantic-warning border-semantic-warning/30' :
+                          'bg-accent-yellow/10 text-accent-yellow border-accent-yellow/30'
+                        }`}>
+                          {quote.estado}
+                        </span>
+                      </td>
+                      <td className="px-sm py-xs text-right font-mono font-medium text-ink">
+                        ${quote.montoNeto.toLocaleString('es-CL')}
+                      </td>
+                      <td className="px-sm py-xs text-right">
+                        <a 
+                          href={`/api/quotes/${quote.id}/pdf`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center text-primary hover:text-primary/80 transition-colors bg-primary/10 px-xxs py-[4px] text-caption-uppercase font-semibold"
+                        >
+                          <span className="material-icons text-[16px] mr-[2px]">picture_as_pdf</span> {t('quotes.pdf')}
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-hairline">
+              {quotes.map((quote, index) => (
+                <div key={quote.id} className="animate-fade-in px-sm py-xs space-y-xxs hover:bg-canvas/50 transition-colors" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="flex items-start justify-between gap-xxs">
+                    <div className="min-w-0 flex-1">
+                      <span className="font-medium text-ink text-sm">COT-{quote.correlativo.toString().padStart(4, '0')}</span>
+                    </div>
+                    <span className={`shrink-0 inline-flex items-center px-xxs py-[2px] text-caption-uppercase font-semibold border text-[10px] ${
                       quote.estado === 'Aceptada' ? 'bg-semantic-success/10 text-semantic-success border-semantic-success/30' :
                       quote.estado === 'Rechazada' ? 'bg-semantic-warning/10 text-semantic-warning border-semantic-warning/30' :
                       'bg-accent-yellow/10 text-accent-yellow border-accent-yellow/30'
                     }`}>
                       {quote.estado}
                     </span>
-                  </td>
-                  <td className="px-sm py-xs text-right font-mono font-medium text-ink">
-                    ${quote.montoNeto.toLocaleString('es-CL')}
-                  </td>
-                  <td className="px-sm py-xs text-right">
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted">
+                    <span>{new Date(quote.fechaEmision).toLocaleDateString()}</span>
+                    <span className="font-semibold text-ink font-mono">${quote.montoNeto.toLocaleString('es-CL')}</span>
+                  </div>
+                  <div className="flex justify-end pt-xxxs">
                     <a 
                       href={`/api/quotes/${quote.id}/pdf`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center text-primary hover:text-primary/80 transition-colors bg-primary/10 px-xxs py-[4px] text-caption-uppercase font-semibold"
+                      className="inline-flex items-center text-primary hover:text-primary/80 transition-colors bg-primary/10 px-xxs py-[4px] text-caption-uppercase font-semibold text-xs"
                     >
                       <span className="material-icons text-[16px] mr-[2px]">picture_as_pdf</span> {t('quotes.pdf')}
                     </a>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </>
         ) : (
           <EmptyState
               variant="document"

@@ -37,6 +37,8 @@ export async function getShowcaseProject(id: string) {
 export async function createShowcaseProject(data: {
   title: string;
   description?: string;
+  descriptionEs?: string;
+  descriptionEn?: string;
   category?: string;
   technologies?: string;
   clientName?: string;
@@ -50,6 +52,8 @@ export async function createShowcaseProject(data: {
     data: {
       title: data.title,
       description: data.description || null,
+      descriptionEs: data.descriptionEs || null,
+      descriptionEn: data.descriptionEn || null,
       category: data.category || 'web',
       technologies: data.technologies || null,
       clientName: data.clientName || null,
@@ -68,6 +72,8 @@ export async function updateShowcaseProject(
   data: {
     title?: string;
     description?: string;
+    descriptionEs?: string;
+    descriptionEn?: string;
     category?: string;
     technologies?: string;
     clientName?: string;
@@ -79,6 +85,8 @@ export async function updateShowcaseProject(
   const cleanData = {
     ...data,
     description: data.description === '' ? null : data.description,
+    descriptionEs: data.descriptionEs === '' ? null : data.descriptionEs,
+    descriptionEn: data.descriptionEn === '' ? null : data.descriptionEn,
     technologies: data.technologies === '' ? null : data.technologies,
     clientName: data.clientName === '' ? null : data.clientName,
     projectUrl: data.projectUrl === '' ? null : data.projectUrl,
@@ -119,6 +127,12 @@ export async function addShowcaseImage(
     url: string;
     caption?: string;
     isFeatured?: boolean;
+    imageMetadata?: {
+      format?: string;
+      width?: number;
+      height?: number;
+      colors?: string[];
+    };
   }
 ) {
   const maxOrder = await prisma.showcaseImage.aggregate({
@@ -130,11 +144,19 @@ export async function addShowcaseImage(
   const imageCount = await prisma.showcaseImage.count({ where: { projectId } });
   const isFeatured = imageCount === 0 ? true : (data.isFeatured ?? false);
 
+  // Auto-generate caption from image metadata if no caption provided
+  let caption = data.caption;
+  if (!caption && data.imageMetadata) {
+    const meta = data.imageMetadata;
+    const tags = [meta.format?.toUpperCase(), meta.width && meta.height ? `${meta.width}×${meta.height}` : null].filter(Boolean);
+    caption = tags.join(' · ') || undefined;
+  }
+
   const image = await prisma.showcaseImage.create({
     data: {
       projectId,
       url: data.url,
-      caption: data.caption || null,
+      caption,
       isFeatured,
       order: (maxOrder._max.order ?? -1) + 1,
     },

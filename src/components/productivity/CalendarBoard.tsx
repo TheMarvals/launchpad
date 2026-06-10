@@ -11,6 +11,7 @@ import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from '@
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 import Swal from 'sweetalert2';
+import { swalTheme } from '@/lib/swal-theme';
 import EventModal from './EventModal';
 
 export default function CalendarBoard({ initialEvents }: { initialEvents: any[] }) {
@@ -95,7 +96,7 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
         }]);
       }
     } catch (err) {
-      Swal.fire('Error', t('create.error'), 'error');
+      Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: t('create.error') });
     }
   };
 
@@ -124,7 +125,7 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
         setEvents(events.filter(e => e.id !== selectedEvent.id));
         setIsModalOpen(false);
       } catch (err) {
-        Swal.fire('Error', t('delete.error'), 'error');
+        Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: t('delete.error') });
       }
     }
   };
@@ -144,6 +145,36 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
         .fc-day-today { background-color: rgba(218, 41, 28, 0.08) !important; }
         .fc-theme-standard td, .fc-theme-standard th { border-color: var(--color-hairline) !important; }
         .fc-theme-standard .fc-scrollgrid { border-color: var(--color-hairline) !important; }
+
+        @media (max-width: 767px) {
+          .fc-toolbar.fc-header-toolbar {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+          .fc-toolbar-chunk {
+            display: flex;
+            justify-content: center;
+          }
+          .fc-button {
+            padding: 0.7rem 0.75rem !important;
+            font-size: 0.6rem !important;
+          }
+          .fc-toolbar-title {
+            font-size: 1.1rem !important;
+          }
+          .fc-col-header-cell-cushion {
+            padding: 0.5rem 0 !important;
+            font-size: 0.55rem !important;
+          }
+          .fc-daygrid-day-number {
+            font-size: 0.75rem !important;
+            padding: 0.25rem !important;
+          }
+          .fc-event {
+            font-size: 0.65rem !important;
+            padding: 0.15rem 0.3rem !important;
+          }
+        }
       `}</style>
       
       <FullCalendar

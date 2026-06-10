@@ -6,6 +6,7 @@ import { createAdmin, deleteAdmin, updateAdmin, resetAdminPassword } from '@/app
 import EmptyState from '@/components/EmptyState';
 import { PERMISSION_GROUPS, ALL_PERMISSIONS, type Permission } from '@/lib/permissions';
 import Swal from 'sweetalert2';
+import { swalTheme } from '@/lib/swal-theme';
 import GenericModal from '../productivity/GenericModal';
 
 interface TeamManagementBoardProps {
@@ -78,7 +79,7 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
 
   const handleSaveAdmin = async () => {
     if (!formData.name || !formData.email) {
-      Swal.fire('Error', t('requiredFields'), 'error');
+      Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: t('requiredFields') });
       return;
     }
 
@@ -142,7 +143,7 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
 
   const handleResetPassword = async () => {
     if (!newPassword) {
-      Swal.fire('Error', t('passwordRequired') || 'Password is required', 'error');
+      Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: t('passwordRequired') || 'Password is required' });
       return;
     }
     setIsSaving(true);
@@ -204,7 +205,7 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
             setShowCopySelector(false);
             setIsModalOpen(true);
           }}
-          className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center justify-center border border-transparent"
+          className="bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center justify-center border border-transparent"
         >
           <span className="material-icons mr-xxs text-sm">person_add</span> {t('newAdmin')}
         </button>
@@ -525,14 +526,14 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
                 setSelectedPermissions([]);
                 setShowCopySelector(false);
               }}
-              className="px-sm py-xxs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors cursor-pointer"
+              className="px-sm py-xs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors cursor-pointer"
             >
               {t('form.cancel')}
             </button>
             <button
               onClick={handleSaveAdmin}
               disabled={isSaving}
-              className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors disabled:opacity-50 cursor-pointer"
+              className="bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors disabled:opacity-50 cursor-pointer"
             >
               {isSaving ? t('form.saving') : t('form.save')}
             </button>
@@ -574,14 +575,14 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
                 setResetAdmin(null);
                 setNewPassword('');
               }}
-              className="px-sm py-xxs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors cursor-pointer"
+              className="px-sm py-xs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors cursor-pointer"
             >
               {t('form.cancel')}
             </button>
             <button
               onClick={handleResetPassword}
               disabled={isSaving}
-              className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors disabled:opacity-50 cursor-pointer"
+              className="bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors disabled:opacity-50 cursor-pointer"
             >
               {isSaving ? t('form.saving') : (t('form.save') || 'Guardar')}
             </button>

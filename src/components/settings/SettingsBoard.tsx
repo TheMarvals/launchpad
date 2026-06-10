@@ -55,7 +55,7 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
         <button
           ref={setTabRef('company')}
           onClick={() => setActiveTab('company')}
-          className={`pb-xxs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
+          className={`py-xs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
             activeTab === 'company' 
               ? 'border-primary text-primary' 
               : 'border-transparent text-muted hover:text-ink'
@@ -66,7 +66,7 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
         <button
           ref={setTabRef('team')}
           onClick={() => setActiveTab('team')}
-          className={`pb-xxs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
+          className={`py-xs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
             activeTab === 'team' 
               ? 'border-primary text-primary' 
               : 'border-transparent text-muted hover:text-ink'
@@ -77,7 +77,7 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
         <button
           ref={setTabRef('productivity')}
           onClick={() => setActiveTab('productivity')}
-          className={`pb-xxs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
+          className={`py-xs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
             activeTab === 'productivity' 
               ? 'border-primary text-primary' 
               : 'border-transparent text-muted hover:text-ink'
@@ -88,7 +88,7 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
         <button
           ref={setTabRef('cleanup')}
           onClick={() => setActiveTab('cleanup')}
-          className={`pb-xxs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
+          className={`py-xs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
             activeTab === 'cleanup' 
               ? 'border-primary text-primary' 
               : 'border-transparent text-muted hover:text-ink'
@@ -99,7 +99,7 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
         <button
           ref={setTabRef('partners')}
           onClick={() => setActiveTab('partners')}
-          className={`pb-xxs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
+          className={`py-xs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
             activeTab === 'partners' 
               ? 'border-primary text-primary' 
               : 'border-transparent text-muted hover:text-ink'
@@ -110,7 +110,7 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
         <button
           ref={setTabRef('prisma')}
           onClick={() => setActiveTab('prisma')}
-          className={`pb-xxs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
+          className={`py-xs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
             activeTab === 'prisma' 
               ? 'border-primary text-primary' 
               : 'border-transparent text-muted hover:text-ink'

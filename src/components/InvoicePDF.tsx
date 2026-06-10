@@ -12,7 +12,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
   const locale = useLocale();
 
   return (
-    <div className="pdf-wrapper w-full max-w-[210mm] print:max-w-full mx-auto print:mx-0 space-y-8 print:space-y-0">
+    <div className="pdf-wrapper max-w-[210mm] print:max-w-full mx-auto print:mx-0 space-y-8 print:space-y-0 overflow-x-auto md:overflow-x-visible">
       <div className="pdf-page w-full min-h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
         {/* Header */}
         <header className="relative w-full p-10 pb-12 text-white shrink-0 overflow-hidden" style={{ background: '#050212' }}>
@@ -184,6 +184,13 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
           -webkit-text-stroke-color: rgba(255, 255, 255, 0.9);
         }
 
+        @media screen and (max-width: 767px) {
+          .pdf-wrapper {
+            width: 210mm !important;
+            min-width: 210mm !important;
+            max-width: none !important;
+          }
+        }
         @media print {
           @page {
             size: A4;

@@ -926,13 +926,16 @@
       "branding": "Branding",
       "infra": "Infrastructure",
       "video": "Video",
-      "app": "App"
+      "app": "App",
+      "design": "Design"
     },
     "form": {
       "title": "Project Title",
       "titlePlaceholder": "e.g. Liceo A1 - Educational Platform",
       "description": "Description",
       "descriptionPlaceholder": "Brief description of the project...",
+      "descriptionEs": "Description (ES)",
+      "descriptionEn": "Description (EN)",
       "category": "Category",
       "clientName": "Client Name",
       "clientPlaceholder": "e.g. Liceo A1",
@@ -941,6 +944,9 @@
       "projectUrl": "Project URL",
       "save": "Save",
       "cancel": "Cancel"
+    },
+    "validation": {
+      "descriptionRequired": "You must add at least one description (ES or EN)"
     },
     "images": {
       "title": "Gallery Images",

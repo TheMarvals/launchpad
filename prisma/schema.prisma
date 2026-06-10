@@ -341,8 +341,10 @@ model CalendarEvent {
 model ShowcaseProject {
   id           String         @id @default(uuid())
   title        String
-  description  String?        @db.Text
-  category     String         @default("web") // web, branding, infra, video, app
+  description  String?        @db.Text // Legacy fallback — use descriptionEs and descriptionEn
+  descriptionEs String?       @db.Text // Spanish description
+  descriptionEn String?       @db.Text // English description
+  category     String         @default("web") // web, branding, infra, video, app, design
   technologies String?        // comma-separated or JSON
   clientName   String?
   projectUrl   String?

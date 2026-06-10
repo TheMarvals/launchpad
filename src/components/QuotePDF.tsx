@@ -150,15 +150,21 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate, companyProfile }
       />
 
       <style dangerouslySetInnerHTML={{ __html: `
-        html, body { margin: 0 !important; padding: 0 !important; }
-        @media print {
-          @page { margin: 0; size: A4; }
-          body { -webkit-print-color-adjust: exact; }
-          .pdf-wrapper { space-y: 0 !important; }
-        }
+        html, body { margin: 0 !important; padding: 0 !important; }          @media print {
+            @page { margin: 0; size: A4; }
+            body { -webkit-print-color-adjust: exact; }
+            .pdf-wrapper { space-y: 0 !important; }
+          }
+          @media screen and (max-width: 767px) {
+            .pdf-wrapper {
+              width: 210mm !important;
+              min-width: 210mm !important;
+              max-width: none !important;
+            }
+          }
       `}} />
 
-      <div className="pdf-wrapper w-full max-w-[210mm] print:max-w-full mx-auto print:mx-0 notranslate" translate="no">
+      <div className="pdf-wrapper max-w-[210mm] print:max-w-full mx-auto print:mx-0 notranslate overflow-x-auto md:overflow-x-visible" translate="no">
         {/* Proposal Pages (auto-paginated) */}
         {computedPages.map((pageContent: string, pageIdx: number) => (
           <div key={pageIdx} className="pdf-page w-full h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">

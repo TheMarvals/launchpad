@@ -9,13 +9,40 @@ function getCloudinary() {
   return cloudinary;
 }
 
-export async function uploadImage(file: string): Promise<string> {
+export interface UploadResult {
+  url: string;
+  format: string;
+  width: number;
+  height: number;
+  bytes: number;
+  colors?: string[];
+}
+
+export async function uploadImage(file: string): Promise<UploadResult> {
   const client = getCloudinary();
   const result = await client.uploader.upload(file, {
     folder: 'launchpad/showcase',
     resource_type: 'image',
+    image_metadata: true,
+    colors: true,
   });
-  return result.secure_url;
+
+  // Extract dominant colors (top 3)
+  const colors: string[] = [];
+  if (result.colors && Array.isArray(result.colors)) {
+    for (const [color] of result.colors.slice(0, 3)) {
+      colors.push(color);
+    }
+  }
+
+  return {
+    url: result.secure_url,
+    format: result.format,
+    width: result.width,
+    height: result.height,
+    bytes: result.bytes,
+    colors: colors.length > 0 ? colors : undefined,
+  };
 }
 
 export async function listCloudinaryResources(folder: string): Promise<{ publicId: string; url: string; createdAt: Date }[]> {

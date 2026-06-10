@@ -12,7 +12,7 @@ export function MobileClientNav() {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="text-muted hover:text-ink transition-colors mr-xs"
+        className="w-10 h-10 flex items-center justify-center text-muted hover:text-ink transition-colors mr-xs"
         title="Menú"
       >
         <span className="material-icons">menu</span>
@@ -32,7 +32,7 @@ export function MobileClientNav() {
       >
         <div className="p-sm flex items-center justify-between border-b border-hairline shrink-0">
           <h1 className="text-xl font-black tracking-tighter stroke-text">LAUNCHPAD</h1>
-          <button onClick={() => setIsOpen(false)} className="text-muted hover:text-ink bg-canvas-elevated p-[4px]">
+          <button onClick={() => setIsOpen(false)} className="w-10 h-10 flex items-center justify-center text-muted hover:text-ink bg-canvas-elevated">
             <span className="material-icons">close</span>
           </button>
         </div>

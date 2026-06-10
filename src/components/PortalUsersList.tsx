@@ -6,24 +6,13 @@ import { useRouter } from '@/i18n/routing';
 import EmptyState from '@/components/EmptyState';
 import { toggleUserAccess, deleteClientUser, updateClientUser } from '@/app/actions/portal';
 import Swal from 'sweetalert2';
+import { swalToastTheme } from '@/lib/swal-theme';
 
 function showToast(icon: 'success' | 'error', title: string) {
   Swal.fire({
+    ...swalToastTheme,
     icon,
     title,
-    toast: true,
-    position: 'top-end',
-    timer: 2500,
-    showConfirmButton: false,
-    showClass: {
-      popup: 'animate-in fade-in zoom-in-95 duration-200',
-    },
-    hideClass: {
-      popup: 'animate-out fade-out zoom-out-95 duration-150',
-    },
-    customClass: {
-      popup: 'rounded-none border border-hairline bg-canvas-elevated text-ink',
-    },
   });
 }
 
@@ -203,7 +192,7 @@ export default function PortalUsersList({ users: initialUsers, clientId }: { use
                 <button
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page <= 1}
-                  className="w-[24px] h-[24px] flex items-center justify-center text-muted hover:text-ink disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  className="w-[40px] h-[40px] flex items-center justify-center text-muted hover:text-ink disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 >
                   <span className="material-icons text-sm">chevron_left</span>
                 </button>
@@ -211,7 +200,7 @@ export default function PortalUsersList({ users: initialUsers, clientId }: { use
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`w-[24px] h-[24px] flex items-center justify-center text-[10px] font-bold transition-colors cursor-pointer ${
+                    className={`w-10 h-10 flex items-center justify-center text-[10px] font-bold transition-colors cursor-pointer ${
                       p === page ? 'bg-primary text-on-primary' : 'text-muted hover:text-ink hover:bg-hairline'
                     }`}
                   >
@@ -221,7 +210,7 @@ export default function PortalUsersList({ users: initialUsers, clientId }: { use
                 <button
                   onClick={() => setPage(Math.min(totalPages, page + 1))}
                   disabled={page >= totalPages}
-                  className="w-[24px] h-[24px] flex items-center justify-center text-muted hover:text-ink disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  className="w-[40px] h-[40px] flex items-center justify-center text-muted hover:text-ink disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 >
                   <span className="material-icons text-sm">chevron_right</span>
                 </button>
@@ -256,7 +245,7 @@ export default function PortalUsersList({ users: initialUsers, clientId }: { use
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   required
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                 />
               </div>
               <div className="space-y-xxs">
@@ -266,7 +255,7 @@ export default function PortalUsersList({ users: initialUsers, clientId }: { use
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
                   required
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                 />
               </div>
               <div className="space-y-xxs">
@@ -278,7 +267,7 @@ export default function PortalUsersList({ users: initialUsers, clientId }: { use
                   value={editPassword}
                   onChange={(e) => setEditPassword(e.target.value)}
                   placeholder={t('passwordPlaceholder') || 'Dejar en blanco para mantener'}
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                 />
               </div>
             </div>
@@ -286,14 +275,14 @@ export default function PortalUsersList({ users: initialUsers, clientId }: { use
             <div className="flex justify-end gap-xxs p-sm border-t border-hairline bg-canvas">
               <button
                 onClick={() => setEditingUser(null)}
-                className="px-sm py-xxs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors cursor-pointer"
+                className="px-sm py-xs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors cursor-pointer"
               >
                 {t('cancel') || 'Cancelar'}
               </button>
               <button
                 onClick={handleEditSave}
                 disabled={editLoading || !editName.trim() || !editEmail.trim()}
-                className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-all disabled:opacity-50 border border-transparent flex items-center cursor-pointer"
+                className="bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-all disabled:opacity-50 border border-transparent flex items-center cursor-pointer"
               >
                 {editLoading ? (
                   <span className="material-icons animate-spin text-[18px]">sync</span>

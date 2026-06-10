@@ -29,8 +29,8 @@ export default async function QuoteTemplatePreview() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex justify-center py-8">
-      <div className="w-[210mm] shadow-2xl bg-white overflow-hidden">
+    <div className="min-h-screen bg-slate-100 flex justify-center py-8 overflow-x-auto">
+      <div className="w-[210mm] shadow-2xl bg-white">
         <QuotePDF quote={mockQuote} isTemplate={true} companyProfile={companyProfile} />
       </div>
     </div>

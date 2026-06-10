@@ -82,7 +82,7 @@ export default function AccessGateModal({ isOpen, onClose }: AccessGateModalProp
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="text-muted hover:text-ink transition-colors disabled:opacity-30 cursor-pointer -mr-xxxs"
+              className="text-muted hover:text-ink transition-colors disabled:opacity-30 cursor-pointer -mr-xxxs w-10 h-10 flex items-center justify-center"
             >
               <span className="material-icons text-[20px]">close</span>
             </button>
@@ -134,14 +134,14 @@ export default function AccessGateModal({ isOpen, onClose }: AccessGateModalProp
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="px-sm py-xxs font-bold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors disabled:opacity-30 cursor-pointer rounded-sm"
+              className="px-sm py-xs font-bold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors disabled:opacity-30 cursor-pointer rounded-sm"
             >
               {t('cancel')}
             </button>
             <button
               type="submit"
               disabled={isLoading || !email}
-              className="bg-primary text-on-primary px-sm py-xxs rounded-sm font-bold text-xs uppercase tracking-wider hover:bg-primary-hover transition-all disabled:opacity-50 border border-transparent flex items-center cursor-pointer"
+              className="bg-primary text-on-primary px-sm py-xs rounded-sm font-bold text-xs uppercase tracking-wider hover:bg-primary-hover transition-all disabled:opacity-50 border border-transparent flex items-center cursor-pointer"
             >
               {isLoading ? (
                 <span className="material-icons animate-spin text-[18px]">sync</span>

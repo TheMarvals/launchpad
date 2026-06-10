@@ -39,21 +39,21 @@ export default function TableSearch({ placeholder = 'Search...' }: TableSearchPr
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
-        className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none pr-sm"
+        className="w-full border border-hairline bg-canvas text-ink px-xs py-xs text-sm focus:border-primary outline-none pr-sm"
       />
       <div className="absolute right-xxs top-1/2 -translate-y-1/2 flex items-center gap-[2px]">
         {value && (
           <button
             type="button"
             onClick={handleClear}
-            className="w-[24px] h-[24px] flex items-center justify-center text-muted hover:text-ink transition-colors cursor-pointer"
+            className="w-[40px] h-[40px] flex items-center justify-center text-muted hover:text-ink transition-colors cursor-pointer"
           >
             <span className="material-icons text-sm">close</span>
           </button>
         )}
         <button
           type="submit"
-          className="w-[24px] h-[24px] flex items-center justify-center text-muted hover:text-ink transition-colors cursor-pointer"
+          className="w-[40px] h-[40px] flex items-center justify-center text-muted hover:text-ink transition-colors cursor-pointer"
         >
           <span className="material-icons text-sm">search</span>
         </button>

@@ -34,14 +34,14 @@ export default function QuoteActions({ quoteId }: QuoteActionsProps) {
     <div className="flex items-center justify-end space-x-3 relative">
       <Link 
         href={`/dashboard/quotes/edit/${quoteId}`}
-        className="text-slate-500 hover:text-blue-600 transition-colors"
+        className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
         title={t('edit')}
       >
         <span className="material-icons text-[18px]">edit</span>
       </Link>
       <a 
         href={`/api/quotes/${quoteId}/pdf`} 
-        className="text-slate-500 hover:text-blue-600 transition-colors"
+        className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
         title={t('download')}
         target="_blank"
         rel="noopener noreferrer"
@@ -57,7 +57,7 @@ export default function QuoteActions({ quoteId }: QuoteActionsProps) {
             router.push('/dashboard/invoices');
           }
         }}
-        className="text-slate-500 hover:text-green-600 transition-colors"
+        className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-green-600 transition-colors"
         title={t('convert') || 'Convertir a Factura'}
       >
         <span className="material-icons text-[18px]">receipt_long</span>
@@ -83,7 +83,7 @@ export default function QuoteActions({ quoteId }: QuoteActionsProps) {
       ) : (
         <button
           onClick={() => setShowConfirm(true)}
-          className="text-slate-400 hover:text-red-500 transition-colors"
+          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors"
           title={t('delete')}
         >
           <span className="material-icons text-[18px]">delete_outline</span>

@@ -151,7 +151,7 @@ export default function ServerCard({ server }: { server: any }) {
               </button>
               <h3 className="font-semibold text-ink tracking-tight">{server.name}</h3>
             </div>
-            <button className="text-muted hover:text-primary transition-colors">
+            <button className="w-10 h-10 flex items-center justify-center text-muted hover:text-primary transition-colors">
               <span className="material-icons text-[18px]">edit</span>
             </button>
           </div>
@@ -175,7 +175,7 @@ export default function ServerCard({ server }: { server: any }) {
                 onClick={() => {
                   navigator.clipboard.writeText(server.hostname || '');
                 }}
-                className="material-icons text-muted text-[16px] ml-auto hover:text-ink transition-colors" 
+                className="w-10 h-10 flex items-center justify-center material-icons text-muted text-[16px] ml-auto hover:text-ink transition-colors" 
                 title={t('copyHostname') || 'Copiar Hostname'}
               >
                 content_copy
@@ -288,7 +288,7 @@ export default function ServerCard({ server }: { server: any }) {
               onClick={() => initiateAction('start')}
               disabled={!!loadingAction || isRunning}
               title={t('start') || 'Start'}
-              className="w-[36px] h-[36px] border border-hairline bg-canvas-elevated flex items-center justify-center text-muted hover:text-semantic-success hover:border-semantic-success/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-[40px] h-[40px] border border-hairline bg-canvas-elevated flex items-center justify-center text-muted hover:text-semantic-success hover:border-semantic-success/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingAction === 'start' ? <span className="material-icons text-[18px] animate-spin">sync</span> : <span className="material-icons text-[18px]">play_arrow</span>}
             </button>
@@ -296,7 +296,7 @@ export default function ServerCard({ server }: { server: any }) {
             <button 
               onClick={handleOpenConsole}
               title={t('secureConsole') || 'Consola Web Segura'}
-              className="w-[36px] h-[36px] border border-hairline bg-canvas-elevated flex items-center justify-center text-muted hover:text-primary hover:border-primary/50 transition-all group"
+              className="w-[40px] h-[40px] border border-hairline bg-canvas-elevated flex items-center justify-center text-muted hover:text-primary hover:border-primary/50 transition-all group"
             >
               <span className="material-icons text-[18px] group-hover:scale-110 transition-transform">terminal</span>
             </button>
@@ -305,7 +305,7 @@ export default function ServerCard({ server }: { server: any }) {
               onClick={() => initiateAction('stop')}
               disabled={!!loadingAction || !isRunning}
               title={t('stop') || 'Stop'}
-              className="w-[36px] h-[36px] border border-hairline bg-canvas-elevated flex items-center justify-center text-muted hover:text-semantic-warning hover:border-semantic-warning/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-[40px] h-[40px] border border-hairline bg-canvas-elevated flex items-center justify-center text-muted hover:text-semantic-warning hover:border-semantic-warning/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingAction === 'stop' ? <span className="material-icons text-[18px] animate-spin">sync</span> : <span className="material-icons text-[18px]">stop</span>}
             </button>
@@ -314,7 +314,7 @@ export default function ServerCard({ server }: { server: any }) {
               onClick={() => initiateAction('restart')}
               disabled={!!loadingAction || !isRunning}
               title={t('restart') || 'Restart'}
-              className="w-[36px] h-[36px] border border-hairline bg-canvas-elevated flex items-center justify-center text-muted hover:text-primary hover:border-primary/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-[40px] h-[40px] border border-hairline bg-canvas-elevated flex items-center justify-center text-muted hover:text-primary hover:border-primary/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingAction === 'restart' ? <span className="material-icons text-[18px] animate-spin">sync</span> : <span className="material-icons text-[18px]">restart_alt</span>}
             </button>
@@ -355,21 +355,21 @@ export default function ServerCard({ server }: { server: any }) {
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, ''))}
                   placeholder={t('otpPlaceholder') || '000000'}
-                  className="w-full bg-canvas border border-hairline text-ink text-center font-mono text-2xl tracking-[0.5em] py-xxs focus:border-primary outline-none transition-colors"
+                  className="w-full bg-canvas border border-hairline text-ink text-center font-mono text-2xl tracking-[0.5em] py-xs focus:border-primary outline-none transition-colors"
                 />
               </div>
 
               <div className="flex gap-xxs">
                 <button 
                   onClick={cancelOtp}
-                  className="flex-1 bg-transparent border border-hairline text-ink font-semibold py-xxs hover:bg-canvas transition-colors"
+                  className="flex-1 bg-transparent border border-hairline text-ink font-semibold py-xs hover:bg-canvas transition-colors"
                 >
                   {t('cancel') || 'Cancelar'}
                 </button>
                 <button 
                   onClick={confirmAction}
                   disabled={otpCode.length !== 6 || loadingAction === 'confirming'}
-                  className="flex-1 bg-primary text-on-primary font-semibold py-xxs hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="flex-1 bg-primary text-on-primary font-semibold py-xs hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
                   {loadingAction === 'confirming' ? (
                     <span className="material-icons animate-spin text-[20px]">sync</span>

@@ -44,11 +44,11 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
   };
 
   return (
-    <div className="flex items-center justify-end space-x-3 relative">
+    <div className="flex items-center justify-end space-x-1 relative">
       <div className="relative">
         <button 
           onClick={() => setShowStatusMenu(!showStatusMenu)}
-          className="text-slate-500 hover:text-blue-600 transition-colors"
+          className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
           title={t('changeStatus') || 'Cambiar Estado'}
         >
           <span className="material-icons text-[18px]">sync_alt</span>
@@ -58,19 +58,19 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
           <div className="absolute right-0 bottom-full mb-2 bg-canvas-elevated border border-hairline py-2 w-32 z-50 overflow-hidden">
             <button 
               onClick={() => handleStatusChange('Pendiente')}
-              className="w-full text-left px-sm py-xxs text-[10px] font-semibold uppercase tracking-widest text-semantic-warning hover:bg-canvas transition-colors"
+              className="w-full text-left px-sm py-xs text-[10px] font-semibold uppercase tracking-widest text-semantic-warning hover:bg-canvas transition-colors"
             >
               {tInv('status.Pendiente')}
             </button>
             <button 
               onClick={() => handleStatusChange('Pagada')}
-              className="w-full text-left px-sm py-xxs text-[10px] font-semibold uppercase tracking-widest text-semantic-success hover:bg-canvas transition-colors"
+              className="w-full text-left px-sm py-xs text-[10px] font-semibold uppercase tracking-widest text-semantic-success hover:bg-canvas transition-colors"
             >
               {tInv('status.Pagada')}
             </button>
             <button 
               onClick={() => handleStatusChange('Anulada')}
-              className="w-full text-left px-sm py-xxs text-[10px] font-semibold uppercase tracking-widest text-muted hover:bg-canvas transition-colors"
+              className="w-full text-left px-sm py-xs text-[10px] font-semibold uppercase tracking-widest text-muted hover:bg-canvas transition-colors"
             >
               {tInv('status.Anulada')}
             </button>
@@ -80,14 +80,14 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
 
       <Link 
         href={`/dashboard/invoices/edit/${invoice.id}`}
-        className="text-slate-500 hover:text-blue-600 transition-colors"
+        className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
         title={t('edit')}
       >
         <span className="material-icons text-[18px]">edit</span>
       </Link>
       <a 
         href={`/api/invoices/${invoice.id}/pdf`} 
-        className="text-slate-500 hover:text-blue-600 transition-colors"
+        className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
         title={t('download')}
         target="_blank"
         rel="noopener noreferrer"
@@ -115,7 +115,7 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
       ) : (
         <button
           onClick={() => setShowConfirm(true)}
-          className="text-slate-400 hover:text-red-500 transition-colors"
+          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors"
           title={t('delete')}
         >
           <span className="material-icons text-[18px]">delete_outline</span>

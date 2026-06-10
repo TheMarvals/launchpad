@@ -6,6 +6,7 @@ import { createTask, updateTask, deleteTask } from '@/app/actions/productivity';
 import { useTranslations, useLocale } from 'next-intl';
 import TaskModal from './TaskModal';
 import Swal from 'sweetalert2';
+import { swalTheme } from '@/lib/swal-theme';
 import EmptyState from '@/components/EmptyState';
 
 export default function TasksBoard({ initialTasks, projects }: { initialTasks: any[], projects: any[] }) {
@@ -20,7 +21,7 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
       const newTask = await createTask(data);
       setTasks([newTask, ...tasks]);
     } catch (err) {
-      Swal.fire('Error', t('create.error'), 'error');
+      Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: t('create.error') });
     }
   };
 
@@ -29,7 +30,7 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
       const updated = await updateTask(id, data);
       setTasks(tasks.map(t => t.id === id ? updated : t));
     } catch (err) {
-      Swal.fire('Error', t('update.error'), 'error');
+      Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: t('update.error') });
     }
   };
 
@@ -53,7 +54,7 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
         await deleteTask(id);
         setTasks(tasks.filter(t => t.id !== id));
       } catch (err) {
-        Swal.fire('Error', t('delete.error'), 'error');
+        Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: t('delete.error') });
       }
     }
   };
@@ -81,7 +82,7 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
         </div>
         <button 
           onClick={() => { setSelectedTask(null); setIsModalOpen(true); }}
-          className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center justify-center border border-transparent"
+          className="bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center justify-center border border-transparent"
         >
           <span className="material-icons mr-2 text-[20px]">add_task</span> {t('newTask')}
         </button>
@@ -112,7 +113,7 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
                     <td className="px-sm py-xs">
                       <button 
                         onClick={() => toggleStatus(task)}
-                        className={`w-8 h-8 border flex items-center justify-center transition-all transform hover:scale-110 active:scale-95 ${
+                        className={`w-10 h-10 border flex items-center justify-center transition-all transform hover:scale-110 active:scale-95 ${
                           task.status === 'done' ? 'bg-primary border-primary text-white' : 'border-hairline hover:border-primary bg-transparent text-transparent'
                         }`}
                       >
@@ -143,22 +144,22 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
                       </div>
                     </td>
                     <td className="px-sm py-xs text-right">
-                      <div className="flex items-center justify-end space-x-xxs opacity-0 group-hover:opacity-100 transition-all">
+                      <div className="flex items-center justify-end space-x-xxs sm:opacity-0 sm:group-hover:opacity-100 transition-all">
                         <Link 
                           href={`/dashboard/productivity/tasks/${task.id}`}
-                          className="p-xxs text-muted hover:text-primary transition-colors"
+                          className="w-10 h-10 flex items-center justify-center text-muted hover:text-primary transition-colors"
                         >
                           <span className="material-icons text-[20px]">open_in_new</span>
                         </Link>
                         <button 
                           onClick={() => { setSelectedTask(task); setIsModalOpen(true); }}
-                          className="p-xxs text-muted hover:text-primary transition-colors"
+                          className="w-10 h-10 flex items-center justify-center text-muted hover:text-primary transition-colors"
                         >
                           <span className="material-icons text-[18px]">edit</span>
                         </button>
                         <button 
                           onClick={() => handleDelete(task.id)}
-                          className="p-xxs text-muted hover:text-primary transition-colors"
+                          className="w-10 h-10 flex items-center justify-center text-muted hover:text-primary transition-colors"
                         >
                           <span className="material-icons text-[18px]">delete</span>
                         </button>

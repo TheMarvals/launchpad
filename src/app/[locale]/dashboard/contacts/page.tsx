@@ -104,7 +104,7 @@ export default function ContactsPage() {
     return (
       <button
         onClick={() => handleSort(field)}
-        className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-[2px] transition-colors cursor-pointer ${
+        className={`px-xs py-xs text-[9px] font-bold uppercase tracking-widest flex items-center gap-[2px] transition-colors cursor-pointer ${
           isActive ? 'text-ink' : 'text-muted hover:text-ink'
         }`}
       >
@@ -210,7 +210,7 @@ export default function ContactsPage() {
                         e.stopPropagation();
                         handleDelete(sub.id);
                       }}
-                      className="text-muted/40 hover:text-semantic-warning transition-colors p-[2px] opacity-0 group-hover:opacity-100"
+                      className="w-10 h-10 flex items-center justify-center text-muted/40 hover:text-semantic-warning transition-colors sm:opacity-0 sm:group-hover:opacity-100"
                       title={t('deleteTitle')}
                     >
                       <span className="material-icons text-xs">delete</span>
@@ -229,7 +229,7 @@ export default function ContactsPage() {
         </div>
 
         {/* Detail panel */}
-        <div className="border border-hairline bg-canvas-elevated p-lg min-h-[300px]">
+        <div className="border border-hairline bg-canvas-elevated p-sm md:p-lg min-h-[300px]">
           {selected ? (
             <div className="space-y-sm">
               <div className="flex items-center justify-between">
@@ -293,14 +293,14 @@ export default function ContactsPage() {
               <div className="flex gap-xxs pt-xs border-t border-hairline">
                 <a
                   href={`mailto:${selected.email}`}
-                  className="flex items-center gap-xxs bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors"
+                  className="flex items-center gap-xxs bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors"
                 >
                   <span className="material-icons text-sm">reply</span>
                   {t('reply')}
                 </a>
                 <button
                   onClick={() => handleDelete(selected.id)}
-                  className="flex items-center gap-xxs px-sm py-xxs font-semibold text-xs uppercase tracking-wider text-muted hover:text-semantic-warning transition-colors cursor-pointer"
+                  className="flex items-center gap-xxs px-sm py-xs font-semibold text-xs uppercase tracking-wider text-muted hover:text-semantic-warning transition-colors cursor-pointer"
                 >
                   <span className="material-icons text-sm">delete</span>
                   {t('delete')}

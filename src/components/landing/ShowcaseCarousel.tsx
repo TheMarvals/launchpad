@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface Image {
   id: string;
@@ -15,6 +15,8 @@ interface Project {
   id: string;
   title: string;
   description: string | null;
+  descriptionEs: string | null;
+  descriptionEn: string | null;
   category: string;
   technologies: string | null;
   clientName: string | null;
@@ -28,8 +30,11 @@ interface Props {
 
 export default function ShowcaseCarousel({ projects }: Props) {
   const t = useTranslations('Showcase');
+  const locale = useLocale();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [prevImageUrl, setPrevImageUrl] = useState<string | null>(null);
+  const [imageTransitioning, setImageTransitioning] = useState(false);
   const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
   const [sectionVisible, setSectionVisible] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
@@ -195,17 +200,25 @@ export default function ShowcaseCarousel({ projects }: Props) {
 
   const openProject = (project: Project) => {
     setSelectedProject(project);
+    setPrevImageUrl(null);
+    setImageTransitioning(false);
     setGalleryIndex(0);
   };
 
-  const nextImage = () => {
-    if (!selectedProject) return;
-    setGalleryIndex((prev) => (prev + 1) % selectedProject.images.length);
-  };
-
-  const prevImage = () => {
-    if (!selectedProject) return;
-    setGalleryIndex((prev) => (prev - 1 + selectedProject.images.length) % selectedProject.images.length);
+  const navigateImage = (direction: 'next' | 'prev') => {
+    if (!selectedProject || imageTransitioning) return;
+    const currentUrl = selectedProject.images[galleryIndex].url;
+    setPrevImageUrl(currentUrl);
+    setImageTransitioning(true);
+    
+    if (direction === 'next') {
+      setGalleryIndex((prev) => (prev + 1) % selectedProject.images.length);
+    } else {
+      setGalleryIndex((prev) => (prev - 1 + selectedProject.images.length) % selectedProject.images.length);
+    }
+    
+    // Reset transition flag after animation completes
+    setTimeout(() => setImageTransitioning(false), 400);
   };
 
   return (
@@ -241,19 +254,19 @@ export default function ShowcaseCarousel({ projects }: Props) {
           onMouseEnter={() => setIsHovering(true)}
           onMouseLeave={() => setIsHovering(false)}
         >
-          {/* Previous button (always visible — infinite scroll wraps around) */}
+          {/* Previous button (always visible) */}
           <button
             onClick={() => scrollByCard('prev')}
-            className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-[#0d0d12] border border-hairline/60 text-ink hover:text-primary-active hover:border-primary/30 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-medium hover:shadow-large opacity-0 group-hover/carousel:opacity-100 md:opacity-100 cursor-pointer"
+            className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-[#0d0d12] border border-hairline/60 text-ink hover:text-primary-active hover:border-primary/30 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-medium hover:shadow-large opacity-100 cursor-pointer"
             aria-label="Previous projects"
           >
             <span className="material-icons text-xl">chevron_left</span>
           </button>
 
-          {/* Next button (always visible — infinite scroll wraps around) */}
+          {/* Next button (always visible) */}
           <button
             onClick={() => scrollByCard('next')}
-            className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-[#0d0d12] border border-hairline/60 text-ink hover:text-primary-active hover:border-primary/30 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-medium hover:shadow-large opacity-0 group-hover/carousel:opacity-100 md:opacity-100 cursor-pointer"
+            className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-[#0d0d12] border border-hairline/60 text-ink hover:text-primary-active hover:border-primary/30 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-medium hover:shadow-large opacity-100 cursor-pointer"
             aria-label="Next projects"
           >
             <span className="material-icons text-xl">chevron_right</span>
@@ -293,7 +306,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
                       {featured ? (
                         <img
                           src={featured.url}
-                          alt={project.title}
+                          alt={featured.caption || project.title}
                           className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
                         />
                       ) : (
@@ -352,7 +365,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
       {/* Gallery Modal */}
       {selectedProject && (
         <div
-          className="fixed inset-0 bg-[#03020a]/80 z-[100] flex items-center justify-center p-lg backdrop-blur-md"
+          className="fixed inset-0 bg-[#03020a]/80 z-[100] flex items-center justify-center p-xs md:p-lg backdrop-blur-md"
           onClick={() => setSelectedProject(null)}
           style={{ animation: 'fadeIn 250ms ease-out' }}
         >
@@ -371,7 +384,7 @@ export default function ShowcaseCarousel({ projects }: Props) {
               </div>
               <button
                 onClick={() => setSelectedProject(null)}
-                className="text-muted hover:text-primary-active w-8 h-8 rounded-sm bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-all duration-300 hover:rotate-90 cursor-pointer"
+                className="text-muted hover:text-primary-active w-10 h-10 md:w-8 md:h-8 rounded-sm bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-all duration-300 hover:rotate-90 cursor-pointer"
               >
                 <span className="material-icons text-[18px]">close</span>
               </button>
@@ -381,13 +394,21 @@ export default function ShowcaseCarousel({ projects }: Props) {
             <div className="flex-grow overflow-y-auto">
               {selectedProject.images.length > 0 ? (
                 <div className="relative">
-                  <div className="relative overflow-hidden bg-[#03020a]/50 flex items-center justify-center">
+                  <div className="relative overflow-hidden bg-[#03020a]/50 flex items-center justify-center min-h-[200px]">
+                    {/* Previous image fading out */}
+                    {prevImageUrl && (
+                      <img
+                        src={prevImageUrl}
+                        alt=""
+                        className="absolute inset-0 w-full max-h-[55vh] object-contain transition-opacity duration-[400ms] ease-out pointer-events-none"
+                        style={{ opacity: imageTransitioning ? 0 : 1 }}
+                      />
+                    )}
+                    {/* Current image (always opaque, revealed as prevImage fades out) */}
                     <img
-                      key={galleryIndex}
                       src={selectedProject.images[galleryIndex].url}
                       alt={selectedProject.images[galleryIndex].caption || selectedProject.title}
-                      className="w-full max-h-[55vh] object-contain transition-opacity duration-300"
-                      style={{ animation: 'fadeIn 300ms ease-out' }}
+                      className="w-full max-h-[55vh] object-contain"
                     />
                   </div>
                   {selectedProject.images[galleryIndex].caption && (
@@ -398,13 +419,13 @@ export default function ShowcaseCarousel({ projects }: Props) {
                   {selectedProject.images.length > 1 && (
                     <>
                       <button
-                        onClick={prevImage}
+                        onClick={() => navigateImage('prev')}
                         className="absolute left-sm top-1/2 -translate-y-1/2 w-[44px] h-[44px] rounded-sm bg-[#0d0d12] border border-hairline text-ink hover:text-primary-active hover:bg-[#0d0d12]/80 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-medium cursor-pointer"
                       >
                         <span className="material-icons text-xl">chevron_left</span>
                       </button>
                       <button
-                        onClick={nextImage}
+                        onClick={() => navigateImage('next')}
                         className="absolute right-sm top-1/2 -translate-y-1/2 w-[44px] h-[44px] rounded-sm bg-[#0d0d12] border border-hairline text-ink hover:text-primary-active hover:bg-[#0d0d12]/80 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-medium cursor-pointer"
                       >
                         <span className="material-icons text-xl">chevron_right</span>
@@ -431,8 +452,10 @@ export default function ShowcaseCarousel({ projects }: Props) {
 
               {/* Project details */}
               <div className="p-sm border-t border-primary/10 space-y-sm bg-black/10">
-                {selectedProject.description && (
-                  <p className="text-sm text-body-strong leading-relaxed">{selectedProject.description}</p>
+                {(selectedProject.descriptionEs || selectedProject.descriptionEn || selectedProject.description) && (
+                  <p className="text-sm text-body-strong leading-relaxed">
+                    {locale === 'es' ? (selectedProject.descriptionEs || selectedProject.description || selectedProject.descriptionEn) : (selectedProject.descriptionEn || selectedProject.description || selectedProject.descriptionEs)}
+                  </p>
                 )}
                 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-sm pt-xs">

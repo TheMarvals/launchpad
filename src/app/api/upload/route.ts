@@ -30,9 +30,15 @@ export async function POST(request: NextRequest) {
     const base64 = buffer.toString('base64');
     const dataUri = `data:${file.type};base64,${base64}`;
 
-    const url = await uploadImage(dataUri);
+    const result = await uploadImage(dataUri);
 
-    return NextResponse.json({ url });
+    return NextResponse.json({ 
+      url: result.url,
+      format: result.format,
+      width: result.width,
+      height: result.height,
+      colors: result.colors,
+    });
   } catch (error: any) {
     console.error('Upload error details:', error);
     return NextResponse.json({ error: 'Upload failed', details: error.message }, { status: 500 });

@@ -63,12 +63,12 @@ export default function TicketReplyForm({ ticketId, buttonText }: { ticketId: st
             required
             rows={3}
             placeholder={t('tickets.detail.replyPlaceholder')}
-            className="w-full px-xs py-xxs bg-canvas border border-hairline text-ink placeholder:text-muted focus:border-primary/50 focus:outline-none resize-none text-sm leading-relaxed"
+            className="w-full px-xs py-xs bg-canvas border border-hairline text-ink placeholder:text-muted focus:border-primary/50 focus:outline-none resize-none text-sm leading-relaxed"
           />
           <button
             type="submit"
             disabled={loading || !message.trim()}
-            className="w-full py-xxs bg-primary text-on-primary font-semibold hover:bg-primary-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex flex-col items-center gap-[2px]"
+            className="w-full py-xs bg-primary text-on-primary font-semibold hover:bg-primary-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex flex-col items-center gap-[2px]"
           >
             {loading ? (
               <span className="material-icons text-[16px] animate-spin">sync</span>
@@ -94,7 +94,7 @@ export default function TicketReplyForm({ ticketId, buttonText }: { ticketId: st
             <button
               type="submit"
               disabled={loading || !message.trim()}
-              className="shrink-0 mb-[6px] mr-[6px] w-[36px] h-[36px] flex items-center justify-center bg-primary text-on-primary hover:bg-primary-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="shrink-0 mb-[6px] mr-[6px] w-[44px] h-[44px] flex items-center justify-center bg-primary text-on-primary hover:bg-primary-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               title={t('tickets.detail.replyButton')}
             >
               {loading ? (

@@ -107,7 +107,7 @@ export default function NoteModal({ isOpen, onClose, onSave, initialData, title 
                   key={c}
                   type="button"
                   onClick={() => setFormData({ ...formData, color: c })}
-                  className={`w-8 h-8 transition-all transform hover:scale-110 ${formData.color === c ? 'border-2 border-ink scale-110' : 'opacity-60'}`}
+                  className={`w-10 h-10 md:w-8 md:h-8 transition-all transform hover:scale-110 ${formData.color === c ? 'border-2 border-ink scale-110' : 'opacity-60'}`}
                   style={{ backgroundColor: c }}
                 />
               ))}
@@ -131,14 +131,14 @@ export default function NoteModal({ isOpen, onClose, onSave, initialData, title 
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 bg-transparent border border-hairline text-ink px-xs py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-canvas transition-colors"
+            className="flex-1 bg-transparent border border-hairline text-ink px-xs py-xs font-semibold text-xs uppercase tracking-wider hover:bg-canvas transition-colors"
           >
             {t('form.cancel')}
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex-[2] bg-primary text-on-primary px-xs py-xxs font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 uppercase tracking-wider text-xs"
+            className="flex-[2] bg-primary text-on-primary px-xs py-xs font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 uppercase tracking-wider text-xs"
           >
             {isSubmitting ? t('form.saving') : t('form.save')}
           </button>

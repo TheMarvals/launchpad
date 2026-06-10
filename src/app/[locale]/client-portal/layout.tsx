@@ -92,11 +92,11 @@ export default async function ClientPortalLayout({
             <h1 className="text-2xl font-black tracking-tighter stroke-text">LAUNCHPAD</h1>
           </div>
           <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }); }}>
-             <button className="text-muted hover:text-primary transition-colors cursor-pointer" title={t('logout')}><span className="material-icons">logout</span></button>
+             <button className="w-10 h-10 flex items-center justify-center text-muted hover:text-primary transition-colors cursor-pointer" title={t('logout')}><span className="material-icons">logout</span></button>
           </form>
         </header>
 
-        <div className="flex-grow overflow-y-auto p-lg">
+        <div className="flex-grow overflow-y-auto p-sm md:p-lg">
           <div className="max-w-6xl w-full mx-auto">
             {children}
           </div>

@@ -124,7 +124,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
 
       {/* Create/Edit Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 bg-ink/90 backdrop-blur-md flex items-center justify-center p-md">
+        <div className="fixed inset-0 z-50 bg-ink/90 backdrop-blur-md flex items-center justify-center p-sm">
           <form
             onSubmit={handleSubmit}
             className="bg-canvas-elevated border border-hairline w-full max-w-2xl p-sm space-y-sm max-h-[90vh] overflow-y-auto"
@@ -139,7 +139,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
               <button
                 type="button"
                 onClick={() => { setShowForm(false); setError(''); }}
-                className="text-muted hover:text-ink transition-colors"
+                className="w-10 h-10 flex items-center justify-center text-muted hover:text-ink transition-colors"
               >
                 <span className="material-icons">close</span>
               </button>
@@ -156,7 +156,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 <label className="text-caption-uppercase text-ink font-semibold">{t('form.rut')} *</label>
                 <input
                   type="text"
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                   value={form.rut}
                   onChange={(e) => updateField('rut', e.target.value)}
                   placeholder={t('form.rutPlaceholder') || '76.543.210-K'}
@@ -167,7 +167,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 <label className="text-caption-uppercase text-ink font-semibold">{t('form.razonSocial')} *</label>
                 <input
                   type="text"
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                   value={form.razonSocial}
                   onChange={(e) => updateField('razonSocial', e.target.value)}
                   placeholder={t('form.razonSocialPlaceholder') || 'EMPRESA SPA'}
@@ -178,7 +178,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 <label className="text-caption-uppercase text-ink font-semibold">{t('form.giro')} *</label>
                 <input
                   type="text"
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                   value={form.giro}
                   onChange={(e) => updateField('giro', e.target.value)}
                   placeholder={t('form.giroPlaceholder') || 'Servicios Informáticos'}
@@ -189,7 +189,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 <label className="text-caption-uppercase text-ink font-semibold">{t('form.direction')} *</label>
                 <input
                   type="text"
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                   value={form.direccion}
                   onChange={(e) => updateField('direccion', e.target.value)}
                   placeholder={t('form.directionPlaceholder') || 'Av. Providencia 1234'}
@@ -200,7 +200,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 <label className="text-caption-uppercase text-ink font-semibold">{t('form.commune')} *</label>
                 <input
                   type="text"
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                   value={form.comuna}
                   onChange={(e) => updateField('comuna', e.target.value)}
                   placeholder={t('form.communePlaceholder') || 'Providencia'}
@@ -211,7 +211,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 <label className="text-caption-uppercase text-ink font-semibold">{t('form.city')} *</label>
                 <input
                   type="text"
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                   value={form.ciudad}
                   onChange={(e) => updateField('ciudad', e.target.value)}
                   placeholder={t('form.cityPlaceholder') || 'Santiago'}
@@ -222,7 +222,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 <label className="text-caption-uppercase text-ink font-semibold">{t('form.email')}</label>
                 <input
                   type="email"
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                   value={form.email}
                   onChange={(e) => updateField('email', e.target.value)}
                   placeholder={t('form.emailPlaceholder') || 'contacto@empresa.cl'}
@@ -232,7 +232,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
                 <label className="text-caption-uppercase text-ink font-semibold">{t('form.phone')}</label>
                 <input
                   type="text"
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                   value={form.telefono}
                   onChange={(e) => updateField('telefono', e.target.value)}
                   placeholder={t('form.phonePlaceholder') || '+56 9 1234 5678'}

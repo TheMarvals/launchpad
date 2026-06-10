@@ -927,13 +927,16 @@
       "branding": "Branding",
       "infra": "Infraestructura",
       "video": "Video",
-      "app": "App"
+      "app": "App",
+      "design": "Diseño"
     },
     "form": {
       "title": "Título del Proyecto",
       "titlePlaceholder": "Ej. Liceo A1 - Plataforma Educativa",
       "description": "Descripción",
       "descriptionPlaceholder": "Breve descripción del proyecto...",
+      "descriptionEs": "Descripción (ES)",
+      "descriptionEn": "Descripción (EN)",
       "category": "Categoría",
       "clientName": "Nombre del Cliente",
       "clientPlaceholder": "Ej. Liceo A1",
@@ -942,6 +945,9 @@
       "projectUrl": "URL del Proyecto",
       "save": "Guardar",
       "cancel": "Cancelar"
+    },
+    "validation": {
+      "descriptionRequired": "Debes agregar al menos una descripción (ES o EN)"
     },
     "images": {
       "title": "Galería de Imágenes",

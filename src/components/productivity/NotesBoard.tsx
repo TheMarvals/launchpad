@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { createNote, updateNote, deleteNote } from '@/app/actions/productivity';
 import { useTranslations, useLocale } from 'next-intl';
 import Swal from 'sweetalert2';
+import { swalTheme } from '@/lib/swal-theme';
 import NoteModal from './NoteModal';
 import EmptyState from '@/components/EmptyState';
 
@@ -67,7 +68,7 @@ export default function NotesBoard({ initialNotes, currentUserId }: { initialNot
         await deleteNote(id);
         setNotes(notes.filter(n => n.id !== id));
       } catch (err) {
-        Swal.fire('Error', t('delete.error'), 'error');
+        Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: t('delete.error') });
       }
     }
   };
@@ -81,7 +82,7 @@ export default function NotesBoard({ initialNotes, currentUserId }: { initialNot
         </div>
         <button 
           onClick={handleOpenCreate}
-          className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center justify-center border border-transparent group"
+          className="bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors flex items-center justify-center border border-transparent group"
         >
           <span className="material-icons mr-2 text-[20px] group-hover:rotate-90 transition-transform">add</span> 
           {t('newNote')}
@@ -101,7 +102,7 @@ export default function NotesBoard({ initialNotes, currentUserId }: { initialNot
             >
               {/* Acciones Rápidas (Hover) */}
               {note.userId === currentUserId && (
-                <div className="absolute top-6 right-6 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
+                <div className="absolute top-6 right-6 flex space-x-2 sm:opacity-0 sm:group-hover:opacity-100 transition-all sm:scale-90 sm:group-hover:scale-100">
                   <button 
                     onClick={(e) => { e.stopPropagation(); handleOpenEdit(note); }}
                     className="w-10 h-10 border border-hairline bg-canvas flex items-center justify-center text-muted hover:text-primary transition-all"

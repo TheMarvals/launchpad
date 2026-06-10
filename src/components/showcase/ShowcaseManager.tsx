@@ -7,6 +7,8 @@ import { reorderItems } from '@/app/actions/reorder';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import Swal from 'sweetalert2';
+import { swalTheme, swalDangerTheme } from '@/lib/swal-theme';
 
 interface Image {
   id: string;
@@ -20,6 +22,8 @@ interface Project {
   id: string;
   title: string;
   description: string | null;
+  descriptionEs: string | null;
+  descriptionEn: string | null;
   category: string;
   technologies: string | null;
   clientName: string | null;
@@ -59,9 +63,25 @@ export default function ShowcaseManager() {
     e.preventDefault();
     const form = e.currentTarget;
     const formData = new FormData(form);
+    const descriptionEs = (formData.get('descriptionEs') as string).trim();
+    const descriptionEn = (formData.get('descriptionEn') as string).trim();
+
+    // Require at least one description
+    if (!descriptionEs && !descriptionEn) {
+      await Swal.fire({
+        ...swalTheme,
+        title: t('validation.descriptionRequired'),
+        icon: 'warning',
+        confirmButtonText: t('ok') || 'OK',
+      });
+      return;
+    }
+
     const data = {
       title: formData.get('title') as string,
-      description: formData.get('description') as string,
+      description: descriptionEs,
+      descriptionEs,
+      descriptionEn,
       category: formData.get('category') as string,
       technologies: formData.get('technologies') as string,
       clientName: formData.get('clientName') as string,
@@ -80,7 +100,15 @@ export default function ShowcaseManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm(t('deleteConfirm'))) {
+    const result = await Swal.fire({
+      ...swalDangerTheme,
+      title: t('deleteConfirm'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: t('deleteYes') || 'Sí, eliminar',
+      cancelButtonText: t('cancel') || 'Cancelar',
+    });
+    if (result.isConfirmed) {
       await deleteShowcaseProject(id);
       loadProjects();
     }
@@ -124,7 +152,19 @@ export default function ShowcaseManager() {
       const res = await fetch('/api/upload', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.url) {
-        await addShowcaseImage(projectId, { url: data.url, caption: '' });
+        // Auto-generate caption from image metadata + filename
+        const project = projects.find(p => p.id === projectId);
+        const fileName = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+        const metaCaption = `${data.format?.toUpperCase() || ''}${data.width && data.height ? ` ${data.width}×${data.height}` : ''}`.trim();
+        const caption = project
+          ? `${project.title} — ${fileName || metaCaption || 'Screenshot'}`
+          : (fileName || metaCaption || undefined);
+
+        await addShowcaseImage(projectId, { 
+          url: data.url, 
+          caption,
+          imageMetadata: { format: data.format, width: data.width, height: data.height, colors: data.colors },
+        });
         loadProjects();
       } else {
         console.error('Upload failed:', data);
@@ -141,7 +181,11 @@ export default function ShowcaseManager() {
     if (!url) return;
     setUploading(true);
     try {
-      await addShowcaseImage(projectId, { url, caption: '' });
+      // Generate caption from project context when pasting URL
+      const project = projects.find(p => p.id === projectId);
+      const caption = project ? `${project.title} — Screenshot` : undefined;
+
+      await addShowcaseImage(projectId, { url, caption });
       setImageUrlInput('');
       loadProjects();
     } catch (err) {
@@ -151,7 +195,7 @@ export default function ShowcaseManager() {
     }
   };
 
-  const CATEGORIES = ['web', 'branding', 'infra', 'video', 'app'];
+  const CATEGORIES = ['web', 'branding', 'infra', 'video', 'app', 'design'];
 
   // Extract a SortableShowcaseCard sub-component
   function SortableShowcaseCard({ project, t, onEdit, onDelete, onToggleActive }: {
@@ -203,8 +247,8 @@ export default function ShowcaseManager() {
           {project.clientName && (
             <p className="text-xs text-muted mb-xxs">{project.clientName}</p>
           )}
-          {project.description && (
-            <p className="text-xs text-muted/70 line-clamp-2 mb-xs">{project.description}</p>
+          {(project.descriptionEs || project.description) && (
+            <p className="text-xs text-muted/70 line-clamp-2 mb-xs">{project.descriptionEs || project.description}</p>
           )}
           {project.technologies && (
             <div className="flex flex-wrap gap-xxxs mb-xs">
@@ -220,21 +264,21 @@ export default function ShowcaseManager() {
               {/* Drag handle */}
               <button
                 {...listeners}
-                className="w-[28px] h-[28px] flex items-center justify-center text-muted hover:text-ink cursor-grab active:cursor-grabbing shrink-0 touch-none"
+                className="w-10 h-10 flex items-center justify-center text-muted hover:text-ink cursor-grab active:cursor-grabbing shrink-0 touch-none"
                 title={t('dragHandle')}
               >
                 <span className="material-icons text-sm">drag_indicator</span>
               </button>
               <button
                 onClick={onEdit}
-                className="text-xs text-muted hover:text-ink transition-colors flex items-center gap-[2px] cursor-pointer"
+                className="text-xs text-muted hover:text-ink transition-colors flex items-center gap-[2px] cursor-pointer py-[10px]"
               >
                 <span className="material-icons text-sm">edit</span>
                 {t('edit')}
               </button>
               <button
                 onClick={onDelete}
-                className="text-xs text-muted hover:text-semantic-danger transition-colors flex items-center gap-[2px] cursor-pointer"
+                className="text-xs text-muted hover:text-semantic-danger transition-colors flex items-center gap-[2px] cursor-pointer py-[10px]"
               >
                 <span className="material-icons text-sm">delete</span>
                 {t('delete')}
@@ -242,7 +286,7 @@ export default function ShowcaseManager() {
             </div>
             <button
               onClick={onToggleActive}
-              className={`text-[9px] font-bold uppercase tracking-wider flex items-center gap-[2px] cursor-pointer transition-colors ${project.isActive ? 'text-semantic-warning hover:text-semantic-danger' : 'text-semantic-success hover:text-semantic-success/80'}`}
+              className={`text-[9px] font-bold uppercase tracking-wider flex items-center gap-[2px] cursor-pointer transition-colors py-[10px] ${project.isActive ? 'text-semantic-warning hover:text-semantic-danger' : 'text-semantic-success hover:text-semantic-success/80'}`}
             >
               <span className="material-icons text-sm">{project.isActive ? 'visibility_off' : 'visibility'}</span>
               {project.isActive ? t('hide') : t('show')}
@@ -267,11 +311,11 @@ export default function ShowcaseManager() {
 
       {/* Project Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-ink/50 z-50 flex items-center justify-center p-lg">
+        <div className="fixed inset-0 bg-ink/50 z-50 flex items-center justify-center p-sm md:p-lg">
           <div className="bg-canvas-elevated border border-hairline w-full max-w-[600px] max-h-[85vh] overflow-y-auto p-md" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-sm">
               <h2 className="text-title-sm font-medium text-ink">{editingProject ? t('editProject') : t('newProject')}</h2>
-              <button onClick={() => setShowForm(false)} className="text-muted hover:text-ink cursor-pointer">
+              <button onClick={() => setShowForm(false)} className="w-10 h-10 flex items-center justify-center text-muted hover:text-ink cursor-pointer">
                 <span className="material-icons">close</span>
               </button>
             </div>
@@ -280,18 +324,24 @@ export default function ShowcaseManager() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
                 <div className="md:col-span-2 space-y-xxs">
                   <label className="text-caption-uppercase text-ink font-semibold">{t('form.title')} *</label>
-                  <input name="title" defaultValue={editingProject?.title || ''} required className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none" placeholder={t('form.titlePlaceholder')} />
+                  <input name="title" defaultValue={editingProject?.title || ''} required className="w-full border border-hairline bg-canvas text-ink px-xs py-xs text-sm focus:border-primary outline-none" placeholder={t('form.titlePlaceholder')} />
                 </div>
 
-                <div className="md:col-span-2 space-y-xxs">
-                  <label className="text-caption-uppercase text-ink font-semibold">{t('form.description')}</label>
-                  <textarea name="description" defaultValue={editingProject?.description || ''} rows={3} className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none resize-none" placeholder={t('form.descriptionPlaceholder')} />
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-sm">
+                  <div className="space-y-xxs">
+                    <label className="text-caption-uppercase text-ink font-semibold">{t('form.descriptionEs')}</label>
+                    <textarea name="descriptionEs" defaultValue={editingProject?.descriptionEs || editingProject?.description || ''} rows={3} className="w-full border border-hairline bg-canvas text-ink px-xs py-xs text-sm focus:border-primary outline-none resize-none" placeholder={t('form.descriptionPlaceholder')} />
+                  </div>
+                  <div className="space-y-xxs">
+                    <label className="text-caption-uppercase text-ink font-semibold">{t('form.descriptionEn')}</label>
+                    <textarea name="descriptionEn" defaultValue={editingProject?.descriptionEn || ''} rows={3} className="w-full border border-hairline bg-canvas text-ink px-xs py-xs text-sm focus:border-primary outline-none resize-none" placeholder={t('form.descriptionPlaceholder')} />
+                  </div>
                 </div>
 
                 <div className="space-y-xxs">
                   <label className="block text-caption-uppercase text-ink font-semibold">{t('form.category')}</label>
                   <div className="relative">
-                    <select name="category" defaultValue={editingProject?.category || 'web'} className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none appearance-none cursor-pointer pr-sm">
+                    <select name="category" defaultValue={editingProject?.category || 'web'} className="w-full border border-hairline bg-canvas text-ink px-xs py-xs text-sm focus:border-primary outline-none appearance-none cursor-pointer pr-sm">
                       {CATEGORIES.map((cat) => (
                         <option key={cat} value={cat}>{t(`categories.${cat}`)}</option>
                       ))}
@@ -302,23 +352,23 @@ export default function ShowcaseManager() {
 
                 <div className="space-y-xxs">
                   <label className="text-caption-uppercase text-ink font-semibold">{t('form.clientName')}</label>
-                  <input name="clientName" defaultValue={editingProject?.clientName || ''} className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none" placeholder={t('form.clientPlaceholder')} />
+                  <input name="clientName" defaultValue={editingProject?.clientName || ''} className="w-full border border-hairline bg-canvas text-ink px-xs py-xs text-sm focus:border-primary outline-none" placeholder={t('form.clientPlaceholder')} />
                 </div>
 
                 <div className="space-y-xxs">
                   <label className="text-caption-uppercase text-ink font-semibold">{t('form.technologies')}</label>
-                  <input name="technologies" defaultValue={editingProject?.technologies || ''} className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none" placeholder={t('form.techPlaceholder')} />
+                  <input name="technologies" defaultValue={editingProject?.technologies || ''} className="w-full border border-hairline bg-canvas text-ink px-xs py-xs text-sm focus:border-primary outline-none" placeholder={t('form.techPlaceholder')} />
                 </div>
 
                 <div className="space-y-xxs">
                   <label className="text-caption-uppercase text-ink font-semibold">{t('form.projectUrl')}</label>
-                  <input name="projectUrl" defaultValue={editingProject?.projectUrl || ''} className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none" placeholder="https://..." />
+                  <input name="projectUrl" defaultValue={editingProject?.projectUrl || ''} className="w-full border border-hairline bg-canvas text-ink px-xs py-xs text-sm focus:border-primary outline-none" placeholder="https://..." />
                 </div>
               </div>
 
               <div className="flex justify-end gap-xxs pt-xs border-t border-hairline">
-                <button type="button" onClick={() => setShowForm(false)} className="px-sm h-[40px] text-xs font-bold uppercase tracking-wider border border-hairline text-ink hover:bg-canvas cursor-pointer">{t('form.cancel')}</button>
-                <button type="submit" className="px-sm h-[40px] text-xs font-bold uppercase tracking-wider bg-primary text-on-primary border border-transparent hover:bg-primary-hover cursor-pointer">{t('form.save')}</button>
+                <button type="button" onClick={() => setShowForm(false)} className="px-sm h-[44px] text-xs font-bold uppercase tracking-wider border border-hairline text-ink hover:bg-canvas cursor-pointer">{t('form.cancel')}</button>
+                <button type="submit" className="px-sm h-[44px] text-xs font-bold uppercase tracking-wider bg-primary text-on-primary border border-transparent hover:bg-primary-hover cursor-pointer">{t('form.save')}</button>
               </div>
             </form>
 
@@ -353,38 +403,38 @@ export default function ShowcaseManager() {
                     value={imageUrlInput}
                     onChange={(e) => setImageUrlInput(e.target.value)}
                     placeholder="https://... (paste image URL)"
-                    className="flex-grow border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none"
+                    className="flex-grow border border-hairline bg-canvas text-ink px-xs py-xs text-sm focus:border-primary outline-none"
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddImageUrl(editingProject.id); } }}
                   />
                   <button
                     onClick={() => handleAddImageUrl(editingProject.id)}
                     disabled={uploading || !imageUrlInput.trim()}
-                    className="px-sm py-xxs text-xs font-bold uppercase tracking-wider bg-primary text-on-primary border border-transparent hover:bg-primary-hover transition-colors disabled:opacity-50 cursor-pointer"
+                    className="px-sm py-xs text-xs font-bold uppercase tracking-wider bg-primary text-on-primary border border-transparent hover:bg-primary-hover transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     {t('images.add')}
                   </button>
                 </div>
 
                 {/* Image list */}
-                <div className="grid grid-cols-3 gap-xxs">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-xxs">
                   {editingProject.images.map((img) => (
                     <div key={img.id} className="relative group aspect-[4/3] bg-canvas border border-hairline overflow-hidden">
-                      <img src={img.url} alt={img.caption || ''} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-ink/0 group-hover:bg-ink/50 transition-colors flex items-center justify-center gap-xxs opacity-0 group-hover:opacity-100">
+                      <img src={img.url} alt={img.caption || editingProject?.title || 'Showcase image'} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-ink/50 sm:bg-ink/0 sm:group-hover:bg-ink/50 transition-colors flex items-center justify-center gap-xxs sm:opacity-0 sm:group-hover:opacity-100">
                         {!img.isFeatured && (
                           <button
                             onClick={async () => {
                               await setFeaturedImage(img.id, editingProject.id);
                               await loadProjects();
                             }}
-                            className="w-[28px] h-[28px] bg-canvas-elevated flex items-center justify-center cursor-pointer hover:text-primary transition-colors"
+                            className="w-[40px] h-[40px] bg-canvas-elevated flex items-center justify-center cursor-pointer hover:text-primary transition-colors"
                             title={t('images.setFeatured') ?? ''}
                           >
                             <span className="material-icons text-sm">star_outline</span>
                           </button>
                         )}
                         {img.isFeatured && (
-                          <span className="w-[28px] h-[28px] bg-primary/20 text-primary flex items-center justify-center" title={t('images.featured') ?? ''}>
+                          <span className="w-[40px] h-[40px] bg-primary/20 text-primary flex items-center justify-center" title={t('images.featured') ?? ''}>
                             <span className="material-icons text-sm">star</span>
                           </span>
                         )}
@@ -393,7 +443,7 @@ export default function ShowcaseManager() {
                             await deleteShowcaseImage(img.id);
                             await loadProjects();
                           }}
-                          className="w-[28px] h-[28px] bg-canvas-elevated flex items-center justify-center cursor-pointer hover:text-semantic-danger transition-colors"
+                          className="w-[40px] h-[40px] bg-canvas-elevated flex items-center justify-center cursor-pointer hover:text-semantic-danger transition-colors"
                           title={t('images.delete') ?? ''}
                         >
                           <span className="material-icons text-sm">delete</span>

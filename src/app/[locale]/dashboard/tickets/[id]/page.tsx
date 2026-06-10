@@ -48,7 +48,7 @@ export default async function AdminTicketDetailsPage({ params }: { params: Promi
       <div className="bg-canvas-elevated border border-hairline px-sm py-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-xxs">
           <div className="flex items-center gap-xxs min-w-0">
-            <Link href="/dashboard/tickets" className="shrink-0 w-[28px] h-[28px] flex items-center justify-center text-muted hover:text-ink hover:bg-canvas transition-colors">
+            <Link href="/dashboard/tickets" className="shrink-0 w-[40px] h-[40px] -ml-[6px] flex items-center justify-center text-muted hover:text-ink hover:bg-canvas transition-colors">
               <span className="material-icons text-[18px]">arrow_back</span>
             </Link>
             <div className="min-w-0">

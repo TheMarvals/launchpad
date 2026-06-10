@@ -49,7 +49,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
       {/* Compact Header */}
       <div className="bg-canvas-elevated border border-hairline px-sm py-xs mb-sm">
         <div className="flex items-center gap-xxs">
-          <Link href="/client-portal/tickets" className="shrink-0 w-[28px] h-[28px] flex items-center justify-center text-muted hover:text-ink hover:bg-canvas transition-colors">
+          <Link href="/client-portal/tickets" className="shrink-0 w-[40px] h-[40px] flex items-center justify-center text-muted hover:text-ink hover:bg-canvas transition-colors">
             <span className="material-icons text-[18px]">arrow_back</span>
           </Link>
           <div className="min-w-0 flex-1">

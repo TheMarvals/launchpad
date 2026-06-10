@@ -166,7 +166,7 @@ export default function PartnersManager() {
         {/* Drag handle */}
         <button
           {...listeners}
-          className="w-[28px] h-[28px] flex items-center justify-center text-muted hover:text-ink cursor-grab active:cursor-grabbing shrink-0 touch-none"
+          className="w-10 h-10 flex items-center justify-center text-muted hover:text-ink cursor-grab active:cursor-grabbing shrink-0 touch-none"
           title={t('dragHandle')}
         >
           <span className="material-icons text-sm">drag_indicator</span>
@@ -200,21 +200,21 @@ export default function PartnersManager() {
         <div className="flex items-center gap-xxs shrink-0">
           <button
             onClick={() => onToggleActive(partner)}
-            className={`w-[32px] h-[32px] flex items-center justify-center transition-colors cursor-pointer ${partner.isActive ? 'text-semantic-warning hover:text-semantic-danger' : 'text-muted hover:text-semantic-success'}`}
+            className={`w-[40px] h-[40px] flex items-center justify-center transition-colors cursor-pointer ${partner.isActive ? 'text-semantic-warning hover:text-semantic-danger' : 'text-muted hover:text-semantic-success'}`}
             title={partner.isActive ? t('hide') : t('show')}
           >
             <span className="material-icons text-sm">{partner.isActive ? 'visibility_off' : 'visibility'}</span>
           </button>
           <button
             onClick={() => onEdit(partner)}
-            className="w-[32px] h-[32px] flex items-center justify-center text-muted hover:text-ink transition-colors cursor-pointer"
+            className="w-[40px] h-[40px] flex items-center justify-center text-muted hover:text-ink transition-colors cursor-pointer"
             title={t('edit')}
           >
             <span className="material-icons text-sm">edit</span>
           </button>
           <button
             onClick={() => onDelete(partner)}
-            className="w-[32px] h-[32px] flex items-center justify-center text-muted hover:text-semantic-danger transition-colors cursor-pointer"
+            className="w-[40px] h-[40px] flex items-center justify-center text-muted hover:text-semantic-danger transition-colors cursor-pointer"
             title={t('delete')}
           >
             <span className="material-icons text-sm">delete</span>
@@ -241,11 +241,11 @@ export default function PartnersManager() {
 
       {/* Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-ink/50 z-50 flex items-center justify-center p-lg">
+        <div className="fixed inset-0 bg-ink/50 z-50 flex items-center justify-center p-sm md:p-lg">
           <div className="bg-canvas-elevated border border-hairline w-full max-w-[500px] p-md" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-sm">
               <h2 className="text-title-sm font-medium text-ink">{editingPartner ? t('editPartner') : t('newPartner')}</h2>
-              <button onClick={() => setShowForm(false)} className="text-muted hover:text-ink cursor-pointer">
+              <button onClick={() => setShowForm(false)} className="w-10 h-10 flex items-center justify-center text-muted hover:text-ink cursor-pointer">
                 <span className="material-icons">close</span>
               </button>
             </div>
@@ -257,7 +257,7 @@ export default function PartnersManager() {
                   name="name"
                   defaultValue={editingPartner?.name || ''}
                   required
-                  className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none"
+                  className="w-full border border-hairline bg-canvas text-ink px-xs py-xs text-sm focus:border-primary outline-none"
                   placeholder={t('form.namePlaceholder')}
                 />
               </div>
@@ -303,19 +303,19 @@ export default function PartnersManager() {
                 <input
                   name="websiteUrl"
                   defaultValue={editingPartner?.websiteUrl || ''}
-                  className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none"
+                  className="w-full border border-hairline bg-canvas text-ink px-xs py-xs text-sm focus:border-primary outline-none"
                   placeholder="https://..."
                 />
               </div>
 
               <div className="flex justify-end gap-xxs pt-xs border-t border-hairline">
-                <button type="button" onClick={() => setShowForm(false)} className="px-sm h-[40px] text-xs font-bold uppercase tracking-wider border border-hairline text-ink hover:bg-canvas cursor-pointer">
+                <button type="button" onClick={() => setShowForm(false)} className="px-sm h-[44px] text-xs font-bold uppercase tracking-wider border border-hairline text-ink hover:bg-canvas cursor-pointer">
                   {t('form.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={uploading || !logoUrlInput.trim()}
-                  className="px-sm h-[40px] text-xs font-bold uppercase tracking-wider bg-primary text-on-primary border border-transparent hover:bg-primary-hover transition-colors disabled:opacity-50 cursor-pointer"
+                  className="px-sm h-[44px] text-xs font-bold uppercase tracking-wider bg-primary text-on-primary border border-transparent hover:bg-primary-hover transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   {t('form.save')}
                 </button>

@@ -53,7 +53,7 @@ export function AddUserModal({ clientId, onClose }: { clientId: string, onClose:
                 value={name}
                 onChange={e => setName(e.target.value)}
                 required
-                className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
               />
             </div>
             <div className="space-y-xxs">
@@ -63,7 +63,7 @@ export function AddUserModal({ clientId, onClose }: { clientId: string, onClose:
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
               />
             </div>
             <div className="space-y-xxs">
@@ -73,7 +73,7 @@ export function AddUserModal({ clientId, onClose }: { clientId: string, onClose:
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
-                className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+                className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
               />
             </div>
           </div>
@@ -82,14 +82,14 @@ export function AddUserModal({ clientId, onClose }: { clientId: string, onClose:
             <button
               type="button"
               onClick={onClose}
-              className="px-sm py-xxs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors cursor-pointer"
+              className="px-sm py-xs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors cursor-pointer"
             >
               {t('cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-all disabled:opacity-50 border border-transparent flex items-center cursor-pointer"
+              className="bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-all disabled:opacity-50 border border-transparent flex items-center cursor-pointer"
             >
               {loading ? (
                 <span className="material-icons animate-spin text-[18px]">sync</span>
@@ -153,45 +153,45 @@ export function AddVpsModal({ clientId, onClose }: { clientId: string, onClose: 
                 onChange={e => setName(e.target.value)}
                 placeholder={t('friendlyNamePlaceholder') || 'Ej: Hosting Liceo'}
                 required
-                className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
-              />
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
+                />
+              </div>
+              <div className="space-y-xxs">
+                <label className="block text-caption-uppercase text-ink font-semibold">{t('providerId')}</label>
+                <input
+                  type="text"
+                  value={providerId}
+                  onChange={e => setProviderId(e.target.value)}
+                  placeholder={t('providerIdPlaceholder') || 'Ej: 123456'}
+                  required
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
+                />
+              </div>
+              <div className="space-y-xxs">
+                <label className="block text-caption-uppercase text-ink font-semibold">{t('ipAddress')}</label>
+                <input
+                  type="text"
+                  value={ipAddress}
+                  onChange={e => setIpAddress(e.target.value)}
+                  placeholder={t('ipAddressPlaceholder') || 'Ej: 192.168.1.1'}
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
+                />
+              </div>
             </div>
-            <div className="space-y-xxs">
-              <label className="block text-caption-uppercase text-ink font-semibold">{t('providerId')}</label>
-              <input
-                type="text"
-                value={providerId}
-                onChange={e => setProviderId(e.target.value)}
-                placeholder={t('providerIdPlaceholder') || 'Ej: 123456'}
-                required
-                className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
-              />
-            </div>
-            <div className="space-y-xxs">
-              <label className="block text-caption-uppercase text-ink font-semibold">{t('ipAddress')}</label>
-              <input
-                type="text"
-                value={ipAddress}
-                onChange={e => setIpAddress(e.target.value)}
-                placeholder={t('ipAddressPlaceholder') || 'Ej: 192.168.1.1'}
-                className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
-              />
-            </div>
-          </div>
 
-          <div className="flex justify-end gap-xxs p-sm border-t border-hairline bg-canvas">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-sm py-xxs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors cursor-pointer"
-            >
-              {t('cancel')}
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-primary text-on-primary px-sm py-xxs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-all disabled:opacity-50 border border-transparent flex items-center cursor-pointer"
-            >
+            <div className="flex justify-end gap-xxs p-sm border-t border-hairline bg-canvas">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-sm py-xs font-semibold text-xs uppercase tracking-wider text-muted hover:text-ink transition-colors cursor-pointer"
+              >
+                {t('cancel')}
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-all disabled:opacity-50 border border-transparent flex items-center cursor-pointer"
+              >
               {loading ? (
                 <span className="material-icons animate-spin text-[18px]">sync</span>
               ) : (

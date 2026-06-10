@@ -36,7 +36,7 @@ export default function GenericModal({
           <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider">{title}</h2>
           <button 
             onClick={onClose}
-            className="text-muted hover:text-ink transition-all"
+            className="w-10 h-10 flex items-center justify-center text-muted hover:text-ink transition-all"
           >
             <span className="material-icons">close</span>
           </button>

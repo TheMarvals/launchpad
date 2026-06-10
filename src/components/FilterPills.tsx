@@ -70,7 +70,7 @@ export default function FilterPills({
           <Link
             key={option.value || 'all'}
             href={buildHref(option.value)}
-            className={`px-sm py-xxs text-[10px] font-bold uppercase tracking-wider border transition-colors ${
+            className={`px-sm py-xs text-[10px] font-bold uppercase tracking-wider border transition-colors ${
               isActive
                 ? 'bg-ink text-canvas border-ink'
                 : 'bg-transparent text-muted border-hairline hover:text-ink hover:border-ink/30'
@@ -86,7 +86,7 @@ export default function FilterPills({
       {currentFilter && (
         <Link
           href={clearHref()}
-          className="px-sm py-xxs text-[10px] font-bold uppercase tracking-wider border border-transparent text-muted/50 hover:text-semantic-danger hover:border-semantic-danger/30 transition-colors flex items-center gap-[2px]"
+          className="px-sm py-xs text-[10px] font-bold uppercase tracking-wider border border-transparent text-muted/50 hover:text-semantic-danger hover:border-semantic-danger/30 transition-colors flex items-center gap-[2px]"
         >
           <span className="material-icons text-[12px]">close</span>
           {locale === 'es' ? 'Limpiar' : 'Clear'}

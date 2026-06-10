@@ -328,7 +328,7 @@ export default async function DashboardLayout({
             >
               <button
                 type="submit"
-                className="text-muted hover:text-primary transition-colors flex items-center justify-center cursor-pointer"
+                className="w-10 h-10 flex items-center justify-center text-muted hover:text-primary transition-colors cursor-pointer"
                 title={t('logout')}
               >
                 <span className="material-icons text-[20px]">logout</span>

@@ -7,24 +7,13 @@ import EmptyState from '@/components/EmptyState';
 import { deleteVpsService } from '@/app/actions/portal';
 import VpsEditModal from './VpsEditModal';
 import Swal from 'sweetalert2';
+import { swalToastTheme } from '@/lib/swal-theme';
 
 function showToast(icon: 'success' | 'error', title: string) {
   Swal.fire({
+    ...swalToastTheme,
     icon,
     title,
-    toast: true,
-    position: 'top-end',
-    timer: 2500,
-    showConfirmButton: false,
-    showClass: {
-      popup: 'animate-in fade-in zoom-in-95 duration-200',
-    },
-    hideClass: {
-      popup: 'animate-out fade-out zoom-out-95 duration-150',
-    },
-    customClass: {
-      popup: 'rounded-none border border-hairline bg-canvas-elevated text-ink',
-    },
   });
 }
 
@@ -156,7 +145,7 @@ export default function PortalServersList({ servers: initialServers }: { servers
                 <button
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page <= 1}
-                  className="w-[24px] h-[24px] flex items-center justify-center text-muted hover:text-ink disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  className="w-[40px] h-[40px] flex items-center justify-center text-muted hover:text-ink disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 >
                   <span className="material-icons text-sm">chevron_left</span>
                 </button>
@@ -164,7 +153,7 @@ export default function PortalServersList({ servers: initialServers }: { servers
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`w-[24px] h-[24px] flex items-center justify-center text-[10px] font-bold transition-colors cursor-pointer ${
+                    className={`w-10 h-10 flex items-center justify-center text-[10px] font-bold transition-colors cursor-pointer ${
                       p === page ? 'bg-primary text-on-primary' : 'text-muted hover:text-ink hover:bg-hairline'
                     }`}
                   >
@@ -174,7 +163,7 @@ export default function PortalServersList({ servers: initialServers }: { servers
                 <button
                   onClick={() => setPage(Math.min(totalPages, page + 1))}
                   disabled={page >= totalPages}
-                  className="w-[24px] h-[24px] flex items-center justify-center text-muted hover:text-ink disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  className="w-[40px] h-[40px] flex items-center justify-center text-muted hover:text-ink disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 >
                   <span className="material-icons text-sm">chevron_right</span>
                 </button>
