@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { getShowcaseProjects, createShowcaseProject, updateShowcaseProject, deleteShowcaseProject, addShowcaseImage, deleteShowcaseImage, setFeaturedImage } from '@/app/actions/showcase';
 import { reorderItems } from '@/app/actions/reorder';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { SortableContext, useSortable, verticalListSortingStrategy, rectSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import Swal from 'sweetalert2';
 import { swalTheme, swalDangerTheme } from '@/lib/swal-theme';
@@ -141,6 +141,29 @@ export default function ShowcaseManager() {
     ]);
   };
 
+  const handleDragEndImages = async (event: DragEndEvent, projectId: string) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    setEditingProject((prev) => {
+      if (!prev || prev.id !== projectId) return prev;
+      
+      const oldIndex = prev.images.findIndex(img => img.id === active.id);
+      const newIndex = prev.images.findIndex(img => img.id === over.id);
+      
+      if (oldIndex === -1 || newIndex === -1) return prev;
+
+      const newImages = arrayMove(prev.images, oldIndex, newIndex);
+      return { ...prev, images: newImages };
+    });
+
+    await reorderItems('showcaseImage', active.id as string, over.id as string, [
+      { path: '/dashboard/settings' },
+      { path: '/dashboard/showcase' },
+      { path: '/', type: 'layout' },
+    ]);
+  };
+
   const [imageUrlInput, setImageUrlInput] = useState('');
 
   const handleUploadImage = async (projectId: string, file: File) => {
@@ -196,6 +219,63 @@ export default function ShowcaseManager() {
   };
 
   const CATEGORIES = ['web', 'branding', 'infra', 'video', 'app', 'design'];
+
+  function SortableImageCard({ img, projectId, t }: { img: Image, projectId: string, t: any }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: img.id });
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.4 : undefined,
+      position: 'relative' as const,
+      zIndex: isDragging ? 50 : undefined,
+    };
+
+    return (
+      <div ref={setNodeRef} style={style} className="relative group aspect-[4/3] bg-canvas border border-hairline overflow-hidden">
+        <img src={img.url} alt={img.caption || 'Showcase image'} className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-ink/50 sm:bg-ink/0 sm:group-hover:bg-ink/50 transition-colors flex items-center justify-center gap-xxs sm:opacity-0 sm:group-hover:opacity-100">
+          <button
+            {...listeners}
+            {...attributes}
+            className="w-[40px] h-[40px] bg-canvas-elevated flex items-center justify-center cursor-grab hover:text-primary transition-colors touch-none"
+            title={t('dragHandle') ?? ''}
+          >
+            <span className="material-icons text-sm">drag_indicator</span>
+          </button>
+          {!img.isFeatured && (
+            <button
+              onClick={async () => {
+                await setFeaturedImage(img.id, projectId);
+                await loadProjects();
+              }}
+              className="w-[40px] h-[40px] bg-canvas-elevated flex items-center justify-center cursor-pointer hover:text-primary transition-colors"
+              title={t('images.setFeatured') ?? ''}
+            >
+              <span className="material-icons text-sm">star_outline</span>
+            </button>
+          )}
+          {img.isFeatured && (
+            <span className="w-[40px] h-[40px] bg-primary/20 text-primary flex items-center justify-center" title={t('images.featured') ?? ''}>
+              <span className="material-icons text-sm">star</span>
+            </span>
+          )}
+          <button
+            onClick={async () => {
+              await deleteShowcaseImage(img.id);
+              await loadProjects();
+            }}
+            className="w-[40px] h-[40px] bg-canvas-elevated flex items-center justify-center cursor-pointer hover:text-semantic-danger transition-colors"
+            title={t('images.delete') ?? ''}
+          >
+            <span className="material-icons text-sm">delete</span>
+          </button>
+        </div>
+        {img.isFeatured && (
+          <span className="absolute top-1 left-1 bg-primary text-on-primary text-[8px] font-bold uppercase px-1 py-[1px]">{t('images.featured')}</span>
+        )}
+      </div>
+    );
+  }
 
   // Extract a SortableShowcaseCard sub-component
   function SortableShowcaseCard({ project, t, onEdit, onDelete, onToggleActive }: {
@@ -416,45 +496,15 @@ export default function ShowcaseManager() {
                 </div>
 
                 {/* Image list */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-xxs">
-                  {editingProject.images.map((img) => (
-                    <div key={img.id} className="relative group aspect-[4/3] bg-canvas border border-hairline overflow-hidden">
-                      <img src={img.url} alt={img.caption || editingProject?.title || 'Showcase image'} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-ink/50 sm:bg-ink/0 sm:group-hover:bg-ink/50 transition-colors flex items-center justify-center gap-xxs sm:opacity-0 sm:group-hover:opacity-100">
-                        {!img.isFeatured && (
-                          <button
-                            onClick={async () => {
-                              await setFeaturedImage(img.id, editingProject.id);
-                              await loadProjects();
-                            }}
-                            className="w-[40px] h-[40px] bg-canvas-elevated flex items-center justify-center cursor-pointer hover:text-primary transition-colors"
-                            title={t('images.setFeatured') ?? ''}
-                          >
-                            <span className="material-icons text-sm">star_outline</span>
-                          </button>
-                        )}
-                        {img.isFeatured && (
-                          <span className="w-[40px] h-[40px] bg-primary/20 text-primary flex items-center justify-center" title={t('images.featured') ?? ''}>
-                            <span className="material-icons text-sm">star</span>
-                          </span>
-                        )}
-                        <button
-                          onClick={async () => {
-                            await deleteShowcaseImage(img.id);
-                            await loadProjects();
-                          }}
-                          className="w-[40px] h-[40px] bg-canvas-elevated flex items-center justify-center cursor-pointer hover:text-semantic-danger transition-colors"
-                          title={t('images.delete') ?? ''}
-                        >
-                          <span className="material-icons text-sm">delete</span>
-                        </button>
-                      </div>
-                      {img.isFeatured && (
-                        <span className="absolute top-1 left-1 bg-primary text-on-primary text-[8px] font-bold uppercase px-1 py-[1px]">{t('images.featured')}</span>
-                      )}
+                <DndContext collisionDetection={closestCenter} onDragEnd={(e) => handleDragEndImages(e, editingProject.id)}>
+                  <SortableContext items={editingProject.images.map(img => img.id)} strategy={rectSortingStrategy}>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-xxs">
+                      {editingProject.images.map((img) => (
+                        <SortableImageCard key={img.id} img={img} projectId={editingProject.id} t={t} />
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </SortableContext>
+                </DndContext>
               </div>
             )}
           </div>

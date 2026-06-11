@@ -3,11 +3,12 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-type PrismaModelName = 'partner' | 'showcaseProject';
+type PrismaModelName = 'partner' | 'showcaseProject' | 'showcaseImage';
 
 const modelMap: Record<PrismaModelName, any> = {
   partner: prisma.partner,
   showcaseProject: prisma.showcaseProject,
+  showcaseImage: prisma.showcaseImage,
 };
 
 /**
