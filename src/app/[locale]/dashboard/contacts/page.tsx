@@ -2,9 +2,18 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { getContactSubmissions, markAsRead, markAllAsRead, deleteContactSubmission } from '@/app/actions/contacts';
+import { getContactSubmissions, markAsRead, markAllAsRead, deleteContactSubmission, replyToContactSubmission } from '@/app/actions/contacts';
 import Swal from 'sweetalert2';
+import { swalTheme, swalDangerTheme } from '@/lib/swal-theme';
 import EmptyState from '@/components/EmptyState';
+
+type ContactReply = {
+  id: string;
+  subject: string | null;
+  message: string;
+  sentBy: string;
+  createdAt: Date;
+};
 
 type Submission = {
   id: string;
@@ -14,6 +23,7 @@ type Submission = {
   challenge: string;
   read: boolean;
   createdAt: Date;
+  replies?: ContactReply[];
 };
 
 export default function ContactsPage() {
@@ -22,6 +32,11 @@ export default function ContactsPage() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Submission | null>(null);
+  
+  const [replyMode, setReplyMode] = useState(false);
+  const [replySubject, setReplySubject] = useState('');
+  const [replyMessage, setReplyMessage] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
 
   const fetchSubmissions = useCallback(async () => {
     setLoading(true);
@@ -50,23 +65,60 @@ export default function ContactsPage() {
 
   const handleDelete = async (id: string) => {
     const result = await Swal.fire({
+      ...swalDangerTheme,
       title: t('deleteTitle'),
       text: t('deleteText'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: t('deleteConfirm'),
       cancelButtonText: t('deleteCancel'),
-      customClass: {
-        popup: 'rounded-none border border-hairline bg-canvas-elevated text-ink',
-        confirmButton: 'px-sm py-xs font-semibold uppercase tracking-wider text-xs border border-transparent bg-semantic-warning text-white',
-        cancelButton: 'px-sm py-xs font-semibold text-muted uppercase tracking-wider text-xs border border-transparent bg-canvas text-muted',
-      },
     });
 
     if (result.isConfirmed) {
       await deleteContactSubmission(id);
       setSubmissions((prev) => prev.filter((s) => s.id !== id));
       if (selected?.id === id) setSelected(null);
+    }
+  };
+
+  const handleSendReply = async () => {
+    if (!selected || !replySubject.trim() || !replyMessage.trim()) return;
+    setSendingReply(true);
+    const result = await replyToContactSubmission(selected.id, replySubject, replyMessage);
+    setSendingReply(false);
+    
+    if (result.success && result.reply) {
+      await Swal.fire({
+        ...swalTheme,
+        title: t('replySuccess'),
+        icon: 'success',
+      });
+      setReplyMode(false);
+      
+      const newReply = result.reply as ContactReply;
+      
+      setSelected(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          replies: [...(prev.replies || []), newReply]
+        };
+      });
+
+      setSubmissions(prev => 
+        prev.map(sub => 
+          sub.id === selected.id 
+            ? { ...sub, replies: [...(sub.replies || []), newReply], read: true }
+            : sub
+        )
+      );
+    } else {
+      await Swal.fire({
+        ...swalDangerTheme,
+        title: t('replyError'),
+        text: result.error,
+        icon: 'error',
+      });
     }
   };
 
@@ -173,6 +225,7 @@ export default function ContactsPage() {
                 key={sub.id}
                 onClick={() => {
                   setSelected(sub);
+                  setReplyMode(false);
                   if (!sub.read) handleMarkRead(sub.id);
                 }}
                 className={`w-full text-left p-sm border transition-all duration-200 cursor-pointer group ${
@@ -290,21 +343,123 @@ export default function ContactsPage() {
                 </div>
               </div>
 
+              {/* Conversation Thread */}
+              {selected.replies && selected.replies.length > 0 && (
+                <div className="space-y-sm pt-sm border-t border-hairline mt-sm">
+                  <p className="text-[9px] uppercase tracking-widest text-muted font-bold mb-xxs">
+                    Historial
+                  </p>
+                  <div className="bg-canvas-elevated/50 rounded-2xl border border-hairline p-sm mt-xs">
+                    <div className="space-y-md">
+                      {selected.replies.map(reply => {
+                        const isAdmin = reply.sentBy === 'ADMIN';
+                        return (
+                          <div key={reply.id} className="flex gap-sm group">
+                            <div className="shrink-0 mt-1">
+                              {isAdmin ? (
+                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 text-primary font-bold shadow-sm" title="Staff">
+                                  N
+                                </div>
+                              ) : (
+                                <div className="w-10 h-10 rounded-full bg-canvas-elevated flex items-center justify-center border border-hairline text-ink font-bold shadow-sm" title="Cliente">
+                                  C
+                                </div>
+                              )}
+                            </div>
+                            
+                            <div className={`flex-1 ${isAdmin ? 'bg-primary/5 border-primary/20' : 'bg-canvas-elevated border-hairline'} border rounded-2xl rounded-tl-sm p-sm shadow-sm hover:shadow-md transition-shadow`}>
+                              <div className="flex flex-wrap justify-between items-center mb-xs gap-2">
+                                <div className="flex items-center gap-xxs">
+                                  <span className="text-sm font-semibold text-ink">
+                                    {isAdmin ? 'Nosotros' : 'Cliente'}
+                                  </span>
+                                  {isAdmin && (
+                                    <span className="bg-primary/10 text-primary px-xxs py-[2px] rounded-md text-[10px] font-bold uppercase tracking-wider">
+                                      Staff
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-xs text-muted/70 group-hover:text-muted transition-colors">
+                                  {new Date(reply.createdAt).toLocaleDateString(locale, {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </span>
+                              </div>
+                              {reply.subject && <p className="text-[10px] font-medium text-ink/70 mb-xxs">Asunto: {reply.subject}</p>}
+                              <p className="text-sm text-body leading-relaxed whitespace-pre-wrap break-words">{reply.message}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-xxs pt-xs border-t border-hairline">
-                <a
-                  href={`mailto:${selected.email}`}
-                  className="flex items-center gap-xxs bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors"
-                >
-                  <span className="material-icons text-sm">reply</span>
-                  {t('reply')}
-                </a>
-                <button
-                  onClick={() => handleDelete(selected.id)}
-                  className="flex items-center gap-xxs px-sm py-xs font-semibold text-xs uppercase tracking-wider text-muted hover:text-semantic-warning transition-colors cursor-pointer"
-                >
-                  <span className="material-icons text-sm">delete</span>
-                  {t('delete')}
-                </button>
+                {!replyMode ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        setReplySubject(`Re: Strategy Audit - ${selected.company}`);
+                        setReplyMessage('');
+                        setReplyMode(true);
+                      }}
+                      className="flex items-center gap-xxs bg-primary text-on-primary px-sm py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors cursor-pointer"
+                    >
+                      <span className="material-icons text-sm">reply</span>
+                      {t('reply')}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(selected.id)}
+                      className="flex items-center gap-xxs px-sm py-xs font-semibold text-xs uppercase tracking-wider text-muted hover:text-semantic-warning transition-colors cursor-pointer"
+                    >
+                      <span className="material-icons text-sm">delete</span>
+                      {t('delete')}
+                    </button>
+                  </>
+                ) : (
+                  <div className="w-full space-y-sm">
+                    <div className="space-y-xxs">
+                      <label className="text-[9px] uppercase tracking-widest text-muted font-bold">{t('replySubject')}</label>
+                      <input 
+                        type="text" 
+                        value={replySubject} 
+                        onChange={e => setReplySubject(e.target.value)} 
+                        className="w-full border border-hairline bg-canvas-elevated/50 text-ink px-sm py-[10px] text-sm rounded-xl focus:border-primary/40 focus:ring-1 focus:ring-primary/40 outline-none transition-shadow shadow-sm" 
+                      />
+                    </div>
+                    <div className="space-y-xxs">
+                      <label className="text-[9px] uppercase tracking-widest text-muted font-bold">{t('replyMessage')}</label>
+                      <textarea 
+                        rows={6} 
+                        value={replyMessage} 
+                        onChange={e => setReplyMessage(e.target.value)} 
+                        className="w-full border border-hairline bg-canvas-elevated/50 text-ink px-sm py-[10px] text-sm rounded-xl focus:border-primary/40 focus:ring-1 focus:ring-primary/40 outline-none resize-none transition-shadow shadow-sm" 
+                      />
+                    </div>
+                    <div className="flex justify-end gap-xs pt-xs">
+                      <button 
+                        onClick={() => setReplyMode(false)}
+                        disabled={sendingReply}
+                        className="px-sm h-10 text-xs font-bold uppercase tracking-wider rounded-xl text-ink hover:bg-canvas transition-colors cursor-pointer disabled:opacity-50 shadow-sm border border-hairline"
+                      >
+                        {t('cancelReply')}
+                      </button>
+                      <button 
+                        onClick={handleSendReply}
+                        disabled={sendingReply || !replySubject.trim() || !replyMessage.trim()}
+                        className="flex items-center gap-xxs px-md h-10 rounded-xl text-xs font-bold uppercase tracking-wider bg-primary text-on-primary hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:hover:scale-100 shadow-sm"
+                      >
+                        {sendingReply ? <span className="material-icons text-sm animate-spin">sync</span> : <span className="material-icons text-sm">send</span>}
+                        {sendingReply ? t('replying') : t('sendReply')}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : (

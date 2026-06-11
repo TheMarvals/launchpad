@@ -375,8 +375,8 @@ export default function EmptyState({
   compact = false,
 }: EmptyStateProps) {
   return (
-    <div className={`text-center py-xl px-sm empty-state-root ${className}`}>
-      <div className="flex flex-col items-center">
+    <div className={`w-full text-center py-xl px-sm empty-state-root ${className}`}>
+      <div className="flex flex-col items-center justify-center w-full">
         <div className={`${compact ? 'w-[80px] h-[80px]' : 'w-[120px] h-[120px]'} flex items-center justify-center mx-auto mb-xs text-muted`}>
           <Illustration variant={variant} />
         </div>
@@ -384,7 +384,7 @@ export default function EmptyState({
           <h3 className="text-title-sm font-medium text-ink mb-[4px] empty-state-title">{title}</h3>
         )}
         {message && (
-          <p className="text-sm text-muted leading-relaxed max-w-md mx-auto empty-state-message">{message}</p>
+          <p className="text-sm text-muted leading-relaxed max-w-md mx-auto empty-state-message w-full min-w-[300px] break-words px-sm">{message}</p>
         )}
         {action && (
           <div className="mt-sm empty-state-action">

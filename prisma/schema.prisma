@@ -386,6 +386,19 @@ model ContactSubmission {
   challenge   String   @db.Text
   read        Boolean  @default(false)
   createdAt   DateTime @default(now())
+
+  replies     ContactReply[]
+}
+
+model ContactReply {
+  id                  String            @id @default(uuid())
+  contactSubmissionId String
+  subject             String?
+  message             String            @db.Text
+  sentBy              String            @default("ADMIN") // ADMIN or USER
+  createdAt           DateTime          @default(now())
+
+  contactSubmission   ContactSubmission @relation(fields: [contactSubmissionId], references: [id], onDelete: Cascade)
 }
 
 model CompanyProfile {
