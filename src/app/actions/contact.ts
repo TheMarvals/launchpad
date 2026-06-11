@@ -11,6 +11,7 @@ export async function submitContactForm(data: {
   email: string;
   company: string;
   challenge: string;
+  honeypot?: string;
 }) {
   const adminEmail = process.env.ADMIN_EMAIL || process.env.USERM;
 
@@ -20,6 +21,12 @@ export async function submitContactForm(data: {
 
   if (!data.name || !data.email || !data.company || !data.challenge) {
     return { error: 'All fields are required' };
+  }
+
+  // Honeypot check - if filled, it's a bot. Silently accept to trick the bot.
+  if (data.honeypot) {
+    console.warn(`[Contact] Blocked honeypot submission from: ${data.email}`);
+    return { success: true };
   }
 
   try {

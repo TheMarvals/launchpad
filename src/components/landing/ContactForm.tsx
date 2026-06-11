@@ -6,7 +6,7 @@ import { submitContactForm } from '@/app/actions/contact';
 
 export default function ContactForm() {
   const t = useTranslations('Contact');
-  const [form, setForm] = useState({ name: '', email: '', company: '', challenge: '' });
+  const [form, setForm] = useState({ name: '', email: '', company: '', challenge: '', honeypot: '' });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [visible, setVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -34,7 +34,7 @@ export default function ContactForm() {
     const res = await submitContactForm(form);
     if (res.success) {
       setStatus('success');
-      setForm({ name: '', email: '', company: '', challenge: '' });
+      setForm({ name: '', email: '', company: '', challenge: '', honeypot: '' });
     } else {
       setStatus('error');
     }
@@ -43,6 +43,20 @@ export default function ContactForm() {
   return (
     <div ref={sectionRef} className={`transition-all duration-700 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
       <form onSubmit={handleSubmit} className="max-w-[560px] mx-auto space-y-sm">
+        {/* Honeypot field - visually hidden but accessible to bots */}
+        <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }} aria-hidden="true">
+          <label htmlFor="bot-check">Do not fill this out</label>
+          <input
+            type="text"
+            id="bot-check"
+            name="bot-check"
+            tabIndex={-1}
+            autoComplete="off"
+            value={form.honeypot}
+            onChange={(e) => setForm({ ...form, honeypot: e.target.value })}
+          />
+        </div>
+
         <div className={`relative transition-all duration-500 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`} style={{ transitionDelay: '0.1s' }}>
           <input
             type="text"
