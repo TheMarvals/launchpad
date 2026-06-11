@@ -23,6 +23,7 @@ interface PortalUser {
   name: string;
   email: string;
   isActive: boolean;
+  permissions?: string[];
 }
 
 export default function PortalUsersList({ users: initialUsers, clientId }: { users: PortalUser[]; clientId: string }) {
@@ -37,6 +38,7 @@ export default function PortalUsersList({ users: initialUsers, clientId }: { use
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [editPassword, setEditPassword] = useState('');
+  const [editPermissions, setEditPermissions] = useState<string[]>(['servers', 'quotes', 'tickets']);
   const [editLoading, setEditLoading] = useState(false);
 
   const filteredUsers = search.trim()
@@ -100,6 +102,7 @@ export default function PortalUsersList({ users: initialUsers, clientId }: { use
     setEditName(user.name);
     setEditEmail(user.email);
     setEditPassword('');
+    setEditPermissions(user.permissions || ['servers', 'quotes', 'tickets']);
   };
 
   const handleEditSave = async () => {
@@ -109,12 +112,13 @@ export default function PortalUsersList({ users: initialUsers, clientId }: { use
       name: editName.trim(),
       email: editEmail.trim(),
       password: editPassword || undefined,
+      permissions: editPermissions,
     });
     setEditLoading(false);
     if (res.error) {
       showToast('error', 'Error: ' + res.error);
     } else {
-      setUsers(users.map((u) => (u.id === editingUser.id ? { ...u, name: editName.trim(), email: editEmail.trim() } : u)));
+      setUsers(users.map((u) => (u.id === editingUser.id ? { ...u, name: editName.trim(), email: editEmail.trim(), permissions: editPermissions } : u)));
       setEditingUser(null);
       showToast('success', t('updateSuccess') || 'Usuario actualizado');
       router.refresh();
@@ -269,6 +273,29 @@ export default function PortalUsersList({ users: initialUsers, clientId }: { use
                   placeholder={t('passwordPlaceholder') || 'Dejar en blanco para mantener'}
                   className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
                 />
+              </div>
+              <div className="space-y-xxs pt-xs">
+                <label className="block text-caption-uppercase text-ink font-semibold">{t('permissions') || 'PERMISOS'}</label>
+                <div className="space-y-[4px]">
+                  {[
+                    { id: 'servers', label: t('permissionServers') || 'Ver Servidores' },
+                    { id: 'quotes', label: t('permissionQuotes') || 'Ver Cotizaciones' },
+                    { id: 'tickets', label: t('permissionTickets') || 'Soporte / Tickets' }
+                  ].map(perm => (
+                    <label key={perm.id} className="flex items-center gap-xxs cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={editPermissions.includes(perm.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setEditPermissions([...editPermissions, perm.id]);
+                          else setEditPermissions(editPermissions.filter(p => p !== perm.id));
+                        }}
+                        className="w-4 h-4 rounded-sm border-hairline bg-canvas text-primary focus:ring-primary/30 cursor-pointer"
+                      />
+                      <span className="text-xs text-ink group-hover:text-primary transition-colors">{perm.label}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
 

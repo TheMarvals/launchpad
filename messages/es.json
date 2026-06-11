@@ -469,7 +469,8 @@
       "showcase": "Portafolio",
       "cleanup": "Cloudinary",
       "partners": "Partners",
-      "prisma": "Prisma"
+      "prisma": "Prisma",
+      "clientUsers": "Usuarios Clientes"
     },
     "companyProfile": {
       "title": "Perfil de Empresa",
@@ -677,6 +678,57 @@
       "testRequired": "Token y Chat ID son requeridos para probar",
       "tokenPlaceholder": "123456:ABC-DEF...",
       "chatIdPlaceholder": "Ej. -100123456789"
+    },
+    "portalUsers": {
+      "title": "Usuarios del Portal",
+      "subtitle": "Gestiona el acceso de los clientes al portal.",
+      "newUser": "Nuevo Usuario",
+      "editUser": "Editar Usuario",
+      "requiredFields": "Nombre, correo y empresa son requeridos.",
+      "createSuccess": "Usuario creado con éxito.",
+      "createError": "Error al crear el usuario.",
+      "updateSuccess": "Usuario actualizado con éxito.",
+      "updateError": "Error al actualizar el usuario.",
+      "deleteTitle": "¿Eliminar usuario?",
+      "deleteText": "Se eliminará el acceso del usuario al portal permanentemente.",
+      "deleteConfirm": "Sí, eliminar",
+      "deleteCancel": "Cancelar",
+      "deleteSuccess": "Usuario eliminado con éxito.",
+      "deleteError": "Error al eliminar el usuario.",
+      "resetPassword": "Restablecer Contraseña",
+      "resetPasswordHelp": "Establece una nueva contraseña para",
+      "passwordRequired": "La contraseña es requerida.",
+      "passwordResetSuccess": "Contraseña restablecida.",
+      "passwordResetError": "Error al restablecer contraseña.",
+      "empty": "No hay usuarios del portal.",
+      "table": {
+        "name": "NOMBRE",
+        "email": "CORREO",
+        "company": "EMPRESA",
+        "status": "ESTADO",
+        "joined": "CREADO",
+        "actions": "ACCIONES"
+      },
+      "status": {
+        "active": "ACTIVO",
+        "inactive": "INACTIVO",
+        "activated": "Activado",
+        "deactivated": "Desactivado"
+      },
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Ej: Juan Pérez",
+        "email": "Correo",
+        "emailPlaceholder": "juan@empresa.com",
+        "company": "Empresa",
+        "selectCompany": "Selecciona una empresa...",
+        "password": "Contraseña",
+        "passwordPlaceholder": "Dejar en blanco para la por defecto",
+        "newPasswordPlaceholder": "Nueva Contraseña",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "saving": "Guardando..."
+      }
     }
   },
   "Login": {
@@ -770,7 +822,11 @@
     "optional": "opcional",
     "passwordPlaceholder": "Dejar en blanco para mantener actual",
     "of": "de",
-    "notFound": "No encontrado"
+    "notFound": "No encontrado",
+    "permissions": "Permisos",
+    "permissionServers": "Ver Servidores",
+    "permissionQuotes": "Ver Cotizaciones",
+    "permissionTickets": "Soporte / Tickets"
   },
   "ClientPortal": {
     "dashboard": {

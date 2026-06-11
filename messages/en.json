@@ -468,7 +468,8 @@
       "showcase": "Showcase",
       "cleanup": "Cloudinary",
       "partners": "Partners",
-      "prisma": "Prisma"
+      "prisma": "Prisma",
+      "clientUsers": "Client Users"
     },
     "companyProfile": {
       "title": "Company Profile",
@@ -676,6 +677,57 @@
       "testRequired": "Token and Chat ID are required for testing",
       "tokenPlaceholder": "123456:ABC-DEF...",
       "chatIdPlaceholder": "e.g. -100123456789"
+    },
+    "portalUsers": {
+      "title": "Portal Users",
+      "subtitle": "Manage clients access to the portal.",
+      "newUser": "New User",
+      "editUser": "Edit User",
+      "requiredFields": "Name, email and company are required.",
+      "createSuccess": "User created successfully.",
+      "createError": "Error creating user.",
+      "updateSuccess": "User updated successfully.",
+      "updateError": "Error updating user.",
+      "deleteTitle": "Delete user?",
+      "deleteText": "User access to the portal will be permanently deleted.",
+      "deleteConfirm": "Yes, delete",
+      "deleteCancel": "Cancel",
+      "deleteSuccess": "User deleted successfully.",
+      "deleteError": "Error deleting user.",
+      "resetPassword": "Reset Password",
+      "resetPasswordHelp": "Set a new password for",
+      "passwordRequired": "Password is required.",
+      "passwordResetSuccess": "Password reset successfully.",
+      "passwordResetError": "Error resetting password.",
+      "empty": "No portal users found.",
+      "table": {
+        "name": "NOMBRE",
+        "email": "CORREO",
+        "company": "EMPRESA",
+        "status": "ESTADO",
+        "joined": "CREADO",
+        "actions": "ACCIONES"
+      },
+      "status": {
+        "active": "ACTIVO",
+        "inactive": "INACTIVO",
+        "activated": "Activado",
+        "deactivated": "Desactivado"
+      },
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Ex: John Doe",
+        "email": "Correo",
+        "emailPlaceholder": "juan@empresa.com",
+        "company": "Empresa",
+        "selectCompany": "Select a company...",
+        "password": "Contraseña",
+        "passwordPlaceholder": "Leave blank for default",
+        "newPasswordPlaceholder": "New Password",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "saving": "Guardando..."
+      }
     }
   },
   "Login": {
@@ -769,7 +821,11 @@
     "optional": "optional",
     "passwordPlaceholder": "Leave blank to keep current",
     "of": "of",
-    "notFound": "Not found"
+    "notFound": "Not found",
+    "permissions": "Permissions",
+    "permissionServers": "View Servers",
+    "permissionQuotes": "View Quotes",
+    "permissionTickets": "Support / Tickets"
   },
   "ClientPortal": {
     "dashboard": {

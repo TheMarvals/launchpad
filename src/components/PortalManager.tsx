@@ -11,6 +11,7 @@ export function AddUserModal({ clientId, onClose }: { clientId: string, onClose:
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [permissions, setPermissions] = useState<string[]>(['servers', 'quotes', 'tickets']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -18,7 +19,7 @@ export function AddUserModal({ clientId, onClose }: { clientId: string, onClose:
     e.preventDefault();
     setLoading(true);
     setError('');
-    const res = await createClientUser(clientId, { name, email, password });
+    const res = await createClientUser(clientId, { name, email, password, permissions });
     setLoading(false);
     if (res.error) {
       setError(res.error);
@@ -75,6 +76,29 @@ export function AddUserModal({ clientId, onClose }: { clientId: string, onClose:
                 required
                 className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
               />
+            </div>
+            <div className="space-y-xxs pt-xs">
+              <label className="block text-caption-uppercase text-ink font-semibold">{t('permissions') || 'PERMISOS'}</label>
+              <div className="space-y-[4px]">
+                {[
+                  { id: 'servers', label: t('permissionServers') || 'Ver Servidores' },
+                  { id: 'quotes', label: t('permissionQuotes') || 'Ver Cotizaciones' },
+                  { id: 'tickets', label: t('permissionTickets') || 'Soporte / Tickets' }
+                ].map(perm => (
+                  <label key={perm.id} className="flex items-center gap-xxs cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={permissions.includes(perm.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) setPermissions([...permissions, perm.id]);
+                        else setPermissions(permissions.filter(p => p !== perm.id));
+                      }}
+                      className="w-4 h-4 rounded-sm border-hairline bg-canvas text-primary focus:ring-primary/30 cursor-pointer"
+                    />
+                    <span className="text-xs text-ink group-hover:text-primary transition-colors">{perm.label}</span>
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
 

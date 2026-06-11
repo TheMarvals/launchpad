@@ -20,6 +20,7 @@ export async function createClientUser(clientId: string, data: any) {
         password: hashedPassword,
         role: 'CLIENT',
         clientId: clientId,
+        permissions: data.permissions || [],
       }
     });
 
@@ -50,12 +51,15 @@ export async function bindVpsServer(clientId: string, data: any) {
   }
 }
 
-export async function updateClientUser(userId: string, data: { name: string; email: string; password?: string }) {
+export async function updateClientUser(userId: string, data: { name: string; email: string; password?: string; permissions?: string[] }) {
   try {
     const updateData: any = {
       name: data.name,
       email: data.email,
     };
+    if (data.permissions) {
+      updateData.permissions = data.permissions;
+    }
     if (data.password) {
       updateData.password = await bcrypt.hash(data.password, 12);
     }

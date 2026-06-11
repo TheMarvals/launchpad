@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 
-export function MobileClientNav() {
+export function MobileClientNav({ permissions = [] }: { permissions?: string[] }) {
   const t = useTranslations('ClientPortal');
   const [isOpen, setIsOpen] = useState(false);
 
@@ -44,21 +44,27 @@ export function MobileClientNav() {
                 <span className="material-icons mr-xxs text-sm opacity-70">dashboard</span> {t('dashboard.navLabel')}
               </Link>
             </li>
-            <li>
-              <Link href="/client-portal/servers" onClick={() => setIsOpen(false)} className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">dns</span> {t('servers.title')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/client-portal/quotes" onClick={() => setIsOpen(false)} className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">description</span> {t('quotes.pageTitle')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/client-portal/tickets" onClick={() => setIsOpen(false)} className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">support_agent</span> {t('tickets.title')}
-              </Link>
-            </li>
+            {permissions.includes('servers') && (
+              <li>
+                <Link href="/client-portal/servers" onClick={() => setIsOpen(false)} className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">dns</span> {t('servers.title')}
+                </Link>
+              </li>
+            )}
+            {permissions.includes('quotes') && (
+              <li>
+                <Link href="/client-portal/quotes" onClick={() => setIsOpen(false)} className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">description</span> {t('quotes.pageTitle')}
+                </Link>
+              </li>
+            )}
+            {permissions.includes('tickets') && (
+              <li>
+                <Link href="/client-portal/tickets" onClick={() => setIsOpen(false)} className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">support_agent</span> {t('tickets.title')}
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
       </div>

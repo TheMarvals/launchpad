@@ -16,22 +16,26 @@ export default function LocaleSwitcher() {
   };
 
   return (
-    <div className="flex items-center p-1 rounded-none border border-hairline bg-canvas-elevated">
+    <div className="relative inline-flex items-center bg-canvas/40 backdrop-blur-sm border border-hairline p-[3px] rounded-full shadow-inner overflow-hidden group">
+      {/* Animated Sliding Background */}
+      <div 
+        className={`absolute top-[3px] bottom-[3px] w-[calc(50%-3px)] bg-primary rounded-full shadow-sm transition-transform duration-300 ease-out ${
+          locale === 'en' ? 'translate-x-full' : 'translate-x-0'
+        }`}
+      />
+      
       <button
         onClick={() => onLocaleChange('es')}
-        className={`px-3 py-xs text-xs font-semibold tracking-wider rounded-none transition-all cursor-pointer ${
-          locale === 'es'          ? 'bg-primary text-white'
-          : 'text-muted hover:text-ink hover:bg-canvas'
+        className={`relative z-10 w-11 py-[4px] text-[10px] font-bold tracking-widest transition-all duration-300 cursor-pointer ${
+          locale === 'es' ? 'text-white drop-shadow-sm' : 'text-muted hover:text-ink'
         }`}
       >
         ES
       </button>
       <button
         onClick={() => onLocaleChange('en')}
-        className={`px-3 py-xs text-xs font-semibold tracking-wider rounded-none transition-all cursor-pointer ${
-          locale === 'en'
-            ? 'bg-primary text-white'
-            : 'text-muted hover:text-ink hover:bg-canvas'
+        className={`relative z-10 w-11 py-[4px] text-[10px] font-bold tracking-widest transition-all duration-300 cursor-pointer ${
+          locale === 'en' ? 'text-white drop-shadow-sm' : 'text-muted hover:text-ink'
         }`}
       >
         EN

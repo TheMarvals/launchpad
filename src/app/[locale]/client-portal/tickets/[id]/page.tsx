@@ -3,8 +3,8 @@ import { Link } from '@/i18n/routing';
 import { notFound } from 'next/navigation';
 import { getTicketDetails } from '@/app/actions/tickets';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { getTranslations } from 'next-intl/server';
+import { es, enUS } from 'date-fns/locale';
+import { getTranslations, getLocale } from 'next-intl/server';
 import TicketReplyForm from './TicketReplyForm';
 import TicketStatusManager from './TicketStatusManager';
 
@@ -12,6 +12,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
   const { id } = await params;
   const ticket = await getTicketDetails(id);
   const t = await getTranslations('ClientPortal');
+  const locale = await getLocale();
 
   if (!ticket) {
     notFound();
@@ -69,46 +70,50 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
       </div>
 
       {/* Chat Messages */}
-      <div className="bg-canvas-elevated/50 rounded-2xl border border-hairline mb-sm p-sm md:p-md">
-        <div className="space-y-md">
+      <div className="bg-canvas-elevated border border-hairline mb-sm p-sm md:p-lg">
+        <div className="space-y-0">
           {ticket.messages.map((msg, idx) => {
             const isAdmin = msg.user.role === 'ADMIN';
             
             return (
-              <div key={msg.id} className="flex gap-sm group">
-                {/* Avatar */}
-                <div className="shrink-0 mt-1">
-                  {isAdmin ? (
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 text-primary font-bold shadow-sm" title={t('tickets.statusManager.supportTeam')}>
-                      {msg.user.name.charAt(0).toUpperCase()}
+              <div key={msg.id} className="py-md border-b border-hairline first:pt-0 last:border-0">
+                <div className="flex items-center justify-between mb-sm">
+                  <div className="flex items-center gap-sm">
+                    {/* Avatar */}
+                    {isAdmin ? (
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 text-primary font-bold shrink-0">
+                        {msg.user.name.charAt(0).toUpperCase()}
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-canvas-elevated flex items-center justify-center border border-hairline text-ink font-bold shrink-0">
+                        {msg.user.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    
+                    <div>
+                      <div className="flex items-center gap-xxs">
+                        <span className="text-sm font-bold text-ink">
+                          {isAdmin ? t('tickets.statusManager.supportTeam') : t('tickets.detail.you')}
+                        </span>
+                        {isAdmin && (
+                          <span className="bg-primary/10 text-primary px-xxs py-[2px] rounded-md text-[10px] font-bold uppercase tracking-wider">
+                            Staff
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted mt-[2px]">
+                        {isAdmin ? t('tickets.detail.toYou') || 'to you' : t('tickets.detail.toSupport') || 'to Support'}
+                      </div>
                     </div>
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-canvas-elevated flex items-center justify-center border border-hairline text-ink font-bold shadow-sm" title={t('tickets.detail.you')}>
-                      {msg.user.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  </div>
+                  <div className="text-xs text-muted/70 whitespace-nowrap">
+                    {format(new Date(msg.createdAt), locale === 'es' ? "d 'de' MMM, HH:mm" : "MMM d, HH:mm", { locale: locale === 'es' ? es : enUS })}
+                  </div>
                 </div>
 
                 {/* Message Body */}
-                <div className={`flex-1 ${isAdmin ? 'bg-primary/5 border-primary/20' : 'bg-canvas-elevated border-hairline'} border rounded-2xl ${isAdmin ? 'rounded-tl-sm' : 'rounded-tl-sm'} p-sm shadow-sm hover:shadow-md transition-shadow`}>
-                  <div className="flex flex-wrap justify-between items-center mb-xs gap-2">
-                    <div className="flex items-center gap-xxs">
-                      <span className="text-sm font-semibold text-ink">
-                        {isAdmin ? t('tickets.statusManager.supportTeam') : t('tickets.detail.you')}
-                      </span>
-                      {isAdmin && (
-                        <span className="bg-primary/10 text-primary px-xxs py-[2px] rounded-md text-[10px] font-bold uppercase tracking-wider">
-                          Staff
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-xs text-muted/70 group-hover:text-muted transition-colors">
-                      {format(new Date(msg.createdAt), locale === 'es' ? "d 'de' MMM, HH:mm" : "MMM d, HH:mm", { locale: locale === 'es' ? es : enUS })}
-                    </span>
-                  </div>
-                  <p className="text-sm text-body leading-relaxed whitespace-pre-wrap break-words">
-                    {msg.message}
-                  </p>
+                <div className="pl-[56px] text-sm text-body leading-relaxed whitespace-pre-wrap break-words">
+                  {msg.message}
                 </div>
               </div>
             );

@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { sendTicketMessage } from '@/app/actions/tickets';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 export default function TicketReplyForm({ ticketId, buttonText }: { ticketId: string, buttonText?: string }) {
   const t = useTranslations('ClientPortal');
@@ -10,6 +11,7 @@ export default function TicketReplyForm({ ticketId, buttonText }: { ticketId: st
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const router = useRouter();
 
   // Auto-resize textarea
   useEffect(() => {
@@ -33,9 +35,10 @@ export default function TicketReplyForm({ ticketId, buttonText }: { ticketId: st
       setError(res.error);
     } else {
       setMessage('');
+      router.refresh();
     }
     setLoading(false);
-  }, [message, loading, ticketId]);
+  }, [message, loading, ticketId, router]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {

@@ -84,41 +84,50 @@ export default async function AdminTicketDetailsPage({ params }: { params: Promi
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-xs">
         {/* Messages */}
         <div className="lg:col-span-2 space-y-xs">
-          <div className="bg-canvas-elevated/50 rounded-2xl border border-hairline p-sm md:p-md">
-            <div className="space-y-md">
+          <div className="bg-canvas-elevated border border-hairline p-sm md:p-lg">
+            <div className="space-y-0">
               {ticket.messages.map((msg) => {
                 const isAdmin = msg.user.role === 'ADMIN';
                 return (
-                  <div key={msg.id} className="flex gap-sm group">
-                    <div className="shrink-0 mt-1">
-                      {isAdmin ? (
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 text-primary font-bold shadow-sm" title="Staff">
-                          {msg.user.name.charAt(0).toUpperCase()}
-                        </div>
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-canvas-elevated flex items-center justify-center border border-hairline text-ink font-bold shadow-sm" title={ticket.client.razonSocial}>
-                          {ticket.client.razonSocial.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className={`flex-1 ${isAdmin ? 'bg-primary/5 border-primary/20' : 'bg-canvas-elevated border-hairline'} border rounded-2xl rounded-tl-sm p-sm shadow-sm hover:shadow-md transition-shadow`}>
-                      <div className="flex flex-wrap justify-between items-center mb-xs gap-2">
-                        <div className="flex items-center gap-xxs">
-                          <span className="text-sm font-semibold text-ink">
-                            {isAdmin ? msg.user.name : ticket.client.razonSocial}
-                          </span>
-                          {isAdmin && (
-                            <span className="bg-primary/10 text-primary px-xxs py-[2px] rounded-md text-[10px] font-bold uppercase tracking-wider">
-                              Staff
-                            </span>
+                  <div key={msg.id} className="py-md border-b border-hairline first:pt-0 last:border-0">
+                    <div className="flex items-center justify-between mb-sm">
+                      <div className="flex items-center gap-sm">
+                        <div className="shrink-0">
+                          {isAdmin ? (
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 text-primary font-bold shrink-0">
+                              {msg.user.name.charAt(0).toUpperCase()}
+                            </div>
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-canvas-elevated flex items-center justify-center border border-hairline text-ink font-bold shrink-0">
+                              {ticket.client.razonSocial.charAt(0).toUpperCase()}
+                            </div>
                           )}
                         </div>
-                        <span className="text-xs text-muted/70 group-hover:text-muted transition-colors">
-                          {format(new Date(msg.createdAt), locale === 'es' ? "d 'de' MMM, HH:mm" : "MMM d, HH:mm", { locale: locale === 'es' ? es : enUS })}
-                        </span>
+                        
+                        <div>
+                          <div className="flex items-center gap-xxs">
+                            <span className="text-sm font-bold text-ink">
+                              {isAdmin ? msg.user.name : ticket.client.razonSocial}
+                            </span>
+                            {isAdmin && (
+                              <span className="bg-primary/10 text-primary px-xxs py-[2px] rounded-md text-[10px] font-bold uppercase tracking-wider">
+                                Staff
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted mt-[2px]">
+                            {isAdmin ? 'to Client' : 'to Support'}
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-sm text-body leading-relaxed whitespace-pre-wrap break-words">{msg.message}</p>
+                      
+                      <div className="text-xs text-muted/70 whitespace-nowrap">
+                        {format(new Date(msg.createdAt), locale === 'es' ? "d 'de' MMM, HH:mm" : "MMM d, HH:mm", { locale: locale === 'es' ? es : enUS })}
+                      </div>
+                    </div>
+                    
+                    <div className="pl-[56px] text-sm text-body leading-relaxed whitespace-pre-wrap break-words">
+                      {msg.message}
                     </div>
                   </div>
                 );

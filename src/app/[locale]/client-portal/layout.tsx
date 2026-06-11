@@ -44,21 +44,27 @@ export default async function ClientPortalLayout({
                 <span className="material-icons mr-xxs text-sm opacity-70">dashboard</span> {t('dashboard')}
               </Link>
             </li>
-            <li>
-              <Link href="/client-portal/servers" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">dns</span> {t('servers')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/client-portal/quotes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">receipt_long</span> {t('quotes')}
-              </Link>
-            </li>
-            <li>
-              <Link href="/client-portal/tickets" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
-                <span className="material-icons mr-xxs text-sm opacity-70">support_agent</span> {t('tickets')}
-              </Link>
-            </li>
+            {(session.user as any).permissions?.includes('servers') && (
+              <li>
+                <Link href="/client-portal/servers" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">dns</span> {t('servers')}
+                </Link>
+              </li>
+            )}
+            {(session.user as any).permissions?.includes('quotes') && (
+              <li>
+                <Link href="/client-portal/quotes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">receipt_long</span> {t('quotes')}
+                </Link>
+              </li>
+            )}
+            {(session.user as any).permissions?.includes('tickets') && (
+              <li>
+                <Link href="/client-portal/tickets" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">support_agent</span> {t('tickets')}
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
 
@@ -88,7 +94,7 @@ export default async function ClientPortalLayout({
       <main className="flex-grow flex flex-col h-screen overflow-hidden bg-canvas">
         <header className="md:hidden h-16 bg-canvas border-b border-hairline flex items-center justify-between px-sm shrink-0 z-50">
           <div className="flex items-center">
-            <MobileClientNav />
+            <MobileClientNav permissions={(session.user as any).permissions || []} />
             <h1 className="text-2xl font-black tracking-tighter stroke-text">LAUNCHPAD</h1>
           </div>
           <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }); }}>
