@@ -11,22 +11,35 @@ import 'react-quill-new/dist/quill.snow.css';
 const ReactQuill = dynamic(() => import('react-quill-new').then(mod => {
   const { default: RQ, Quill } = mod;
   if (Quill) {
-    const BlockEmbed = Quill.import('blots/block/embed');
+    const BlockEmbed = Quill.import('blots/block/embed') as {
+      // Quill's registry defines blot constructors with a variadic `any[]`.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      new (...args: any[]): object;
+      create(value?: unknown): HTMLElement;
+      scope: number;
+    };
     class HrBlot extends BlockEmbed {
+      static blotName = 'divider';
+      static tagName = 'hr';
+
       static create() {
         const node = super.create();
         node.setAttribute('class', 'forced-page-break');
         return node;
       }
     }
-    HrBlot.blotName = 'divider';
-    HrBlot.tagName = 'hr';
     // Prevent registering multiple times in fast-refresh
     try {
-      Quill.register(HrBlot);
+      Quill.register('formats/divider', HrBlot);
     } catch (e) {}
   }
-  return RQ;
+  const ReactQuillWithRef = React.forwardRef<
+    InstanceType<typeof RQ>,
+    React.ComponentProps<typeof RQ>
+  >((props, ref) => <RQ {...props} ref={ref} />);
+  ReactQuillWithRef.displayName = 'ReactQuillWithRef';
+
+  return ReactQuillWithRef;
 }), { ssr: false });
 
 const QUILL_MODULES = {
