@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { Link } from '@/i18n/routing';
 import { useRouter } from 'next/navigation';
-import { deleteQuote } from '@/app/actions/quotes';
-import { useTranslations } from 'next-intl';
+import { deleteQuote, duplicateQuote } from '@/app/actions/quotes';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface QuoteActionsProps {
   quoteId: string;
@@ -12,8 +12,11 @@ interface QuoteActionsProps {
 
 export default function QuoteActions({ quoteId }: QuoteActionsProps) {
   const t = useTranslations('Dashboard.recentQuotes');
+  const tQuote = useTranslations('Quotes');
+  const locale = useLocale();
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleDelete = async () => {
@@ -39,8 +42,30 @@ export default function QuoteActions({ quoteId }: QuoteActionsProps) {
       >
         <span className="material-icons text-[18px]">edit</span>
       </Link>
+      <button
+        onClick={async () => {
+          if (isDuplicating) return;
+          setIsDuplicating(true);
+          try {
+            const newQuote = await duplicateQuote(quoteId);
+            router.push(`/dashboard/quotes/edit/${newQuote.id}`);
+            router.refresh();
+          } catch (error) {
+            console.error(error);
+            alert(tQuote('duplicateError') || 'Error al duplicar la cotización.');
+            setIsDuplicating(false);
+          }
+        }}
+        className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-amber-600 transition-colors"
+        title={tQuote('duplicate') || 'Duplicar'}
+        disabled={isDuplicating}
+      >
+        <span className="material-icons text-[18px]">
+          {isDuplicating ? 'sync' : 'content_copy'}
+        </span>
+      </button>
       <a 
-        href={`/api/quotes/${quoteId}/pdf`} 
+        href={`/api/quotes/${quoteId}/pdf?locale=${locale}`} 
         className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
         title={t('download')}
         target="_blank"

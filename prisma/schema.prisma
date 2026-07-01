@@ -111,6 +111,7 @@ model Quote {
   extraFeeName     String?     // e.g., "PayPal Fee"
   extraFeeAmount   Float       @default(0)
   paymentMethod    String?     // e.g., "Transferencia", "PayPal"
+  totalLabel       String?     // Custom label for "Total", e.g. "Total Monthly"
 
   notasCondiciones String?
   createdAt        DateTime    @default(now())

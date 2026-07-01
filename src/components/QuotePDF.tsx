@@ -85,7 +85,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate, companyProfile }
 
     for (const child of children) {
       // Forced page break
-      if (child.classList.contains('forced-page-break')) {
+      if (
+        child.classList.contains('forced-page-break') || 
+        child.tagName.toUpperCase() === 'HR' || 
+        child.querySelector('hr')
+      ) {
         if (currentPageHTML) {
           pages.push(currentPageHTML);
           currentPageHTML = '';
@@ -362,7 +366,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate, companyProfile }
                   </div>
                 )}
                 <div className="flex justify-between text-lg font-black text-slate-900 border-t border-slate-200 pt-2 mt-2">
-                  <span className="text-[10px] uppercase tracking-widest text-slate-500 self-center">{t('total')}</span>
+                  <span className="text-[10px] uppercase tracking-widest text-slate-500 self-center">{quote.totalLabel || t('total')}</span>
                   <span>{isTemplate ? '$__________' : `$${(quote.montoTotal || 0).toLocaleString(locale)}`}</span>
                 </div>
                 {(isTemplate || quote.paymentMethod) && (

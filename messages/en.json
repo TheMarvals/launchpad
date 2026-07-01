@@ -99,6 +99,8 @@
     "subtitle": "{count} document{count, plural, one {} other {s}} registered.",
     "newQuote": "New Quote",
     "editQuote": "Edit Quote",
+    "duplicate": "Duplicate",
+    "duplicateError": "Error duplicating quote.",
     "noQuotes": "No quotes available.",
     "table": {
       "number": "Nº",

@@ -1,13 +1,14 @@
 import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
 import EmptyState from '@/components/EmptyState';
 
 export default async function ClientQuotesPage() {
   const session = await auth();
   const clientId = (session?.user as any)?.clientId;
   const t = await getTranslations('ClientPortal');
+  const locale = await getLocale();
 
   if (!clientId) return null;
 
@@ -57,7 +58,7 @@ export default async function ClientQuotesPage() {
                       </td>
                       <td className="px-sm py-xs text-right">
                         <a 
-                          href={`/api/quotes/${quote.id}/pdf`}
+                          href={`/api/quotes/${quote.id}/pdf?locale=${locale}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center text-primary hover:text-primary/80 transition-colors bg-primary/10 px-xxs py-[4px] text-caption-uppercase font-semibold"
@@ -93,7 +94,7 @@ export default async function ClientQuotesPage() {
                   </div>
                   <div className="flex justify-end pt-xxxs">
                     <a 
-                      href={`/api/quotes/${quote.id}/pdf`}
+                      href={`/api/quotes/${quote.id}/pdf?locale=${locale}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center text-primary hover:text-primary/80 transition-colors bg-primary/10 px-xxs py-[4px] text-caption-uppercase font-semibold text-xs"

@@ -99,6 +99,8 @@
     "subtitle": "{count} documento{count, plural, one {} other {s}} registrado{count, plural, one {} other {s}}.",
     "newQuote": "Nueva Cotización",
     "editQuote": "Editar Cotización",
+    "duplicate": "Duplicar",
+    "duplicateError": "Error al duplicar la cotización.",
     "noQuotes": "No hay cotizaciones disponibles.",
     "table": {
       "number": "Nº",

@@ -103,7 +103,7 @@ export default async function QuotesListPage({ searchParams, params }: { searchP
         </div>
         <div className="flex flex-row gap-xxs w-full sm:w-auto">            <CsvDownloadButton href={`/api/quotes/export?${exportParams.toString()}`} locale={locale} />
             <a 
-            href="/api/quotes/template/pdf"
+            href={`/api/quotes/template/pdf?locale=${locale}`}
             className="flex-1 sm:flex-initial bg-transparent border border-ink text-ink hover:bg-ink/10 px-sm h-[48px] rounded-none text-xs font-bold uppercase tracking-[1.4px] flex items-center justify-center transition-colors cursor-pointer"
             title="Download blank template"
           >

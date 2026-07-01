@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createQuote, updateQuote } from '@/app/actions/quotes';
 import { useTranslations, useLocale } from 'next-intl';
@@ -8,7 +8,26 @@ import QuotePDF from './QuotePDF';
 import dynamic from 'next/dynamic';
 import 'react-quill-new/dist/quill.snow.css';
 
-const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
+const ReactQuill = dynamic(() => import('react-quill-new').then(mod => {
+  const { default: RQ, Quill } = mod;
+  if (Quill) {
+    const BlockEmbed = Quill.import('blots/block/embed');
+    class HrBlot extends BlockEmbed {
+      static create() {
+        const node = super.create();
+        node.setAttribute('class', 'forced-page-break');
+        return node;
+      }
+    }
+    HrBlot.blotName = 'divider';
+    HrBlot.tagName = 'hr';
+    // Prevent registering multiple times in fast-refresh
+    try {
+      Quill.register(HrBlot);
+    } catch (e) {}
+  }
+  return RQ;
+}), { ssr: false });
 
 const QUILL_MODULES = {
   toolbar: [
@@ -20,22 +39,44 @@ const QUILL_MODULES = {
 };
 
 const EDITOR_STYLE = `
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;700;900&display=swap');
+
   .ql-container.ql-snow {
     border: none !important;
-    font-family: inherit;
+    font-family: 'Outfit', 'Inter', sans-serif;
     font-size: 15px;
+    height: auto !important;
+    overflow: visible !important;
   }
   .ql-toolbar.ql-snow {
     border: none !important;
     border-bottom: 1px solid #f1f5f9 !important;
     background: #f8fafc;
     padding: 8px 24px !important;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .ql-toolbar.ql-snow .ql-formats {
+    margin-right: 8px !important;
+  }
+  .ql-toolbar.ql-snow .ql-picker-label,
+  .ql-toolbar.ql-snow button {
+    font-family: 'Outfit', 'Inter', sans-serif !important;
+  }
+
+  .ql-editor, .ql-editor * {
+    color: #f8fafc !important;
   }
   .ql-editor {
     padding: 24px !important;
     min-height: 300px;
     line-height: 1.6;
-    color: #334155;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 15px;
+    height: auto !important;
+    overflow: visible !important;
   }
   @media (min-width: 768px) {
     .ql-editor {
@@ -46,7 +87,95 @@ const EDITOR_STYLE = `
   .ql-editor.ql-blank::before {
     left: 40px !important;
     font-style: italic;
-    color: #cbd5e1;
+    color: #64748b !important; /* Lighter placeholder */
+    font-family: 'Outfit', 'Inter', sans-serif;
+  }
+
+  /* === Match .propuesta-content styles from QuotePDF === */
+  .ql-editor h1, .ql-editor h2, .ql-editor h3,
+  .ql-editor h1 *, .ql-editor h2 *, .ql-editor h3 * {
+    color: #ffffff !important; /* White headings */
+    font-weight: 900;
+  }
+  .ql-editor h1, .ql-editor h2, .ql-editor h3 {
+    letter-spacing: -0.025em;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    border-left: 4px solid #da291c;
+    padding-left: 1rem;
+  }
+  .ql-editor h1 { font-size: 1.5rem; line-height: 1.3; }
+  .ql-editor h2 { font-size: 1.25rem; line-height: 1.35; }
+  .ql-editor h3 { font-size: 1.1rem; line-height: 1.4; }
+  .ql-editor p { margin-bottom: 1em; }
+  .ql-editor ul, .ql-editor ol {
+    margin-bottom: 1em;
+    padding-left: 1.5rem;
+  }
+  .ql-editor ul { list-style-type: disc; }
+  .ql-editor ol { list-style-type: decimal; }
+  .ql-editor li { margin-bottom: 0.5em; }
+  .ql-editor strong, .ql-editor b,
+  .ql-editor strong *, .ql-editor b * {
+    color: #ffffff !important; /* White bold text */
+    font-weight: 900;
+  }
+
+  /* Table Styles — match QuotePDF exactly */
+  .ql-editor table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5em;
+    font-size: 0.9em;
+    color: #f8fafc !important;
+  }
+  .ql-editor th, .ql-editor td {
+    border: 1px solid #475569; /* Darker border for tables */
+    padding: 8px 12px;
+    vertical-align: top;
+  }
+  .ql-editor th {
+    font-weight: 900;
+    background-color: #1e293b !important; /* Dark background for table headers */
+    color: #ffffff !important; /* White text for table headers */
+    text-transform: uppercase;
+  }
+  .ql-editor td * {
+    margin-bottom: 0 !important;
+    color: #f8fafc !important;
+  }
+
+  /* Page Break styling inside Quill editor */
+  .ql-editor hr.forced-page-break,
+  .ql-editor hr {
+    display: block !important;
+    border: none !important;
+    border-top: 2px dashed #d1d5db !important;
+    margin: 32px 0 !important;
+    height: auto !important;
+    position: relative !important;
+    page-break-after: always;
+    clear: both;
+  }
+  .ql-editor hr.forced-page-break::after,
+  .ql-editor hr::after {
+    content: "⏎ --- Salto de Página / Page Break ---";
+    display: block;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #9ca3af;
+    text-transform: uppercase;
+    padding-top: 6px;
+  }
+  .ql-editor hr.forced-page-break:hover,
+  .ql-editor hr:hover {
+    border-top-color: #f59e0b !important;
+  }
+  .ql-editor hr.forced-page-break:hover::after,
+  .ql-editor hr:hover::after {
+    color: #f59e0b;
   }
 `;
 
@@ -74,6 +203,7 @@ interface QuoteFormProps {
     extraFeeName: string | null;
     extraFeeAmount: number;
     paymentMethod: string | null;
+    totalLabel: string | null;
     items: { descripcion: string; cantidad: number; precioUnitario: number }[];
     client: Client;
   };
@@ -85,7 +215,6 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
   const locale = useLocale();
   const router = useRouter();
   const isEditing = !!initialData;
-
   const [clientId, setClientId] = useState(initialData?.clientId || '');
   const [fechaValidez, setFechaValidez] = useState(
     initialData?.fechaValidez 
@@ -99,12 +228,15 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
   const [extraFeeName, setExtraFeeName] = useState(initialData?.extraFeeName || '');
   const [extraFeeAmount, setExtraFeeAmount] = useState(initialData?.extraFeeAmount?.toString() || '0');
   const [paymentMethod, setPaymentMethod] = useState(initialData?.paymentMethod || '');
+  const [totalLabel, setTotalLabel] = useState(initialData?.totalLabel || '');
 
-  // Proposal content — single editor, auto-paginates in QuotePDF
+  // Proposal content — single editor with visible page breaks
   const [propuesta, setPropuesta] = useState<string>(() => {
     if (initialData?.propuesta) {
-      // Migrate old PAGE_BREAK format: join pages into a single string
-      return initialData.propuesta.replace(/---PAGE_BREAK---/g, '');
+      // Convert legacy ---PAGE_BREAK--- markers to visible <hr> in the editor
+      const content = initialData.propuesta
+        .replace(/---PAGE_BREAK---/g, '<hr class="forced-page-break" />');
+      return content;
     }
     return t.raw('defaultProposal.page1');
   });
@@ -119,7 +251,112 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showMobilePreview, setShowMobilePreview] = useState(false);
+  const [livePreviewPropuesta, setLivePreviewPropuesta] = useState(propuesta);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
+  const quillRef = useRef<any>(null);
+  const [previewScale, setPreviewScale] = useState(1);
 
+  // Debounced live preview — always running, updates 200ms after the user stops typing
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      setLivePreviewPropuesta(propuesta);
+    }, 200);
+    return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
+  }, [propuesta]);
+
+  // ResizeObserver to scale the PDF preview to fit its container perfectly
+  useEffect(() => {
+    if (!previewContainerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width } = entry.contentRect;
+        // 210mm is ~794px. We add 32px of padding
+        const targetWidth = 794; 
+        const padding = 32;
+        const availableWidth = width - padding;
+        if (availableWidth < targetWidth) {
+          setPreviewScale(availableWidth / targetWidth);
+        } else {
+          setPreviewScale(1);
+        }
+      }
+    });
+    observer.observe(previewContainerRef.current);
+    return () => observer.disconnect();
+  }, [showPreview, showMobilePreview]);
+
+  // Insert a page break at cursor position in the Quill editor
+  const insertPageBreak = useCallback(() => {
+    // Get the Quill instance safely from the React ref
+    const quill = quillRef.current?.getEditor();
+    
+    if (quill && typeof quill.getSelection === 'function') {
+      // Focus first in case the user clicked the button (which removes focus)
+      quill.focus();
+      const selection = quill.getSelection();
+      const index = selection ? selection.index : quill.getLength();
+      // Use insertEmbed instead of dangerouslyPasteHTML for custom blot
+      quill.insertEmbed(index, 'divider', true, 'user');
+      // Add a small delay to ensure rendering before moving selection
+      setTimeout(() => {
+        quill.setSelection(index + 1, 0, 'silent');
+      }, 10);
+    } else {
+      // Fallback: append at end
+      setPropuesta(prev => prev + '<hr class="forced-page-break" />');
+    }
+  }, []);
+
+  // Keyboard shortcut: Ctrl+Enter / Cmd+Enter to insert a page break
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isCtrlEnter = (e.ctrlKey || e.metaKey) && e.key === 'Enter';
+      if (!isCtrlEnter) return;
+
+      // Only trigger when the Quill editor is focused
+      const activeEl = document.activeElement;
+      const isQuillFocused = activeEl?.closest('.ql-editor');
+      if (!isQuillFocused) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      insertPageBreak();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [insertPageBreak]);
+
+  // Calculate page info from content
+  const getPageInfo = useCallback(() => {
+    const content = propuesta || '';
+    // Count explicit page breaks
+    const explicitBreaks = (content.match(/<hr[^>]*class="[^"]*forced-page-break[^"]*"[^>]*\/?>/gi) || []).length;
+    
+    // Estimate additional pages based on content volume (rough heuristic)
+    // Remove HTML tags to get text length
+    const textContent = content.replace(/<[^>]*>/g, '').trim();
+    const textLength = textContent.length;
+    
+    // Each page can hold roughly 2500-3000 chars of text content (estimated)
+    const charsPerPage = 2800;
+    const autoPages = Math.max(1, Math.ceil(textLength / charsPerPage));
+    
+    // Total estimated pages: explicit sections vs auto-pages, whichever is larger
+    const estimatedPages = Math.max(explicitBreaks + 1, autoPages);
+    
+    return {
+      explicitBreaks,
+      autoPages,
+      estimatedPages,
+      textLength,
+    };
+  }, [propuesta]);
+
+  const pageInfo = getPageInfo();
 
   const addItem = () => {
     setItems([...items, { descripcion: '', cantidad: 1, precioUnitario: 0 }]);
@@ -152,7 +389,6 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
         subtotal: Number(item.cantidad) * Number(item.precioUnitario)
       }));
 
-
       const payload = {
         clientId,
         fechaValidez,
@@ -164,6 +400,7 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
         extraFeeName: extraFeeName || null,
         extraFeeAmount,
         paymentMethod: paymentMethod || null,
+        totalLabel: totalLabel || null,
         items: itemsWithSubtotals
       };
 
@@ -197,6 +434,7 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
     extraFeeName,
     extraFeeAmount: fee,
     paymentMethod,
+    totalLabel,
     notasCondiciones,
     propuesta,
     client: selectedClient || { razonSocial: 'CLIENTE NO SELECCIONADO', rut: '---' },
@@ -270,25 +508,123 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
         </div>
       </div>
 
-      {/* 2. Proposal Editor */}
+      {/* 2. Proposal Editor — Split View: Editor + Live Preview */}
       <div className="bg-canvas-elevated border border-hairline p-sm space-y-sm">
-        <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
-          <span className="material-icons mr-xxs text-primary">edit_note</span> {t('proposalTitle')}
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
+            <span className="material-icons mr-xxs text-primary">edit_note</span> {t('proposalTitle')}
+          </h2>
+          <div className="flex items-center gap-xs">
+            {/* Page counter badge */}
+            <div className="flex items-center gap-1 px-xs py-xxs bg-canvas border border-hairline text-muted text-xs font-semibold uppercase tracking-wider">
+              <span className="material-icons text-sm">description</span>
+              <span>{pageInfo.estimatedPages} ~págs</span>
+              {pageInfo.explicitBreaks > 0 && (
+                <span className="text-muted/60 ml-1">
+                  · {pageInfo.explicitBreaks} saltos
+                </span>
+              )}
+              {pageInfo.textLength > 0 && (
+                <span className="text-muted/60 ml-1">
+                  · {pageInfo.textLength} car.
+                </span>
+              )}
+            </div>
+            {/* Mobile toggle for preview */}
+            <button
+              type="button"
+              onClick={() => setShowMobilePreview(prev => !prev)}
+              className="lg:hidden flex items-center gap-1 px-xs py-xxs text-xs font-semibold uppercase tracking-wider transition-colors border text-muted hover:text-ink border-transparent hover:border-hairline"
+              title="Alternar vista previa"
+            >
+              <span className="material-icons text-sm">visibility</span>
+              {showMobilePreview ? 'Ocultar' : 'Preview'}
+            </button>
+          </div>
+        </div>
         <p className="text-body text-muted text-sm">
-          Escribe toda la propuesta aquí. Las páginas se generarán automáticamente en la vista previa.
+          Escribe tu propuesta. La vista previa en vivo se actualiza automáticamente para mostrar cómo se paginará el contenido.
         </p>
 
-        <div className="border border-hairline overflow-hidden">
-          <div className="bg-canvas min-h-[500px]">
-            <ReactQuill 
-              theme="snow"
-              value={propuesta}
-              onChange={setPropuesta}
-              modules={QUILL_MODULES}
-              className="h-full border-none"
-              placeholder="Escribe la propuesta completa..."
-            />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-sm lg:h-[calc(100vh-250px)] lg:min-h-[600px]">
+          {/* Left Column: Editor */}
+          <div className="border border-hairline overflow-hidden flex flex-col min-h-[400px] lg:min-h-0 h-full">
+            {/* Toolbar extension for page break */}
+            <div className="flex items-center justify-between px-sm py-xxs bg-canvas border-b border-hairline/50 shrink-0">
+              <button
+                type="button"
+                onClick={insertPageBreak}
+                className="flex items-center gap-1 px-xs py-xxs text-xs font-semibold uppercase tracking-wider text-muted hover:text-ink hover:bg-hairline/30 transition-colors border border-transparent hover:border-hairline"
+                title="Insertar salto de página (Ctrl+Enter)"
+              >
+                <span className="material-icons text-sm">horizontal_rule</span>
+                <span className="hidden sm:inline">Salto de Página</span>
+                <span className="sm:hidden">Salto</span>
+                <kbd className="ml-1 px-1 py-[1px] text-[9px] font-bold bg-hairline/50 border border-hairline rounded-[2px] text-muted hidden md:inline">Ctrl+Enter</kbd>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowPreview(true)}
+                className="text-xs font-semibold uppercase tracking-wider text-muted hover:text-ink transition-colors flex items-center gap-1"
+                title="Vista previa en pantalla completa"
+              >
+                <span className="material-icons text-sm">fullscreen</span>
+                <span className="hidden sm:inline">Pantalla Completa</span>
+              </button>
+            </div>
+
+            <div className="bg-canvas flex-1 overflow-auto">
+              <ReactQuill 
+                ref={quillRef}
+                theme="snow"
+                value={propuesta}
+                onChange={setPropuesta}
+                modules={QUILL_MODULES}
+                className="h-full border-none"
+                placeholder="Escribe la propuesta completa..."
+              />
+            </div>
+          </div>
+
+          {/* Right Column: Live Preview — always visible on desktop, toggleable on mobile */}
+          <div className={`border border-hairline bg-canvas overflow-hidden flex flex-col min-h-[400px] lg:min-h-0 h-full ${
+            showMobilePreview ? 'block' : 'hidden lg:flex'
+          }`}>
+            <div className="flex items-center justify-between px-sm py-xxs bg-canvas border-b border-hairline/50 shrink-0">
+              <div className="flex items-center gap-2 text-caption-uppercase text-muted font-semibold text-xs">
+                <span className="material-icons text-sm">visibility</span>
+                Vista Previa en Vivo
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-muted/50">
+                  {propuesta === livePreviewPropuesta ? '✓' : '⏳'}
+                </span>
+              </div>
+            </div>
+            <div ref={previewContainerRef} className="overflow-x-hidden overflow-y-auto flex-1 p-sm md:p-md bg-ink/5">
+              <div 
+                className="w-full flex flex-col items-center"
+                style={{ 
+                  height: previewScale < 1 ? `calc(100% * ${previewScale})` : 'auto' 
+                }}
+              >
+                <div 
+                  className="w-[210mm] max-w-none flex flex-col items-center gap-md"
+                  style={{ 
+                    transform: `scale(${previewScale})`, 
+                    transformOrigin: 'top center',
+                  }}
+                >
+                  <QuotePDF 
+                    quote={{
+                      ...mockQuote,
+                      propuesta: livePreviewPropuesta,
+                    }} 
+                    companyProfile={companyProfile} 
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -425,6 +761,16 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
               />
             </div>
           </div>
+          <div className="space-y-xxs">
+            <label className="text-caption-uppercase text-ink font-semibold">Texto "Total"</label>
+            <input 
+              type="text" 
+              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
+              value={totalLabel}
+              onChange={(e) => setTotalLabel(e.target.value)}
+              placeholder={`Ej. ${t('total')}`}
+            />
+          </div>
         </div>
 
         <div className="flex justify-end pt-md">
@@ -444,7 +790,7 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
               </div>
             )}
             <div className="flex justify-between text-xl pt-xs mt-xs border-t border-hairline">
-              <span className="text-caption-uppercase text-muted self-center">{t('total')}</span>
+              <span className="text-caption-uppercase text-muted self-center">{totalLabel || t('total')}</span>
               <span className="text-ink font-medium">${total.toLocaleString(locale)}</span>
             </div>
           </div>
