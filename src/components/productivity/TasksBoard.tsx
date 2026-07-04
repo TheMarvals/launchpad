@@ -287,14 +287,14 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
               <TaskKanbanColumn 
                 id="todo" 
                 title={t('status.todo') || 'To Do'} 
-                tasks={tasks.filter(t => t.status === 'todo' || !t.status)} 
+                tasks={tasks.filter(t => t.status === 'todo' || t.status === 'pending' || !t.status)} 
                 onTaskClick={(t) => { setSelectedTask(t); setIsModalOpen(true); }}
                 onTaskDelete={handleDelete}
                 t={t}
               />
               <TaskKanbanColumn 
                 id="in-progress" 
-                title={t('status.inProgress') || 'In Progress'} 
+                title={t('status.in-progress') || 'In Progress'} 
                 tasks={tasks.filter(t => t.status === 'in-progress')} 
                 onTaskClick={(t) => { setSelectedTask(t); setIsModalOpen(true); }}
                 onTaskDelete={handleDelete}
