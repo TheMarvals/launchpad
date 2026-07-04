@@ -38,6 +38,7 @@ model User {
   invoices     FreelanceInvoice[]
   notes        PersonalNote[]
   events       CalendarEvent[]
+  sharedEvents EventShare[]
   settings     ProductivitySettings?
   companyProfile CompanyProfile?
 }
@@ -264,6 +265,10 @@ model ProductivitySettings {
   telegramEnabled       Boolean  @default(false)
   googleRefreshToken    String?  @db.Text
   googleCalendarEnabled Boolean  @default(false)
+  // Calendar notification preferences
+  calendarDailyDigest     Boolean @default(true)
+  calendarTomorrowPreview  Boolean @default(true)
+  calendarHourBefore       Boolean @default(true)
   updatedAt             DateTime @updatedAt
 
   user                  User     @relation(fields: [userId], references: [id])
@@ -333,10 +338,46 @@ model CalendarEvent {
   end         DateTime
   allDay      Boolean  @default(false)
   color       String   @default("#3b82f6")
+
+  // Recurrence (RFC 5545 RRULE)
+  recurrenceRule  String?   // e.g. "FREQ=WEEKLY;BYDAY=MO,WE,FR"
+  recurrenceEnd   DateTime? // End date for recurrence
+  parentEventId   String?   // If this is an exception to a recurring event
+  excludedDates   String?   @db.Text // JSON array of excluded ISO date strings
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   user        User     @relation(fields: [userId], references: [id])
+  parentEvent CalendarEvent?  @relation("RecurrenceExceptions", fields: [parentEventId], references: [id], onDelete: Cascade)
+  exceptions  CalendarEvent[] @relation("RecurrenceExceptions")
+  shares      EventShare[]
+  notificationLogs EventNotificationLog[]
+}
+
+model EventShare {
+  id        String   @id @default(uuid())
+  eventId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  event     CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id])
+
+  @@unique([eventId, userId])
+}
+
+model EventNotificationLog {
+  id        String   @id @default(uuid())
+  eventId   String
+  userId    String
+  type      String   // "1h_before" | "today_digest" | "tomorrow_digest"
+  eventDate DateTime // Specific occurrence date (important for recurring)
+  sentAt    DateTime @default(now())
+
+  event     CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId, type, eventDate])
 }
 
 model ShowcaseProject {

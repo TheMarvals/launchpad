@@ -3,6 +3,8 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { RRule } from 'rrule';
+import { sendEventSharedNotification } from '@/lib/email';
 
 /**
  * Ensures the user is an ADMIN before allowing access to productivity features.
@@ -206,18 +208,129 @@ export async function deleteNote(id: string) {
 }
 // --- CALENDAR EVENTS ---
 
+/**
+ * Expands recurring events into individual occurrences within a date range.
+ */
+function expandRecurringEvents(
+  events: any[],
+  rangeStart: Date,
+  rangeEnd: Date
+): any[] {
+  const expanded: any[] = [];
+
+  for (const event of events) {
+    const isShared = event._isShared || false;
+
+    if (!event.recurrenceRule) {
+      expanded.push({
+        ...event,
+        isRecurring: false,
+        isShared,
+        originalEventId: event.id,
+      });
+      continue;
+    }
+
+    // Recurring event — generate occurrences
+    const duration = event.end.getTime() - event.start.getTime();
+    const excludedDates: string[] = event.excludedDates
+      ? JSON.parse(event.excludedDates)
+      : [];
+
+    const effectiveEnd = event.recurrenceEnd
+      ? new Date(Math.min(event.recurrenceEnd.getTime(), rangeEnd.getTime()))
+      : rangeEnd;
+
+    try {
+      const rule = RRule.fromString(event.recurrenceRule);
+      const occurrences = rule.between(rangeStart, effectiveEnd, true);
+
+      for (const occurrence of occurrences) {
+        const dateISO = occurrence.toISOString();
+        if (excludedDates.includes(dateISO)) continue;
+
+        const occurrenceEnd = new Date(occurrence.getTime() + duration);
+
+        expanded.push({
+          ...event,
+          id: `${event.id}_${dateISO}`,
+          start: occurrence,
+          end: occurrenceEnd,
+          isRecurring: true,
+          isShared,
+          originalEventId: event.id,
+        });
+      }
+    } catch (e) {
+      console.error('Error parsing recurrence rule for event', event.id, e);
+    }
+  }
+
+  return expanded;
+}
+
 export async function getCalendarEvent(id: string) {
   await ensureAdmin();
   return await prisma.calendarEvent.findUnique({
     where: { id },
+    include: {
+      shares: { include: { user: true } },
+      parentEvent: true,
+    },
   });
 }
 
-export async function getCalendarEvents() {
-  await ensureAdmin();
-  return await prisma.calendarEvent.findMany({
+export async function getCalendarEvents(
+  rangeStart?: Date,
+  rangeEnd?: Date
+) {
+  const user = await ensureAdmin();
+
+  // Fetch own events
+  const ownEvents = await prisma.calendarEvent.findMany({
+    where: { userId: user.id },
+    include: {
+      shares: { include: { user: true } },
+      parentEvent: true,
+    },
     orderBy: { start: 'asc' },
   });
+
+  // Fetch events shared with this user
+  const sharedEventRecords = await prisma.eventShare.findMany({
+    where: { userId: user.id },
+    include: {
+      event: {
+        include: {
+          shares: { include: { user: true } },
+          parentEvent: true,
+        },
+      },
+    },
+  });
+
+  const sharedEvents = sharedEventRecords.map((s) => ({
+    ...s.event,
+    _isShared: true,
+  }));
+
+  const allEvents = [
+    ...ownEvents,
+    ...sharedEvents,
+  ];
+
+  // If range provided, expand recurring events
+  if (rangeStart && rangeEnd) {
+    return expandRecurringEvents(allEvents, rangeStart, rangeEnd);
+  }
+
+  // Default: return all with flags
+  return allEvents.map((event) => ({
+    ...event,
+    isRecurring: !!event.recurrenceRule,
+    isShared: (event as any)._isShared || false,
+    originalEventId: event.id,
+  }));
 }
 
 export async function createCalendarEvent(data: {
@@ -227,6 +340,8 @@ export async function createCalendarEvent(data: {
   end: Date;
   allDay?: boolean;
   color?: string;
+  recurrenceRule?: string;
+  recurrenceEnd?: Date;
 }) {
   const user = await ensureAdmin();
   const event = await prisma.calendarEvent.create({
@@ -239,8 +354,50 @@ export async function createCalendarEvent(data: {
   return event;
 }
 
-export async function updateCalendarEvent(id: string, data: any) {
-  await ensureAdmin();
+export async function updateCalendarEvent(
+  id: string,
+  data: any,
+  editMode: 'all' | 'this' = 'all',
+  occurrenceDate?: Date
+) {
+  const user = await ensureAdmin();
+
+  if (editMode === 'this' && occurrenceDate) {
+    // Create exception event and exclude the occurrence from parent
+    const parentEvent = await prisma.calendarEvent.findUnique({
+      where: { id },
+    });
+    if (!parentEvent) throw new Error('Event not found');
+
+    // Add occurrence date to parent's excludedDates
+    const excludedDates: string[] = parentEvent.excludedDates
+      ? JSON.parse(parentEvent.excludedDates)
+      : [];
+    excludedDates.push(occurrenceDate.toISOString());
+    await prisma.calendarEvent.update({
+      where: { id },
+      data: { excludedDates: JSON.stringify(excludedDates) },
+    });
+
+    // Create exception event linked to parent
+    const exception = await prisma.calendarEvent.create({
+      data: {
+        title: data.title || parentEvent.title,
+        description: data.description ?? parentEvent.description,
+        start: data.start || occurrenceDate,
+        end: data.end || new Date(occurrenceDate.getTime() + (parentEvent.end.getTime() - parentEvent.start.getTime())),
+        allDay: data.allDay ?? parentEvent.allDay,
+        color: data.color || parentEvent.color,
+        userId: parentEvent.userId,
+        parentEventId: id,
+      },
+    });
+
+    revalidatePath('/dashboard/productivity/calendar');
+    return exception;
+  }
+
+  // Default: update the event directly
   const event = await prisma.calendarEvent.update({
     where: { id },
     data,
@@ -249,13 +406,136 @@ export async function updateCalendarEvent(id: string, data: any) {
   return event;
 }
 
-export async function deleteCalendarEvent(id: string) {
+export async function deleteCalendarEvent(
+  id: string,
+  deleteMode: 'all' | 'this' | 'thisAndFuture' = 'all',
+  occurrenceDate?: Date
+) {
   await ensureAdmin();
+
+  if (deleteMode === 'this' && occurrenceDate) {
+    // Add occurrenceDate to excludedDates
+    const event = await prisma.calendarEvent.findUnique({ where: { id } });
+    if (!event) throw new Error('Event not found');
+
+    const excludedDates: string[] = event.excludedDates
+      ? JSON.parse(event.excludedDates)
+      : [];
+    excludedDates.push(occurrenceDate.toISOString());
+    await prisma.calendarEvent.update({
+      where: { id },
+      data: { excludedDates: JSON.stringify(excludedDates) },
+    });
+
+    revalidatePath('/dashboard/productivity/calendar');
+    return { success: true };
+  }
+
+  if (deleteMode === 'thisAndFuture' && occurrenceDate) {
+    // Set recurrenceEnd to the day before occurrenceDate
+    const dayBefore = new Date(occurrenceDate);
+    dayBefore.setDate(dayBefore.getDate() - 1);
+
+    await prisma.calendarEvent.update({
+      where: { id },
+      data: { recurrenceEnd: dayBefore },
+    });
+
+    revalidatePath('/dashboard/productivity/calendar');
+    return { success: true };
+  }
+
+  // Default: delete the event entirely
   await prisma.calendarEvent.delete({
     where: { id },
   });
   revalidatePath('/dashboard/productivity/calendar');
   return { success: true };
+}
+
+// --- EVENT SHARING ---
+
+export async function shareEvent(eventId: string, userEmail: string) {
+  const user = await ensureAdmin();
+
+  // Verify current user owns the event
+  const event = await prisma.calendarEvent.findUnique({
+    where: { id: eventId },
+  });
+  if (!event || event.userId !== user.id) {
+    throw new Error('Unauthorized: You can only share your own events');
+  }
+
+  // Find target user by email
+  const targetUser = await prisma.user.findUnique({
+    where: { email: userEmail },
+  });
+  if (!targetUser) {
+    throw new Error('User not found with that email');
+  }
+
+  const share = await prisma.eventShare.create({
+    data: {
+      eventId,
+      userId: targetUser.id,
+    },
+    include: { user: true },
+  });
+
+  // Notify the recipient
+  try {
+    await sendEventSharedNotification(targetUser.email, targetUser.name, event, user.name || 'Usuario', 'es');
+  } catch (e) {
+    console.error('Error sending event shared notification:', e);
+  }
+
+  revalidatePath('/dashboard/productivity/calendar');
+  return share;
+}
+
+export async function unshareEvent(eventId: string, userId: string) {
+  const user = await ensureAdmin();
+
+  // Verify current user owns the event
+  const event = await prisma.calendarEvent.findUnique({
+    where: { id: eventId },
+  });
+  if (!event || event.userId !== user.id) {
+    throw new Error('Unauthorized: You can only manage sharing for your own events');
+  }
+
+  await prisma.eventShare.delete({
+    where: {
+      eventId_userId: {
+        eventId,
+        userId,
+      },
+    },
+  });
+
+  revalidatePath('/dashboard/productivity/calendar');
+  return { success: true };
+}
+
+export async function getEventShares(eventId: string) {
+  const user = await ensureAdmin();
+
+  // Verify current user owns the event
+  const event = await prisma.calendarEvent.findUnique({
+    where: { id: eventId },
+  });
+  if (!event || event.userId !== user.id) {
+    throw new Error('Unauthorized: You can only view shares for your own events');
+  }
+
+  return await prisma.eventShare.findMany({
+    where: { eventId },
+    include: {
+      user: {
+        select: { id: true, name: true, email: true },
+      },
+    },
+  });
 }
 
 // --- SETTINGS ---

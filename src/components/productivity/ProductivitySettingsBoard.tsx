@@ -24,6 +24,9 @@ export default function ProductivitySettingsBoard({ initialSettings }: SettingsP
         telegramEnabled: settings.telegramEnabled,
         telegramBotToken: settings.telegramBotToken,
         telegramChatId: settings.telegramChatId,
+        calendarDailyDigest: settings.calendarDailyDigest,
+        calendarTomorrowPreview: settings.calendarTomorrowPreview,
+        calendarHourBefore: settings.calendarHourBefore,
       });
       Swal.fire({
         title: 'Success',
@@ -139,6 +142,85 @@ export default function ProductivitySettingsBoard({ initialSettings }: SettingsP
             >
               <span className="material-icons mr-xxs text-sm">save</span>
               {isSaving ? '...' : t('telegram.save')}
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      {/* Calendar Notifications Section */}
+      <div className="bg-canvas-elevated border border-hairline overflow-hidden mt-8">
+        <div className="p-sm border-b border-hairline flex items-center bg-canvas">
+          <div className="w-[40px] h-[40px] border border-hairline bg-primary flex items-center justify-center text-on-primary mr-xxs">
+            <span className="material-icons text-lg">event_available</span>
+          </div>
+          <div>
+            <h2 className="text-sm font-medium text-ink">{t('calendarNotifications.title')}</h2>
+            <p className="text-muted text-xs">{t('calendarNotifications.subtitle')}</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSave} className="p-sm space-y-sm">
+          <div className="space-y-4">
+            {/* Daily Digest Toggle */}
+            <div className="flex items-center justify-between border border-hairline p-xxs">
+              <div>
+                <p className="text-sm font-medium text-ink">{t('calendarNotifications.dailyDigest')}</p>
+                <p className="text-xs text-muted">{t('calendarNotifications.dailyDigestDesc')}</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={settings.calendarDailyDigest !== false}
+                  onChange={(e) => setSettings({ ...settings, calendarDailyDigest: e.target.checked })}
+                  className="sr-only peer" 
+                />
+                <div className="w-11 h-6 bg-canvas border border-hairline peer-focus:outline-none peer peer-checked:after:translate-x-full peer-checked:after:border-transparent after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-muted after:border-transparent after:border after:h-5 after:w-5 after:transition-all peer-checked:after:bg-white peer-checked:bg-primary"></div>
+              </label>
+            </div>
+
+            {/* Tomorrow Preview Toggle */}
+            <div className="flex items-center justify-between border border-hairline p-xxs">
+              <div>
+                <p className="text-sm font-medium text-ink">{t('calendarNotifications.tomorrowPreview')}</p>
+                <p className="text-xs text-muted">{t('calendarNotifications.tomorrowPreviewDesc')}</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={settings.calendarTomorrowPreview !== false}
+                  onChange={(e) => setSettings({ ...settings, calendarTomorrowPreview: e.target.checked })}
+                  className="sr-only peer" 
+                />
+                <div className="w-11 h-6 bg-canvas border border-hairline peer-focus:outline-none peer peer-checked:after:translate-x-full peer-checked:after:border-transparent after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-muted after:border-transparent after:border after:h-5 after:w-5 after:transition-all peer-checked:after:bg-white peer-checked:bg-primary"></div>
+              </label>
+            </div>
+
+            {/* 1 Hour Before Toggle */}
+            <div className="flex items-center justify-between border border-hairline p-xxs">
+              <div>
+                <p className="text-sm font-medium text-ink">{t('calendarNotifications.hourBefore')}</p>
+                <p className="text-xs text-muted">{t('calendarNotifications.hourBeforeDesc')}</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={settings.calendarHourBefore !== false}
+                  onChange={(e) => setSettings({ ...settings, calendarHourBefore: e.target.checked })}
+                  className="sr-only peer" 
+                />
+                <div className="w-11 h-6 bg-canvas border border-hairline peer-focus:outline-none peer peer-checked:after:translate-x-full peer-checked:after:border-transparent after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-muted after:border-transparent after:border after:h-5 after:w-5 after:transition-all peer-checked:after:bg-white peer-checked:bg-primary"></div>
+              </label>
+            </div>
+          </div>
+
+          <div className="pt-xs flex justify-end">
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="bg-primary text-on-primary px-xs py-xs font-semibold text-xs uppercase tracking-wider hover:bg-primary-hover transition-colors disabled:opacity-50 flex items-center justify-center border border-transparent"
+            >
+              <span className="material-icons mr-xxs text-sm">save</span>
+              {isSaving ? '...' : t('calendarNotifications.save')}
             </button>
           </div>
         </form>

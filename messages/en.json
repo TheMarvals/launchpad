@@ -396,7 +396,8 @@
       "title": "Delete event?",
       "confirm": "Yes, delete",
       "cancel": "Cancel",
-      "error": "Could not delete the event."
+      "error": "Could not delete the event.",
+      "text": "This action cannot be undone."
     },
     "create": {
       "error": "Could not create the event."
@@ -417,6 +418,55 @@
       "cancel": "Cancel",
       "delete": "Delete",
       "saving": "Saving..."
+    },
+    "recurrence": {
+      "label": "Repeat",
+      "none": "Does not repeat",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "custom": "Custom",
+      "interval": "Every",
+      "days": "days",
+      "weeks": "weeks",
+      "months": "months",
+      "years": "years",
+      "endDate": "Until",
+      "endDatePlaceholder": "No end date",
+      "onDays": "On days",
+      "mon": "Mo",
+      "tue": "Tu",
+      "wed": "We",
+      "thu": "Th",
+      "fri": "Fr",
+      "sat": "Sa",
+      "dom": "Su"
+    },
+    "recurring": {
+      "editTitle": "Recurring event",
+      "editThis": "This occurrence only",
+      "editAll": "All occurrences",
+      "deleteTitle": "Delete recurring event",
+      "deleteThis": "This occurrence only",
+      "deleteThisAndFuture": "This and future occurrences",
+      "deleteAll": "All occurrences",
+      "indicator": "Recurring"
+    },
+    "share": {
+      "title": "Share Event",
+      "add": "Add",
+      "remove": "Remove",
+      "emailPlaceholder": "User email...",
+      "sharedWith": "Shared with",
+      "readOnly": "Read only",
+      "sharedByOther": "Shared by {name}",
+      "shareSuccess": "Event shared successfully.",
+      "shareError": "Could not share the event.",
+      "userNotFound": "User not found.",
+      "alreadyShared": "Already shared with this user.",
+      "removeSuccess": "Event access removed.",
+      "removeError": "Error removing access."
     }
   },
   "Reminders": {
@@ -679,6 +729,19 @@
       "testRequired": "Token and Chat ID are required for testing",
       "tokenPlaceholder": "123456:ABC-DEF...",
       "chatIdPlaceholder": "e.g. -100123456789"
+    },
+    "calendarNotifications": {
+      "title": "Calendar Notifications",
+      "subtitle": "Configure automatic email notifications for calendar events.",
+      "dailyDigest": "Daily Digest",
+      "dailyDigestDesc": "Receive an email at 7:00 AM with the day's events.",
+      "tomorrowPreview": "Tomorrow's Preview",
+      "tomorrowPreviewDesc": "Receive an email at 8:00 PM with tomorrow's events.",
+      "hourBefore": "1 Hour Before Reminder",
+      "hourBeforeDesc": "Receive an email 1 hour before each event starts.",
+      "save": "Save Preferences",
+      "success": "Notification preferences updated.",
+      "error": "Error saving preferences."
     },
     "portalUsers": {
       "title": "Portal Users",

@@ -7,7 +7,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import esLocale from '@fullcalendar/core/locales/es';
 import enLocale from '@fullcalendar/core/locales/en-gb';
-import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from '@/app/actions/productivity';
+import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent, shareEvent, unshareEvent } from '@/app/actions/productivity';
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 import Swal from 'sweetalert2';
@@ -27,7 +27,14 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
     borderColor: 'transparent',
     extendedProps: {
       description: e.description,
-      color: e.color
+      color: e.color,
+      isRecurring: e.isRecurring,
+      isShared: e.isShared,
+      sharedBy: e.sharedBy,
+      shares: e.shares,
+      recurrenceRule: e.recurrenceRule,
+      recurrenceEnd: e.recurrenceEnd,
+      originalEventId: e.originalEventId
     }
   })));
 
@@ -49,58 +56,79 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
   const handleEventClick = (clickInfo: any) => {
     const ev = clickInfo.event;
     setSelectedEvent({
-      id: ev.id,
+      id: ev.extendedProps.originalEventId || ev.id, // Use original ID if it's an expanded recurring event
       title: ev.title,
       start: ev.start,
       end: ev.end || ev.start,
       allDay: ev.allDay,
       color: ev.backgroundColor,
-      description: ev.extendedProps.description || ''
+      description: ev.extendedProps.description || '',
+      isRecurring: ev.extendedProps.isRecurring,
+      isShared: ev.extendedProps.isShared,
+      sharedBy: ev.extendedProps.sharedBy,
+      shares: ev.extendedProps.shares,
+      recurrenceRule: ev.extendedProps.recurrenceRule,
+      recurrenceEnd: ev.extendedProps.recurrenceEnd
     });
     setIsModalOpen(true);
   };
 
-  const handleSaveEvent = async (formData: any) => {
+  const renderEventContent = (eventInfo: any) => {
+    const { isShared, isRecurring } = eventInfo.event.extendedProps;
+    return (
+      <div className="flex items-center w-full overflow-hidden">
+        {isShared && <span className="material-icons text-[10px] mr-[2px] opacity-70">people</span>}
+        {isRecurring && <span className="material-icons text-[10px] mr-[2px] opacity-70">repeat</span>}
+        <span className="truncate flex-1">{eventInfo.event.title}</span>
+      </div>
+    );
+  };
+
+  const handleSaveEvent = async (formData: any, editMode?: 'this' | 'all') => {
     try {
       if (selectedEvent?.id) {
         // Update
-        const updated = await updateCalendarEvent(selectedEvent.id, formData);
-        setEvents(events.map(e => e.id === selectedEvent.id ? {
-          id: updated.id,
-          title: updated.title,
-          start: updated.start.toISOString(),
-          end: updated.end.toISOString(),
-          allDay: updated.allDay,
-          backgroundColor: updated.color,
-          borderColor: 'transparent',
-          extendedProps: {
-            description: updated.description,
-            color: updated.color
-          }
-        } : e));
+        const updated = await updateCalendarEvent(selectedEvent.id, formData, editMode);
+        
+        // We will just do a hard refresh of the page to get the newly expanded events
+        // since calculating all the RRule expansions client-side is complex
+        window.location.reload();
       } else {
         // Create
         const newEvent = await createCalendarEvent(formData);
-        setEvents([...events, {
-          id: newEvent.id,
-          title: newEvent.title,
-          start: newEvent.start.toISOString(),
-          end: newEvent.end.toISOString(),
-          allDay: newEvent.allDay,
-          backgroundColor: newEvent.color,
-          borderColor: 'transparent',
-          extendedProps: {
-            description: newEvent.description,
-            color: newEvent.color
-          }
-        }]);
+        
+        // If it's recurring, it's safer to just reload to get the server to expand it correctly
+        if (formData.recurrenceRule) {
+          window.location.reload();
+        } else {
+          setEvents([...events, {
+            id: newEvent.id,
+            title: newEvent.title,
+            start: newEvent.start.toISOString(),
+            end: newEvent.end.toISOString(),
+            allDay: newEvent.allDay,
+            backgroundColor: newEvent.color,
+            borderColor: 'transparent',
+            extendedProps: {
+              description: newEvent.description,
+              color: newEvent.color,
+              isRecurring: false,
+              isShared: false,
+              sharedBy: undefined,
+              shares: [],
+              recurrenceRule: null,
+              recurrenceEnd: null,
+              originalEventId: newEvent.id
+            }
+          }]);
+        }
       }
     } catch (err) {
       Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: t('create.error') });
     }
   };
 
-  const handleDeleteEvent = async () => {
+  const handleDeleteEvent = async (deleteMode?: 'this' | 'thisAndFuture' | 'all') => {
     if (!selectedEvent?.id) return;
     
     const result = await Swal.fire({
@@ -121,12 +149,37 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
 
     if (result.isConfirmed) {
       try {
-        await deleteCalendarEvent(selectedEvent.id);
-        setEvents(events.filter(e => e.id !== selectedEvent.id));
+        await deleteCalendarEvent(selectedEvent.id, deleteMode, selectedEvent.start);
+        
+        if (selectedEvent.isRecurring) {
+           window.location.reload(); // Reload for complex recurring deletions
+        } else {
+           setEvents(events.filter(e => e.id !== selectedEvent.id));
+        }
         setIsModalOpen(false);
       } catch (err) {
         Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: t('delete.error') });
       }
+    }
+  };
+
+  const handleShareEvent = async (email: string) => {
+    if (!selectedEvent?.id) return;
+    try {
+      await shareEvent(selectedEvent.id, email);
+      window.location.reload(); // Hard refresh to get updated shares
+    } catch (err: any) {
+      Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: err.message || t('share.shareError') });
+    }
+  };
+
+  const handleUnshareEvent = async (userId: string) => {
+    if (!selectedEvent?.id) return;
+    try {
+      await unshareEvent(selectedEvent.id, userId);
+      window.location.reload();
+    } catch (err: any) {
+      Swal.fire({ ...swalTheme, icon: 'error', title: 'Error', text: err.message || t('share.removeError') });
     }
   };
 
@@ -193,6 +246,7 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
         events={events}
         select={handleDateSelect}
         eventClick={handleEventClick}
+        eventContent={renderEventContent}
         locale={locale === 'es' ? esLocale : enLocale}
         height="100%"
       />
@@ -202,6 +256,8 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveEvent}
         onDelete={handleDeleteEvent}
+        onShare={handleShareEvent}
+        onUnshare={handleUnshareEvent}
         title={selectedEvent?.id ? t('editEvent') : t('newEvent')}
         initialData={selectedEvent}
       />

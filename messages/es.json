@@ -396,7 +396,8 @@
       "title": "¿Eliminar evento?",
       "confirm": "Sí, eliminar",
       "cancel": "Cancelar",
-      "error": "No se pudo eliminar el evento."
+      "error": "No se pudo eliminar el evento.",
+      "text": "Esta acción no se puede deshacer."
     },
     "create": {
       "error": "No se pudo crear el evento."
@@ -417,6 +418,55 @@
       "cancel": "Cancelar",
       "delete": "Eliminar",
       "saving": "Guardando..."
+    },
+    "recurrence": {
+      "label": "Repetir",
+      "none": "No se repite",
+      "daily": "Diario",
+      "weekly": "Semanal",
+      "monthly": "Mensual",
+      "yearly": "Anual",
+      "custom": "Personalizado",
+      "interval": "Cada",
+      "days": "días",
+      "weeks": "semanas",
+      "months": "meses",
+      "years": "años",
+      "endDate": "Hasta",
+      "endDatePlaceholder": "Sin fecha de fin",
+      "onDays": "Los días",
+      "mon": "Lu",
+      "tue": "Ma",
+      "wed": "Mi",
+      "thu": "Ju",
+      "fri": "Vi",
+      "sat": "Sa",
+      "dom": "Do"
+    },
+    "recurring": {
+      "editTitle": "Evento recurrente",
+      "editThis": "Solo esta ocurrencia",
+      "editAll": "Todas las ocurrencias",
+      "deleteTitle": "Eliminar evento recurrente",
+      "deleteThis": "Solo esta ocurrencia",
+      "deleteThisAndFuture": "Esta y futuras",
+      "deleteAll": "Todas las ocurrencias",
+      "indicator": "Recurrente"
+    },
+    "share": {
+      "title": "Compartir Evento",
+      "add": "Agregar",
+      "remove": "Quitar",
+      "emailPlaceholder": "Email del usuario...",
+      "sharedWith": "Compartido con",
+      "readOnly": "Solo lectura",
+      "sharedByOther": "Compartido por {name}",
+      "shareSuccess": "Evento compartido exitosamente.",
+      "shareError": "No se pudo compartir el evento.",
+      "userNotFound": "Usuario no encontrado.",
+      "alreadyShared": "Ya está compartido con este usuario.",
+      "removeSuccess": "Se removió el acceso al evento.",
+      "removeError": "Error al remover acceso."
     }
   },
   "Reminders": {
@@ -680,6 +730,19 @@
       "testRequired": "Token y Chat ID son requeridos para probar",
       "tokenPlaceholder": "123456:ABC-DEF...",
       "chatIdPlaceholder": "Ej. -100123456789"
+    },
+    "calendarNotifications": {
+      "title": "Notificaciones de Calendario",
+      "subtitle": "Configura las notificaciones automáticas por email para eventos del calendario.",
+      "dailyDigest": "Resumen Diario",
+      "dailyDigestDesc": "Recibe un email a las 7:00 AM con los eventos del día.",
+      "tomorrowPreview": "Preview de Mañana",
+      "tomorrowPreviewDesc": "Recibe un email a las 8:00 PM con los eventos de mañana.",
+      "hourBefore": "Recordatorio 1 Hora Antes",
+      "hourBeforeDesc": "Recibe un email 1 hora antes de cada evento.",
+      "save": "Guardar Preferencias",
+      "success": "Preferencias de notificación actualizadas.",
+      "error": "Error al guardar las preferencias."
     },
     "portalUsers": {
       "title": "Usuarios del Portal",

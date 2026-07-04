@@ -6,6 +6,7 @@ import * as React from 'react';
 import TicketNotificationEmail from '../emails/TicketNotificationEmail';
 import SecurityOtpEmail from '../emails/SecurityOtpEmail';
 import RemindersEmail from '../emails/RemindersEmail';
+import CalendarNotificationEmail from '../emails/CalendarNotificationEmail';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -165,3 +166,129 @@ export async function sendRemindersEmail(
 
 // Export resend instance in case it is needed somewhere else directly
 export { resend };
+
+// --- Calendar Notifications ---
+
+export async function sendCalendarDailyDigest(
+  toEmail: string,
+  userName: string,
+  events: any[],
+  locale: string = 'es'
+) {
+  try {
+    const html = await render(
+      React.createElement(CalendarNotificationEmail, {
+        type: 'daily_digest',
+        userName,
+        events,
+        locale,
+      })
+    );
+    const dateStr = new Date().toLocaleDateString(locale);
+    const subject = `[LAUNCHPAD] ${t(locale, 'Resumen del día', "Today's Schedule")} — ${dateStr}`;
+
+    const { error } = await resend.emails.send({
+      from: getFromEmail(locale, 'Portal'),
+      to: toEmail,
+      subject,
+      html,
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.error(`[Email] Error sending daily digest:`, err);
+    throw err;
+  }
+}
+
+export async function sendCalendarTomorrowPreview(
+  toEmail: string,
+  userName: string,
+  events: any[],
+  locale: string = 'es'
+) {
+  try {
+    const html = await render(
+      React.createElement(CalendarNotificationEmail, {
+        type: 'tomorrow_preview',
+        userName,
+        events,
+        locale,
+      })
+    );
+    const dateStr = new Date().toLocaleDateString(locale);
+    const subject = `[LAUNCHPAD] ${t(locale, 'Eventos de mañana', "Tomorrow's Events")} — ${dateStr}`;
+
+    const { error } = await resend.emails.send({
+      from: getFromEmail(locale, 'Portal'),
+      to: toEmail,
+      subject,
+      html,
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.error(`[Email] Error sending tomorrow preview:`, err);
+    throw err;
+  }
+}
+
+export async function sendCalendarHourBeforeReminder(
+  toEmail: string,
+  userName: string,
+  event: any,
+  locale: string = 'es'
+) {
+  try {
+    const html = await render(
+      React.createElement(CalendarNotificationEmail, {
+        type: 'hour_before',
+        userName,
+        event,
+        locale,
+      })
+    );
+    const subject = `[LAUNCHPAD] ⏰ ${event.title} — ${t(locale, 'en 1 hora', 'in 1 hour')}`;
+
+    const { error } = await resend.emails.send({
+      from: getFromEmail(locale, 'Portal'),
+      to: toEmail,
+      subject,
+      html,
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.error(`[Email] Error sending hour before reminder:`, err);
+    throw err;
+  }
+}
+
+export async function sendEventSharedNotification(
+  toEmail: string,
+  userName: string,
+  sharedEvent: any,
+  sharedByName: string,
+  locale: string = 'es'
+) {
+  try {
+    const html = await render(
+      React.createElement(CalendarNotificationEmail, {
+        type: 'event_shared',
+        userName,
+        sharedEvent,
+        sharedByName,
+        locale,
+      })
+    );
+    const subject = `[LAUNCHPAD] ${sharedByName} ${t(locale, 'compartió un evento', 'shared an event')}`;
+
+    const { error } = await resend.emails.send({
+      from: getFromEmail(locale, 'Portal'),
+      to: toEmail,
+      subject,
+      html,
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.error(`[Email] Error sending event shared notification:`, err);
+    throw err;
+  }
+}
