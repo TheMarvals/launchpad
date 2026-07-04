@@ -5,6 +5,7 @@ import {
   sendCalendarTomorrowPreview,
 } from '@/lib/email';
 import { RRule } from 'rrule';
+import { format, fromZonedTime } from 'date-fns-tz';
 
 interface ExpandedEvent {
   id: string;
@@ -188,39 +189,10 @@ export async function processHourBeforeNotifications() {
  * Sends a summary of today's events to each user.
  */
 export async function processDailyDigest() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const now = new Date();
 
   try {
     const users = await prisma.user.findMany({
-      where: {
-        OR: [
-          {
-            events: {
-              some: {
-                OR: [
-                  { start: { gte: today, lt: tomorrow }, recurrenceRule: null },
-                  { recurrenceRule: { not: null } },
-                ],
-              },
-            },
-          },
-          {
-            sharedEvents: {
-              some: {
-                event: {
-                  OR: [
-                    { start: { gte: today, lt: tomorrow }, recurrenceRule: null },
-                    { recurrenceRule: { not: null } },
-                  ],
-                },
-              },
-            },
-          },
-        ],
-      },
       include: {
         events: true,
         sharedEvents: { include: { event: true } },
@@ -232,12 +204,31 @@ export async function processDailyDigest() {
       const calendarDailyDigest = user.settings?.calendarDailyDigest ?? true;
       if (!calendarDailyDigest) continue;
 
+      const tz = user.settings?.timezone || 'America/Caracas';
+      const localHour = parseInt(format(now, 'H', { timeZone: tz }), 10);
+      
+      // Only send digest at 7 AM in the user's local timezone
+      if (localHour !== 7) continue;
+
+      // Calculate the start and end of 'today' in the user's timezone
+      const ymdToday = format(now, 'yyyy-MM-dd', { timeZone: tz });
+      const todayStartUTC = fromZonedTime(`${ymdToday}T00:00:00`, tz);
+      
+      const nextDay = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      const ymdTomorrow = format(nextDay, 'yyyy-MM-dd', { timeZone: tz });
+      const tomorrowStartUTC = fromZonedTime(`${ymdTomorrow}T00:00:00`, tz);
+
+      // Now filter the user's events using these UTC bounds
       const allEvents = [
         ...user.events,
         ...user.sharedEvents.map((s: any) => s.event),
-      ];
+      ].filter((e: any) => {
+        // Broad initial filter to avoid expanding things way out of bounds
+        if (!e.recurrenceRule && (e.start >= tomorrowStartUTC || e.end < todayStartUTC)) return false;
+        return true;
+      });
 
-      const expanded = expandEventsForRange(allEvents, today, tomorrow);
+      const expanded = expandEventsForRange(allEvents, todayStartUTC, tomorrowStartUTC);
       if (expanded.length === 0) continue;
 
       // Check if digest already sent for this user today
@@ -245,7 +236,7 @@ export async function processDailyDigest() {
         where: {
           userId: user.id,
           type: 'today_digest',
-          eventDate: { gte: today, lt: tomorrow },
+          eventDate: { gte: todayStartUTC, lt: tomorrowStartUTC },
         },
       });
 
@@ -253,20 +244,18 @@ export async function processDailyDigest() {
 
       try {
         await sendCalendarDailyDigest(user.email, user.name, expanded, 'es');
-
-        // Create one log entry per event
-        for (const event of expanded) {
-          await prisma.eventNotificationLog.create({
-            data: {
-              eventId: event.originalEventId,
-              userId: user.id,
-              type: 'today_digest',
-              eventDate: event.start,
-            },
-          });
-        }
+        
+        // Log that we sent it for today
+        await prisma.eventNotificationLog.create({
+          data: {
+            eventId: 'daily_digest', // use a dummy ID for digests since it's per-user not per-event
+            userId: user.id,
+            type: 'today_digest',
+            eventDate: todayStartUTC,
+          },
+        });
       } catch (e) {
-        console.error('[CRON] Error sending daily digest for user', user.id, e);
+        console.error('[CRON] Error sending daily digest to', user.email, e);
       }
     }
   } catch (e) {
@@ -276,43 +265,12 @@ export async function processDailyDigest() {
 
 /**
  * Process tomorrow preview notifications.
- * Sends a preview of tomorrow's events to each user.
  */
 export async function processTomorrowPreview() {
-  const tomorrow = new Date();
-  tomorrow.setHours(0, 0, 0, 0);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const dayAfter = new Date(tomorrow);
-  dayAfter.setDate(dayAfter.getDate() + 1);
+  const now = new Date();
 
   try {
     const users = await prisma.user.findMany({
-      where: {
-        OR: [
-          {
-            events: {
-              some: {
-                OR: [
-                  { start: { gte: tomorrow, lt: dayAfter }, recurrenceRule: null },
-                  { recurrenceRule: { not: null } },
-                ],
-              },
-            },
-          },
-          {
-            sharedEvents: {
-              some: {
-                event: {
-                  OR: [
-                    { start: { gte: tomorrow, lt: dayAfter }, recurrenceRule: null },
-                    { recurrenceRule: { not: null } },
-                  ],
-                },
-              },
-            },
-          },
-        ],
-      },
       include: {
         events: true,
         sharedEvents: { include: { event: true } },
@@ -324,20 +282,37 @@ export async function processTomorrowPreview() {
       const calendarTomorrowPreview = user.settings?.calendarTomorrowPreview ?? true;
       if (!calendarTomorrowPreview) continue;
 
+      const tz = user.settings?.timezone || 'America/Caracas';
+      const localHour = parseInt(format(now, 'H', { timeZone: tz }), 10);
+      
+      // Only send preview at 8 PM (20:00) in the user's local timezone
+      if (localHour !== 20) continue;
+
+      // Calculate the start and end of 'tomorrow' in the user's timezone
+      const nextDay = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      const ymdTomorrow = format(nextDay, 'yyyy-MM-dd', { timeZone: tz });
+      const tomorrowStartUTC = fromZonedTime(`${ymdTomorrow}T00:00:00`, tz);
+      
+      const dayAfter = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+      const ymdDayAfter = format(dayAfter, 'yyyy-MM-dd', { timeZone: tz });
+      const tomorrowEndUTC = fromZonedTime(`${ymdDayAfter}T00:00:00`, tz);
+
       const allEvents = [
         ...user.events,
         ...user.sharedEvents.map((s: any) => s.event),
-      ];
+      ].filter((e: any) => {
+        if (!e.recurrenceRule && (e.start >= tomorrowEndUTC || e.end < tomorrowStartUTC)) return false;
+        return true;
+      });
 
-      const expanded = expandEventsForRange(allEvents, tomorrow, dayAfter);
+      const expanded = expandEventsForRange(allEvents, tomorrowStartUTC, tomorrowEndUTC);
       if (expanded.length === 0) continue;
 
-      // Check if preview already sent for this user
       const existing = await prisma.eventNotificationLog.findFirst({
         where: {
           userId: user.id,
           type: 'tomorrow_digest',
-          eventDate: { gte: tomorrow, lt: dayAfter },
+          eventDate: { gte: tomorrowStartUTC, lt: tomorrowEndUTC },
         },
       });
 
@@ -345,19 +320,17 @@ export async function processTomorrowPreview() {
 
       try {
         await sendCalendarTomorrowPreview(user.email, user.name, expanded, 'es');
-
-        for (const event of expanded) {
-          await prisma.eventNotificationLog.create({
-            data: {
-              eventId: event.originalEventId,
-              userId: user.id,
-              type: 'tomorrow_digest',
-              eventDate: event.start,
-            },
-          });
-        }
+        
+        await prisma.eventNotificationLog.create({
+          data: {
+            eventId: 'tomorrow_digest',
+            userId: user.id,
+            type: 'tomorrow_digest',
+            eventDate: tomorrowStartUTC,
+          },
+        });
       } catch (e) {
-        console.error('[CRON] Error sending tomorrow preview for user', user.id, e);
+        console.error('[CRON] Error sending tomorrow preview to', user.email, e);
       }
     }
   } catch (e) {

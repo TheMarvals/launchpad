@@ -266,6 +266,7 @@ model ProductivitySettings {
   googleRefreshToken    String?  @db.Text
   googleCalendarEnabled Boolean  @default(false)
   // Calendar notification preferences
+  timezone                String  @default("America/Caracas")
   calendarDailyDigest     Boolean @default(true)
   calendarTomorrowPreview  Boolean @default(true)
   calendarHourBefore       Boolean @default(true)

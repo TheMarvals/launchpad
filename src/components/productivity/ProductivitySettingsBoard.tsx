@@ -24,6 +24,7 @@ export default function ProductivitySettingsBoard({ initialSettings }: SettingsP
         telegramEnabled: settings.telegramEnabled,
         telegramBotToken: settings.telegramBotToken,
         telegramChatId: settings.telegramChatId,
+        timezone: settings.timezone || 'America/Caracas',
         calendarDailyDigest: settings.calendarDailyDigest,
         calendarTomorrowPreview: settings.calendarTomorrowPreview,
         calendarHourBefore: settings.calendarHourBefore,
@@ -161,6 +162,33 @@ export default function ProductivitySettingsBoard({ initialSettings }: SettingsP
 
         <form onSubmit={handleSave} className="p-sm space-y-sm">
           <div className="space-y-4">
+            {/* Timezone Selector */}
+            <div className="flex items-center justify-between border border-hairline p-xxs">
+              <div className="flex-1 mr-4">
+                <p className="text-sm font-medium text-ink">{t('calendarNotifications.timezone') || 'Timezone'}</p>
+                <p className="text-xs text-muted">{t('calendarNotifications.timezoneDesc') || 'Select your local timezone for notifications'}</p>
+              </div>
+              <select
+                value={settings.timezone || 'America/Caracas'}
+                onChange={(e) => setSettings({ ...settings, timezone: e.target.value })}
+                className="px-xs py-xxs border border-hairline bg-canvas text-ink text-sm outline-none w-[200px]"
+              >
+                {/* Fallbacks if Intl API is not available, though it should be */}
+                {Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone').map(tz => (
+                  <option key={tz} value={tz}>{tz}</option>
+                )) : (
+                  <>
+                    <option value="America/Caracas">America/Caracas</option>
+                    <option value="America/Bogota">America/Bogota</option>
+                    <option value="America/Santiago">America/Santiago</option>
+                    <option value="America/Mexico_City">America/Mexico_City</option>
+                    <option value="America/New_York">America/New_York</option>
+                    <option value="Europe/Madrid">Europe/Madrid</option>
+                  </>
+                )}
+              </select>
+            </div>
+
             {/* Daily Digest Toggle */}
             <div className="flex items-center justify-between border border-hairline p-xxs">
               <div>
