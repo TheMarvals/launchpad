@@ -24,7 +24,7 @@ import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import TaskKanbanColumn from './TaskKanbanColumn';
 import TaskKanbanCard from './TaskKanbanCard';
 
-export default function TasksBoard({ initialTasks, projects }: { initialTasks: any[], projects: any[] }) {
+export default function TasksBoard({ initialTasks, projects, adminUsers = [] }: { initialTasks: any[], projects: any[], adminUsers?: any[] }) {
   const t = useTranslations('Tasks');
   const locale = useLocale();
   const [tasks, setTasks] = useState(initialTasks);
@@ -241,7 +241,16 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
                       </td>
                       <td className="px-sm py-xs">
                         <div className="flex items-center text-muted font-medium text-sm">
-                          <span className="material-icons text-[16px] mr-xxs opacity-40">calendar_today</span>
+                          {task.assignee ? (
+                            <div className="flex items-center" title={`Assignee: ${task.assignee.name}`}>
+                              <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold border border-primary/20 mr-2 uppercase">
+                                {task.assignee.name.substring(0, 2)}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="material-icons text-[16px] mr-xxs opacity-20" title="Unassigned">person_outline</span>
+                          )}
+                          <span className="material-icons text-[16px] ml-2 mr-xxs opacity-40">calendar_today</span>
                           {task.dueDate ? new Date(task.dueDate).toLocaleDateString(locale, { day: '2-digit', month: 'short' }) : t('noDate') || '-'}
                         </div>
                       </td>
@@ -337,6 +346,7 @@ export default function TasksBoard({ initialTasks, projects }: { initialTasks: a
           }
         }}
         projects={projects}
+        adminUsers={adminUsers}
         initialData={selectedTask}
         title={selectedTask ? t('editTask') : t('newTask')}
       />

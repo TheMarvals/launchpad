@@ -13,8 +13,10 @@ interface TaskModalProps {
     priority: string; 
     notes: string; 
     dueDate?: Date;
+    assigneeId?: string;
   }) => Promise<void>;
   projects: any[];
+  adminUsers?: any[];
   initialData?: {
     id?: string;
     title: string;
@@ -22,11 +24,12 @@ interface TaskModalProps {
     priority: string;
     notes?: string | null;
     dueDate?: Date | null;
+    assigneeId?: string | null;
   };
   title: string;
 }
 
-export default function TaskModal({ isOpen, onClose, onSave, projects, initialData, title }: TaskModalProps) {
+export default function TaskModal({ isOpen, onClose, onSave, projects, adminUsers = [], initialData, title }: TaskModalProps) {
   const t = useTranslations('Tasks');
   const [formData, setFormData] = useState({
     title: '',
@@ -34,6 +37,7 @@ export default function TaskModal({ isOpen, onClose, onSave, projects, initialDa
     priority: 'medium',
     notes: '',
     dueDate: '',
+    assigneeId: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -45,6 +49,16 @@ export default function TaskModal({ isOpen, onClose, onSave, projects, initialDa
         priority: initialData.priority || 'medium',
         notes: initialData.notes || '',
         dueDate: initialData.dueDate ? new Date(initialData.dueDate).toISOString().split('T')[0] : '',
+        assigneeId: initialData.assigneeId || '',
+      });
+    } else {
+      setFormData({
+        title: '',
+        projectId: '',
+        priority: 'medium',
+        notes: '',
+        dueDate: '',
+        assigneeId: '',
       });
     }
   }, [initialData, isOpen]);
@@ -56,7 +70,10 @@ export default function TaskModal({ isOpen, onClose, onSave, projects, initialDa
       await onSave({
         ...formData,
         projectId: formData.projectId || undefined,
-        dueDate: formData.dueDate ? new Date(formData.dueDate) : undefined,
+        priority: formData.priority,
+        notes: formData.notes,
+        ...(formData.dueDate ? { dueDate: new Date(formData.dueDate) } : {}),
+        ...(formData.assigneeId ? { assigneeId: formData.assigneeId } : {}),
       });
       onClose();
     } catch (error) {
@@ -113,6 +130,22 @@ export default function TaskModal({ isOpen, onClose, onSave, projects, initialDa
               <span className="material-icons absolute right-xxs top-1/2 -translate-y-1/2 text-muted pointer-events-none text-sm">expand_more</span>
             </div>
           </div>
+        </div>
+
+        <div className="space-y-xxs">
+          <label className="text-caption-uppercase text-ink font-semibold">Assignee</label>
+          <select
+            value={formData.assigneeId}
+            onChange={(e) => setFormData({ ...formData, assigneeId: e.target.value })}
+            className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors text-sm"
+          >
+            <option value="">Unassigned</option>
+            {adminUsers.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name} ({user.email})
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-xxs">

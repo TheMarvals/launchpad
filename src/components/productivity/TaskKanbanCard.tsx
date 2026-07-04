@@ -85,12 +85,21 @@ export default function TaskKanbanCard({ task, onClick, onDelete, t }: TaskKanba
           {t(`priority.${task.priority}`) || task.priority}
         </span>
         
-        {task.dueDate && (
-          <div className="flex items-center text-muted text-xs">
-            <span className="material-icons text-[12px] mr-1">event</span>
-            {new Date(task.dueDate).toLocaleDateString()}
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {task.assignee && (
+            <div className="flex items-center" title={`Assignee: ${task.assignee.name}`}>
+              <span className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[9px] font-bold border border-primary/20 uppercase">
+                {task.assignee.name.substring(0, 2)}
+              </span>
+            </div>
+          )}
+          {task.dueDate && (
+            <div className="flex items-center text-muted text-xs">
+              <span className="material-icons text-[12px] mr-1">event</span>
+              {new Date(task.dueDate).toLocaleDateString()}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

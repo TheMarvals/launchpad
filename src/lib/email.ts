@@ -7,6 +7,7 @@ import TicketNotificationEmail from '../emails/TicketNotificationEmail';
 import SecurityOtpEmail from '../emails/SecurityOtpEmail';
 import RemindersEmail from '../emails/RemindersEmail';
 import CalendarNotificationEmail from '../emails/CalendarNotificationEmail';
+import TaskAssignedEmail from '@/emails/TaskAssignedEmail';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -164,9 +165,6 @@ export async function sendRemindersEmail(
   }
 }
 
-// Export resend instance in case it is needed somewhere else directly
-export { resend };
-
 // --- Calendar Notifications ---
 
 export async function sendCalendarDailyDigest(
@@ -292,3 +290,40 @@ export async function sendEventSharedNotification(
     throw err;
   }
 }
+
+export async function sendTaskAssignedNotification(
+  toEmail: string,
+  assigneeName: string,
+  task: { title: string; priority: string; dueDate?: string },
+  assignerName: string,
+  locale: string = 'es'
+) {
+  try {
+    const subject = `[LAUNCHPAD] ${t(
+      locale,
+      'Nueva tarea asignada',
+      'New task assigned'
+    )}: ${task.title}`;
+    
+    await resend.emails.send({
+      from: getFromEmail(locale, 'Portal'),
+      to: [toEmail],
+      subject,
+      react: TaskAssignedEmail({
+        assigneeName,
+        assignerName,
+        taskTitle: task.title,
+        taskPriority: task.priority,
+        taskDueDate: task.dueDate,
+        locale,
+      }),
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to send task assigned notification email:', error);
+    return { success: false, error };
+  }
+}
+
+// Export resend instance in case it is needed somewhere else directly
+export { resend };

@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { RRule } from 'rrule';
-import { sendEventSharedNotification } from '@/lib/email';
+import { sendEventSharedNotification, sendTaskAssignedNotification } from '@/lib/email';
 
 /**
  * Ensures the user is an ADMIN before allowing access to productivity features.
@@ -85,11 +85,22 @@ export async function getTask(id: string) {
   });
 }
 
+export async function getAdminUsers() {
+  await ensureAdmin();
+  return await prisma.user.findMany({
+    where: { role: 'ADMIN' },
+    select: { id: true, name: true, email: true },
+  });
+}
+
 export async function getTasks(projectId?: string) {
   await ensureAdmin();
   return await prisma.task.findMany({
     where: { 
       ...(projectId ? { projectId } : {}),
+    },
+    include: {
+      assignee: true,
     },
     orderBy: [
       { status: 'asc' },
@@ -104,15 +115,29 @@ export async function createTask(data: {
   priority?: string;
   notes?: string;
   dueDate?: Date;
+  assigneeId?: string;
 }) {
   const user = await ensureAdmin();
   const task = await prisma.task.create({
     data: {
       ...data,
       userId: user.id,
-      status: 'pending',
+      status: 'todo',
     },
+    include: { assignee: true }
   });
+
+  // Notify assignee if it's someone else
+  if (task.assigneeId && task.assigneeId !== user.id && task.assignee) {
+    await sendTaskAssignedNotification(
+      task.assignee.email,
+      task.assignee.name,
+      { title: task.title, priority: task.priority, dueDate: task.dueDate?.toISOString() },
+      user.name || 'Launchpad Admin',
+      'es'
+    );
+  }
+
   revalidatePath('/dashboard/productivity/tasks');
   return task;
 }
@@ -127,13 +152,35 @@ export async function deleteTask(id: string) {
 }
 
 export async function updateTask(id: string, data: any) {
-  await ensureAdmin();
-  const task = await prisma.task.update({
+  const user = await ensureAdmin();
+  
+  // Get old task to compare assignees
+  const oldTask = await prisma.task.findUnique({ where: { id }, select: { assigneeId: true } });
+  
+  const updated = await prisma.task.update({
     where: { id },
     data,
+    include: { assignee: true }
   });
+
+  // Notify new assignee if it changed and it's someone else
+  if (
+    data.assigneeId && 
+    oldTask?.assigneeId !== data.assigneeId && 
+    data.assigneeId !== user.id && 
+    updated.assignee
+  ) {
+    await sendTaskAssignedNotification(
+      updated.assignee.email,
+      updated.assignee.name,
+      { title: updated.title, priority: updated.priority, dueDate: updated.dueDate?.toISOString() },
+      user.name || 'Launchpad Admin',
+      'es'
+    );
+  }
+
   revalidatePath('/dashboard/productivity/tasks');
-  return task;
+  return updated;
 }
 
 // --- TIME TRACKING ---
