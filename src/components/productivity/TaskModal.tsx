@@ -68,12 +68,12 @@ export default function TaskModal({ isOpen, onClose, onSave, projects, adminUser
     setIsSubmitting(true);
     try {
       await onSave({
-        ...formData,
+        title: formData.title,
         projectId: formData.projectId || undefined,
         priority: formData.priority,
         notes: formData.notes,
-        ...(formData.dueDate ? { dueDate: new Date(formData.dueDate) } : {}),
-        ...(formData.assigneeId ? { assigneeId: formData.assigneeId } : {}),
+        dueDate: formData.dueDate ? new Date(formData.dueDate) : undefined,
+        assigneeId: formData.assigneeId || undefined,
       });
       onClose();
     } catch (error) {
