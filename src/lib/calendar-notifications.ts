@@ -147,18 +147,20 @@ export async function processHourBeforeNotifications() {
       ];
 
       // Expand recurring events
-      const expanded = expandEventsForRange(allEvents, now, rangeEnd);
+      const expanded = expandEventsForRange(allEvents, now, rangeEnd).filter(e => !e.allDay);
 
       for (const event of expanded) {
+        // Strip milliseconds to ensure consistent DB matching
+        const eventDateNoMs = new Date(event.start);
+        eventDateNoMs.setMilliseconds(0);
+
         // Check if notification already sent
-        const existing = await prisma.eventNotificationLog.findUnique({
+        const existing = await prisma.eventNotificationLog.findFirst({
           where: {
-            eventId_userId_type_eventDate: {
-              eventId: event.originalEventId,
-              userId: user.id,
-              type: '1h_before',
-              eventDate: event.start,
-            },
+            eventId: event.originalEventId,
+            userId: user.id,
+            type: '1h_before',
+            eventDate: eventDateNoMs,
           },
         });
 
@@ -231,12 +233,17 @@ export async function processDailyDigest() {
       const expanded = expandEventsForRange(allEvents, todayStartUTC, tomorrowStartUTC);
       if (expanded.length === 0) continue;
 
-      // Check if digest already sent for this user today
+      // Check if digest already sent for this user today by checking the first event
+      const firstEvent = expanded[0];
+      const eventDateNoMs = new Date(firstEvent.start);
+      eventDateNoMs.setMilliseconds(0);
+
       const existing = await prisma.eventNotificationLog.findFirst({
         where: {
           userId: user.id,
           type: 'today_digest',
-          eventDate: { gte: todayStartUTC, lt: tomorrowStartUTC },
+          eventId: firstEvent.originalEventId,
+          eventDate: eventDateNoMs,
         },
       });
 
@@ -245,15 +252,27 @@ export async function processDailyDigest() {
       try {
         await sendCalendarDailyDigest(user.email, user.name, expanded, 'es');
         
-        // Log that we sent it for today
-        await prisma.eventNotificationLog.create({
-          data: {
-            eventId: 'daily_digest', // use a dummy ID for digests since it's per-user not per-event
-            userId: user.id,
-            type: 'today_digest',
-            eventDate: todayStartUTC,
-          },
-        });
+        // Log that we sent it for today using the events we just notified about
+        await Promise.all(expanded.map(async (ev) => {
+          const evDate = new Date(ev.start);
+          evDate.setMilliseconds(0);
+          
+          // Use upsert or findFirst to avoid unique constraint if duplicates exist
+          const exists = await prisma.eventNotificationLog.findFirst({
+            where: { eventId: ev.originalEventId, userId: user.id, type: 'today_digest', eventDate: evDate }
+          });
+          
+          if (!exists) {
+            await prisma.eventNotificationLog.create({
+              data: {
+                eventId: ev.originalEventId,
+                userId: user.id,
+                type: 'today_digest',
+                eventDate: evDate,
+              },
+            });
+          }
+        }));
       } catch (e) {
         console.error('[CRON] Error sending daily digest to', user.email, e);
       }
@@ -308,11 +327,16 @@ export async function processTomorrowPreview() {
       const expanded = expandEventsForRange(allEvents, tomorrowStartUTC, tomorrowEndUTC);
       if (expanded.length === 0) continue;
 
+      const firstEvent = expanded[0];
+      const eventDateNoMs = new Date(firstEvent.start);
+      eventDateNoMs.setMilliseconds(0);
+
       const existing = await prisma.eventNotificationLog.findFirst({
         where: {
           userId: user.id,
-          type: 'tomorrow_digest',
-          eventDate: { gte: tomorrowStartUTC, lt: tomorrowEndUTC },
+          type: 'tomorrow_preview',
+          eventId: firstEvent.originalEventId,
+          eventDate: eventDateNoMs,
         },
       });
 
@@ -321,14 +345,25 @@ export async function processTomorrowPreview() {
       try {
         await sendCalendarTomorrowPreview(user.email, user.name, expanded, 'es');
         
-        await prisma.eventNotificationLog.create({
-          data: {
-            eventId: 'tomorrow_digest',
-            userId: user.id,
-            type: 'tomorrow_digest',
-            eventDate: tomorrowStartUTC,
-          },
-        });
+        await Promise.all(expanded.map(async (ev) => {
+          const evDate = new Date(ev.start);
+          evDate.setMilliseconds(0);
+          
+          const exists = await prisma.eventNotificationLog.findFirst({
+            where: { eventId: ev.originalEventId, userId: user.id, type: 'tomorrow_preview', eventDate: evDate }
+          });
+          
+          if (!exists) {
+            await prisma.eventNotificationLog.create({
+              data: {
+                eventId: ev.originalEventId,
+                userId: user.id,
+                type: 'tomorrow_preview',
+                eventDate: evDate,
+              },
+            });
+          }
+        }));
       } catch (e) {
         console.error('[CRON] Error sending tomorrow preview to', user.email, e);
       }
