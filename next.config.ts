@@ -13,6 +13,15 @@ const nextConfig: NextConfig = {
       allowedOrigins: ['192.168.1.105', 'localhost:3000', 'localhost:3010'],
     },
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 export default withNextIntl(nextConfig);
