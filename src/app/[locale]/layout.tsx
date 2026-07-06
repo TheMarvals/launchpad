@@ -9,7 +9,15 @@ export const metadata: Metadata = {
   title: "LAUNCHPAD · Admin Panel",
   description: "Plataforma administrativa y centro de productividad integral de LAUNCHPAD.",
   metadataBase: new URL(process.env.SITE_ORIGIN || 'https://thelaunchpad.help'),
-  // Icons are auto-detected from app/favicon.ico and app/icon.png
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icon.png' }
+    ]
+  }
 };
 
 export default async function RootLayout({
