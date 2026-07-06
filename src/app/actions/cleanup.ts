@@ -9,11 +9,18 @@ export async function getOrphanedCloudinaryImages() {
     // Get all images stored in Cloudinary under the showcase folder
     const cloudinaryImages = await listCloudinaryResources('launchpad/showcase');
 
-    // Get all image URLs currently referenced in the database
+    // Get all image URLs currently referenced in the database (Showcase and Partners)
     const dbImages = await prisma.showcaseImage.findMany({
       select: { url: true },
     });
-    const dbUrls = new Set(dbImages.map(img => img.url));
+    const dbPartners = await prisma.partner.findMany({
+      select: { logoUrl: true },
+    });
+    
+    const dbUrls = new Set([
+      ...dbImages.map(img => img.url),
+      ...dbPartners.map(p => p.logoUrl)
+    ]);
 
     // Find images that exist in Cloudinary but not in the database
     const orphaned = cloudinaryImages.filter(img => !dbUrls.has(img.url));
