@@ -10,6 +10,7 @@
     "invoices": "Facturación",
     "products": "Productos",
     "tickets": "Tickets",
+    "emails": "Correos",
     "showcase": "Portafolio",
     "audit": "Auditoría",
     "productivity": "Productividad",
@@ -891,7 +892,8 @@
     "permissions": "Permisos",
     "permissionServers": "Ver Servidores",
     "permissionQuotes": "Ver Cotizaciones",
-    "permissionTickets": "Soporte / Tickets"
+    "permissionTickets": "Soporte / Tickets",
+    "permissionEmails": "Soporte / Correos"
   },
   "ClientPortal": {
     "dashboard": {

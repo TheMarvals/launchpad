@@ -18,6 +18,7 @@ export const PERMISSIONS = {
   CALENDAR: 'calendar',
   REMINDERS: 'reminders',
   CONTACTS: 'contacts',
+  EMAILS: 'emails',
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -41,6 +42,7 @@ export const PERMISSION_GROUPS: { label: string; permissions: { key: Permission;
     label: 'Support',
     permissions: [
       { key: PERMISSIONS.TICKETS, labelKey: 'tickets' },
+      { key: PERMISSIONS.EMAILS, labelKey: 'emails' },
     ],
   },
   {

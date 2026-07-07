@@ -10,6 +10,7 @@
     "invoices": "Billing",
     "products": "Products",
     "tickets": "Tickets",
+    "emails": "Inbox",
     "showcase": "Showcase",
     "audit": "Audit Logs",
     "productivity": "Productivity",
@@ -890,7 +891,8 @@
     "permissions": "Permissions",
     "permissionServers": "View Servers",
     "permissionQuotes": "View Quotes",
-    "permissionTickets": "Support / Tickets"
+    "permissionTickets": "Support / Tickets",
+    "permissionEmails": "Support / Emails"
   },
   "ClientPortal": {
     "dashboard": {
