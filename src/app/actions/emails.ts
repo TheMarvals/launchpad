@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { Resend } from 'resend';
+import { revalidatePath } from 'next/cache';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -134,6 +135,8 @@ export async function deleteEmail(id: string) {
   await prisma.emailMessage.delete({
     where: { id }
   });
+
+  revalidatePath('/dashboard/emails', 'layout');
 
   return { success: true };
 }
