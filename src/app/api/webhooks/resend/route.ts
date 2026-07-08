@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
@@ -15,24 +19,30 @@ export async function POST(req: Request) {
 
     console.log('[Resend Webhook] Received payload:', JSON.stringify(payload, null, 2));
 
-    // Optional: Verify signature if you set a webhook secret in Resend
-    // Not implemented here for simplicity, but recommended for production.
-
-    // Resend inbound webhook data structure differs slightly from event structure
-    // But typically it comes as the main payload or under payload.data
-    // Inbound webhooks may be different from generic event webhooks.
-    
-    // Check if it's an email received event (could be directly the email object if using pure inbound, or wrapped in an event)
     const emailData = payload.type === 'email.received' ? payload.data : (payload.from ? payload : null);
 
     if (emailData) {
       const from = emailData.from || 'Unknown Sender';
       const to = Array.isArray(emailData.to) ? emailData.to.join(', ') : (emailData.to || 'Unknown Recipient');
       const subject = emailData.subject || 'No Subject';
-      const textBody = emailData.text || '';
-      const htmlBody = emailData.html || '';
-      // Sometimes messageId is message_id or inside headers
       const messageId = emailData.message_id || emailData.messageId || null;
+      
+      let textBody = emailData.text || '';
+      let htmlBody = emailData.html || '';
+
+      // If text/html are empty, and we have an email_id, fetch the full email from Resend API
+      const emailId = emailData.email_id || payload.email_id;
+      if (emailId && (!textBody && !htmlBody)) {
+        try {
+          const fullEmail = await resend.emails.get(emailId);
+          if (fullEmail.data) {
+            textBody = fullEmail.data.text || textBody;
+            htmlBody = fullEmail.data.html || htmlBody;
+          }
+        } catch (fetchErr) {
+          console.error('[Resend Webhook] Failed to fetch full email body for ID', emailId, fetchErr);
+        }
+      }
 
       await prisma.emailMessage.create({
         data: {

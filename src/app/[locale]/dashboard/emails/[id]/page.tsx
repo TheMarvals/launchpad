@@ -116,8 +116,12 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
       <div className="flex-1 overflow-y-auto p-4 md:p-6 text-body prose prose-sm max-w-none">
         {email.htmlBody ? (
           <div dangerouslySetInnerHTML={{ __html: email.htmlBody }} />
-        ) : (
+        ) : email.textBody ? (
           <pre className="whitespace-pre-wrap font-sans text-sm">{email.textBody}</pre>
+        ) : (
+          <div className="italic text-muted opacity-70">
+            {locale === 'es' ? '(Este correo no tiene contenido o no se pudo cargar)' : '(This email has no content or could not be loaded)'}
+          </div>
         )}
       </div>
 
