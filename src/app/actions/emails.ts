@@ -58,7 +58,24 @@ export async function replyToEmail(originalEmailId: string, replyBody: string) {
 
   if (!originalEmail) throw new Error('Original email not found');
 
-  const fromEmail = process.env.USERM || 'soporte@thelaunchpad.help'; // Fallback
+  // Use the original recipient email as the sender for the reply
+  let rawTo = originalEmail.to || '';
+  if (rawTo.includes(',')) {
+    rawTo = rawTo.split(',')[0].trim();
+  }
+  
+  // Extract email if formatted as "Name <email@domain.com>"
+  const emailMatch = rawTo.match(/<([^>]+)>/);
+  let fromEmail = emailMatch ? emailMatch[1] : rawTo;
+
+  if (!fromEmail || !fromEmail.includes('@')) {
+    fromEmail = process.env.USERM || 'soporte@thelaunchpad.help'; // Fallback
+  }
+
+  // Format the sender name based on the email prefix (e.g. finanzas, soporte)
+  const prefix = fromEmail.split('@')[0];
+  const departmentName = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+  const senderName = `LAUNCHPAD ${departmentName}`;
   
   // Format subject: add Re: if not already there
   let subject = originalEmail.subject || '';
@@ -68,7 +85,7 @@ export async function replyToEmail(originalEmailId: string, replyBody: string) {
 
   // Send via Resend
   const data = await resend.emails.send({
-    from: `LAUNCHPAD Support <${fromEmail}>`,
+    from: `${senderName} <${fromEmail}>`,
     to: originalEmail.from,
     subject: subject,
     text: replyBody, // Simple text reply for now
