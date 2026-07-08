@@ -3,16 +3,17 @@
 import React, { useState } from 'react';
 import { Link, usePathname } from '@/i18n/routing';
 import { formatDistanceToNow } from 'date-fns';
+import { es, enUS } from 'date-fns/locale';
 
 type EmailSidebarProps = {
   initialEmails: any[];
   locale: string;
-  dateLocale: any;
 };
 
-export default function EmailSidebar({ initialEmails, locale, dateLocale }: EmailSidebarProps) {
+export default function EmailSidebar({ initialEmails, locale }: EmailSidebarProps) {
   const [activeTab, setActiveTab] = useState<'inbox' | 'sent'>('inbox');
   const pathname = usePathname(); // e.g. /dashboard/emails or /dashboard/emails/123
+  const dateLocale = locale === 'es' ? es : enUS;
 
   // Filter emails based on the active tab
   const filteredEmails = initialEmails.filter((email) => {

@@ -1,7 +1,6 @@
 import React from 'react';
 import { getTranslations } from 'next-intl/server';
 import { getEmails } from '@/app/actions/emails';
-import { es, enUS } from 'date-fns/locale';
 import EmailSidebar from '@/components/emails/EmailSidebar';
 
 export default async function EmailsLayout({
@@ -13,7 +12,6 @@ export default async function EmailsLayout({
 }) {
   const { locale } = await params;
   const t = await getTranslations('Navigation');
-  const dateLocale = locale === 'es' ? es : enUS;
 
   let emails: any[] = [];
   try {
@@ -35,7 +33,7 @@ export default async function EmailsLayout({
       <div className="flex flex-1 overflow-hidden">
         
         {/* Panel Izquierdo: Lista de correos con pestañas (Client Component) */}
-        <EmailSidebar initialEmails={emails} locale={locale} dateLocale={dateLocale} />
+        <EmailSidebar initialEmails={emails} locale={locale} />
 
         {/* Panel Derecho: Contenido (children) */}
         <div className="hidden md:flex flex-1 flex-col overflow-hidden bg-canvas-elevated/10">
