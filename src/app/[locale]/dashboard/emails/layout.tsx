@@ -36,7 +36,7 @@ export default async function EmailsLayout({
         <EmailSidebar initialEmails={emails} locale={locale} />
 
         {/* Panel Derecho: Contenido (children) */}
-        <div className="hidden md:flex flex-1 flex-col overflow-hidden bg-canvas-elevated/10">
+        <div className="hidden md:flex flex-1 min-w-0 flex-col overflow-hidden bg-canvas-elevated/10">
           {children}
         </div>
         
