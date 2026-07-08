@@ -21,7 +21,16 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
 
   // Clean the raw HTML and convert PAGE_BREAK markers to measurable elements
   const signatureHtml = sow?.signatureUrl 
-    ? `<div style="margin-top: 40px; text-align: center;"><img src="${sow.signatureUrl}" style="max-height: 120px; max-width: 300px; display: inline-block;" /><div style="margin-top: 10px; border-top: 1px solid #cbd5e1; width: 250px; margin-left: auto; margin-right: auto; padding-top: 5px; font-size: 12px; color: #64748b; font-weight: bold;">FIRMA ACEPTACIÓN</div></div>`
+    ? `<div style="margin-top: 80px; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 20px;">
+        <div style="text-align: center; width: 250px;">
+          <img src="${sow.signatureUrl}" style="max-height: 120px; max-width: 250px; display: inline-block; object-fit: contain;" />
+          <div style="margin-top: 10px; border-top: 1.5px solid #0f172a; padding-top: 8px; font-size: 11px; color: #0f172a; font-weight: 900; text-transform: uppercase;">${companyProfile?.name || 'LA AGENCIA'}</div>
+        </div>
+        <div style="text-align: center; width: 250px;">
+          <div style="height: 120px;"></div>
+          <div style="margin-top: 10px; border-top: 1.5px solid #0f172a; padding-top: 8px; font-size: 11px; color: #0f172a; font-weight: 900; text-transform: uppercase;">Firma de Aceptación (Cliente)</div>
+        </div>
+      </div>`
     : '';
 
   const rawContent = isTemplate
