@@ -370,27 +370,21 @@ export default function SowForm({ clients, companyProfile, initialData }: SowFor
     if (!file) return;
 
     try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64data = reader.result as string;
-        
-        const formData = new FormData();
-        formData.append('file', base64data);
-        
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          setSignatureUrl(data.url);
-        } else {
-          console.error('Upload failed');
-          alert('Error uploading signature');
-        }
-      };
-      reader.readAsDataURL(file);
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setSignatureUrl(data.url);
+      } else {
+        console.error('Upload failed');
+        alert('Error uploading signature');
+      }
     } catch (err) {
       console.error(err);
       alert('Error uploading signature');
