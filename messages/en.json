@@ -8,6 +8,7 @@
     "clients": "Clients",
     "quotes": "Quotes",
     "invoices": "Billing",
+    "sows": "SOWs",
     "products": "Products",
     "tickets": "Tickets",
     "emails": "Emails",
@@ -103,6 +104,29 @@
     "duplicate": "Duplicate",
     "duplicateError": "Error duplicating quote.",
     "noQuotes": "No quotes available.",
+    "table": {
+      "number": "Nº",
+      "client": "Client",
+      "issueDate": "Issue Date",
+      "validity": "Validity",
+      "total": "Total",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "pagination": {
+      "showing": "Showing {start}–{end} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "Sows": {
+    "title": "Statements of Work",
+    "subtitle": "{count} SOW{count, plural, one {} other {s}} registered.",
+    "newSow": "New SOW",
+    "editSow": "Edit SOW",
+    "duplicate": "Duplicate",
+    "duplicateError": "Error duplicating SOW.",
+    "noSows": "No SOWs available.",
     "table": {
       "number": "Nº",
       "client": "Client",

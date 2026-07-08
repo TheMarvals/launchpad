@@ -1,0 +1,107 @@
+'use client';
+
+import React, { useState } from 'react';
+import { Link } from '@/i18n/routing';
+import { useRouter } from 'next/navigation';
+import { deleteSow, duplicateSow } from '@/app/actions/sows';
+import { useTranslations, useLocale } from 'next-intl';
+
+interface SowActionsProps {
+  sowId: string;
+}
+
+export default function SowActions({ sowId }: SowActionsProps) {
+  const t = useTranslations('Dashboard.recentSows');
+  const tSow = useTranslations('Sows');
+  const locale = useLocale();
+  const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteSow(sowId);
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      alert(t('deleteError') || 'Error al eliminar la sowón.');
+    } finally {
+      setIsDeleting(false);
+      setShowConfirm(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-end space-x-3 relative">
+      <Link 
+        href={`/dashboard/sows/edit/${sowId}`}
+        className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
+        title={t('edit')}
+      >
+        <span className="material-icons text-[18px]">edit</span>
+      </Link>
+      <button
+        onClick={async () => {
+          if (isDuplicating) return;
+          setIsDuplicating(true);
+          try {
+            const newSow = await duplicateSow(sowId);
+            router.push(`/dashboard/sows/edit/${newSow.id}`);
+            router.refresh();
+          } catch (error) {
+            console.error(error);
+            alert(tSow('duplicateError') || 'Error al duplicar la sowón.');
+            setIsDuplicating(false);
+          }
+        }}
+        className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-amber-600 transition-colors"
+        title={tSow('duplicate') || 'Duplicar'}
+        disabled={isDuplicating}
+      >
+        <span className="material-icons text-[18px]">
+          {isDuplicating ? 'sync' : 'content_copy'}
+        </span>
+      </button>
+      <a 
+        href={`/api/sows/${sowId}/pdf?locale=${locale}`} 
+        className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
+        title={t('download')}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <span className="material-icons text-[18px]">picture_as_pdf</span>
+      </a>
+
+
+      
+      {showConfirm ? (
+        <div className="flex items-center space-x-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5 absolute right-0 -top-1 shadow-lg z-10">
+          <span className="text-xs font-bold text-red-600 whitespace-nowrap">{t('confirmDelete')}</span>
+          <button
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="text-xs font-bold text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md transition-colors disabled:opacity-50"
+          >
+            {isDeleting ? '...' : t('yes')}
+          </button>
+          <button
+            onClick={() => setShowConfirm(false)}
+            className="text-xs font-bold text-red-400 hover:text-red-600 px-2 py-1 transition-colors"
+          >
+            {t('no')}
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowConfirm(true)}
+          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors"
+          title={t('delete')}
+        >
+          <span className="material-icons text-[18px]">delete_outline</span>
+        </button>
+      )}
+    </div>
+  );
+}

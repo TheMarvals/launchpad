@@ -8,6 +8,7 @@
     "clients": "Clientes",
     "quotes": "Cotizaciones",
     "invoices": "Facturación",
+    "sows": "SOWs",
     "products": "Productos",
     "tickets": "Tickets",
     "emails": "Emails",
@@ -103,6 +104,29 @@
     "duplicate": "Duplicar",
     "duplicateError": "Error al duplicar la cotización.",
     "noQuotes": "No hay cotizaciones disponibles.",
+    "table": {
+      "number": "Nº",
+      "client": "Cliente",
+      "issueDate": "Fecha Emisión",
+      "validity": "Validez",
+      "total": "Total",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "pagination": {
+      "showing": "Mostrando {start}–{end} de {total}",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    }
+  },
+  "Sows": {
+    "title": "Statements of Work",
+    "subtitle": "{count} documento{count, plural, one {} other {s}} registrado{count, plural, one {} other {s}}.",
+    "newSow": "Nuevo SOW",
+    "editSow": "Editar SOW",
+    "duplicate": "Duplicar",
+    "duplicateError": "Error al duplicar el SOW.",
+    "noSows": "No hay SOWs disponibles.",
     "table": {
       "number": "Nº",
       "client": "Cliente",

@@ -58,6 +58,7 @@ model Client {
   updatedAt    DateTime @updatedAt
   quotes       Quote[]
   invoices     Invoice[]
+  sows         Sow[]
   users        User[]
   servers      VpsService[]
   tickets      Ticket[]
@@ -176,6 +177,47 @@ model InvoiceItem {
   esExento       Boolean  @default(false)
 
   invoice        Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model Sow {
+  id               String      @id @default(uuid())
+  correlativo      Int         @unique @default(autoincrement())
+  clientId         String
+  fechaEmision     DateTime    @default(now())
+  fechaValidez     DateTime
+  estado           String      @default("Borrador") // Borrador, Enviada, Aceptada, Rechazada
+  propuesta        String?
+  montoNeto        Float       @default(0)
+  montoIva         Float       @default(0)
+  montoTotal       Float       @default(0)
+  
+  // Custom Taxes & Fees
+  taxName          String      @default("IVA")
+  taxPercent       Float       @default(19)
+  extraFeeName     String?     // e.g., "PayPal Fee"
+  extraFeeAmount   Float       @default(0)
+  paymentMethod    String?     // e.g., "Transferencia", "PayPal"
+  totalLabel       String?     // Custom label for "Total", e.g. "Total Monthly"
+
+  notasCondiciones String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  client           Client      @relation(fields: [clientId], references: [id])
+  items            SowItem[]
+}
+
+model SowItem {
+  id             String   @id @default(uuid())
+  sowId          String
+  descripcion    String
+  cantidad       Float
+  precioUnitario Float
+  descuento      Float    @default(0)
+  subtotal       Float
+  esExento       Boolean  @default(false)
+
+  sow            Sow      @relation(fields: [sowId], references: [id], onDelete: Cascade)
 }
 
 model Project {

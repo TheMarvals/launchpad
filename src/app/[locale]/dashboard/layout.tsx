@@ -75,6 +75,13 @@ export default async function DashboardLayout({
                 </Link>
               </li>
             )}
+            {can(PERMISSIONS.SOWS) && (
+              <li>
+                <Link href="/dashboard/sows" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">assignment</span> {t('sows')}
+                </Link>
+              </li>
+            )}
             {can(PERMISSIONS.INVOICES) && (
               <li>
                 <Link href="/dashboard/invoices" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
