@@ -42,6 +42,11 @@ export default async function DashboardLayout({
   const unreadContacts = await prisma.contactSubmission.count({
     where: { read: false },
   });
+  
+  // Unread emails count for sidebar badge
+  const unreadEmails = await prisma.emailMessage.count({
+    where: { direction: 'INBOUND', status: 'UNREAD' },
+  });
 
   const can = createPermissionChecker(dbUser?.permissions as string[] | undefined);
 
@@ -109,6 +114,11 @@ export default async function DashboardLayout({
               <li>
                 <Link href="/dashboard/emails" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
                   <span className="material-icons mr-xxs text-sm opacity-70">email</span> {t('emails')}
+                  {unreadEmails > 0 && (
+                    <span className="ml-auto bg-primary text-on-primary text-[9px] font-bold px-[5px] py-[1px] leading-none">
+                      {unreadEmails > 99 ? '99+' : unreadEmails}
+                    </span>
+                  )}
                 </Link>
               </li>
             )}
@@ -235,6 +245,18 @@ export default async function DashboardLayout({
               <li>
                 <Link href="/dashboard/tickets" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
                   <span className="material-icons mr-xxs text-sm opacity-70">support_agent</span> {t('tickets')}
+                </Link>
+              </li>
+            )}
+            {can(PERMISSIONS.EMAILS) && (
+              <li>
+                <Link href="/dashboard/emails" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                  <span className="material-icons mr-xxs text-sm opacity-70">email</span> {t('emails')}
+                  {unreadEmails > 0 && (
+                    <span className="ml-auto bg-primary text-on-primary text-[9px] font-bold px-[5px] py-[1px] leading-none">
+                      {unreadEmails > 99 ? '99+' : unreadEmails}
+                    </span>
+                  )}
                 </Link>
               </li>
             )}

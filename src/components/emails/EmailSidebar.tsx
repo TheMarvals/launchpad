@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Link, usePathname } from '@/i18n/routing';
+import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { formatDistanceToNow } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
 
@@ -13,6 +13,7 @@ type EmailSidebarProps = {
 export default function EmailSidebar({ initialEmails, locale }: EmailSidebarProps) {
   const [activeTab, setActiveTab] = useState<'inbox' | 'sent'>('inbox');
   const pathname = usePathname(); // e.g. /dashboard/emails or /dashboard/emails/123
+  const router = useRouter();
   const dateLocale = locale === 'es' ? es : enUS;
 
   // Filter emails based on the active tab
@@ -25,7 +26,7 @@ export default function EmailSidebar({ initialEmails, locale }: EmailSidebarProp
   return (
     <div className="w-full md:w-1/3 lg:w-[400px] border-r border-hairline overflow-y-auto bg-canvas shrink-0 flex flex-col h-full">
       {/* Tabs Header */}
-      <div className="flex border-b border-hairline shrink-0 bg-canvas">
+      <div className="flex border-b border-hairline shrink-0 bg-canvas items-center relative">
         <button
           onClick={() => setActiveTab('inbox')}
           className={`flex-1 py-3 text-sm font-bold uppercase tracking-widest transition-colors ${
@@ -45,6 +46,13 @@ export default function EmailSidebar({ initialEmails, locale }: EmailSidebarProp
           }`}
         >
           {locale === 'es' ? 'Enviados' : 'Sent'}
+        </button>
+        <button 
+          onClick={() => router.refresh()}
+          className="absolute right-2 w-8 h-8 flex items-center justify-center text-muted hover:text-ink hover:bg-canvas-elevated rounded-sm transition-colors"
+          title={locale === 'es' ? 'Actualizar' : 'Refresh'}
+        >
+          <span className="material-icons text-[18px]">refresh</span>
         </button>
       </div>
 
