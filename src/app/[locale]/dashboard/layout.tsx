@@ -108,7 +108,7 @@ export default async function DashboardLayout({
             {can(PERMISSIONS.EMAILS) && (
               <li>
                 <Link href="/dashboard/emails" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
-                  <span className="material-icons mr-xxs text-sm opacity-70">inbox</span> {t('emails')}
+                  <span className="material-icons mr-xxs text-sm opacity-70">email</span> {t('emails')}
                 </Link>
               </li>
             )}
