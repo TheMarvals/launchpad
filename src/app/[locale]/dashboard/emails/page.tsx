@@ -11,7 +11,7 @@ export default async function EmailsIndexPage({ params }: { params: Promise<{ lo
       <h2 className="text-lg font-bold text-ink mb-2">
         {locale === 'es' ? 'Bandeja de entrada' : 'Inbox'}
       </h2>
-      <p className="max-w-xs text-sm">
+      <p className="max-w-md w-full text-sm">
         {locale === 'es' 
           ? 'Selecciona un correo de la lista a la izquierda para leer su contenido.' 
           : 'Select an email from the list on the left to read its contents.'}
