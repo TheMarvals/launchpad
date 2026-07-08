@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from '@/i18n/routing';
-import { getEmailById, replyToEmail } from '@/app/actions/emails';
+import { getEmailById, replyToEmail, deleteEmail } from '@/app/actions/emails';
 import { format } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
 
@@ -14,6 +14,7 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
   const [loading, setLoading] = useState(true);
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
 
   const dateLocale = locale === 'es' ? es : enUS;
@@ -33,6 +34,22 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
     }
     fetchEmail();
   }, [id]);
+
+  const handleDelete = async () => {
+    if (!confirm(locale === 'es' ? '¿Estás seguro de que deseas eliminar este correo?' : 'Are you sure you want to delete this email?')) {
+      return;
+    }
+    setDeleting(true);
+    try {
+      await deleteEmail(id);
+      router.push('/dashboard/emails');
+      router.refresh();
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Error deleting email');
+      setDeleting(false);
+    }
+  };
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,9 +105,21 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
 
       {/* Header */}
       <div className="p-4 md:p-6 border-b border-hairline shrink-0">
-        <h1 className="text-xl md:text-2xl font-black tracking-tighter mb-4">
-          {email.subject || '(Sin asunto)'}
-        </h1>
+        <div className="flex justify-between items-start gap-4 mb-4">
+          <h1 className="text-xl md:text-2xl font-black tracking-tighter">
+            {email.subject || '(Sin asunto)'}
+          </h1>
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="w-8 h-8 flex items-center justify-center text-red-500 bg-red-500/10 hover:bg-red-500/20 rounded-sm transition-colors shrink-0 disabled:opacity-50"
+            title={locale === 'es' ? 'Eliminar correo' : 'Delete email'}
+          >
+            <span className="material-icons text-[18px]">
+              {deleting ? 'refresh' : 'delete'}
+            </span>
+          </button>
+        </div>
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex gap-3">
             <div className="w-10 h-10 bg-canvas-elevated border border-hairline rounded-sm flex items-center justify-center font-bold text-ink shrink-0">
@@ -103,7 +132,7 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
           </div>
           <div className="text-xs text-muted sm:text-right shrink-0">
             {format(new Date(email.createdAt), "d 'de' MMMM, yyyy • HH:mm", { locale: dateLocale })}
-            <div className="mt-1">
+            <div className="mt-1 flex gap-2 sm:justify-end">
               <span className="bg-canvas-elevated px-2 py-0.5 text-[9px] uppercase font-bold rounded-sm border border-hairline">
                 {email.direction}
               </span>

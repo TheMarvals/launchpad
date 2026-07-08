@@ -116,3 +116,24 @@ export async function replyToEmail(originalEmailId: string, replyBody: string) {
 
   return { success: true };
 }
+
+export async function deleteEmail(id: string) {
+  const session = await auth();
+  if (!session?.user) throw new Error('Unauthorized');
+
+  // Verify permission
+  const dbUser = await prisma.user.findUnique({
+    where: { id: (session.user as any).id },
+    select: { permissions: true }
+  });
+
+  if (!dbUser?.permissions?.includes('emails')) {
+    throw new Error('Forbidden');
+  }
+
+  await prisma.emailMessage.delete({
+    where: { id }
+  });
+
+  return { success: true };
+}
