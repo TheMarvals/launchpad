@@ -1178,5 +1178,50 @@
     "deleteText": "This will permanently delete this contact submission.",
     "deleteConfirm": "Yes, delete",
     "deleteCancel": "Cancel"
+  },
+  "SowForm": {
+    "title": "Sow Details",
+    "clientLabel": "Selected Client",
+    "clientPlaceholder": "Search client...",
+    "validityLabel": "Validity Date",
+    "proposalTitle": "Proposal Editor",
+    "newPage": "New Page",
+    "page": "Page",
+    "of": "of",
+    "capacity": "capacity",
+    "pageLimit": "Page limit reached. Consider using a new sheet.",
+    "standardA4": "Standard A4 Format",
+    "characters": "characters",
+    "economicDetail": "Economic Detail",
+    "addItem": "Add Item",
+    "itemLabel": "Service / Product",
+    "quantity": "Quantity",
+    "unitPrice": "Unit Price",
+    "subtotal": "Subtotal",
+    "net": "Net",
+    "taxLabel": "Tax Name",
+    "taxPercent": "Percentage (%)",
+    "tax": "Tax",
+    "extraFeeLabel": "Extra Fee / Commission (e.g. PayPal)",
+    "extraFee": "Commission",
+    "paymentMethodLabel": "Payment Method",
+    "paymentMethodPlaceholder": "e.g. Bank Transfer, PayPal...",
+    "total": "Total",
+    "notesTitle": "Notes and Commercial Conditions",
+    "preview": "Preview",
+    "saveDraft": "Save Draft",
+    "generate": "Generate Sow",
+    "update": "Update Sow",
+    "close": "Close",
+    "saving": "Saving...",
+    "errors": {
+      "selectClient": "Please select a client.",
+      "saveError": "There was an error saving the sow."
+    },
+    "defaultProposal": {
+      "page1": "<h1>1. EXECUTIVE SUMMARY</h1><p>A comprehensive proposal is presented for the development of advanced technological solutions, focused on optimizing the infrastructure and critical processes of your organization.</p><h2>Main Objectives</h2><ul><li>Implementation of scalable architectures.</li><li>Long-term maintainability.</li><li>Enterprise-grade security.</li></ul>",
+      "page2": "<h1>2. TECHNICAL PROPOSAL</h1><p>Architecture and Platform:</p><ul><li>Development on modern standards (Next.js, Tailwind, Prisma).</li><li>Continuous integration and automated launch.</li><li>Proactive service monitoring.</li></ul>"
+    },
+    "defaultNotes": "50% advance payment, 50% upon delivery. Valid for 15 days."
   }
 }

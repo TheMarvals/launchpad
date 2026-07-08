@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       const emailId = emailData.email_id || payload.email_id;
       if (emailId && (!textBody && !htmlBody)) {
         try {
-          const fullEmail = await resend.emails.receiving.get(emailId);
+          const fullEmail = await resend.emails.get(emailId);
           if (fullEmail.data) {
             textBody = fullEmail.data.text || textBody;
             htmlBody = fullEmail.data.html || htmlBody;

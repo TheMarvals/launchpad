@@ -255,13 +255,7 @@ export default function SowForm({ clients, companyProfile, initialData }: SowFor
   });
 
   const [notasCondiciones, setNotasCondiciones] = useState(initialData?.notasCondiciones || t('defaultNotes'));
-  const [items, setItems] = useState(
-    initialData?.items?.map(it => ({
-      descripcion: it.descripcion,
-      cantidad: it.cantidad,
-      precioUnitario: it.precioUnitario,
-    })) || [{ descripcion: '', cantidad: 1, precioUnitario: 0 }]
-  );
+  const [signatureUrl, setSignatureUrl] = useState<string>((initialData as any)?.signatureUrl || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
@@ -371,37 +365,43 @@ export default function SowForm({ clients, companyProfile, initialData }: SowFor
 
   const pageInfo = getPageInfo();
 
-  const addItem = () => {
-    setItems([...items, { descripcion: '', cantidad: 1, precioUnitario: 0 }]);
-  };
+  const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const updateItem = (index: number, field: string, value: any) => {
-    const newItems = [...items];
-    newItems[index] = { ...newItems[index], [field]: value };
-    setItems(newItems);
-  };
-
-  const removeItem = (index: number) => {
-    if (items.length > 1) {
-      setItems(items.filter((_: any, i: number) => i !== index));
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64data = reader.result as string;
+        
+        const formData = new FormData();
+        formData.append('file', base64data);
+        
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          setSignatureUrl(data.url);
+        } else {
+          console.error('Upload failed');
+          alert('Error uploading signature');
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error(err);
+      alert('Error uploading signature');
     }
   };
-
-  const neto = items.reduce((acc: number, item: any) => acc + (Number(item.cantidad) * Number(item.precioUnitario) || 0), 0);
-  const iva = Math.round(neto * ((parseFloat(taxPercent) || 0) / 100));
-  const fee = parseFloat(extraFeeAmount) || 0;
-  const total = neto + iva + fee;
 
   const handleSubmit = async (estado: 'Borrador' | 'Enviada' = 'Enviada') => {
     if (!clientId) return alert(t('errors.selectClient'));
     
     setIsSubmitting(true);
     try {
-      const itemsWithSubtotals = items.map((item: any) => ({
-        ...item,
-        subtotal: Number(item.cantidad) * Number(item.precioUnitario)
-      }));
-
       const payload = {
         clientId,
         fechaValidez,
@@ -414,7 +414,8 @@ export default function SowForm({ clients, companyProfile, initialData }: SowFor
         extraFeeAmount,
         paymentMethod: paymentMethod || null,
         totalLabel: totalLabel || null,
-        items: itemsWithSubtotals
+        signatureUrl,
+        items: []
       };
 
       if (isEditing) {
@@ -439,19 +440,20 @@ export default function SowForm({ clients, companyProfile, initialData }: SowFor
     correlativo: 0,
     fechaEmision: new Date(),
     fechaValidez: fechaValidez ? new Date(fechaValidez) : null,
-    montoNeto: neto,
-    montoIva: iva,
-    montoTotal: total,
-    taxName,
-    taxPercent: parseFloat(taxPercent),
-    extraFeeName,
-    extraFeeAmount: fee,
-    paymentMethod,
-    totalLabel,
+    montoNeto: 0,
+    montoIva: 0,
+    montoTotal: 0,
+    taxName: '',
+    taxPercent: 0,
+    extraFeeName: '',
+    extraFeeAmount: 0,
+    paymentMethod: '',
+    totalLabel: '',
     notasCondiciones,
     propuesta,
+    signatureUrl,
     client: selectedClient || { razonSocial: 'CLIENTE NO SELECCIONADO', rut: '---' },
-    items: items.map(it => ({ ...it, subtotal: Number(it.cantidad) * Number(it.precioUnitario) }))
+    items: []
   };
 
   if (showPreview) {
@@ -642,171 +644,35 @@ export default function SowForm({ clients, companyProfile, initialData }: SowFor
         </div>
       </div>
 
-      {/* 3. Items Table */}
+      {/* 3. Signature Upload */}
       <div className="bg-canvas-elevated border border-hairline p-sm space-y-sm">
-        <div className="flex justify-between items-center">
-          <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
-            <span className="material-icons mr-xxs text-primary">payments</span> {t('economicDetail')}
-          </h2>
-          <button 
-            type="button" 
-            onClick={addItem}
-            className="text-ink font-semibold text-xs uppercase tracking-wider hover:bg-canvas px-sm py-xs transition-colors flex items-center border border-hairline"
-          >
-            <span className="material-icons mr-xxs text-sm">add</span> {t('addItem')}
-          </button>
-        </div>
-
-        <div className="space-y-sm border-t border-hairline pt-sm">
-          {items.map((item: any, idx: number) => (
-            <div key={idx} className="bg-surface-card p-sm md:p-0 md:bg-transparent md:border-none space-y-sm md:space-y-0 md:flex md:gap-sm md:items-end pb-sm border-b border-hairline/20 mb-sm last:border-b-0 last:mb-0 last:pb-0">
-              {/* Description - full width on mobile */}
-              <div className="w-full md:w-auto md:flex-1 space-y-xxs">
-                <label className="text-caption-uppercase text-ink font-semibold">{t('itemLabel')}</label>
-                <input 
-                  type="text" 
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
-                  value={item.descripcion}
-                  onChange={(e) => updateItem(idx, 'descripcion', e.target.value)}
-                  required
-                />
-              </div>
-              {/* Quantity + Unit Price - side by side on mobile */}
-              <div className="grid grid-cols-2 md:flex md:gap-sm gap-2 items-end">
-                <div className="md:w-24 space-y-xxs">
-                  <label className="text-caption-uppercase text-ink font-semibold">{t('quantity')}</label>
-                  <input 
-                    type="number" 
-                    min="1"
-                    className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors text-center font-semibold px-xs py-xs text-sm"
-                    value={item.cantidad}
-                    onChange={(e) => updateItem(idx, 'cantidad', e.target.value)}
-                    required
-                  />
+        <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
+          <span className="material-icons mr-xxs text-primary">draw</span> Firma del Cliente
+        </h2>
+        <div className="flex flex-col gap-sm">
+          {signatureUrl ? (
+            <div className="relative w-full max-w-[300px] bg-canvas border border-hairline p-sm rounded-sm">
+              <img src={signatureUrl} alt="Signature" className="max-h-[100px] object-contain mx-auto" />
+              <button 
+                type="button" 
+                onClick={() => setSignatureUrl('')}
+                className="absolute top-1 right-1 text-muted hover:text-semantic-warning"
+              >
+                <span className="material-icons text-sm">close</span>
+              </button>
+            </div>
+          ) : (
+            <div className="w-full max-w-[300px]">
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-hairline border-dashed hover:bg-canvas cursor-pointer rounded-sm transition-colors">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-muted hover:text-primary transition-colors">
+                  <span className="material-icons mb-2">cloud_upload</span>
+                  <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-center">Subir Firma</p>
+                  <p className="text-xs opacity-70">PNG, JPG</p>
                 </div>
-                <div className="md:w-40 space-y-xxs">
-                  <label className="text-caption-uppercase text-ink font-semibold">{t('unitPrice')}</label>
-                  <div className="relative">
-                    <span className="absolute left-xs top-1/2 -translate-y-1/2 text-muted font-semibold">$</span>
-                    <input 
-                      type="number" 
-                      min="0"
-                      className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors font-semibold pl-md px-xs py-xs text-sm"
-                      value={item.precioUnitario}
-                      onChange={(e) => updateItem(idx, 'precioUnitario', e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-                {/* Subtotal - desktop only here */}
-                <div className="hidden md:block md:w-32 text-right self-center pb-xxs">
-                  <div className="text-caption-uppercase text-muted mb-xxs">{t('subtotal')}</div>
-                  <div className="font-medium text-ink">
-                    ${(Number(item.cantidad) * Number(item.precioUnitario) || 0).toLocaleString(locale)}
-                  </div>
-                </div>
-                {/* Delete - desktop only here */}
-                <button 
-                  type="button" 
-                  onClick={() => removeItem(idx)}
-                  className="hidden md:block pb-xxs p-xxs text-muted hover:text-semantic-warning transition-colors self-end"
-                >
-                  <span className="material-icons">delete_outline</span>
-                </button>
-              </div>
-              {/* Mobile: subtotal + delete row */}
-              <div className="flex md:hidden justify-between items-center pt-1 border-t border-hairline/10">
-                <div className="flex items-center gap-1">
-                  <span className="text-caption-uppercase text-muted text-xs">{t('subtotal')}</span>
-                  <span className="font-semibold text-ink text-sm">
-                    ${(Number(item.cantidad) * Number(item.precioUnitario) || 0).toLocaleString(locale)}
-                  </span>
-                </div>
-                <button 
-                  type="button" 
-                  onClick={() => removeItem(idx)}
-                  className="p-xxs text-muted hover:text-semantic-warning transition-colors flex items-center gap-1 text-xs font-semibold uppercase tracking-wider"
-                >
-                  <span className="material-icons text-sm">delete_outline</span>
-                  Eliminar
-                </button>
-              </div>
+                <input type="file" className="hidden" accept="image/*" onChange={handleSignatureUpload} />
+              </label>
             </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-sm pt-sm border-t border-hairline">
-          <div className="space-y-xxs">
-            <label className="text-caption-uppercase text-ink font-semibold">{t('taxLabel')}</label>
-            <input 
-              type="text" 
-              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
-              value={taxName}
-              onChange={(e) => setTaxName(e.target.value)}
-              placeholder="Ej. IVA"
-            />
-          </div>
-          <div className="space-y-xxs">
-            <label className="text-caption-uppercase text-ink font-semibold">{t('taxPercent')}</label>
-            <input 
-              type="number" 
-              step="0.01"
-              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
-              value={taxPercent}
-              onChange={(e) => setTaxPercent(e.target.value)}
-            />
-          </div>
-          <div className="space-y-xxs">
-            <label className="text-caption-uppercase text-ink font-semibold">{t('extraFeeLabel')}</label>
-            <div className="grid grid-cols-3 gap-xxs">
-              <input 
-                type="text" 
-                className="col-span-2 w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
-                value={extraFeeName}
-                onChange={(e) => setExtraFeeName(e.target.value)}
-                placeholder="Ej. PayPal Fee"
-              />
-              <input 
-                type="number" 
-                className="col-span-1 w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
-                value={extraFeeAmount}
-                onChange={(e) => setExtraFeeAmount(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="space-y-xxs">
-            <label className="text-caption-uppercase text-ink font-semibold">Texto "Total"</label>
-            <input 
-              type="text" 
-              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
-              value={totalLabel}
-              onChange={(e) => setTotalLabel(e.target.value)}
-              placeholder={`Ej. ${t('total')}`}
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-end pt-md">
-          <div className="w-full md:w-80 space-y-xxs p-sm bg-canvas border border-hairline ml-auto">
-            <div className="flex justify-between text-caption-uppercase text-muted">
-              <span>{t('net')}</span>
-              <span className="text-ink font-medium">${neto.toLocaleString(locale)}</span>
-            </div>
-            <div className="flex justify-between text-caption-uppercase text-muted">
-              <span>{taxName} ({taxPercent}%)</span>
-              <span className="text-ink font-medium">${iva.toLocaleString(locale)}</span>
-            </div>
-            {fee > 0 && (
-              <div className="flex justify-between text-caption-uppercase text-muted">
-                <span>{extraFeeName || t('extraFee')}</span>
-                <span className="text-ink font-medium">${fee.toLocaleString(locale)}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-xl pt-xs mt-xs border-t border-hairline">
-              <span className="text-caption-uppercase text-muted self-center">{totalLabel || t('total')}</span>
-              <span className="text-ink font-medium">${total.toLocaleString(locale)}</span>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 

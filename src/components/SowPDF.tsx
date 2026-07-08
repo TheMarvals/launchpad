@@ -20,6 +20,10 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
   const [computedPages, setComputedPages] = useState<string[]>([]);
 
   // Clean the raw HTML and convert PAGE_BREAK markers to measurable elements
+  const signatureHtml = sow?.signatureUrl 
+    ? `<div style="margin-top: 40px; text-align: center;"><img src="${sow.signatureUrl}" style="max-height: 120px; max-width: 300px; display: inline-block;" /><div style="margin-top: 10px; border-top: 1px solid #cbd5e1; width: 250px; margin-left: auto; margin-right: auto; padding-top: 5px; font-size: 12px; color: #64748b; font-weight: bold;">FIRMA ACEPTACIÓN</div></div>`
+    : '';
+
   const rawContent = isTemplate
     ? `
       <h1>PROPUESTA DE CONSULTORÍA Y ARQUITECTURA DE SOFTWARE</h1>
@@ -51,9 +55,9 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
         [EQUIPO DE TRABAJO / TEAM ROLES BOX]
       </div>
     `
-    : (sow.propuesta || '')
+    : ((sow.propuesta || '')
         .replace(/&nbsp;/g, ' ')
-        .replace(/---PAGE_BREAK---/g, '<hr class="forced-page-break" />');
+        .replace(/---PAGE_BREAK---/g, '<hr class="forced-page-break" />') + signatureHtml);
 
   const paginateContent = useCallback(() => {
     const container = measureRef.current;
@@ -133,7 +137,7 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
     return () => clearTimeout(timer);
   }, [paginateContent]);
 
-  const totalPages = computedPages.length + 1; // +1 for investment page
+  const totalPages = computedPages.length;
 
   return (
     <>
@@ -285,131 +289,6 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
             </footer>
           </div>
         ))}
-
-        {/* Investment Detail Page */}
-        <div className="pdf-page w-full h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
-          <header className="relative w-full p-8 border-b border-slate-50 shrink-0 flex justify-between items-center bg-white">
-            <div className="relative inline-block">
-              <h1 className="text-3xl font-black mb-0 stroke-text leading-none tracking-tighter" style={{ WebkitTextStrokeColor: '#000000', WebkitTextStrokeWidth: '1.5px' }}>{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
-              <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-primary" />
-            </div>
-            <div className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-300">{totalPages} / {totalPages}</div>
-          </header>
-
-          <main className="flex-grow px-10 pt-10 pb-8 overflow-hidden">
-            {/* Watermark */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
-              <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#181818', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
-            </div>
-
-            <div className="relative z-10 space-y-12">
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <h3 className="text-slate-900 uppercase text-[11px] font-black tracking-[0.3em] mr-4 whitespace-nowrap">{t('investmentDetail')}</h3>
-                  <div className="h-[1px] bg-slate-100 w-full"></div>
-                </div>
-                <div className="rounded-2xl overflow-hidden border border-slate-100">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-slate-50 text-left text-[10px] uppercase text-slate-500 tracking-widest font-black border-b border-slate-100">
-                        <th className="p-4">{t('description')}</th>
-                        <th className="p-4 text-right w-20">{t('quantity')}</th>
-                        <th className="p-4 text-right w-28">{t('subtotal')}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                      {isTemplate ? (
-                        <>
-                          <tr className="text-[13px]">
-                            <td className="p-4 font-bold text-slate-400 border-b border-dotted border-slate-100">1. <span className="font-normal border-b border-dashed border-slate-300 w-64 inline-block h-3 pt-2"></span></td>
-                            <td className="p-4 text-right font-bold text-slate-400 border-b border-dotted border-slate-100">__</td>
-                            <td className="p-4 text-right font-black text-slate-400 border-b border-dotted border-slate-100">$__________</td>
-                          </tr>
-                          <tr className="text-[13px]">
-                            <td className="p-4 font-bold text-slate-400 border-b border-dotted border-slate-100">2. <span className="font-normal border-b border-dashed border-slate-300 w-64 inline-block h-3 pt-2"></span></td>
-                            <td className="p-4 text-right font-bold text-slate-400 border-b border-dotted border-slate-100">__</td>
-                            <td className="p-4 text-right font-black text-slate-400 border-b border-dotted border-slate-100">$__________</td>
-                          </tr>
-                          <tr className="text-[13px]">
-                            <td className="p-4 font-bold text-slate-400 border-b border-dotted border-slate-100">3. <span className="font-normal border-b border-dashed border-slate-300 w-64 inline-block h-3 pt-2"></span></td>
-                            <td className="p-4 text-right font-bold text-slate-400 border-b border-dotted border-slate-100">__</td>
-                            <td className="p-4 text-right font-black text-slate-400 border-b border-dotted border-slate-100">$__________</td>
-                          </tr>
-                        </>
-                      ) : (
-                        (sow.items || []).map((item: any, idx: number) => (
-                          <tr key={idx} className="text-[13px]">
-                            <td className="p-4 font-bold text-slate-800">{item.descripcion}</td>
-                            <td className="p-4 text-right font-bold text-slate-300">{item.cantidad}</td>
-                            <td className="p-4 text-right font-black text-slate-900">${(item.subtotal || 0).toLocaleString(locale)}</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className="space-y-2 p-4 w-64 ml-auto">
-                <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
-                  <span>{t('net')}</span>
-                  <span>{isTemplate ? '$__________' : `$${(sow.montoNeto || 0).toLocaleString(locale)}`}</span>
-                </div>
-                <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
-                  <span>{sow.taxName || t('tax')} ({sow.taxPercent ?? 19}%)</span>
-                  <span>{isTemplate ? '$__________' : `$${(sow.montoIva || 0).toLocaleString(locale)}`}</span>
-                </div>
-                {(isTemplate || sow.extraFeeAmount > 0) && (
-                  <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
-                    <span>{sow.extraFeeName || t('fee')}</span>
-                    <span>{isTemplate ? '$__________' : `$${(sow.extraFeeAmount || 0).toLocaleString(locale)}`}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-lg font-black text-slate-900 border-t border-slate-200 pt-2 mt-2">
-                  <span className="text-[10px] uppercase tracking-widest text-slate-500 self-center">{sow.totalLabel || t('total')}</span>
-                  <span>{isTemplate ? '$__________' : `$${(sow.montoTotal || 0).toLocaleString(locale)}`}</span>
-                </div>
-                {(isTemplate || sow.paymentMethod) && (
-                  <div className="pt-4 mt-4 border-t border-slate-50 text-right">
-                    <div className="text-[8px] font-black uppercase text-slate-300 tracking-[0.2em] mb-1">{t('paymentMethod')}</div>
-                    <div className="text-[10px] font-bold text-slate-800">{isTemplate ? '_____________________' : sow.paymentMethod}</div>
-                  </div>
-                )}
-              </div>
-
-              {/* Notes & Conditions */}
-              {(isTemplate || sow.notasCondiciones) && (
-                <div className="space-y-3 mt-8">
-                  <div className="flex items-center">
-                    <h3 className="text-slate-900 uppercase text-[11px] font-black tracking-[0.3em] mr-4 whitespace-nowrap">{t('conditions')}</h3>
-                    <div className="h-[1px] bg-slate-100 w-full"></div>
-                  </div>
-                  <div className="text-[11px] text-slate-500 leading-relaxed whitespace-pre-line">
-                    {isTemplate ? (
-                      <div className="space-y-2">
-                        <div className="border-b border-dashed border-slate-300 h-4 w-full"></div>
-                        <div className="border-b border-dashed border-slate-300 h-4 w-full"></div>
-                        <div className="border-b border-dashed border-slate-300 h-4 w-3/4"></div>
-                      </div>
-                    ) : (
-                      sow.notasCondiciones
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </main>
-
-          <footer className="w-full p-6 text-slate-300 text-center shrink-0" style={{ background: '#0B1026' }}>
-            <div className="text-[12px] font-black uppercase tracking-[0.6em] text-white">{companyProfile?.brandNameFooter || 'EDUARDO MARVAL'}</div>
-            <div className="h-px w-8 bg-primary mx-auto my-3 opacity-30"></div>
-            <div className="text-[8px] font-bold opacity-40 space-x-6 uppercase tracking-widest">
-              <span>{companyProfile?.address || 'ANTONIO BELLET 193 OF 1210 12P, PROVIDENCIA, RM'}</span>
-              <span>•</span>
-              <span>{companyProfile?.email || 'e.marval@themarvals.com'}</span>
-            </div>
-          </footer>
-        </div>
 
         <style dangerouslySetInnerHTML={{
           __html: `

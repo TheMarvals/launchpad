@@ -1179,5 +1179,50 @@
     "deleteText": "Esto eliminará permanentemente esta solicitud de contacto.",
     "deleteConfirm": "Sí, eliminar",
     "deleteCancel": "Cancelar"
+  },
+  "SowForm": {
+    "title": "Datos de la SOWón",
+    "clientLabel": "Cliente Seleccionado",
+    "clientPlaceholder": "Buscar cliente...",
+    "validityLabel": "Fecha de Validez",
+    "proposalTitle": "Editor de Propuesta",
+    "newPage": "Nueva Página",
+    "page": "Hoja",
+    "of": "de",
+    "capacity": "capacidad",
+    "pageLimit": "Límite de página alcanzado. Considera usar una nueva hoja.",
+    "standardA4": "Formato A4 Estándar",
+    "characters": "caracteres",
+    "economicDetail": "Detalle Económico",
+    "addItem": "Agregar Ítem",
+    "itemLabel": "Servicio / Producto",
+    "quantity": "Cantidad",
+    "unitPrice": "Precio Unitario",
+    "subtotal": "Subtotal",
+    "net": "Neto",
+    "taxLabel": "Nombre del Impuesto",
+    "taxPercent": "Porcentaje (%)",
+    "tax": "Impuesto",
+    "extraFeeLabel": "Comisión / Cargo Extra (Ej. PayPal)",
+    "extraFee": "Comisión",
+    "paymentMethodLabel": "Método de Pago",
+    "paymentMethodPlaceholder": "Ej. Transferencia Banco Chile, PayPal...",
+    "total": "Total",
+    "notesTitle": "Notas y Condiciones Comerciales",
+    "preview": "Vista Previa",
+    "saveDraft": "Guardar Borrador",
+    "generate": "Generar SOWón",
+    "update": "Actualizar SOWón",
+    "close": "Cerrar",
+    "saving": "Guardando...",
+    "errors": {
+      "selectClient": "Por favor, selecciona un cliente.",
+      "saveError": "Hubo un error al guardar la SOWón."
+    },
+    "defaultProposal": {
+      "page1": "<h1>1. RESUMEN EJECUTIVO</h1><p>Se presenta una propuesta integral para el desarrollo de soluciones tecnológicas avanzadas, enfocadas en optimizar la infraestructura y los procesos críticos de su organización.</p><h2>Objetivos Principales</h2><ul><li>Implementación de arquitecturas escalables.</li><li>Mantenibilidad a largo plazo.</li><li>Seguridad de nivel corporativo.</li></ul>",
+      "page2": "<h1>2. PROPUESTA TÉCNICA</h1><p>Arquitectura y Plataforma:</p><ul><li>Desarrollo sobre estándares modernos (Next.js, Tailwind, Prisma).</li><li>Integración continua y despliegue automatizado.</li><li>Monitorización proactiva de servicios.</li></ul>"
+    },
+    "defaultNotes": "Pago 50% anticipado, 50% contra entrega. Válido por 15 días."
   }
 }

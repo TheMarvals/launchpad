@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { formatDistanceToNow } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
+import { deleteEmail } from '@/app/actions/emails';
 
 type EmailSidebarProps = {
   initialEmails: any[];
@@ -12,6 +13,7 @@ type EmailSidebarProps = {
 
 export default function EmailSidebar({ initialEmails, locale }: EmailSidebarProps) {
   const [activeTab, setActiveTab] = useState<'inbox' | 'sent'>('inbox');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const pathname = usePathname(); // e.g. /dashboard/emails or /dashboard/emails/123
   const router = useRouter();
   const dateLocale = locale === 'es' ? es : enUS;
@@ -74,11 +76,31 @@ export default function EmailSidebar({ initialEmails, locale }: EmailSidebarProp
             {filteredEmails.map((email: any) => {
               const isActive = pathname === `/dashboard/emails/${email.id}`;
               
+              const handleDeleteClick = async (e: React.MouseEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!confirm(locale === 'es' ? '¿Eliminar correo?' : 'Delete email?')) return;
+                
+                setDeletingId(email.id);
+                try {
+                  await deleteEmail(email.id);
+                  if (isActive) {
+                    router.push('/dashboard/emails');
+                  }
+                  router.refresh();
+                } catch (err) {
+                  console.error('Error deleting email', err);
+                  alert(locale === 'es' ? 'Error al eliminar correo' : 'Error deleting email');
+                } finally {
+                  setDeletingId(null);
+                }
+              };
+
               return (
                 <Link 
                   href={`/dashboard/emails/${email.id}`} 
                   key={email.id}
-                  className={`block p-4 transition-colors ${
+                  className={`block p-4 transition-colors group relative ${
                     isActive 
                       ? 'bg-canvas-elevated border-l-4 border-l-primary' 
                       : email.status === 'UNREAD' && activeTab === 'inbox'
@@ -87,7 +109,7 @@ export default function EmailSidebar({ initialEmails, locale }: EmailSidebarProp
                   }`}
                 >
                   <div className="flex justify-between items-start mb-1 gap-2">
-                    <span className={`font-semibold truncate text-sm flex-1 ${email.status === 'UNREAD' && activeTab === 'inbox' ? 'text-ink' : 'text-body'}`}>
+                    <span className={`font-semibold truncate text-sm flex-1 pr-6 ${email.status === 'UNREAD' && activeTab === 'inbox' ? 'text-ink' : 'text-body'}`}>
                       {activeTab === 'inbox' ? email.from : `Para: ${email.to}`}
                     </span>
                     <span className="text-[10px] text-muted whitespace-nowrap shrink-0 mt-1">
@@ -95,10 +117,22 @@ export default function EmailSidebar({ initialEmails, locale }: EmailSidebarProp
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <h3 className={`text-xs truncate ${email.status === 'UNREAD' && activeTab === 'inbox' ? 'font-bold text-ink' : 'text-muted'}`}>
+                    <h3 className={`text-xs truncate pr-6 ${email.status === 'UNREAD' && activeTab === 'inbox' ? 'font-bold text-ink' : 'text-muted'}`}>
                       {email.subject || '(Sin asunto)'}
                     </h3>
                   </div>
+                  
+                  {/* Delete Button (visible on hover) */}
+                  <button
+                    onClick={handleDeleteClick}
+                    disabled={deletingId === email.id}
+                    className="absolute top-1/2 -translate-y-1/2 right-2 w-8 h-8 rounded-sm bg-canvas border border-hairline flex items-center justify-center text-red-500 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 hover:bg-red-500/10 hover:border-red-500/30"
+                    title={locale === 'es' ? 'Eliminar' : 'Delete'}
+                  >
+                    <span className="material-icons text-[16px]">
+                      {deletingId === email.id ? 'refresh' : 'delete'}
+                    </span>
+                  </button>
                 </Link>
               );
             })}

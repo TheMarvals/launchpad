@@ -200,6 +200,7 @@ model Sow {
   totalLabel       String?     // Custom label for "Total", e.g. "Total Monthly"
 
   notasCondiciones String?
+  signatureUrl     String?
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 

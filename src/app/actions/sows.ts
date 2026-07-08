@@ -7,7 +7,7 @@ import { redirect } from '@/i18n/routing';
 export async function createSow(formData: any) {
   const { 
     clientId, items, notasCondiciones, propuesta, estado, fechaValidez,
-    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod, totalLabel
+    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod, totalLabel, signatureUrl
   } = formData;
 
   // Calculate totals
@@ -44,6 +44,7 @@ export async function createSow(formData: any) {
       paymentMethod,
       totalLabel,
       estado: estado || 'Borrador',
+      signatureUrl,
       items: {
         create: items.map((item: any) => ({
           descripcion: item.descripcion,
@@ -88,7 +89,7 @@ export async function getSowById(id: string) {
 export async function updateSow(id: string, formData: any) {
   const { 
     clientId, items, notasCondiciones, propuesta, estado, fechaValidez,
-    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod, totalLabel
+    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod, totalLabel, signatureUrl
   } = formData;
 
   // Calculate totals
@@ -126,6 +127,7 @@ export async function updateSow(id: string, formData: any) {
         paymentMethod,
         totalLabel,
         estado: estado || 'Borrador',
+        signatureUrl,
         items: {
           create: items.map((item: any) => ({
             descripcion: item.descripcion,
@@ -175,6 +177,7 @@ export async function duplicateSow(id: string) {
       extraFeeAmount: original.extraFeeAmount,
       paymentMethod: original.paymentMethod,
       totalLabel: original.totalLabel,
+      signatureUrl: original.signatureUrl,
       items: {
         create: original.items.map(item => ({
           descripcion: item.descripcion,
