@@ -630,7 +630,9 @@
           "tasks": "Tareas",
           "notes": "Notas",
           "calendar": "Calendario",
-          "reminders": "Recordatorios"
+          "reminders": "Recordatorios",
+          "emails": "Emails",
+          "contacts": "Contactos"
         }
       }
     },

@@ -629,7 +629,9 @@
           "tasks": "Tasks",
           "notes": "Notes",
           "calendar": "Calendar",
-          "reminders": "Reminders"
+          "reminders": "Reminders",
+          "emails": "Emails",
+          "contacts": "Contacts"
         }
       }
     },
