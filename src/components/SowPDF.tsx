@@ -24,11 +24,11 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
     ? `<div style="margin-top: 80px; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 20px;">
         <div style="text-align: center; width: 250px;">
           <img src="${sow.signatureUrl}" style="max-height: 120px; max-width: 250px; display: inline-block; object-fit: contain;" />
-          <div style="margin-top: 10px; border-top: 1.5px solid #0f172a; padding-top: 8px; font-size: 11px; color: #0f172a; font-weight: 900; text-transform: uppercase;">${companyProfile?.name || 'LA AGENCIA'}</div>
+          <div style="margin-top: 10px; border-top: 1.5px solid #0f172a; padding-top: 8px; font-size: 11px; color: #0f172a; font-weight: 900; text-transform: uppercase;">${companyProfile?.name || (locale === 'es' ? 'LA AGENCIA' : 'THE AGENCY')}</div>
         </div>
         <div style="text-align: center; width: 250px;">
           <div style="height: 120px;"></div>
-          <div style="margin-top: 10px; border-top: 1.5px solid #0f172a; padding-top: 8px; font-size: 11px; color: #0f172a; font-weight: 900; text-transform: uppercase;">Firma de Aceptación (Cliente)</div>
+          <div style="margin-top: 10px; border-top: 1.5px solid #0f172a; padding-top: 8px; font-size: 11px; color: #0f172a; font-weight: 900; text-transform: uppercase;">${locale === 'es' ? 'Firma de Aceptación (Cliente)' : 'Acceptance Signature (Client)'}</div>
         </div>
       </div>`
     : '';
