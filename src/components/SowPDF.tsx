@@ -287,7 +287,7 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
                         <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{t('document')}</div>
                         <div className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">
                           {sow.isAnnex ? (
-                            <span className="text-primary">TECHNICAL ANNEX</span>
+                            <span className="text-primary tracking-normal">TECHNICAL ANNEX</span>
                           ) : (
                             <>{t('sow')} <span className="text-primary">#{isTemplate ? 'XXXX' : String(sow.correlativo || 0).padStart(4, '0')}</span></>
                           )}
