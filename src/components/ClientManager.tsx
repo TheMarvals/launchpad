@@ -79,7 +79,7 @@ export default function ClientManager({ clients }: ClientManagerProps) {
     setIsSubmitting(true);
     setError('');
     try {
-      let res;
+      let res: any;
       if (editingId) {
         res = await updateClient(editingId, form);
       } else {
