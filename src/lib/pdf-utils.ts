@@ -101,6 +101,8 @@ export async function generatePdf(options: GeneratePdfOptions): Promise<Response
     waitUntil: 'networkidle0',
   });
 
+  await page.waitForSelector('.pdf-page', { timeout: 30000 });
+
   await page.emulateMediaType('screen');
   await applyPdfStyles(page);
 

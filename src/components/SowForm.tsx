@@ -217,6 +217,7 @@ interface SowFormProps {
     extraFeeAmount: number;
     paymentMethod: string | null;
     totalLabel: string | null;
+    isAnnex: boolean;
     items: { descripcion: string; cantidad: number; precioUnitario: number }[];
     client: Client;
   };
@@ -234,6 +235,8 @@ export default function SowForm({ clients, companyProfile, initialData }: SowFor
       ? new Date(initialData.fechaValidez).toISOString().split('T')[0] 
       : ''
   );
+  
+  const [isAnnex, setIsAnnex] = useState(initialData?.isAnnex || false);
   
   // Custom Taxes & Fees State
   const [taxName, setTaxName] = useState(initialData?.taxName || 'IVA');
@@ -409,6 +412,7 @@ export default function SowForm({ clients, companyProfile, initialData }: SowFor
         paymentMethod: paymentMethod || null,
         totalLabel: totalLabel || null,
         signatureUrl,
+        isAnnex,
         items: []
       };
 
@@ -443,6 +447,7 @@ export default function SowForm({ clients, companyProfile, initialData }: SowFor
     extraFeeAmount: 0,
     paymentMethod: '',
     totalLabel: '',
+    isAnnex,
     notasCondiciones,
     propuesta,
     signatureUrl,
@@ -514,6 +519,26 @@ export default function SowForm({ clients, companyProfile, initialData }: SowFor
               required
             />
           </div>
+        </div>
+        
+        {/* Is Annex Checkbox */}
+        <div className="pt-sm border-t border-hairline mt-sm">
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <div className="relative flex items-center justify-center w-5 h-5 border border-hairline bg-canvas group-hover:border-primary transition-colors">
+              <input
+                type="checkbox"
+                className="peer sr-only"
+                checked={isAnnex}
+                onChange={(e) => setIsAnnex(e.target.checked)}
+              />
+              <span className="material-icons text-[16px] text-primary opacity-0 peer-checked:opacity-100 transition-opacity absolute">
+                check
+              </span>
+            </div>
+            <span className="text-sm text-ink group-hover:text-primary transition-colors font-medium">
+              Marcar como Anexo Técnico (Elimina el # de documento y cambia el título a TECHNICAL ANNEX)
+            </span>
+          </label>
         </div>
       </div>
 

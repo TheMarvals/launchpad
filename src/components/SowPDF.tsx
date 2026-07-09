@@ -1,6 +1,7 @@
 'use client';
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import mermaid from 'mermaid';
 
 interface SowPDFProps {
   sow: any;
@@ -33,6 +34,17 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
       </div>`
     : '';
 
+  const processPropuesta = (html: string) => {
+    let processed = html.replace(/```mermaid([\s\S]*?)```/g, (match, p1) => {
+      let cleanContent = p1.replace(/<[^>]*>/g, '\n').replace(/&nbsp;/g, ' ');
+      cleanContent = cleanContent.replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&');
+      return `<div class="mermaid">${cleanContent.trim()}</div>`;
+    });
+    processed = processed.replace(/&nbsp;/g, ' ');
+    processed = processed.replace(/---PAGE_BREAK---/g, '<hr class="forced-page-break" />');
+    return processed;
+  };
+
   const rawContent = isTemplate
     ? `
       <h1>PROPUESTA DE CONSULTORÍA Y ARQUITECTURA DE SOFTWARE</h1>
@@ -64,11 +76,9 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
         [EQUIPO DE TRABAJO / TEAM ROLES BOX]
       </div>
     `
-    : ((sow.propuesta || '')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/---PAGE_BREAK---/g, '<hr class="forced-page-break" />') + signatureHtml);
+    : (processPropuesta(sow.propuesta || '') + signatureHtml);
 
-  const paginateContent = useCallback(() => {
+  const paginateContent = useCallback(async () => {
     const container = measureRef.current;
     if (!container || !rawContent) {
       setComputedPages([rawContent || '']);
@@ -77,6 +87,17 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
 
     // Inject content into hidden measurement container
     container.innerHTML = rawContent;
+
+    // Render Mermaid diagrams before measuring
+    try {
+      const mermaidNodes = container.querySelectorAll('.mermaid');
+      if (mermaidNodes.length > 0) {
+        mermaid.initialize({ startOnLoad: false, theme: 'default' });
+        await mermaid.run({ nodes: Array.from(mermaidNodes) as HTMLElement[] });
+      }
+    } catch (e) {
+      console.error('Mermaid render error', e);
+    }
 
     // Calculate px per mm from the container's known width (should be ~189mm)
     // container width in CSS = calc(210mm - 5rem). At 16px base, 5rem=80px.
@@ -265,7 +286,11 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
                       <div className="space-y-1">
                         <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{t('document')}</div>
                         <div className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">
-                          {t('sow')} <span className="text-primary">#{isTemplate ? 'XXXX' : String(sow.correlativo || 0).padStart(4, '0')}</span>
+                          {sow.isAnnex ? (
+                            <span className="text-primary">TECHNICAL ANNEX</span>
+                          ) : (
+                            <>{t('sow')} <span className="text-primary">#{isTemplate ? 'XXXX' : String(sow.correlativo || 0).padStart(4, '0')}</span></>
+                          )}
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-right">

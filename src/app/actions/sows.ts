@@ -5,9 +5,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from '@/i18n/routing';
 
 export async function createSow(formData: any) {
-  const { 
+  const {
     clientId, items, notasCondiciones, propuesta, estado, fechaValidez,
-    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod, totalLabel, signatureUrl
+    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod, totalLabel, signatureUrl, isAnnex
   } = formData;
 
   // Calculate totals
@@ -45,6 +45,7 @@ export async function createSow(formData: any) {
       totalLabel,
       estado: estado || 'Borrador',
       signatureUrl,
+      isAnnex: isAnnex || false,
       items: {
         create: items.map((item: any) => ({
           descripcion: item.descripcion,
@@ -87,9 +88,9 @@ export async function getSowById(id: string) {
 }
 
 export async function updateSow(id: string, formData: any) {
-  const { 
+  const {
     clientId, items, notasCondiciones, propuesta, estado, fechaValidez,
-    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod, totalLabel, signatureUrl
+    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod, totalLabel, signatureUrl, isAnnex
   } = formData;
 
   // Calculate totals
@@ -128,6 +129,7 @@ export async function updateSow(id: string, formData: any) {
         totalLabel,
         estado: estado || 'Borrador',
         signatureUrl,
+        isAnnex: isAnnex || false,
         items: {
           create: items.map((item: any) => ({
             descripcion: item.descripcion,
@@ -178,6 +180,7 @@ export async function duplicateSow(id: string) {
       paymentMethod: original.paymentMethod,
       totalLabel: original.totalLabel,
       signatureUrl: original.signatureUrl,
+      isAnnex: original.isAnnex,
       items: {
         create: original.items.map(item => ({
           descripcion: item.descripcion,

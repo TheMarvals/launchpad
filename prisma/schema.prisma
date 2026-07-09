@@ -199,6 +199,7 @@ model Sow {
   paymentMethod    String?     // e.g., "Transferencia", "PayPal"
   totalLabel       String?     // Custom label for "Total", e.g. "Total Monthly"
 
+  isAnnex          Boolean     @default(false)
   notasCondiciones String?
   signatureUrl     String?
   createdAt        DateTime    @default(now())
