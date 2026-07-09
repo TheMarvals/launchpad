@@ -7,7 +7,8 @@ import { redirect } from '@/i18n/routing';
 export async function createQuote(formData: any) {
   const { 
     clientId, items, notasCondiciones, propuesta, estado, fechaValidez,
-    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod, totalLabel
+    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod, totalLabel,
+    userId, showInvestment
   } = formData;
 
   // Calculate totals
@@ -44,6 +45,8 @@ export async function createQuote(formData: any) {
       paymentMethod,
       totalLabel,
       estado: estado || 'Borrador',
+      userId: userId || null,
+      showInvestment: showInvestment !== undefined ? showInvestment : true,
       items: {
         create: items.map((item: any) => ({
           descripcion: item.descripcion,
@@ -74,6 +77,15 @@ export async function getQuoteById(id: string) {
     include: {
       client: true,
       items: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          cargo: true,
+          telefono: true,
+        },
+      },
     },
   });
 }
@@ -81,7 +93,8 @@ export async function getQuoteById(id: string) {
 export async function updateQuote(id: string, formData: any) {
   const { 
     clientId, items, notasCondiciones, propuesta, estado, fechaValidez,
-    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod, totalLabel
+    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod, totalLabel,
+    userId, showInvestment
   } = formData;
 
   // Calculate totals
@@ -119,6 +132,8 @@ export async function updateQuote(id: string, formData: any) {
         paymentMethod,
         totalLabel,
         estado: estado || 'Borrador',
+        userId: userId || null,
+        showInvestment: showInvestment !== undefined ? showInvestment : true,
         items: {
           create: items.map((item: any) => ({
             descripcion: item.descripcion,
@@ -168,6 +183,8 @@ export async function duplicateQuote(id: string) {
       extraFeeAmount: original.extraFeeAmount,
       paymentMethod: original.paymentMethod,
       totalLabel: original.totalLabel,
+      userId: original.userId,
+      showInvestment: original.showInvestment,
       items: {
         create: original.items.map(item => ({
           descripcion: item.descripcion,

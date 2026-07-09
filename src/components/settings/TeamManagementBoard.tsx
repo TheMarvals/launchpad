@@ -22,7 +22,7 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
   // Add Admin / Edit Admin Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<any | null>(null);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', cargo: '', telefono: '' });
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   
   // Password Reset Modal state
@@ -119,18 +119,20 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
           name: formData.name,
           email: formData.email,
           permissions: selectedPermissions,
+          cargo: formData.cargo,
+          telefono: formData.telefono,
         });
         setAdmins(admins.map(a => a.id === editingAdmin.id ? updated : a));
         setIsModalOpen(false);
         setEditingAdmin(null);
-        setFormData({ name: '', email: '', password: '' });
+        setFormData({ name: '', email: '', password: '', cargo: '', telefono: '' });
         setSelectedPermissions([]);
         showToast('success', t('updateSuccess') || 'Admin updated successfully');
       } else {
         const newAdmin = await createAdmin({ ...formData, permissions: selectedPermissions });
         setAdmins([newAdmin, ...admins]);
         setIsModalOpen(false);
-        setFormData({ name: '', email: '', password: '' });
+        setFormData({ name: '', email: '', password: '', cargo: '', telefono: '' });
         setSelectedPermissions([]);
         showToast('success', t('createSuccess'));
       }
@@ -200,7 +202,7 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
         <button 
           onClick={() => {
             setEditingAdmin(null);
-            setFormData({ name: '', email: '', password: '' });
+            setFormData({ name: '', email: '', password: '', cargo: '', telefono: '' });
             setSelectedPermissions(ALL_PERMISSIONS);
             setShowCopySelector(false);
             setIsModalOpen(true);
@@ -238,8 +240,12 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
                   <tr key={admin.id} className="border-b border-hairline hover:bg-canvas transition-colors">
                     <td className="px-sm py-xs">
                       <div className="font-semibold text-ink text-sm uppercase tracking-wider">{admin.name}</div>
+                      {admin.cargo && <div className="text-xs text-muted font-medium">{admin.cargo}</div>}
                     </td>
-                    <td className="px-sm py-xs text-muted text-sm">{admin.email}</td>
+                    <td className="px-sm py-xs text-muted text-sm">
+                      <div>{admin.email}</div>
+                      {admin.telefono && <div className="text-xs opacity-80">{admin.telefono}</div>}
+                    </td>
                     <td className="px-sm py-xs">
                       <span className={`text-[10px] font-semibold px-xxs py-[1px] uppercase tracking-widest ${admin.isActive ? 'bg-semantic-success/10 text-semantic-success' : 'bg-semantic-danger/10 text-semantic-danger'}`}>
                         {admin.isActive ? t('status.active') : t('status.inactive')}
@@ -273,7 +279,7 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
                       <button 
                         onClick={() => {
                           setEditingAdmin(admin);
-                          setFormData({ name: admin.name, email: admin.email, password: '' });
+                          setFormData({ name: admin.name, email: admin.email, password: '', cargo: admin.cargo || '', telefono: admin.telefono || '' });
                           setSelectedPermissions(admin.permissions || ALL_PERMISSIONS);
                           setShowCopySelector(false);
                           setIsModalOpen(true);
@@ -317,7 +323,7 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
         onClose={() => {
           setIsModalOpen(false);
           setEditingAdmin(null);
-          setFormData({ name: '', email: '', password: '' });
+          setFormData({ name: '', email: '', password: '', cargo: '', telefono: '' });
           setSelectedPermissions([]);
           setShowCopySelector(false);
         }}
@@ -352,6 +358,28 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors text-sm"
               placeholder={t('form.emailPlaceholder')}
+            />
+          </div>
+
+          <div className="space-y-xxs">
+            <label className="block text-caption-uppercase text-ink font-semibold">{t('form.cargo') || 'Cargo'}</label>
+            <input
+              type="text"
+              value={formData.cargo}
+              onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
+              className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors text-sm"
+              placeholder={t('form.cargoPlaceholder') || 'Ej: Lead Solution Architect'}
+            />
+          </div>
+
+          <div className="space-y-xxs">
+            <label className="block text-caption-uppercase text-ink font-semibold">{t('form.telefono') || 'Teléfono'}</label>
+            <input
+              type="text"
+              value={formData.telefono}
+              onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+              className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors text-sm"
+              placeholder={t('form.telefonoPlaceholder') || 'Ej: +569 94438833'}
             />
           </div>
 
@@ -522,7 +550,7 @@ export default function TeamManagementBoard({ initialAdmins, currentUserId }: Te
               onClick={() => {
                 setIsModalOpen(false);
                 setEditingAdmin(null);
-                setFormData({ name: '', email: '', password: '' });
+                setFormData({ name: '', email: '', password: '', cargo: '', telefono: '' });
                 setSelectedPermissions([]);
                 setShowCopySelector(false);
               }}

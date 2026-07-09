@@ -54,30 +54,6 @@ export default function CompanyProfileBoard({ initialProfile }: CompanyProfileBo
       <form onSubmit={handleSave} className="bg-canvas-elevated border border-hairline p-sm space-y-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
           <div className="space-y-xxs">
-            <label className="block text-caption-uppercase text-ink font-semibold">{t('name')}</label>
-            <input
-              type="text"
-              value={profile?.name || ''}
-              onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
-              placeholder="e.g. EDUARDO MARVAL"
-              required
-            />
-          </div>
-
-          <div className="space-y-xxs">
-            <label className="block text-caption-uppercase text-ink font-semibold">{t('role')}</label>
-            <input
-              type="text"
-              value={profile?.role || ''}
-              onChange={(e) => setProfile({ ...profile, role: e.target.value })}
-              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
-              placeholder="e.g. LEAD SOLUTION ARCHITECT"
-              required
-            />
-          </div>
-
-          <div className="space-y-xxs">
             <label className="block text-caption-uppercase text-ink font-semibold">{t('taxIdLabel')}</label>
             <input
               type="text"
@@ -97,30 +73,6 @@ export default function CompanyProfileBoard({ initialProfile }: CompanyProfileBo
               onChange={(e) => setProfile({ ...profile, taxId: e.target.value })}
               className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
               placeholder="e.g. 27.087.979-9"
-              required
-            />
-          </div>
-
-          <div className="space-y-xxs">
-            <label className="block text-caption-uppercase text-ink font-semibold">{t('phone')}</label>
-            <input
-              type="text"
-              value={profile?.phone || ''}
-              onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
-              placeholder="e.g. +569 94438833"
-              required
-            />
-          </div>
-
-          <div className="space-y-xxs">
-            <label className="block text-caption-uppercase text-ink font-semibold">{t('email')}</label>
-            <input
-              type="email"
-              value={profile?.email || ''}
-              onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
-              placeholder="e.g. e.marval@themarvals.com"
               required
             />
           </div>

@@ -11,6 +11,11 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
   const tInv = useTranslations('Invoices');
   const locale = useLocale();
 
+  const senderName = companyProfile?.user?.name || companyProfile?.name || 'Eduardo Marval';
+  const senderRole = companyProfile?.user?.cargo || companyProfile?.role || 'Lead Solution Architect';
+  const senderPhone = companyProfile?.user?.telefono || companyProfile?.phone || '+569 94438833';
+  const senderEmail = companyProfile?.user?.email || companyProfile?.email || 'e.marval@themarvals.com';
+
   return (
     <div className="pdf-wrapper max-w-[210mm] print:max-w-full mx-auto print:mx-0 space-y-8 print:space-y-0 overflow-x-auto md:overflow-x-visible">
       <div className="pdf-page w-full min-h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
@@ -35,13 +40,13 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
             </div>
             <div className="text-right flex flex-col items-end">
               <div className="mb-6">
-                <h2 className="text-xl font-black tracking-tight uppercase leading-none text-white">{companyProfile?.name || 'Eduardo Marval'}</h2>
-                <div className="text-[9px] font-medium text-blue-400/80 uppercase tracking-widest mt-1">{companyProfile?.role || 'Lead Solution Architect'}</div>
+                <h2 className="text-xl font-black tracking-tight uppercase leading-none text-white">{senderName}</h2>
+                <div className="text-[9px] font-medium text-blue-400/80 uppercase tracking-widest mt-1">{senderRole}</div>
               </div>
               <div className="space-y-1.5 border-r-2 border-blue-500/30 pr-4">
                 <div className="text-[9px] font-bold text-slate-300">{companyProfile?.taxIdLabel || 'TAX ID'}: {companyProfile?.taxId || '27.087.979-9'}</div>
-                <div className="text-[9px] font-bold text-slate-300">TELF: {companyProfile?.phone || '+569 94438833'}</div>
-                <div className="text-[9px] font-bold text-slate-300 lowercase">{companyProfile?.email || 'e.marval@themarvals.com'}</div>
+                <div className="text-[9px] font-bold text-slate-300">TELF: {senderPhone}</div>
+                <div className="text-[9px] font-bold text-slate-300 lowercase">{senderEmail}</div>
               </div>
             </div>
           </div>
@@ -157,12 +162,12 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
         </main>
 
         <footer className="absolute bottom-0 left-0 w-full p-6 text-slate-300 text-center shrink-0" style={{ background: '#050212' }}>
-          <div className="text-[12px] font-black uppercase tracking-[0.6em] text-white">{companyProfile?.brandNameFooter || 'EDUARDO MARVAL'}</div>
+          <div className="text-[12px] font-black uppercase tracking-[0.6em] text-white">{companyProfile?.brandNameFooter || senderName.toUpperCase()}</div>
           <div className="h-px w-8 bg-blue-500 mx-auto my-3 opacity-30"></div>
           <div className="text-[8px] font-bold opacity-40 space-x-6 uppercase tracking-widest">
             <span>{companyProfile?.address || 'ANTONIO BELLET 193 OF 1210 12P, PROVIDENCIA, RM'}</span>
             <span>•</span>
-            <span>{companyProfile?.email || 'e.marval@themarvals.com'}</span>
+            <span>{senderEmail}</span>
           </div>
         </footer>
       </div>

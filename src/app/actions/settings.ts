@@ -22,11 +22,31 @@ export async function getCompanyProfile() {
   const user = await ensureAdmin();
   let profile = await prisma.companyProfile.findUnique({
     where: { userId: user.id },
+    include: {
+      user: {
+        select: {
+          name: true,
+          email: true,
+          cargo: true,
+          telefono: true,
+        },
+      },
+    },
   });
 
   if (!profile) {
     profile = await prisma.companyProfile.create({
       data: { userId: user.id },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+            cargo: true,
+            telefono: true,
+          },
+        },
+      },
     });
   }
 
@@ -35,9 +55,21 @@ export async function getCompanyProfile() {
 
 export async function updateCompanyProfile(data: any) {
   const user = await ensureAdmin();
+  // Strip out relation before update to prevent Prisma crash
+  const { user: userRelation, ...profileData } = data;
   const profile = await prisma.companyProfile.update({
     where: { userId: user.id },
-    data,
+    data: profileData,
+    include: {
+      user: {
+        select: {
+          name: true,
+          email: true,
+          cargo: true,
+          telefono: true,
+        },
+      },
+    },
   });
   revalidatePath('/dashboard/settings');
   return profile;
@@ -53,6 +85,8 @@ export async function getAdmins() {
       id: true,
       name: true,
       email: true,
+      cargo: true,
+      telefono: true,
       createdAt: true,
       isActive: true,
       permissions: true,
@@ -61,7 +95,22 @@ export async function getAdmins() {
   });
 }
 
-export async function createAdmin(data: { name: string; email: string; password?: string; permissions?: string[] }) {
+export async function getAdminsForQuote() {
+  await ensureAdmin();
+  return await prisma.user.findMany({
+    where: { role: 'ADMIN', isActive: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      cargo: true,
+      telefono: true,
+    },
+    orderBy: { name: 'asc' },
+  });
+}
+
+export async function createAdmin(data: { name: string; email: string; password?: string; permissions?: string[]; cargo?: string; telefono?: string }) {
   await ensureAdmin();
   
   const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
@@ -80,11 +129,15 @@ export async function createAdmin(data: { name: string; email: string; password?
       role: 'ADMIN',
       isActive: true,
       permissions: data.permissions || [],
+      cargo: data.cargo || null,
+      telefono: data.telefono || null,
     },
     select: {
       id: true,
       name: true,
       email: true,
+      cargo: true,
+      telefono: true,
       createdAt: true,
       isActive: true,
       permissions: true,
@@ -113,7 +166,7 @@ export async function deleteAdmin(id: string) {
   return { success: true };
 }
 
-export async function updateAdmin(id: string, data: { name: string; email: string; permissions?: string[] }) {
+export async function updateAdmin(id: string, data: { name: string; email: string; permissions?: string[]; cargo?: string; telefono?: string }) {
   await ensureAdmin();
   const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
   if (existingUser && existingUser.id !== id) {
@@ -126,11 +179,15 @@ export async function updateAdmin(id: string, data: { name: string; email: strin
       name: data.name,
       email: data.email,
       ...(data.permissions !== undefined ? { permissions: data.permissions } : {}),
+      cargo: data.cargo !== undefined ? (data.cargo || null) : undefined,
+      telefono: data.telefono !== undefined ? (data.telefono || null) : undefined,
     },
     select: {
       id: true,
       name: true,
       email: true,
+      cargo: true,
+      telefono: true,
       createdAt: true,
       isActive: true,
       permissions: true,

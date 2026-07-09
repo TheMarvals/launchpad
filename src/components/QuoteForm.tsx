@@ -202,11 +202,14 @@ interface Client {
 
 interface QuoteFormProps {
   clients: Client[];
+  admins?: any[];
   companyProfile?: any;
   initialData?: {
     id: string;
     correlativo: number;
     clientId: string;
+    userId: string | null;
+    showInvestment: boolean;
     fechaValidez: Date;
     propuesta: string | null;
     notasCondiciones: string | null;
@@ -222,13 +225,15 @@ interface QuoteFormProps {
   };
 }
 
-export default function QuoteForm({ clients, companyProfile, initialData }: QuoteFormProps) {
+export default function QuoteForm({ clients, admins = [], companyProfile, initialData }: QuoteFormProps) {
   const t = useTranslations('QuoteForm');
   const tCommon = useTranslations('Dashboard.recentQuotes');
   const locale = useLocale();
   const router = useRouter();
   const isEditing = !!initialData;
   const [clientId, setClientId] = useState(initialData?.clientId || '');
+  const [userId, setUserId] = useState(initialData?.userId || '');
+  const [showInvestment, setShowInvestment] = useState(initialData?.showInvestment !== undefined ? initialData.showInvestment : true);
   const [fechaValidez, setFechaValidez] = useState(
     initialData?.fechaValidez 
       ? new Date(initialData.fechaValidez).toISOString().split('T')[0] 
@@ -414,7 +419,9 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
         extraFeeAmount,
         paymentMethod: paymentMethod || null,
         totalLabel: totalLabel || null,
-        items: itemsWithSubtotals
+        items: itemsWithSubtotals,
+        userId: userId || null,
+        showInvestment,
       };
 
       if (isEditing) {
@@ -451,7 +458,9 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
     notasCondiciones,
     propuesta,
     client: selectedClient || { razonSocial: 'CLIENTE NO SELECCIONADO', rut: '---' },
-    items: items.map(it => ({ ...it, subtotal: Number(it.cantidad) * Number(it.precioUnitario) }))
+    items: items.map(it => ({ ...it, subtotal: Number(it.cantidad) * Number(it.precioUnitario) })),
+    user: admins.find(a => a.id === userId) || null,
+    showInvestment,
   };
 
   if (showPreview) {
@@ -517,6 +526,38 @@ export default function QuoteForm({ clients, companyProfile, initialData }: Quot
               onChange={(e) => setFechaValidez(e.target.value)}
               required
             />
+          </div>
+          <div className="space-y-xxs">
+            <label className="block text-caption-uppercase text-ink font-semibold">{t('senderLabel') || 'Remitente'}</label>
+            <div className="relative">
+              <select 
+                className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors px-xs py-xs text-sm appearance-none cursor-pointer pr-sm"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+              >
+                <option value="">{t('senderPlaceholder') || 'Seleccionar Remitente (Usar Company Profile)'}</option>
+                {admins.map(admin => (
+                  <option key={admin.id} value={admin.id}>
+                    {admin.name} {admin.cargo ? `(${admin.cargo})` : ''}
+                  </option>
+                ))}
+              </select>
+              <span className="material-icons absolute right-xxs top-1/2 -translate-y-1/2 text-muted pointer-events-none text-sm">expand_more</span>
+            </div>
+          </div>
+          <div className="space-y-xxs flex flex-col justify-end pb-[6px]">
+            <label className="text-caption-uppercase text-ink font-semibold mb-xxs">Configuración PDF</label>
+            <label className="flex items-center gap-xs cursor-pointer group py-xxs">
+              <input 
+                type="checkbox"
+                checked={showInvestment}
+                onChange={(e) => setShowInvestment(e.target.checked)}
+                className="w-4 h-4 rounded-sm border-hairline bg-canvas text-primary focus:ring-primary/30 cursor-pointer"
+              />
+              <span className="text-sm text-muted group-hover:text-ink transition-colors font-medium">
+                Mostrar página de inversión en el PDF
+              </span>
+            </label>
           </div>
         </div>
       </div>

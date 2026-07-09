@@ -22,6 +22,8 @@ model User {
   clientId    String?  // If role is CLIENT, this links to their company
   googleId    String?  @unique // For Google OAuth
   permissions String[] // Dashboard view permissions for ADMIN users
+  cargo       String?  // Job title for admin users
+  telefono    String?  // Phone number for admin users
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -30,6 +32,7 @@ model User {
   otpCodes   OtpCode[]
   tickets    Ticket[]
   ticketMessages TicketMessage[]
+  quotes     Quote[]
   
   // FreelanceHub Integration (Admin Only)
   projects     Project[]
@@ -100,6 +103,7 @@ model Quote {
   id               String      @id @default(uuid())
   correlativo      Int         @unique @default(autoincrement())
   clientId         String
+  userId           String?     // Admin sender
   fechaEmision     DateTime    @default(now())
   fechaValidez     DateTime
   estado           String      @default("Borrador") // Borrador, Enviada, Aceptada, Rechazada
@@ -107,6 +111,7 @@ model Quote {
   montoNeto        Float       @default(0)
   montoIva         Float       @default(0)
   montoTotal       Float       @default(0)
+  showInvestment   Boolean     @default(true)
   
   // Custom Taxes & Fees
   taxName          String      @default("IVA")
@@ -121,6 +126,7 @@ model Quote {
   updatedAt        DateTime    @updatedAt
 
   client           Client      @relation(fields: [clientId], references: [id])
+  user             User?       @relation(fields: [userId], references: [id])
   items            QuoteItem[]
   
   invoice          Invoice?    @relation(fields: [invoiceId], references: [id])
@@ -494,12 +500,8 @@ model ContactReply {
 model CompanyProfile {
   id              String   @id @default(uuid())
   userId          String   @unique
-  name            String   @default("EDUARDO MARVAL")
-  role            String   @default("LEAD SOLUTION ARCHITECT")
   taxIdLabel      String   @default("TAX ID")
   taxId           String   @default("27.087.979-9")
-  phone           String   @default("+569 94438833")
-  email           String   @default("e.marval@themarvals.com")
   systemsTitle    String   @default("SYSTEMS ARCHITECTURE")
   systemsSubtitle String   @default("IT CONSULTING • SOFTWARE ENGINEERING")
   brandNameHeader String   @default("LAUNCHPAD")

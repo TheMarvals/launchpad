@@ -47,6 +47,15 @@ export default async function PreviewPage({ params }: PreviewPageProps) {
     include: {
       client: true,
       items: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          cargo: true,
+          telefono: true,
+        },
+      },
     },
   });
 

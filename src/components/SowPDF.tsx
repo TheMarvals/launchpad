@@ -20,12 +20,17 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
   const measureRef = useRef<HTMLDivElement>(null);
   const [computedPages, setComputedPages] = useState<string[]>([]);
 
+  const senderName = companyProfile?.user?.name || companyProfile?.name || 'Eduardo Marval';
+  const senderRole = companyProfile?.user?.cargo || companyProfile?.role || 'Lead Solution Architect';
+  const senderPhone = companyProfile?.user?.telefono || companyProfile?.phone || '+569 94438833';
+  const senderEmail = companyProfile?.user?.email || companyProfile?.email || 'e.marval@themarvals.com';
+
   // Clean the raw HTML and convert PAGE_BREAK markers to measurable elements
   const signatureHtml = (sow?.signatureUrl && !sow?.isAnnex)
     ? `<div style="margin-top: 80px; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 20px;">
         <div style="text-align: center; width: 250px;">
           <img src="${sow.signatureUrl}" style="max-height: 120px; max-width: 250px; display: inline-block; object-fit: contain;" />
-          <div style="margin-top: 10px; border-top: 1.5px solid #0f172a; padding-top: 8px; font-size: 11px; color: #0f172a; font-weight: 900; text-transform: uppercase;">${companyProfile?.name || (locale === 'es' ? 'LA AGENCIA' : 'THE AGENCY')}</div>
+          <div style="margin-top: 10px; border-top: 1.5px solid #0f172a; padding-top: 8px; font-size: 11px; color: #0f172a; font-weight: 900; text-transform: uppercase;">${senderName || (locale === 'es' ? 'LA AGENCIA' : 'THE AGENCY')}</div>
         </div>
         <div style="text-align: center; width: 250px;">
           <div style="height: 120px;"></div>
@@ -228,13 +233,13 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
                   </div>
                   <div className="text-right flex flex-col items-end">
                     <div className="mb-6">
-                      <h2 className="text-xl font-black tracking-tight uppercase leading-none text-white">{companyProfile?.name || 'Eduardo Marval'}</h2>
-                      <div className="text-[9px] font-medium text-primary/80 uppercase tracking-widest mt-1">{companyProfile?.role || 'Lead Solution Architect'}</div>
+                      <h2 className="text-xl font-black tracking-tight uppercase leading-none text-white">{senderName}</h2>
+                      <div className="text-[9px] font-medium text-primary/80 uppercase tracking-widest mt-1">{senderRole}</div>
                     </div>
                     <div className="space-y-1.5 border-r-2 border-[#303030] pr-4">
                       <div className="text-[9px] font-bold text-slate-300">{companyProfile?.taxIdLabel || 'TAX ID'}: {companyProfile?.taxId || '27.087.979-9'}</div>
-                      <div className="text-[9px] font-bold text-slate-300">TELF: {companyProfile?.phone || '+569 94438833'}</div>
-                      <div className="text-[9px] font-bold text-slate-300 lowercase">{companyProfile?.email || 'e.marval@themarvals.com'}</div>
+                      <div className="text-[9px] font-bold text-slate-300">TELF: {senderPhone}</div>
+                      <div className="text-[9px] font-bold text-slate-300 lowercase">{senderEmail}</div>
                     </div>
                   </div>
                 </div>
@@ -313,12 +318,12 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
 
             {/* Footer */}
             <footer className="w-full p-6 text-slate-300 text-center shrink-0" style={{ background: '#0B1026' }}>
-              <div className="text-[12px] font-black uppercase tracking-[0.6em] text-white">{companyProfile?.brandNameFooter || 'EDUARDO MARVAL'}</div>
+              <div className="text-[12px] font-black uppercase tracking-[0.6em] text-white">{companyProfile?.brandNameFooter || senderName.toUpperCase()}</div>
               <div className="h-px w-8 bg-primary mx-auto my-3 opacity-30"></div>
               <div className="text-[8px] font-bold opacity-40 space-x-6 uppercase tracking-widest">
                 <span>{companyProfile?.address || 'ANTONIO BELLET 193 OF 1210 12P, PROVIDENCIA, RM'}</span>
                 <span>•</span>
-                <span>{companyProfile?.email || 'e.marval@themarvals.com'}</span>
+                <span>{senderEmail}</span>
               </div>
             </footer>
           </div>
