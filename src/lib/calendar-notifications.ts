@@ -5,7 +5,7 @@ import {
   sendCalendarTomorrowPreview,
 } from '@/lib/email';
 import { RRule } from 'rrule';
-import { format, fromZonedTime } from 'date-fns-tz';
+import { formatInTimeZone, fromZonedTime } from 'date-fns-tz';
 
 interface ExpandedEvent {
   id: string;
@@ -216,17 +216,17 @@ export async function processDailyDigest() {
       if (!calendarDailyDigest) continue;
 
       const tz = user.settings?.timezone || 'America/Caracas';
-      const localHour = parseInt(format(now, 'H', { timeZone: tz }), 10);
+      const localHour = parseInt(formatInTimeZone(now, tz, 'H'), 10);
       
       // Only send digest at 7 AM in the user's local timezone
       if (localHour !== 7) continue;
 
       // Calculate the start and end of 'today' in the user's timezone
-      const ymdToday = format(now, 'yyyy-MM-dd', { timeZone: tz });
+      const ymdToday = formatInTimeZone(now, tz, 'yyyy-MM-dd');
       const todayStartUTC = fromZonedTime(`${ymdToday}T00:00:00`, tz);
       
       const nextDay = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      const ymdTomorrow = format(nextDay, 'yyyy-MM-dd', { timeZone: tz });
+      const ymdTomorrow = formatInTimeZone(nextDay, tz, 'yyyy-MM-dd');
       const tomorrowStartUTC = fromZonedTime(`${ymdTomorrow}T00:00:00`, tz);
 
       // Now filter the user's events using these UTC bounds
@@ -311,18 +311,18 @@ export async function processTomorrowPreview() {
       if (!calendarTomorrowPreview) continue;
 
       const tz = user.settings?.timezone || 'America/Caracas';
-      const localHour = parseInt(format(now, 'H', { timeZone: tz }), 10);
+      const localHour = parseInt(formatInTimeZone(now, tz, 'H'), 10);
       
       // Only send preview at 8 PM (20:00) in the user's local timezone
       if (localHour !== 20) continue;
 
       // Calculate the start and end of 'tomorrow' in the user's timezone
       const nextDay = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      const ymdTomorrow = format(nextDay, 'yyyy-MM-dd', { timeZone: tz });
+      const ymdTomorrow = formatInTimeZone(nextDay, tz, 'yyyy-MM-dd');
       const tomorrowStartUTC = fromZonedTime(`${ymdTomorrow}T00:00:00`, tz);
       
       const dayAfter = new Date(now.getTime() + 48 * 60 * 60 * 1000);
-      const ymdDayAfter = format(dayAfter, 'yyyy-MM-dd', { timeZone: tz });
+      const ymdDayAfter = formatInTimeZone(dayAfter, tz, 'yyyy-MM-dd');
       const tomorrowEndUTC = fromZonedTime(`${ymdDayAfter}T00:00:00`, tz);
 
       const allEvents = [
