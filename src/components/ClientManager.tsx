@@ -79,11 +79,19 @@ export default function ClientManager({ clients }: ClientManagerProps) {
     setIsSubmitting(true);
     setError('');
     try {
+      let res;
       if (editingId) {
-        await updateClient(editingId, form);
+        res = await updateClient(editingId, form);
       } else {
-        await createClient(form);
+        res = await createClient(form);
       }
+      
+      if (res && res.error) {
+        setError(res.error);
+        setIsSubmitting(false);
+        return;
+      }
+
       setShowForm(false);
       setForm(emptyForm);
       setEditingId(null);
