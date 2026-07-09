@@ -60,7 +60,16 @@ function expandEventsForRange(
       : rangeEnd;
 
     try {
-      const rule = RRule.fromString(event.recurrenceRule);
+      // Ensure we import rrulestr if not already there, but we'll use RRule.fromString if rrulestr is not available, actually let's just use rrulestr. Wait, I didn't import rrulestr.
+      // I can just require it or use rrule's string parsing. 
+      // The easiest way without changing imports is to construct the string with DTSTART if it's missing.
+      let ruleStr = event.recurrenceRule;
+      if (!ruleStr.includes('DTSTART')) {
+        // Format to basic ISO 8601 string without separators: YYYYMMDDTHHMMSSZ
+        const dtstartStr = event.start.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+        ruleStr = \`DTSTART:\${dtstartStr}\\nRRULE:\${ruleStr}\`;
+      }
+      const rule = RRule.fromString(ruleStr);
       const occurrences = rule.between(rangeStart, effectiveEnd, true);
 
       for (const occurrence of occurrences) {
