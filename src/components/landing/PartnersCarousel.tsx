@@ -27,7 +27,7 @@ export default function PartnersCarousel({ partners }: Props) {
     if (!scrollEl) return;
 
     let animationId: number;
-    let speed = 0.5; // pixels per frame
+    let speed = 1; // pixels per frame
 
     const scroll = () => {
       if (!scrollEl) return;
@@ -43,7 +43,7 @@ export default function PartnersCarousel({ partners }: Props) {
 
     // Pause on hover
     const handleMouseEnter = () => { speed = 0; };
-    const handleMouseLeave = () => { speed = 0.5; };
+    const handleMouseLeave = () => { speed = 1; };
     scrollEl.addEventListener('mouseenter', handleMouseEnter);
     scrollEl.addEventListener('mouseleave', handleMouseLeave);
 

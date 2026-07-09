@@ -292,7 +292,7 @@ function expandRecurringEvents(
       let ruleStr = event.recurrenceRule;
       if (!ruleStr.includes('DTSTART')) {
         const dtstartStr = event.start.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-        ruleStr = \`DTSTART:\${dtstartStr}\\nRRULE:\${ruleStr}\`;
+        ruleStr = `DTSTART:${dtstartStr}\nRRULE:${ruleStr}`;
       }
       const rule = RRule.fromString(ruleStr);
       const occurrences = rule.between(rangeStart, effectiveEnd, true);

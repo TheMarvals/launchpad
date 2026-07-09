@@ -67,7 +67,7 @@ function expandEventsForRange(
       if (!ruleStr.includes('DTSTART')) {
         // Format to basic ISO 8601 string without separators: YYYYMMDDTHHMMSSZ
         const dtstartStr = event.start.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-        ruleStr = \`DTSTART:\${dtstartStr}\\nRRULE:\${ruleStr}\`;
+        ruleStr = `DTSTART:${dtstartStr}\nRRULE:${ruleStr}`;
       }
       const rule = RRule.fromString(ruleStr);
       const occurrences = rule.between(rangeStart, effectiveEnd, true);
