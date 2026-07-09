@@ -9,6 +9,7 @@ import { prisma } from '@/lib/prisma';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
 import DashboardMobileNav, { MobileNavTrigger } from '@/components/DashboardMobileNav';
 import { MobileNavProvider } from '@/components/MobileNavProvider';
+import SidebarDropdown from '@/components/SidebarDropdown';
 
 export default async function DashboardLayout({
   children,
@@ -68,26 +69,30 @@ export default async function DashboardLayout({
                 </Link>
               </li>
             )}
-            {can(PERMISSIONS.QUOTES) && (
-              <li>
-                <Link href="/dashboard/quotes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
-                  <span className="material-icons mr-xxs text-sm opacity-70">description</span> {t('quotes')}
-                </Link>
-              </li>
-            )}
-            {can(PERMISSIONS.SOWS) && (
-              <li>
-                <Link href="/dashboard/sows" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
-                  <span className="material-icons mr-xxs text-sm opacity-70">assignment</span> {t('sows')}
-                </Link>
-              </li>
-            )}
-            {can(PERMISSIONS.INVOICES) && (
-              <li>
-                <Link href="/dashboard/invoices" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
-                  <span className="material-icons mr-xxs text-sm opacity-70">receipt_long</span> {t('invoices')}
-                </Link>
-              </li>
+            {(can(PERMISSIONS.QUOTES) || can(PERMISSIONS.SOWS) || can(PERMISSIONS.INVOICES)) && (
+              <SidebarDropdown title={t('commercial')} icon="storefront" activePaths={['/quotes', '/sows', '/invoices']}>
+                {can(PERMISSIONS.QUOTES) && (
+                  <li>
+                    <Link href="/dashboard/quotes" className="h-[40px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                      <span className="material-icons mr-xxs text-[16px] opacity-70">description</span> {t('quotes')}
+                    </Link>
+                  </li>
+                )}
+                {can(PERMISSIONS.SOWS) && (
+                  <li>
+                    <Link href="/dashboard/sows" className="h-[40px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                      <span className="material-icons mr-xxs text-[16px] opacity-70">assignment</span> {t('sows')}
+                    </Link>
+                  </li>
+                )}
+                {can(PERMISSIONS.INVOICES) && (
+                  <li>
+                    <Link href="/dashboard/invoices" className="h-[40px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                      <span className="material-icons mr-xxs text-[16px] opacity-70">receipt_long</span> {t('invoices')}
+                    </Link>
+                  </li>
+                )}
+              </SidebarDropdown>
             )}
             {can(PERMISSIONS.CLIENTS) && (
               <li>
@@ -213,19 +218,30 @@ export default async function DashboardLayout({
                 </Link>
               </li>
             )}
-            {can(PERMISSIONS.QUOTES) && (
-              <li>
-                <Link href="/dashboard/quotes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
-                  <span className="material-icons mr-xxs text-sm opacity-70">description</span> {t('quotes')}
-                </Link>
-              </li>
-            )}
-            {can(PERMISSIONS.INVOICES) && (
-              <li>
-                <Link href="/dashboard/invoices" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
-                  <span className="material-icons mr-xxs text-sm opacity-70">receipt_long</span> {t('invoices')}
-                </Link>
-              </li>
+            {(can(PERMISSIONS.QUOTES) || can(PERMISSIONS.SOWS) || can(PERMISSIONS.INVOICES)) && (
+              <SidebarDropdown title={t('commercial')} icon="storefront" activePaths={['/quotes', '/sows', '/invoices']}>
+                {can(PERMISSIONS.QUOTES) && (
+                  <li>
+                    <Link href="/dashboard/quotes" className="h-[40px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                      <span className="material-icons mr-xxs text-[16px] opacity-70">description</span> {t('quotes')}
+                    </Link>
+                  </li>
+                )}
+                {can(PERMISSIONS.SOWS) && (
+                  <li>
+                    <Link href="/dashboard/sows" className="h-[40px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                      <span className="material-icons mr-xxs text-[16px] opacity-70">assignment</span> {t('sows')}
+                    </Link>
+                  </li>
+                )}
+                {can(PERMISSIONS.INVOICES) && (
+                  <li>
+                    <Link href="/dashboard/invoices" className="h-[40px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                      <span className="material-icons mr-xxs text-[16px] opacity-70">receipt_long</span> {t('invoices')}
+                    </Link>
+                  </li>
+                )}
+              </SidebarDropdown>
             )}
             {can(PERMISSIONS.CLIENTS) && (
               <li>
