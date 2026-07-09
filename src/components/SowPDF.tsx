@@ -21,7 +21,7 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
   const [computedPages, setComputedPages] = useState<string[]>([]);
 
   // Clean the raw HTML and convert PAGE_BREAK markers to measurable elements
-  const signatureHtml = sow?.signatureUrl 
+  const signatureHtml = (sow?.signatureUrl && !sow?.isAnnex)
     ? `<div style="margin-top: 80px; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 20px;">
         <div style="text-align: center; width: 250px;">
           <img src="${sow.signatureUrl}" style="max-height: 120px; max-width: 250px; display: inline-block; object-fit: contain;" />
