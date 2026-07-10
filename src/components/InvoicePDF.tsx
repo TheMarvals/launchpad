@@ -17,9 +17,9 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
   const senderEmail = companyProfile?.email || 'e.marval@themarvals.com';
 
   return (
-    <div className="pdf-wrapper max-w-[210mm] print:max-w-full mx-auto print:mx-0 space-y-8 print:space-y-0 overflow-x-auto md:overflow-x-visible">
-      <div className="pdf-page w-full min-h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
-        {/* Header */}
+    <div className="pdf-wrapper max-w-[210mm] print:max-w-full mx-auto print:mx-0 notranslate overflow-x-auto md:overflow-x-visible" translate="no">
+      <div className="pdf-page w-full h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
+        {/* Header — identical to QuotePDF page 1 */}
         <header className="relative w-full p-10 pb-12 text-white shrink-0 overflow-hidden" style={{ background: '#0B1026' }}>
           <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/20 to-transparent skew-x-[-15deg] translate-x-20" />
           <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/10 rounded-full blur-[100px]" />
@@ -52,31 +52,33 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
           </div>
         </header>
 
-        <main className="flex-grow p-12 pb-32 relative">
-          {/* Watermark */}
+        {/* Main content */}
+        <main className="flex-grow px-10 pt-10 pb-8 overflow-hidden">
+          {/* Watermark — identical to QuotePDF */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
             <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#181818', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
           </div>
 
-          <div className="relative z-10 space-y-10">
-            {/* Metadata */}
+          <div className="relative z-10 space-y-12">
+            {/* Client info + Invoice metadata — same structure as QuotePDF */}
             <div className="flex justify-between items-start border-b border-slate-100 pb-8">
               <div className="max-w-[60%]">
-                <div className="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-[8px] font-black uppercase tracking-[0.2em] rounded-md mb-3">
+                <div className="inline-block px-2 py-1 bg-slate-100 text-slate-800 text-[8px] font-black uppercase tracking-[0.2em] rounded-none mb-3">
                   {t('clientInfo')}
                 </div>
                 <h3 className="font-black text-2xl uppercase tracking-tighter text-slate-900 leading-tight mb-2">
                   {invoice.client?.razonSocial || 'CLIENTE'}
-                </h3>                  <div className="space-y-0.5 text-xs font-bold text-slate-400">
+                </h3>
+                <div className="space-y-0.5 text-xs font-bold text-slate-400">
                   <div>{companyProfile?.taxIdLabel || 'TAX ID'}: {invoice.client?.rut || '---'}</div>
                   <div className="font-medium italic opacity-80 text-[11px]">{invoice.client?.giro || 'Servicios Informáticos'}</div>
                 </div>
               </div>
               <div className="text-right space-y-4">
                 <div className="space-y-1">
-                <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{t('document')}</div>
+                  <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{t('document')}</div>
                   <div className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">
-                    {locale === 'en' ? 'INVOICE' : 'FACTURA'} <span className="text-blue-600">#{String(invoice.correlativo || 0).padStart(4, '0')}</span>
+                    {locale === 'en' ? 'INVOICE' : 'FACTURA'} <span className="text-primary">#{String(invoice.correlativo || 0).padStart(4, '0')}</span>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-right">
@@ -88,7 +90,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
               </div>
             </div>
 
-            {/* Table */}
+            {/* Investment Detail table — identical structure to QuotePDF */}
             <div className="space-y-4">
               <div className="flex items-center">
                 <h3 className="text-slate-900 uppercase text-[11px] font-black tracking-[0.3em] mr-4 whitespace-nowrap">{t('investmentDetail')}</h3>
@@ -127,56 +129,64 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
               </div>
             </div>
 
-            {/* Totals */}
-            <div className="grid grid-cols-2 gap-8 items-start">
-              <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                <h4 className="text-[9px] font-black uppercase text-slate-400 tracking-[0.3em] mb-3">{t('conditions')}</h4>
-                <p className="text-[10px] text-slate-400 leading-relaxed whitespace-pre-wrap">
-                  {invoice.notas}
-                </p>
-                {invoice.estado !== 'Pendiente' && (
-                  <div className="mt-6 pt-6 border-t border-slate-200">
-                    <div className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                      invoice.estado === 'Pagada' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                    }`}>
-                      {invoice.estado}
-                    </div>
-                  </div>
-                )}
+            {/* Totals — identical structure to QuotePDF */}
+            <div className="space-y-2 p-4 w-64 ml-auto">
+              <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
+                <span>{t('net')}</span>
+                <span>${(invoice.montoNeto || 0).toLocaleString(locale)}</span>
               </div>
-              <div className="space-y-2 p-4 w-64 ml-auto">
-                <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
-                  <span>{t('net')}</span>
-                  <span>${(invoice.montoNeto || 0).toLocaleString(locale)}</span>
-                </div>
-                <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
-                  <span>{invoice.taxName || t('tax')} ({invoice.taxPercent ?? 19}%)</span>
-                  <span>${(invoice.montoIva || 0).toLocaleString(locale)}</span>
-                </div>
-                {invoice.extraFeeAmount > 0 && (
-                  <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
-                    <span>{invoice.extraFeeName || t('fee')}</span>
-                    <span>${(invoice.extraFeeAmount || 0).toLocaleString(locale)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-lg font-black text-slate-900 border-t border-slate-200 pt-2 mt-2">
-                  <span className="text-[10px] uppercase tracking-widest text-slate-500 self-center">{invoice.totalLabel || t('total')}</span>
-                  <span>${(invoice.montoTotal || 0).toLocaleString(locale)}</span>
-                </div>
-                {invoice.paymentMethod && (
-                  <div className="pt-4 mt-4 border-t border-slate-50 text-right">
-                    <div className="text-[8px] font-black uppercase text-slate-300 tracking-[0.2em] mb-1">{t('paymentMethod')}</div>
-                    <div className="text-[10px] font-bold text-slate-800">{invoice.paymentMethod}</div>
-                  </div>
-                )}
+              <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
+                <span>{invoice.taxName || t('tax')} ({invoice.taxPercent ?? 19}%)</span>
+                <span>${(invoice.montoIva || 0).toLocaleString(locale)}</span>
               </div>
+              {invoice.extraFeeAmount > 0 && (
+                <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">
+                  <span>{invoice.extraFeeName || t('fee')}</span>
+                  <span>${(invoice.extraFeeAmount || 0).toLocaleString(locale)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-lg font-black text-slate-900 border-t border-slate-200 pt-2 mt-2">
+                <span className="text-[10px] uppercase tracking-widest text-slate-500 self-center">{invoice.totalLabel || t('total')}</span>
+                <span>${(invoice.montoTotal || 0).toLocaleString(locale)}</span>
+              </div>
+              {invoice.paymentMethod && (
+                <div className="pt-4 mt-4 border-t border-slate-50 text-right">
+                  <div className="text-[8px] font-black uppercase text-slate-300 tracking-[0.2em] mb-1">{t('paymentMethod')}</div>
+                  <div className="text-[10px] font-bold text-slate-800">{invoice.paymentMethod}</div>
+                </div>
+              )}
             </div>
+
+            {/* Notes & Conditions — same structure as QuotePDF */}
+            {invoice.notas && (
+              <div className="space-y-3">
+                <div className="flex items-center">
+                  <h3 className="text-slate-900 uppercase text-[11px] font-black tracking-[0.3em] mr-4 whitespace-nowrap">{t('conditions')}</h3>
+                  <div className="h-[1px] bg-slate-100 w-full"></div>
+                </div>
+                <div className="text-[11px] text-slate-500 leading-relaxed whitespace-pre-line">
+                  {invoice.notas}
+                </div>
+              </div>
+            )}
+
+            {/* Status badge — only shown for non-Pendiente */}
+            {invoice.estado !== 'Pendiente' && (
+              <div className="flex justify-end">
+                <div className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                  invoice.estado === 'Pagada' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                }`}>
+                  {invoice.estado}
+                </div>
+              </div>
+            )}
           </div>
         </main>
 
-        <footer className="absolute bottom-0 left-0 w-full p-6 text-slate-300 text-center shrink-0" style={{ background: '#050212' }}>
+        {/* Footer — identical to QuotePDF */}
+        <footer className="w-full p-6 text-slate-300 text-center shrink-0" style={{ background: '#0B1026' }}>
           <div className="text-[12px] font-black uppercase tracking-[0.6em] text-white">{companyProfile?.brandNameFooter || senderName.toUpperCase()}</div>
-          <div className="h-px w-8 bg-blue-500 mx-auto my-3 opacity-30"></div>
+          <div className="h-px w-8 bg-primary mx-auto my-3 opacity-30"></div>
           <div className="text-[8px] font-bold opacity-40 space-x-6 uppercase tracking-widest">
             <span>{companyProfile?.address || 'ANTONIO BELLET 193 OF 1210 12P, PROVIDENCIA, RM'}</span>
             <span>•</span>
