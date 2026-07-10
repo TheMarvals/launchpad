@@ -20,30 +20,30 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
     <div className="pdf-wrapper max-w-[210mm] print:max-w-full mx-auto print:mx-0 space-y-8 print:space-y-0 overflow-x-auto md:overflow-x-visible">
       <div className="pdf-page w-full min-h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
         {/* Header */}
-        <header className="relative w-full p-10 pb-12 text-white shrink-0 overflow-hidden" style={{ background: '#050212' }}>
-          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-blue-600/20 to-transparent skew-x-[-15deg] translate-x-20" />
-          <div className="absolute -top-24 -left-24 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px]" />
+        <header className="relative w-full p-10 pb-12 text-white shrink-0 overflow-hidden" style={{ background: '#0B1026' }}>
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/20 to-transparent skew-x-[-15deg] translate-x-20" />
+          <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/10 rounded-full blur-[100px]" />
           <div className="relative z-10 flex justify-between items-center">
             <div className="space-y-4">
               <div className="relative inline-block">
                 <h1 className="hero-heading text-[60px] font-black mb-0 stroke-text leading-[0.8] tracking-[-0.05em]">{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
-                <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-transparent" />
+                <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-primary to-transparent" />
               </div>
               <div className="flex flex-col space-y-1.5 pt-4">
-                <div className="flex items-center text-[8px] font-black tracking-[0.3em] text-blue-400 uppercase">
-                  <span className="w-4 h-[1px] bg-blue-400 mr-3"></span> {t('architecture')}
+                <div className="flex items-center text-[8px] font-black tracking-[0.3em] text-primary uppercase">
+                  <span className="w-4 h-[1px] bg-primary mr-3"></span> {companyProfile?.systemsTitle || t('architecture')}
                 </div>
                 <div className="flex items-center text-[9px] font-bold tracking-wider text-slate-400 uppercase pl-7">
-                  {t('consulting')}
+                  {companyProfile?.systemsSubtitle || t('consulting')}
                 </div>
               </div>
             </div>
             <div className="text-right flex flex-col items-end">
               <div className="mb-6">
                 <h2 className="text-xl font-black tracking-tight uppercase leading-none text-white">{senderName}</h2>
-                <div className="text-[9px] font-medium text-blue-400/80 uppercase tracking-widest mt-1">{senderRole}</div>
+                <div className="text-[9px] font-medium text-primary/80 uppercase tracking-widest mt-1">{senderRole}</div>
               </div>
-              <div className="space-y-1.5 border-r-2 border-blue-500/30 pr-4">
+              <div className="space-y-1.5 border-r-2 border-[#303030] pr-4">
                 <div className="text-[9px] font-bold text-slate-300">{companyProfile?.taxIdLabel || 'TAX ID'}: {companyProfile?.taxId || '27.087.979-9'}</div>
                 <div className="text-[9px] font-bold text-slate-300">TELF: {senderPhone}</div>
                 <div className="text-[9px] font-bold text-slate-300 lowercase">{senderEmail}</div>
@@ -55,7 +55,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
         <main className="flex-grow p-12 pb-32 relative">
           {/* Watermark */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
-            <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#1e3a8a', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
+            <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#181818', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
           </div>
 
           <div className="relative z-10 space-y-10">
