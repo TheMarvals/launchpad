@@ -16,6 +16,19 @@ export async function GET(request: NextRequest) {
       baseUrl,
       previewUrl,
       filename: 'launchpad-template-blank.pdf',
+      extraEvaluate: async (page) => {
+        await page.evaluate(() => {
+          const wrapper = document.querySelector('.pdf-wrapper') as HTMLElement;
+          if (wrapper) {
+            wrapper.style.setProperty('gap', '0', 'important');
+          }
+          document.querySelectorAll('nextjs-portal, [data-nextjs-dialog-overlay], [data-nextjs-toast]').forEach((el) => {
+            (el as HTMLElement).style.display = 'none';
+          });
+          const nextIndicator = document.querySelector('body > nextjs-portal');
+          if (nextIndicator) nextIndicator.remove();
+        });
+      },
     });
   } catch (error: any) {
     console.error('Error generating Template PDF:', error);

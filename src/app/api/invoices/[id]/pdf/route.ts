@@ -20,6 +20,21 @@ export async function GET(
       baseUrl,
       previewUrl,
       filename: `factura-${id}.pdf`,
+      extraEvaluate: async (page) => {
+        await page.evaluate(() => {
+          const wrapper = document.querySelector('.pdf-wrapper') as HTMLElement;
+          if (wrapper) {
+            wrapper.style.setProperty('gap', '0', 'important');
+          }
+
+          // Hide Next.js dev indicators
+          document.querySelectorAll('nextjs-portal, [data-nextjs-dialog-overlay], [data-nextjs-toast]').forEach((el) => {
+            (el as HTMLElement).style.display = 'none';
+          });
+          const nextIndicator = document.querySelector('body > nextjs-portal');
+          if (nextIndicator) nextIndicator.remove();
+        });
+      },
     });
   } catch (error: any) {
     console.error('Error generating PDF:', error);
