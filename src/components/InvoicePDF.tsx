@@ -76,7 +76,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
                 <div className="space-y-1">
                 <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{t('document')}</div>
                   <div className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">
-                    FACTURA <span className="text-blue-600">#{String(invoice.correlativo || 0).padStart(4, '0')}</span>
+                    {locale === 'en' ? 'INVOICE' : 'FACTURA'} <span className="text-blue-600">#{String(invoice.correlativo || 0).padStart(4, '0')}</span>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-right">
@@ -106,7 +106,18 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
                   <tbody className="divide-y divide-slate-50">
                     {(invoice.items || []).map((item: any, idx: number) => (
                       <tr key={idx} className="text-[13px]">
-                        <td className="p-4 font-bold text-slate-800">{item.descripcion}</td>
+                        <td className="p-4 text-slate-800 whitespace-pre-wrap leading-relaxed text-xs">
+                          {item.descripcion.includes('\n') ? (
+                            <>
+                              <div className="font-bold text-sm mb-1">{item.descripcion.split('\n')[0]}</div>
+                              <div className="font-normal text-slate-500 mt-1 pl-2 border-l-2 border-blue-500/20">
+                                {item.descripcion.substring(item.descripcion.indexOf('\n') + 1)}
+                              </div>
+                            </>
+                          ) : (
+                            <span className="font-bold">{item.descripcion}</span>
+                          )}
+                        </td>
                         <td className="p-4 text-right font-bold text-slate-300">{item.cantidad}</td>
                         <td className="p-4 text-right font-black text-slate-900">${(item.subtotal || 0).toLocaleString(locale)}</td>
                       </tr>
@@ -123,13 +134,15 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
                 <p className="text-[10px] text-slate-400 leading-relaxed whitespace-pre-wrap">
                   {invoice.notas}
                 </p>
-                <div className="mt-6 pt-6 border-t border-slate-200">
-                  <div className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                    invoice.estado === 'Pagada' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
-                  }`}>
-                    {invoice.estado}
+                {invoice.estado !== 'Pendiente' && (
+                  <div className="mt-6 pt-6 border-t border-slate-200">
+                    <div className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                      invoice.estado === 'Pagada' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {invoice.estado}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
               <div className="space-y-2 p-4 w-64 ml-auto">
                 <div className="flex justify-between text-[10px] uppercase text-slate-500 font-bold tracking-widest">

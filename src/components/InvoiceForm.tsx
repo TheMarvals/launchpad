@@ -298,12 +298,12 @@ export default function InvoiceForm({ clients, admins = [], companyProfile, init
                 <div key={index} className="bg-surface-card p-sm md:p-0 md:bg-transparent md:border-none space-y-sm md:space-y-0 md:flex md:gap-sm md:items-end pb-sm border-b border-hairline/20 mb-sm last:border-b-0 last:mb-0 last:pb-0">
                   <div className="w-full md:w-auto md:flex-1 space-y-xxs">
                     <label className="text-caption-uppercase text-ink font-semibold">{tForm('itemLabel')}</label>
-                    <input 
-                      type="text" 
-                      className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
+                    <textarea 
+                      className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm min-h-[60px] resize-y"
                       placeholder={tForm('itemLabel')}
                       value={item.descripcion}
                       onChange={(e) => updateItem(index, 'descripcion', e.target.value)}
+                      rows={2}
                       required
                     />
                   </div>

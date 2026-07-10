@@ -347,7 +347,18 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate, companyProfile }
                         ) : (
                           (quote.items || []).map((item: any, idx: number) => (
                             <tr key={idx} className="text-[13px]">
-                              <td className="p-4 font-bold text-slate-800">{item.descripcion}</td>
+                              <td className="p-4 text-slate-800 whitespace-pre-wrap leading-relaxed text-xs">
+                                {item.descripcion.includes('\n') ? (
+                                  <>
+                                    <div className="font-bold text-sm mb-1">{item.descripcion.split('\n')[0]}</div>
+                                    <div className="font-normal text-slate-500 mt-1 pl-2 border-l-2 border-blue-500/20">
+                                      {item.descripcion.substring(item.descripcion.indexOf('\n') + 1)}
+                                    </div>
+                                  </>
+                                ) : (
+                                  <span className="font-bold">{item.descripcion}</span>
+                                )}
+                              </td>
                               <td className="p-4 text-right font-bold text-slate-300">{item.cantidad}</td>
                               <td className="p-4 text-right font-black text-slate-900">${(item.subtotal || 0).toLocaleString(locale)}</td>
                             </tr>

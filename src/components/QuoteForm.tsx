@@ -704,11 +704,11 @@ export default function QuoteForm({ clients, admins = [], companyProfile, initia
               {/* Description - full width on mobile */}
               <div className="w-full md:w-auto md:flex-1 space-y-xxs">
                 <label className="text-caption-uppercase text-ink font-semibold">{t('itemLabel')}</label>
-                <input 
-                  type="text" 
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
+                <textarea 
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm min-h-[60px] resize-y"
                   value={item.descripcion}
                   onChange={(e) => updateItem(idx, 'descripcion', e.target.value)}
+                  rows={2}
                   required
                 />
               </div>
