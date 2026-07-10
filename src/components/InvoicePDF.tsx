@@ -19,8 +19,8 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
   return (
     <div className="pdf-wrapper max-w-[210mm] print:max-w-full mx-auto print:mx-0 notranslate overflow-x-auto md:overflow-x-visible" translate="no">
       <div className="pdf-page w-full h-[297mm] bg-white text-slate-800 font-sans relative flex flex-col shadow-2xl print:shadow-none print:break-after-page overflow-hidden">
-        {/* Header — identical to QuotePDF page 1 */}
-        <header className="relative w-full p-10 pb-12 text-white shrink-0 overflow-hidden" style={{ background: '#0B1026' }}>
+        {/* Header — identical to QuotePDF page 1 but px-10 py-8 */}
+        <header className="relative w-full px-10 py-8 text-white shrink-0 overflow-hidden" style={{ background: '#0B1026' }}>
           <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/20 to-transparent skew-x-[-15deg] translate-x-20" />
           <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/10 rounded-full blur-[100px]" />
           <div className="relative z-10 flex justify-between items-center">
@@ -53,15 +53,15 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
         </header>
 
         {/* Main content */}
-        <main className="flex-grow px-10 pt-10 pb-8 overflow-hidden">
+        <main className="flex-grow px-10 pt-6 pb-6 overflow-hidden">
           {/* Watermark — identical to QuotePDF */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
             <h1 className="whitespace-nowrap font-black select-none tracking-tighter" style={{ fontSize: '800px', transform: 'rotate(-35deg)', WebkitTextFillColor: 'transparent', WebkitTextStrokeColor: '#181818', WebkitTextStrokeWidth: '5px', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>{companyProfile?.brandNameHeader || 'LAUNCHPAD'}</h1>
           </div>
 
-          <div className="relative z-10 space-y-12">
+          <div className="relative z-10 space-y-8">
             {/* Client info + Invoice metadata — same structure as QuotePDF */}
-            <div className="flex justify-between items-start border-b border-slate-100 pb-8">
+            <div className="flex justify-between items-start border-b border-slate-100 pb-6">
               <div className="max-w-[60%]">
                 <div className="inline-block px-2 py-1 bg-slate-100 text-slate-800 text-[8px] font-black uppercase tracking-[0.2em] rounded-none mb-3">
                   {t('clientInfo')}
@@ -100,15 +100,15 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-slate-50 text-left text-[10px] uppercase text-slate-500 tracking-widest font-black border-b border-slate-100">
-                      <th className="p-4">{t('description')}</th>
-                      <th className="p-4 text-right w-20">{t('quantity')}</th>
-                      <th className="p-4 text-right w-28">{t('subtotal')}</th>
+                      <th className="py-2.5 px-4">{t('description')}</th>
+                      <th className="py-2.5 px-4 text-right w-20">{t('quantity')}</th>
+                      <th className="py-2.5 px-4 text-right w-28">{t('subtotal')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {(invoice.items || []).map((item: any, idx: number) => (
                       <tr key={idx} className="text-[13px]">
-                        <td className="p-4 text-slate-800 whitespace-pre-wrap leading-relaxed text-xs">
+                        <td className="py-2.5 px-4 text-slate-800 whitespace-pre-wrap leading-relaxed text-xs">
                           {item.descripcion.includes('\n') ? (
                             <>
                               <div className="font-bold text-sm mb-1">{item.descripcion.split('\n')[0]}</div>
@@ -120,8 +120,8 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
                             <span className="font-bold">{item.descripcion}</span>
                           )}
                         </td>
-                        <td className="p-4 text-right font-bold text-slate-300">{item.cantidad}</td>
-                        <td className="p-4 text-right font-black text-slate-900">${(item.subtotal || 0).toLocaleString(locale)}</td>
+                        <td className="py-2.5 px-4 text-right font-bold text-slate-300">{item.cantidad}</td>
+                        <td className="py-2.5 px-4 text-right font-black text-slate-900">${(item.subtotal || 0).toLocaleString(locale)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -183,8 +183,8 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
           </div>
         </main>
 
-        {/* Footer — identical to QuotePDF */}
-        <footer className="w-full p-6 text-slate-300 text-center shrink-0" style={{ background: '#0B1026' }}>
+        {/* Footer — identical to QuotePDF but py-4 px-6 */}
+        <footer className="w-full py-4 px-6 text-slate-300 text-center shrink-0" style={{ background: '#0B1026' }}>
           <div className="text-[12px] font-black uppercase tracking-[0.6em] text-white">{companyProfile?.brandNameFooter || senderName.toUpperCase()}</div>
           <div className="h-px w-8 bg-primary mx-auto my-3 opacity-30"></div>
           <div className="text-[8px] font-bold opacity-40 space-x-6 uppercase tracking-widest">
@@ -238,13 +238,15 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
             padding: 0 !important; 
           }
           .shadow-2xl { box-shadow: none !important; }
-          .pdf-page { 
-            width: 100% !important; 
-            height: 100vh !important; 
-            max-height: none !important; 
-            min-height: 100vh !important; 
-            border: none !important; 
-            margin: 0 !important; 
+          .pdf-page {
+            width: 210mm !important;
+            height: 297mm !important;
+            max-height: 297mm !important;
+            min-height: 297mm !important;
+            border: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            page-break-after: always;
           }
         }
       `}} />
