@@ -89,6 +89,18 @@ export default function CompanyProfileBoard({ initialProfile }: CompanyProfileBo
             />
           </div>
 
+          <div className="md:col-span-2 space-y-xxs">
+            <label className="block text-caption-uppercase text-ink font-semibold">{t('email')}</label>
+            <input
+              type="email"
+              value={profile?.email || ''}
+              onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
+              placeholder="e.g. e.marval@themarvals.com"
+              required
+            />
+          </div>
+
           <div className="space-y-xxs">
             <label className="block text-caption-uppercase text-ink font-semibold">{t('brandNameHeader')}</label>
             <input

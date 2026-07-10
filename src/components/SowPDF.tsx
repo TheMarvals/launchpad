@@ -23,7 +23,7 @@ const SowPDF: React.FC<SowPDFProps> = ({ sow, isTemplate, companyProfile }) => {
   const senderName = companyProfile?.user?.name || companyProfile?.name || 'Eduardo Marval';
   const senderRole = companyProfile?.user?.cargo || companyProfile?.role || 'Lead Solution Architect';
   const senderPhone = companyProfile?.user?.telefono || companyProfile?.phone || '+569 94438833';
-  const senderEmail = companyProfile?.user?.email || companyProfile?.email || 'e.marval@themarvals.com';
+  const senderEmail = companyProfile?.email || 'e.marval@themarvals.com';
 
   // Clean the raw HTML and convert PAGE_BREAK markers to measurable elements
   const signatureHtml = (sow?.signatureUrl && !sow?.isAnnex)

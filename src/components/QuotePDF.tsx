@@ -140,7 +140,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({ quote, isTemplate, companyProfile }
   const senderName = quote?.user?.name || companyProfile?.user?.name || companyProfile?.name || 'Eduardo Marval';
   const senderRole = quote?.user?.cargo || companyProfile?.user?.cargo || companyProfile?.role || 'Lead Solution Architect';
   const senderPhone = quote?.user?.telefono || companyProfile?.user?.telefono || companyProfile?.phone || '+569 94438833';
-  const senderEmail = quote?.user?.email || companyProfile?.user?.email || companyProfile?.email || 'e.marval@themarvals.com';
+  const senderEmail = companyProfile?.email || 'e.marval@themarvals.com';
 
   return (
     <>

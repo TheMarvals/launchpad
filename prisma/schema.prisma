@@ -506,6 +506,7 @@ model CompanyProfile {
   userId          String   @unique
   taxIdLabel      String   @default("TAX ID")
   taxId           String   @default("27.087.979-9")
+  email           String?  @default("e.marval@themarvals.com")
   systemsTitle    String   @default("SYSTEMS ARCHITECTURE")
   systemsSubtitle String   @default("IT CONSULTING • SOFTWARE ENGINEERING")
   brandNameHeader String   @default("LAUNCHPAD")

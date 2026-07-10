@@ -14,7 +14,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
   const senderName = invoice?.user?.name || companyProfile?.user?.name || companyProfile?.name || 'Eduardo Marval';
   const senderRole = invoice?.user?.cargo || companyProfile?.user?.cargo || companyProfile?.role || 'Lead Solution Architect';
   const senderPhone = invoice?.user?.telefono || companyProfile?.user?.telefono || companyProfile?.phone || '+569 94438833';
-  const senderEmail = invoice?.user?.email || companyProfile?.user?.email || companyProfile?.email || 'e.marval@themarvals.com';
+  const senderEmail = companyProfile?.email || 'e.marval@themarvals.com';
 
   return (
     <div className="pdf-wrapper max-w-[210mm] print:max-w-full mx-auto print:mx-0 space-y-8 print:space-y-0 overflow-x-auto md:overflow-x-visible">
