@@ -11,10 +11,10 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
   const tInv = useTranslations('Invoices');
   const locale = useLocale();
 
-  const senderName = companyProfile?.user?.name || companyProfile?.name || 'Eduardo Marval';
-  const senderRole = companyProfile?.user?.cargo || companyProfile?.role || 'Lead Solution Architect';
-  const senderPhone = companyProfile?.user?.telefono || companyProfile?.phone || '+569 94438833';
-  const senderEmail = companyProfile?.user?.email || companyProfile?.email || 'e.marval@themarvals.com';
+  const senderName = invoice?.user?.name || companyProfile?.user?.name || companyProfile?.name || 'Eduardo Marval';
+  const senderRole = invoice?.user?.cargo || companyProfile?.user?.cargo || companyProfile?.role || 'Lead Solution Architect';
+  const senderPhone = invoice?.user?.telefono || companyProfile?.user?.telefono || companyProfile?.phone || '+569 94438833';
+  const senderEmail = invoice?.user?.email || companyProfile?.user?.email || companyProfile?.email || 'e.marval@themarvals.com';
 
   return (
     <div className="pdf-wrapper max-w-[210mm] print:max-w-full mx-auto print:mx-0 space-y-8 print:space-y-0 overflow-x-auto md:overflow-x-visible">
@@ -147,7 +147,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, companyProfile }) => {
                   </div>
                 )}
                 <div className="flex justify-between text-lg font-black text-slate-900 border-t border-slate-200 pt-2 mt-2">
-                  <span className="text-[10px] uppercase tracking-widest text-slate-500 self-center">{t('total')}</span>
+                  <span className="text-[10px] uppercase tracking-widest text-slate-500 self-center">{invoice.totalLabel || t('total')}</span>
                   <span>${(invoice.montoTotal || 0).toLocaleString(locale)}</span>
                 </div>
                 {invoice.paymentMethod && (

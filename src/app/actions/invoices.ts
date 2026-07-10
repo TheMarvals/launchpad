@@ -8,7 +8,7 @@ export async function createInvoice(formData: any) {
   const { 
     clientId, items, notas, fechaVencimiento, estado,
     taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod,
-    quoteId
+    quoteId, userId, totalLabel
   } = formData;
 
   // Calculate totals
@@ -36,6 +36,8 @@ export async function createInvoice(formData: any) {
       extraFeeName,
       extraFeeAmount: fee,
       paymentMethod,
+      totalLabel,
+      userId: userId || null,
       estado: estado || 'Pendiente',
       items: {
         create: items.map((item: any) => ({
@@ -69,7 +71,16 @@ export async function getInvoiceById(id: string) {
     include: {
       client: true,
       items: true,
-      quote: true
+      quote: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          cargo: true,
+          telefono: true,
+        },
+      },
     },
   });
 }
@@ -77,7 +88,8 @@ export async function getInvoiceById(id: string) {
 export async function updateInvoice(id: string, formData: any) {
   const { 
     clientId, items, notas, fechaVencimiento, estado,
-    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod
+    taxName, taxPercent, extraFeeName, extraFeeAmount, paymentMethod,
+    userId, totalLabel
   } = formData;
 
   // Calculate totals
@@ -111,6 +123,8 @@ export async function updateInvoice(id: string, formData: any) {
         extraFeeName,
         extraFeeAmount: fee,
         paymentMethod,
+        totalLabel,
+        userId: userId || null,
         estado,
         items: {
           create: items.map((item: any) => ({
@@ -162,6 +176,8 @@ export async function convertQuoteToInvoice(quoteId: string) {
       extraFeeName: quote.extraFeeName,
       extraFeeAmount: quote.extraFeeAmount,
       paymentMethod: quote.paymentMethod,
+      totalLabel: quote.totalLabel,
+      userId: quote.userId,
       estado: 'Pendiente',
       items: {
         create: quote.items.map(item => ({

@@ -33,6 +33,7 @@ model User {
   tickets    Ticket[]
   ticketMessages TicketMessage[]
   quotes     Quote[]
+  sentInvoices Invoice[] @relation("SentInvoices")
   
   // FreelanceHub Integration (Admin Only)
   projects     Project[]
@@ -150,6 +151,7 @@ model Invoice {
   id               String      @id @default(uuid())
   correlativo      Int         @unique @default(autoincrement())
   clientId         String
+  userId           String?
   fechaEmision     DateTime    @default(now())
   fechaVencimiento DateTime
   estado           String      @default("Pendiente") // Pendiente, Pagada, Anulada
@@ -163,12 +165,14 @@ model Invoice {
   extraFeeName     String?
   extraFeeAmount   Float       @default(0)
   paymentMethod    String?
+  totalLabel       String?
   
   notas            String?
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
   client           Client      @relation(fields: [clientId], references: [id])
+  user             User?       @relation("SentInvoices", fields: [userId], references: [id])
   items            InvoiceItem[]
   quote            Quote?
 }
