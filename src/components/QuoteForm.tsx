@@ -700,88 +700,81 @@ export default function QuoteForm({ clients, admins = [], companyProfile, initia
 
         <div className="space-y-sm border-t border-hairline pt-sm">
           {items.map((item: any, idx: number) => (
-            <div key={idx} className="bg-surface-card p-sm md:p-0 md:bg-transparent md:border-none space-y-sm md:space-y-0 md:flex md:gap-sm md:items-end pb-sm border-b border-hairline/20 mb-sm last:border-b-0 last:mb-0 last:pb-0">
-              {/* Description - full width on mobile */}
-              <div className="w-full md:w-auto md:flex-1 space-y-xxs">
-                <label className="text-caption-uppercase text-ink font-semibold">{t('itemLabel')}</label>
+            <div key={idx} className="bg-canvas border border-hairline p-sm space-y-xs relative">
+              {/* Description - 100% width */}
+              <div className="space-y-xxs">
+                <label className="block text-caption-uppercase text-ink font-semibold">{t('itemLabel')}</label>
                 <textarea 
-                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm min-h-[60px] resize-y"
+                  className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm min-h-[70px] resize-y"
                   value={item.descripcion}
                   onChange={(e) => updateItem(idx, 'descripcion', e.target.value)}
                   rows={2}
                   required
                 />
               </div>
-              {/* Quantity + Unit Price - side by side on mobile */}
-              <div className="grid grid-cols-2 md:flex md:gap-sm gap-2 items-end">
-                <div className="md:w-24 space-y-xxs">
-                  <label className="text-caption-uppercase text-ink font-semibold">{t('quantity')}</label>
-                  <input 
-                    type="number" 
-                    min="1"
-                    className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors text-center font-semibold px-xs py-xs text-sm"
-                    value={item.cantidad}
-                    onChange={(e) => updateItem(idx, 'cantidad', e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="md:w-40 space-y-xxs">
-                  <label className="text-caption-uppercase text-ink font-semibold">{t('unitPrice')}</label>
-                  <div className="relative">
-                    <span className="absolute left-xs top-1/2 -translate-y-1/2 text-muted font-semibold">$</span>
+              
+              {/* Values: Qty, Unit Price, Subtotal, Delete */}
+              <div className="flex flex-wrap items-center justify-between gap-sm pt-xs border-t border-hairline/20">
+                <div className="flex gap-sm">
+                  {/* Quantity */}
+                  <div className="w-24 space-y-xxs">
+                    <label className="block text-caption-uppercase text-ink font-semibold">{t('quantity')}</label>
                     <input 
                       type="number" 
-                      min="0"
-                      className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors font-semibold pl-md px-xs py-xs text-sm"
-                      value={item.precioUnitario}
-                      onChange={(e) => updateItem(idx, 'precioUnitario', e.target.value)}
+                      min="1"
+                      className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors text-center font-semibold px-xs py-xxs text-sm"
+                      value={item.cantidad}
+                      onChange={(e) => updateItem(idx, 'cantidad', e.target.value)}
                       required
                     />
                   </div>
-                </div>
-                {/* Subtotal - desktop only here */}
-                <div className="hidden md:block md:w-32 text-right self-center pb-xxs">
-                  <div className="text-caption-uppercase text-muted mb-xxs">{t('subtotal')}</div>
-                  <div className="font-medium text-ink">
-                    ${(Number(item.cantidad) * Number(item.precioUnitario) || 0).toLocaleString(locale)}
+                  
+                  {/* Unit Price */}
+                  <div className="w-36 space-y-xxs">
+                    <label className="block text-caption-uppercase text-ink font-semibold">{t('unitPrice')}</label>
+                    <div className="relative">
+                      <span className="absolute left-xs top-1/2 -translate-y-1/2 text-muted font-semibold">$</span>
+                      <input 
+                        type="number" 
+                        min="0"
+                        className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors font-semibold pl-md px-xs py-xxs text-sm"
+                        value={item.precioUnitario}
+                        onChange={(e) => updateItem(idx, 'precioUnitario', e.target.value)}
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
-                {/* Delete - desktop only here */}
-                <button 
-                  type="button" 
-                  onClick={() => removeItem(idx)}
-                  className="hidden md:block pb-xxs p-xxs text-muted hover:text-semantic-warning transition-colors self-end"
-                >
-                  <span className="material-icons">delete_outline</span>
-                </button>
-              </div>
-              {/* Mobile: subtotal + delete row */}
-              <div className="flex md:hidden justify-between items-center pt-1 border-t border-hairline/10">
-                <div className="flex items-center gap-1">
-                  <span className="text-caption-uppercase text-muted text-xs">{t('subtotal')}</span>
-                  <span className="font-semibold text-ink text-sm">
-                    ${(Number(item.cantidad) * Number(item.precioUnitario) || 0).toLocaleString(locale)}
-                  </span>
+
+                {/* Subtotal & Delete */}
+                <div className="flex items-center gap-md self-end pb-[2px]">
+                  <div className="text-right">
+                    <div className="text-caption-uppercase text-muted text-[10px] mb-0">{t('subtotal')}</div>
+                    <div className="font-semibold text-ink text-sm">
+                      ${(Number(item.cantidad) * Number(item.precioUnitario) || 0).toLocaleString(locale)}
+                    </div>
+                  </div>
+                  
+                  <button 
+                    type="button" 
+                    onClick={() => removeItem(idx)}
+                    className="p-xxs text-muted hover:text-semantic-warning transition-colors"
+                    title="Eliminar"
+                  >
+                    <span className="material-icons text-lg">delete_outline</span>
+                  </button>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={() => removeItem(idx)}
-                  className="p-xxs text-muted hover:text-semantic-warning transition-colors flex items-center gap-1 text-xs font-semibold uppercase tracking-wider"
-                >
-                  <span className="material-icons text-sm">delete_outline</span>
-                  Eliminar
-                </button>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-sm pt-sm border-t border-hairline">
+        <div className="grid grid-cols-2 gap-sm pt-sm border-t border-hairline">
           <div className="space-y-xxs">
             <label className="text-caption-uppercase text-ink font-semibold">{t('taxLabel')}</label>
             <input 
               type="text" 
-              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
+              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
               value={taxName}
               onChange={(e) => setTaxName(e.target.value)}
               placeholder="Ej. IVA"
@@ -792,12 +785,12 @@ export default function QuoteForm({ clients, admins = [], companyProfile, initia
             <input 
               type="number" 
               step="0.01"
-              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
+              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
               value={taxPercent}
               onChange={(e) => setTaxPercent(e.target.value)}
             />
           </div>
-          <div className="space-y-xxs">
+          <div className="col-span-2 space-y-xxs">
             <label className="text-caption-uppercase text-ink font-semibold">{t('extraFeeLabel')}</label>
             <div className="grid grid-cols-3 gap-xxs">
               <input 
@@ -815,11 +808,11 @@ export default function QuoteForm({ clients, admins = [], companyProfile, initia
               />
             </div>
           </div>
-          <div className="space-y-xxs">
+          <div className="col-span-2 space-y-xxs">
             <label className="text-caption-uppercase text-ink font-semibold">Texto "Total"</label>
             <input 
               type="text" 
-              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xs text-sm"
+              className="w-full border border-hairline bg-canvas text-ink placeholder:text-muted focus:border-primary outline-none transition-colors px-xs py-xxs text-sm"
               value={totalLabel}
               onChange={(e) => setTotalLabel(e.target.value)}
               placeholder={`Ej. ${t('total')}`}
