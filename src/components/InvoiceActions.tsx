@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Link } from '@/i18n/routing';
 import { useRouter } from 'next/navigation';
 import { deleteInvoice, updateInvoiceStatus } from '@/app/actions/invoices';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface InvoiceActionsProps {
   invoice: any;
@@ -13,6 +13,7 @@ interface InvoiceActionsProps {
 export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
   const t = useTranslations('Dashboard.recentQuotes');
   const tInv = useTranslations('Invoices');
+  const locale = useLocale();
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -86,7 +87,7 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
         <span className="material-icons text-[18px]">edit</span>
       </Link>
       <a 
-        href={`/api/invoices/${invoice.id}/pdf`} 
+        href={`/api/invoices/${invoice.id}/pdf?locale=${locale}`} 
         className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
         title={t('download')}
         target="_blank"
