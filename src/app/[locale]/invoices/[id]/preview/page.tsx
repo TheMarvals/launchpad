@@ -23,9 +23,5 @@ export default async function InvoicePreviewPage({
     notFound();
   }
 
-  return (
-    <div className="bg-slate-100 min-h-screen py-12 px-4 print:p-0 print:bg-white">
-      <InvoicePDF invoice={invoice} companyProfile={companyProfile} />
-    </div>
-  );
+  return <InvoicePDF invoice={invoice} companyProfile={companyProfile} />;
 }
