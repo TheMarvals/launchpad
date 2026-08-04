@@ -42,11 +42,25 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
   const handleDateSelect = (selectInfo: any) => {
+    const nextDay = new Date(selectInfo.start);
+    nextDay.setDate(nextDay.getDate() + 1);
+    const isSingleDaySelection = selectInfo.allDay
+      && selectInfo.end.getTime() === nextDay.getTime();
+    const start = new Date(selectInfo.start);
+    const end = new Date(selectInfo.end);
+
+    // A click in the month view represents an all-day range in FullCalendar.
+    // Default a single clicked day to a useful timed event instead of 00:00.
+    if (isSingleDaySelection) {
+      start.setHours(9, 0, 0, 0);
+      end.setTime(start.getTime() + 60 * 60 * 1000);
+    }
+
     setSelectedEvent({
       title: '',
-      start: selectInfo.start,
-      end: selectInfo.end,
-      allDay: selectInfo.allDay,
+      start,
+      end,
+      allDay: selectInfo.allDay && !isSingleDaySelection,
       color: '#3b82f6',
       description: ''
     });
@@ -79,6 +93,9 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
       <div className="flex items-center w-full overflow-hidden">
         {isShared && <span className="material-icons text-[10px] mr-[2px] opacity-70">people</span>}
         {isRecurring && <span className="material-icons text-[10px] mr-[2px] opacity-70">repeat</span>}
+        {eventInfo.timeText && (
+          <span className="shrink-0 mr-1 font-bold">{eventInfo.timeText}</span>
+        )}
         <span className="truncate flex-1">{eventInfo.event.title}</span>
       </div>
     );
@@ -247,6 +264,12 @@ export default function CalendarBoard({ initialEvents }: { initialEvents: any[] 
         select={handleDateSelect}
         eventClick={handleEventClick}
         eventContent={renderEventContent}
+        displayEventTime={true}
+        eventTimeFormat={{
+          hour: '2-digit',
+          minute: '2-digit',
+          meridiem: false,
+        }}
         locale={locale === 'es' ? esLocale : enLocale}
         height="100%"
       />

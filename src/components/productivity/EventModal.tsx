@@ -38,6 +38,12 @@ interface EventModalProps {
   title: string;
 }
 
+function formatLocalDateTime(date: Date) {
+  const localDate = new Date(date);
+  localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset());
+  return localDate.toISOString().slice(0, 16);
+}
+
 export default function EventModal({ isOpen, onClose, onSave, onDelete, onShare, onUnshare, initialData, title }: EventModalProps) {
   const t = useTranslations('Calendar');
   const [formData, setFormData] = useState({
@@ -64,12 +70,6 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, onShare,
   useEffect(() => {
     if (isOpen && initialData) {
       // Adjustment for local time strings for input type="datetime-local"
-      const formatDate = (date: Date) => {
-        const d = new Date(date);
-        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-        return d.toISOString().slice(0, 16);
-      };
-
       // Parse recurrence rule if exists
       let recMode = 'none';
       let recInterval = 1;
@@ -94,14 +94,14 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, onShare,
       setFormData({
         title: initialData.title || '',
         description: initialData.description || '',
-        start: formatDate(initialData.start),
-        end: formatDate(initialData.end),
+        start: formatLocalDateTime(initialData.start),
+        end: formatLocalDateTime(initialData.end),
         allDay: initialData.allDay || false,
         color: initialData.color || '#3b82f6',
         recurrenceMode: recMode,
         recurrenceInterval: recInterval,
         recurrenceDays: recDays,
-        recurrenceEndDate: initialData.recurrenceEnd ? formatDate(initialData.recurrenceEnd).slice(0, 10) : '',
+        recurrenceEndDate: initialData.recurrenceEnd ? formatLocalDateTime(initialData.recurrenceEnd).slice(0, 10) : '',
       });
       
       setEditMode('all');
@@ -109,6 +109,37 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, onShare,
       setShowDeleteConfirm(false);
     }
   }, [initialData, isOpen]);
+
+  const handleAllDayChange = (allDay: boolean) => {
+    const start = new Date(formData.start);
+    const end = new Date(formData.end);
+
+    if (allDay) {
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+      if (end <= start) {
+        end.setDate(start.getDate() + 1);
+      }
+    } else {
+      const startDay = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+      const endDay = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
+      const allDaySpan = Math.max(
+        1,
+        Math.round((endDay - startDay) / (24 * 60 * 60 * 1000)),
+      );
+      start.setHours(9, 0, 0, 0);
+      end.setTime(start.getTime());
+      end.setDate(start.getDate() + allDaySpan - 1);
+      end.setHours(10, 0, 0, 0);
+    }
+
+    setFormData({
+      ...formData,
+      allDay,
+      start: formatLocalDateTime(start),
+      end: formatLocalDateTime(end),
+    });
+  };
 
   const generateRRule = () => {
     if (formData.recurrenceMode === 'none') return null;
@@ -184,10 +215,13 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, onShare,
             <label className="text-caption-uppercase text-ink font-semibold">{t('form.start')}</label>
             <input
               required
-              type="datetime-local"
+              type={formData.allDay ? 'date' : 'datetime-local'}
               readOnly={isShared}
-              value={formData.start}
-              onChange={(e) => setFormData({ ...formData, start: e.target.value })}
+              value={formData.allDay ? formData.start.slice(0, 10) : formData.start}
+              onChange={(e) => setFormData({
+                ...formData,
+                start: formData.allDay ? `${e.target.value}T00:00` : e.target.value,
+              })}
               className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors text-sm disabled:opacity-50"
             />
           </div>
@@ -195,14 +229,27 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, onShare,
             <label className="text-caption-uppercase text-ink font-semibold">{t('form.end')}</label>
             <input
               required
-              type="datetime-local"
+              type={formData.allDay ? 'date' : 'datetime-local'}
               readOnly={isShared}
-              value={formData.end}
-              onChange={(e) => setFormData({ ...formData, end: e.target.value })}
+              value={formData.allDay ? formData.end.slice(0, 10) : formData.end}
+              onChange={(e) => setFormData({
+                ...formData,
+                end: formData.allDay ? `${e.target.value}T00:00` : e.target.value,
+              })}
               className="w-full px-xs py-xxs border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors text-sm disabled:opacity-50"
             />
           </div>
         </div>
+
+        <label className="inline-flex items-center gap-2 text-sm text-ink cursor-pointer">
+          <input
+            type="checkbox"
+            checked={formData.allDay}
+            disabled={isShared}
+            onChange={(e) => handleAllDayChange(e.target.checked)}
+          />
+          {t('form.allDay')}
+        </label>
 
         {/* RECURRENCE SECTION */}
         {!isShared && (

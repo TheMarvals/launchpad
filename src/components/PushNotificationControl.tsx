@@ -1,0 +1,165 @@
+'use client';
+
+import { useEffect, useState, useSyncExternalStore } from 'react';
+
+interface PushStatusResponse {
+  configured: boolean;
+  publicKey: string | null;
+}
+
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map((character) => character.charCodeAt(0)));
+}
+
+async function getServiceWorkerRegistration() {
+  const existingRegistration = await navigator.serviceWorker.getRegistration('/');
+  if (existingRegistration) return existingRegistration;
+
+  return navigator.serviceWorker.register('/sw.js', {
+    scope: '/',
+    updateViaCache: 'none',
+  });
+}
+
+export default function PushNotificationControl({ locale }: { locale: string }) {
+  const [configured, setConfigured] = useState(false);
+  const [publicKey, setPublicKey] = useState<string | null>(null);
+  const [subscription, setSubscription] = useState<PushSubscription | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const isSpanish = locale === 'es';
+  const supported = useSyncExternalStore(
+    () => () => undefined,
+    () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window,
+    () => false,
+  );
+
+  useEffect(() => {
+    if (!supported) return;
+
+    const loadStatus = async () => {
+      try {
+        const response = await fetch('/api/push/subscriptions', { cache: 'no-store' });
+        if (!response.ok) throw new Error('Unable to load push settings');
+
+        const status = await response.json() as PushStatusResponse;
+        const registration = await navigator.serviceWorker.getRegistration('/');
+        const currentSubscription = await registration?.pushManager.getSubscription() ?? null;
+
+        setConfigured(status.configured);
+        setPublicKey(status.publicKey);
+        setSubscription(currentSubscription);
+      } catch (loadError) {
+        console.error('[Push] Failed to load notification status:', loadError);
+        setError(isSpanish ? 'No se pudo cargar Push' : 'Could not load Push');
+      }
+    };
+
+    void loadStatus();
+  }, [isSpanish, supported]);
+
+  const enableNotifications = async () => {
+    if (!publicKey) return;
+
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      throw new Error(isSpanish ? 'Permiso de notificaciones denegado' : 'Notification permission denied');
+    }
+
+    const registration = await getServiceWorkerRegistration();
+    const currentSubscription = await registration.pushManager.getSubscription();
+    const nextSubscription = currentSubscription || await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey),
+    });
+
+    const response = await fetch('/api/push/subscriptions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(nextSubscription.toJSON()),
+    });
+
+    if (!response.ok) {
+      const result = await response.json().catch(() => null) as { error?: string } | null;
+      throw new Error(result?.error || 'Unable to save push subscription');
+    }
+
+    setSubscription(nextSubscription);
+  };
+
+  const disableNotifications = async () => {
+    if (!subscription) return;
+
+    const endpoint = subscription.endpoint;
+    const response = await fetch('/api/push/subscriptions', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint }),
+    });
+
+    if (!response.ok) throw new Error('Unable to remove push subscription');
+
+    await subscription.unsubscribe();
+    setSubscription(null);
+  };
+
+  const toggleNotifications = async () => {
+    setBusy(true);
+    setError('');
+
+    try {
+      if (subscription) {
+        await disableNotifications();
+      } else {
+        await enableNotifications();
+      }
+    } catch (toggleError) {
+      const message = toggleError instanceof Error ? toggleError.message : 'Push notification error';
+      console.error('[Push] Failed to update notifications:', toggleError);
+      setError(message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (supported === false) return null;
+
+  const denied = typeof Notification !== 'undefined' && Notification.permission === 'denied';
+  const disabled = busy || !configured || denied;
+  const title = error
+    || (!configured
+      ? (isSpanish ? 'Configura las claves VAPID para activar Push' : 'Configure VAPID keys to enable Push')
+      : denied
+        ? (isSpanish ? 'Notificaciones bloqueadas en el navegador' : 'Notifications are blocked in the browser')
+        : subscription
+          ? (isSpanish ? 'Desactivar notificaciones Push' : 'Disable Push notifications')
+          : (isSpanish ? 'Activar notificaciones de correos y tickets' : 'Enable email and ticket notifications'));
+
+  return (
+    <button
+      type="button"
+      onClick={toggleNotifications}
+      disabled={disabled}
+      title={title}
+      aria-label={title}
+      className={`relative w-10 h-10 flex items-center justify-center transition-colors cursor-pointer disabled:cursor-not-allowed ${
+        error
+          ? 'text-red-400'
+          : subscription
+            ? 'text-primary'
+            : 'text-muted hover:text-primary'
+      } disabled:opacity-50`}
+    >
+      <span className={`material-icons text-[20px] ${busy ? 'animate-pulse' : ''}`}>
+        {subscription ? 'notifications_active' : 'notifications_none'}
+      </span>
+      {subscription && (
+        <span className="absolute top-[7px] right-[7px] w-2 h-2 rounded-full bg-emerald-400 border border-canvas" />
+      )}
+    </button>
+  );
+}

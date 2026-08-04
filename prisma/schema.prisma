@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider          = "postgresql"
-  url               = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
   // When using PgBouncer with transaction pooling, append ?pgbouncer=true
   // to the DATABASE_URL for PgBouncer compatibility.
 }
@@ -19,74 +19,75 @@ model User {
   password    String
   role        String   @default("ADMIN") // ADMIN or CLIENT
   isActive    Boolean  @default(true)
-  clientId    String?  // If role is CLIENT, this links to their company
+  clientId    String? // If role is CLIENT, this links to their company
   googleId    String?  @unique // For Google OAuth
   permissions String[] // Dashboard view permissions for ADMIN users
-  cargo       String?  // Job title for admin users
-  telefono    String?  // Phone number for admin users
+  cargo       String? // Job title for admin users
+  telefono    String? // Phone number for admin users
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  client    Client?  @relation(fields: [clientId], references: [id])
-  actionLogs ActionLog[]
-  otpCodes   OtpCode[]
-  tickets    Ticket[]
+  client         Client?         @relation(fields: [clientId], references: [id])
+  actionLogs     ActionLog[]
+  otpCodes       OtpCode[]
+  tickets        Ticket[]
   ticketMessages TicketMessage[]
-  quotes     Quote[]
-  sentInvoices Invoice[] @relation("SentInvoices")
-  
+  quotes         Quote[]
+  sentInvoices   Invoice[]       @relation("SentInvoices")
+
   // FreelanceHub Integration (Admin Only)
-  projects     Project[]
-  tasks        Task[]          @relation("TaskOwner")
-  assignedTasks Task[]         @relation("TaskAssignee")
-  timeEntries  TimeEntry[]
-  invoices     FreelanceInvoice[]
-  notes        PersonalNote[]
-  events       CalendarEvent[]
-  sharedEvents EventShare[]
-  settings     ProductivitySettings?
-  companyProfile CompanyProfile?
+  projects          Project[]
+  tasks             Task[]                @relation("TaskOwner")
+  assignedTasks     Task[]                @relation("TaskAssignee")
+  timeEntries       TimeEntry[]
+  invoices          FreelanceInvoice[]
+  notes             PersonalNote[]
+  events            CalendarEvent[]
+  sharedEvents      EventShare[]
+  settings          ProductivitySettings?
+  companyProfile    CompanyProfile?
+  pushSubscriptions PushSubscription[]
 }
 
 model Client {
-  id           String   @id @default(uuid())
-  rut          String   @unique
-  razonSocial  String
-  giro         String
-  direccion    String
-  comuna       String
-  ciudad       String
-  email        String?
-  telefono     String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  quotes       Quote[]
-  invoices     Invoice[]
-  sows         Sow[]
-  users        User[]
-  servers      VpsService[]
-  tickets      Ticket[]
+  id          String       @id @default(uuid())
+  rut         String       @unique
+  razonSocial String
+  giro        String
+  direccion   String
+  comuna      String
+  ciudad      String
+  email       String?
+  telefono    String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  quotes      Quote[]
+  invoices    Invoice[]
+  sows        Sow[]
+  users       User[]
+  servers     VpsService[]
+  tickets     Ticket[]
 }
 
 model VpsService {
-  id            String   @id @default(uuid())
-  clientId      String
-  providerId    String?  // Provider ID for API calls
-  name          String   // Friendly name like 'Liceo A1 Web Server'
-  hostname      String?  // Public hostname like 'srv1.marval.host'
-  ipAddress     String?
-  status        String   @default("active") // active, suspended
-  dueDate       DateTime?
-  cpu           String?
-  memory        String?
-  storage       String?
-  bandwidth     String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id         String    @id @default(uuid())
+  clientId   String
+  providerId String? // Provider ID for API calls
+  name       String // Friendly name like 'Liceo A1 Web Server'
+  hostname   String? // Public hostname like 'srv1.marval.host'
+  ipAddress  String?
+  status     String    @default("active") // active, suspended
+  dueDate    DateTime?
+  cpu        String?
+  memory     String?
+  storage    String?
+  bandwidth  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
-  client        Client   @relation(fields: [clientId], references: [id])
-  actionLogs    ActionLog[]
-  otpCodes      OtpCode[]
+  client     Client      @relation(fields: [clientId], references: [id])
+  actionLogs ActionLog[]
+  otpCodes   OtpCode[]
 }
 
 model Product {
@@ -101,173 +102,173 @@ model Product {
 }
 
 model Quote {
-  id               String      @id @default(uuid())
-  correlativo      Int         @unique @default(autoincrement())
-  clientId         String
-  userId           String?     // Admin sender
-  fechaEmision     DateTime    @default(now())
-  fechaValidez     DateTime
-  estado           String      @default("Borrador") // Borrador, Enviada, Aceptada, Rechazada
-  propuesta        String?
-  montoNeto        Float       @default(0)
-  montoIva         Float       @default(0)
-  montoTotal       Float       @default(0)
-  showInvestment   Boolean     @default(true)
-  
+  id             String   @id @default(uuid())
+  correlativo    Int      @unique @default(autoincrement())
+  clientId       String
+  userId         String? // Admin sender
+  fechaEmision   DateTime @default(now())
+  fechaValidez   DateTime
+  estado         String   @default("Borrador") // Borrador, Enviada, Aceptada, Rechazada
+  propuesta      String?
+  montoNeto      Float    @default(0)
+  montoIva       Float    @default(0)
+  montoTotal     Float    @default(0)
+  showInvestment Boolean  @default(true)
+
   // Custom Taxes & Fees
-  taxName          String      @default("IVA")
-  taxPercent       Float       @default(19)
-  extraFeeName     String?     // e.g., "PayPal Fee"
-  extraFeeAmount   Float       @default(0)
-  paymentMethod    String?     // e.g., "Transferencia", "PayPal"
-  totalLabel       String?     // Custom label for "Total", e.g. "Total Monthly"
+  taxName        String  @default("IVA")
+  taxPercent     Float   @default(19)
+  extraFeeName   String? // e.g., "PayPal Fee"
+  extraFeeAmount Float   @default(0)
+  paymentMethod  String? // e.g., "Transferencia", "PayPal"
+  totalLabel     String? // Custom label for "Total", e.g. "Total Monthly"
 
   notasCondiciones String?
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  client           Client      @relation(fields: [clientId], references: [id])
-  user             User?       @relation(fields: [userId], references: [id])
-  items            QuoteItem[]
-  
-  invoice          Invoice?    @relation(fields: [invoiceId], references: [id])
-  invoiceId        String?     @unique
+  client Client      @relation(fields: [clientId], references: [id])
+  user   User?       @relation(fields: [userId], references: [id])
+  items  QuoteItem[]
+
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+  invoiceId String?  @unique
 }
 
 model QuoteItem {
-  id             String   @id @default(uuid())
+  id             String  @id @default(uuid())
   quoteId        String
   descripcion    String
   cantidad       Float
   precioUnitario Float
-  descuento      Float    @default(0)
+  descuento      Float   @default(0)
   subtotal       Float
-  esExento       Boolean  @default(false)
+  esExento       Boolean @default(false)
 
-  quote          Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  quote Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
 }
 
 model Invoice {
-  id               String      @id @default(uuid())
-  correlativo      Int         @unique @default(autoincrement())
+  id               String   @id @default(uuid())
+  correlativo      Int      @unique @default(autoincrement())
   clientId         String
   userId           String?
-  fechaEmision     DateTime    @default(now())
+  fechaEmision     DateTime @default(now())
   fechaVencimiento DateTime
-  estado           String      @default("Pendiente") // Pendiente, Pagada, Anulada
-  montoNeto        Float       @default(0)
-  montoIva         Float       @default(0)
-  montoTotal       Float       @default(0)
-  
-  // Custom Taxes & Fees
-  taxName          String      @default("IVA")
-  taxPercent       Float       @default(19)
-  extraFeeName     String?
-  extraFeeAmount   Float       @default(0)
-  paymentMethod    String?
-  totalLabel       String?
-  
-  notas            String?
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  estado           String   @default("Pendiente") // Pendiente, Pagada, Anulada
+  montoNeto        Float    @default(0)
+  montoIva         Float    @default(0)
+  montoTotal       Float    @default(0)
 
-  client           Client      @relation(fields: [clientId], references: [id])
-  user             User?       @relation("SentInvoices", fields: [userId], references: [id])
-  items            InvoiceItem[]
-  quote            Quote?
+  // Custom Taxes & Fees
+  taxName        String  @default("IVA")
+  taxPercent     Float   @default(19)
+  extraFeeName   String?
+  extraFeeAmount Float   @default(0)
+  paymentMethod  String?
+  totalLabel     String?
+
+  notas     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client Client        @relation(fields: [clientId], references: [id])
+  user   User?         @relation("SentInvoices", fields: [userId], references: [id])
+  items  InvoiceItem[]
+  quote  Quote?
 }
 
 model InvoiceItem {
-  id             String   @id @default(uuid())
+  id             String  @id @default(uuid())
   invoiceId      String
   descripcion    String
   cantidad       Float
   precioUnitario Float
   subtotal       Float
-  esExento       Boolean  @default(false)
+  esExento       Boolean @default(false)
 
-  invoice        Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
 model Sow {
-  id               String      @id @default(uuid())
-  correlativo      Int         @unique @default(autoincrement())
-  clientId         String
-  fechaEmision     DateTime    @default(now())
-  fechaValidez     DateTime
-  estado           String      @default("Borrador") // Borrador, Enviada, Aceptada, Rechazada
-  propuesta        String?
-  montoNeto        Float       @default(0)
-  montoIva         Float       @default(0)
-  montoTotal       Float       @default(0)
-  
-  // Custom Taxes & Fees
-  taxName          String      @default("IVA")
-  taxPercent       Float       @default(19)
-  extraFeeName     String?     // e.g., "PayPal Fee"
-  extraFeeAmount   Float       @default(0)
-  paymentMethod    String?     // e.g., "Transferencia", "PayPal"
-  totalLabel       String?     // Custom label for "Total", e.g. "Total Monthly"
+  id           String   @id @default(uuid())
+  correlativo  Int      @unique @default(autoincrement())
+  clientId     String
+  fechaEmision DateTime @default(now())
+  fechaValidez DateTime
+  estado       String   @default("Borrador") // Borrador, Enviada, Aceptada, Rechazada
+  propuesta    String?
+  montoNeto    Float    @default(0)
+  montoIva     Float    @default(0)
+  montoTotal   Float    @default(0)
 
-  isAnnex          Boolean     @default(false)
+  // Custom Taxes & Fees
+  taxName        String  @default("IVA")
+  taxPercent     Float   @default(19)
+  extraFeeName   String? // e.g., "PayPal Fee"
+  extraFeeAmount Float   @default(0)
+  paymentMethod  String? // e.g., "Transferencia", "PayPal"
+  totalLabel     String? // Custom label for "Total", e.g. "Total Monthly"
+
+  isAnnex          Boolean  @default(false)
   notasCondiciones String?
   signatureUrl     String?
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  client           Client      @relation(fields: [clientId], references: [id])
-  items            SowItem[]
+  client Client    @relation(fields: [clientId], references: [id])
+  items  SowItem[]
 }
 
 model SowItem {
-  id             String   @id @default(uuid())
+  id             String  @id @default(uuid())
   sowId          String
   descripcion    String
   cantidad       Float
   precioUnitario Float
-  descuento      Float    @default(0)
+  descuento      Float   @default(0)
   subtotal       Float
-  esExento       Boolean  @default(false)
+  esExento       Boolean @default(false)
 
-  sow            Sow      @relation(fields: [sowId], references: [id], onDelete: Cascade)
+  sow Sow @relation(fields: [sowId], references: [id], onDelete: Cascade)
 }
 
 model Project {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   userId      String
   name        String
   clientName  String?
-  status      String   @default("active") // active, paused, completed
-  priority    String   @default("medium") // low, medium, high, urgent
-  budget      Float    @default(0)
+  status      String    @default("active") // active, paused, completed
+  priority    String    @default("medium") // low, medium, high, urgent
+  budget      Float     @default(0)
   deadline    DateTime?
-  description String?  @db.Text
-  color       String   @default("#6366f1")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  description String?   @db.Text
+  color       String    @default("#6366f1")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id])
+  user        User               @relation(fields: [userId], references: [id])
   tasks       Task[]
   timeEntries TimeEntry[]
   invoices    FreelanceInvoice[]
 }
 
 model Task {
-  id          String   @id @default(uuid())
-  userId      String
-  projectId   String?
-  title       String
-  priority    String   @default("medium")
-  status      String   @default("todo") // todo, in-progress, done
-  dueDate     DateTime?
-  notes       String?  @db.Text
-  assigneeId  String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String    @id @default(uuid())
+  userId     String
+  projectId  String?
+  title      String
+  priority   String    @default("medium")
+  status     String    @default("todo") // todo, in-progress, done
+  dueDate    DateTime?
+  notes      String?   @db.Text
+  assigneeId String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
-  user        User     @relation("TaskOwner", fields: [userId], references: [id])
-  assignee    User?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
-  project     Project? @relation(fields: [projectId], references: [id])
+  user     User     @relation("TaskOwner", fields: [userId], references: [id])
+  assignee User?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  project  Project? @relation(fields: [projectId], references: [id])
 }
 
 model TimeEntry {
@@ -279,70 +280,70 @@ model TimeEntry {
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
 
-  user        User     @relation(fields: [userId], references: [id])
-  project     Project? @relation(fields: [projectId], references: [id])
+  user    User     @relation(fields: [userId], references: [id])
+  project Project? @relation(fields: [projectId], references: [id])
 }
 
 model FreelanceInvoice {
-  id          String   @id @default(uuid())
-  userId      String
-  projectId   String?
-  concept     String
-  amount      Float
-  date        DateTime @default(now())
-  status      String   @default("unpaid") // paid, unpaid, overdue
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String?
+  concept   String
+  amount    Float
+  date      DateTime @default(now())
+  status    String   @default("unpaid") // paid, unpaid, overdue
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id])
-  project     Project? @relation(fields: [projectId], references: [id])
+  user    User     @relation(fields: [userId], references: [id])
+  project Project? @relation(fields: [projectId], references: [id])
 }
 
 model PersonalNote {
-  id          String   @id @default(uuid())
-  userId      String
-  title       String
-  content     String?  @db.Text
-  category    String?  // General, Trabajo, Personal, etc.
-  color       String   @default("#6366f1")
-  isPublic    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  content   String?  @db.Text
+  category  String? // General, Trabajo, Personal, etc.
+  color     String   @default("#6366f1")
+  isPublic  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model ProductivitySettings {
-  id                    String   @id @default(uuid())
-  userId                String   @unique
-  workDuration          Int      @default(45)
-  breakDuration         Int      @default(15)
-  telegramBotToken      String?
-  telegramChatId        String?
-  telegramEnabled       Boolean  @default(false)
-  googleRefreshToken    String?  @db.Text
-  googleCalendarEnabled Boolean  @default(false)
+  id                      String   @id @default(uuid())
+  userId                  String   @unique
+  workDuration            Int      @default(45)
+  breakDuration           Int      @default(15)
+  telegramBotToken        String?
+  telegramChatId          String?
+  telegramEnabled         Boolean  @default(false)
+  googleRefreshToken      String?  @db.Text
+  googleCalendarEnabled   Boolean  @default(false)
   // Calendar notification preferences
-  timezone                String  @default("America/Caracas")
-  calendarDailyDigest     Boolean @default(true)
-  calendarTomorrowPreview  Boolean @default(true)
-  calendarHourBefore       Boolean @default(true)
-  updatedAt             DateTime @updatedAt
+  timezone                String   @default("America/Caracas")
+  calendarDailyDigest     Boolean  @default(true)
+  calendarTomorrowPreview Boolean  @default(true)
+  calendarHourBefore      Boolean  @default(true)
+  updatedAt               DateTime @updatedAt
 
-  user                  User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model ActionLog {
   id        String   @id @default(uuid())
   userId    String
   serverId  String
-  action    String   // start, stop, restart
-  status    String   // PENDING, SUCCESS, FAILED
+  action    String // start, stop, restart
+  status    String // PENDING, SUCCESS, FAILED
   details   String?
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
-  server    VpsService @relation(fields: [serverId], references: [id])
+  user   User       @relation(fields: [userId], references: [id])
+  server VpsService @relation(fields: [serverId], references: [id])
 }
 
 model OtpCode {
@@ -355,36 +356,36 @@ model OtpCode {
   expiresAt DateTime
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
-  server    VpsService? @relation(fields: [serverId], references: [id])
+  user   User        @relation(fields: [userId], references: [id])
+  server VpsService? @relation(fields: [serverId], references: [id])
 }
 
 model Ticket {
-  id        String   @id @default(uuid())
-  subject   String
-  status    String   @default("OPEN") // OPEN, IN_PROGRESS, CLOSED
-  priority  String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
-  clientId  String
-  userId    String   // The user who created the ticket
+  id       String @id @default(uuid())
+  subject  String
+  status   String @default("OPEN") // OPEN, IN_PROGRESS, CLOSED
+  priority String @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  clientId String
+  userId   String // The user who created the ticket
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  client    Client   @relation(fields: [clientId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
-  messages  TicketMessage[]
+  client   Client          @relation(fields: [clientId], references: [id])
+  user     User            @relation(fields: [userId], references: [id])
+  messages TicketMessage[]
 }
 
 model TicketMessage {
-  id        String   @id @default(uuid())
-  ticketId  String
-  userId    String   // The user who sent the message (can be admin or client)
-  message   String   @db.Text
+  id       String @id @default(uuid())
+  ticketId String
+  userId   String // The user who sent the message (can be admin or client)
+  message  String @db.Text
 
   createdAt DateTime @default(now())
 
-  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id])
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 model CalendarEvent {
@@ -398,18 +399,18 @@ model CalendarEvent {
   color       String   @default("#3b82f6")
 
   // Recurrence (RFC 5545 RRULE)
-  recurrenceRule  String?   // e.g. "FREQ=WEEKLY;BYDAY=MO,WE,FR"
-  recurrenceEnd   DateTime? // End date for recurrence
-  parentEventId   String?   // If this is an exception to a recurring event
-  excludedDates   String?   @db.Text // JSON array of excluded ISO date strings
+  recurrenceRule String? // e.g. "FREQ=WEEKLY;BYDAY=MO,WE,FR"
+  recurrenceEnd  DateTime? // End date for recurrence
+  parentEventId  String? // If this is an exception to a recurring event
+  excludedDates  String?   @db.Text // JSON array of excluded ISO date strings
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id])
-  parentEvent CalendarEvent?  @relation("RecurrenceExceptions", fields: [parentEventId], references: [id], onDelete: Cascade)
-  exceptions  CalendarEvent[] @relation("RecurrenceExceptions")
-  shares      EventShare[]
+  user             User                   @relation(fields: [userId], references: [id])
+  parentEvent      CalendarEvent?         @relation("RecurrenceExceptions", fields: [parentEventId], references: [id], onDelete: Cascade)
+  exceptions       CalendarEvent[]        @relation("RecurrenceExceptions")
+  shares           EventShare[]
   notificationLogs EventNotificationLog[]
 }
 
@@ -419,8 +420,8 @@ model EventShare {
   userId    String
   createdAt DateTime @default(now())
 
-  event     CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user      User          @relation(fields: [userId], references: [id])
+  event CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User          @relation(fields: [userId], references: [id])
 
   @@unique([eventId, userId])
 }
@@ -429,76 +430,76 @@ model EventNotificationLog {
   id        String   @id @default(uuid())
   eventId   String
   userId    String
-  type      String   // "1h_before" | "today_digest" | "tomorrow_digest"
+  type      String // "1h_before" | "today_digest" | "tomorrow_digest"
   eventDate DateTime // Specific occurrence date (important for recurring)
   sentAt    DateTime @default(now())
 
-  event     CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@unique([eventId, userId, type, eventDate])
 }
 
 model ShowcaseProject {
-  id           String         @id @default(uuid())
-  title        String
-  description  String?        @db.Text // Legacy fallback — use descriptionEs and descriptionEn
-  descriptionEs String?       @db.Text // Spanish description
-  descriptionEn String?       @db.Text // English description
-  category     String         @default("web") // web, branding, infra, video, app, design
-  technologies String?        // comma-separated or JSON
-  clientName   String?
-  projectUrl   String?
-  order        Int            @default(0)
-  isActive     Boolean        @default(true)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id            String   @id @default(uuid())
+  title         String
+  description   String?  @db.Text // Legacy fallback — use descriptionEs and descriptionEn
+  descriptionEs String?  @db.Text // Spanish description
+  descriptionEn String?  @db.Text // English description
+  category      String   @default("web") // web, branding, infra, video, app, design
+  technologies  String? // comma-separated or JSON
+  clientName    String?
+  projectUrl    String?
+  order         Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  images       ShowcaseImage[]
+  images ShowcaseImage[]
 }
 
 model ShowcaseImage {
-  id        String         @id @default(uuid())
-  projectId String
-  url       String
-  caption   String?
-  isFeatured Boolean       @default(false)
-  order     Int            @default(0)
+  id         String  @id @default(uuid())
+  projectId  String
+  url        String
+  caption    String?
+  isFeatured Boolean @default(false)
+  order      Int     @default(0)
 
-  project   ShowcaseProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project ShowcaseProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Partner {
-  id        String   @id @default(uuid())
-  name      String
-  logoUrl   String
+  id         String   @id @default(uuid())
+  name       String
+  logoUrl    String
   websiteUrl String?
-  order     Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  order      Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model ContactSubmission {
-  id          String   @id @default(uuid())
-  name        String
-  email       String
-  company     String
-  challenge   String   @db.Text
-  read        Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  company   String
+  challenge String   @db.Text
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 
-  replies     ContactReply[]
+  replies ContactReply[]
 }
 
 model ContactReply {
-  id                  String            @id @default(uuid())
+  id                  String   @id @default(uuid())
   contactSubmissionId String
   subject             String?
-  message             String            @db.Text
-  sentBy              String            @default("ADMIN") // ADMIN or USER
-  createdAt           DateTime          @default(now())
+  message             String   @db.Text
+  sentBy              String   @default("ADMIN") // ADMIN or USER
+  createdAt           DateTime @default(now())
 
-  contactSubmission   ContactSubmission @relation(fields: [contactSubmissionId], references: [id], onDelete: Cascade)
+  contactSubmission ContactSubmission @relation(fields: [contactSubmissionId], references: [id], onDelete: Cascade)
 }
 
 model CompanyProfile {
@@ -514,19 +515,51 @@ model CompanyProfile {
   address         String   @default("ANTONIO BELLET 193 OF 1210 12P, PROVIDENCIA, RM")
   updatedAt       DateTime @updatedAt
 
-  user            User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model EmailMessage {
-  id          String   @id @default(uuid())
-  messageId   String?  @unique
-  from        String
-  to          String
-  subject     String?
-  textBody    String?  @db.Text
-  htmlBody    String?  @db.Text
-  direction   String   @default("INBOUND") // INBOUND or OUTBOUND
-  status      String   @default("UNREAD") // UNREAD, READ, REPLIED
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(uuid())
+  messageId       String?  @unique
+  providerEmailId String?  @unique
+  from            String
+  to              String
+  subject         String?
+  textBody        String?  @db.Text
+  htmlBody        String?  @db.Text
+  direction       String   @default("INBOUND") // INBOUND or OUTBOUND
+  status          String   @default("UNREAD") // UNREAD, READ, REPLIED
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  attachments EmailAttachment[]
+}
+
+model EmailAttachment {
+  id                   String   @id @default(uuid())
+  emailMessageId       String
+  filename             String
+  contentType          String
+  sizeBytes            Int
+  providerAttachmentId String?
+  createdAt            DateTime @default(now())
+
+  emailMessage EmailMessage @relation(fields: [emailMessageId], references: [id], onDelete: Cascade)
+
+  @@index([emailMessageId])
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  endpoint  String   @unique @db.Text
+  p256dh    String   @db.Text
+  auth      String   @db.Text
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

@@ -1,21 +1,27 @@
 'use client';
 
-import React, { useEffect, useState, use } from 'react';
+import React, { useEffect, useRef, useState, use } from 'react';
 import { useRouter } from '@/i18n/routing';
-import { getEmailById, replyToEmail, deleteEmail } from '@/app/actions/emails';
+import { getEmailById, deleteEmail } from '@/app/actions/emails';
 import { format } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
 
 export default function EmailDetailPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale, id } = use(params);
   const router = useRouter();
   
-  const [email, setEmail] = useState<any>(null);
+  const [email, setEmail] = useState<Awaited<ReturnType<typeof getEmailById>> | null>(null);
   const [loading, setLoading] = useState(true);
   const [replyText, setReplyText] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const dateLocale = locale === 'es' ? es : enUS;
 
@@ -44,32 +50,87 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
       await deleteEmail(id);
       router.push('/dashboard/emails');
       router.refresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || 'Error deleting email');
+      setError(getErrorMessage(err, 'Error deleting email'));
       setDeleting(false);
     }
   };
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!replyText.trim()) return;
+    if (!replyText.trim() && selectedFiles.length === 0) return;
 
     setSending(true);
+    setError('');
     try {
-      await replyToEmail(id, replyText);
+      const formData = new FormData();
+      formData.set('originalEmailId', id);
+      formData.set('replyBody', replyText);
+      selectedFiles.forEach((file) => formData.append('attachments', file));
+
+      const response = await fetch('/api/emails/reply', {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await response.json().catch(() => null) as { error?: string } | null;
+
+      if (!response.ok) {
+        throw new Error(result?.error || 'Error sending reply');
+      }
+
       setReplyText('');
+      setSelectedFiles([]);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       // Reload email to show REPLIED status
       const data = await getEmailById(id);
       setEmail(data);
       alert(locale === 'es' ? 'Respuesta enviada con éxito' : 'Reply sent successfully');
       router.refresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || 'Error sending reply');
+      setError(getErrorMessage(err, 'Error sending reply'));
     } finally {
       setSending(false);
     }
+  };
+
+  const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const incomingFiles = Array.from(event.target.files || []);
+    const nextFiles = [...selectedFiles, ...incomingFiles];
+    const totalSize = nextFiles.reduce((total, file) => total + file.size, 0);
+
+    if (nextFiles.length > 10) {
+      setError(locale === 'es' ? 'Puedes adjuntar un máximo de 10 archivos.' : 'You can attach up to 10 files.');
+      event.target.value = '';
+      return;
+    }
+
+    const oversizedFile = nextFiles.find((file) => file.size > 10 * 1024 * 1024);
+    if (oversizedFile) {
+      setError(locale === 'es' ? `${oversizedFile.name} supera los 10 MB.` : `${oversizedFile.name} exceeds 10 MB.`);
+      event.target.value = '';
+      return;
+    }
+
+    if (totalSize > 25 * 1024 * 1024) {
+      setError(locale === 'es' ? 'Los adjuntos superan el máximo total de 25 MB.' : 'Attachments exceed the 25 MB total limit.');
+      event.target.value = '';
+      return;
+    }
+
+    setError('');
+    setSelectedFiles(nextFiles);
+    event.target.value = '';
+  };
+
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles((files) => files.filter((_, fileIndex) => fileIndex !== index));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   if (loading) {
@@ -152,6 +213,46 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
             {locale === 'es' ? '(Este correo no tiene contenido o no se pudo cargar)' : '(This email has no content or could not be loaded)'}
           </div>
         )}
+
+        {email.attachments?.length > 0 && (
+          <div className="mt-6 pt-4 border-t border-hairline not-prose">
+            <p className="text-[10px] uppercase tracking-widest font-bold text-muted mb-3">
+              {locale === 'es' ? 'Adjuntos' : 'Attachments'} ({email.attachments.length})
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {email.attachments.map((attachment) => {
+                const available = Boolean(attachment.providerAttachmentId && email.providerEmailId);
+                const content = (
+                  <>
+                    <span className="material-icons text-[17px] text-primary">attach_file</span>
+                    <span className="truncate max-w-[220px]">{attachment.filename}</span>
+                    {attachment.sizeBytes > 0 && (
+                      <span className="text-muted">{formatFileSize(attachment.sizeBytes)}</span>
+                    )}
+                  </>
+                );
+
+                return available ? (
+                  <a
+                    key={attachment.id}
+                    href={`/api/emails/${email.id}/attachments/${attachment.id}`}
+                    className="inline-flex items-center gap-2 px-3 py-2 border border-hairline bg-canvas-elevated rounded-sm text-xs text-ink hover:border-primary transition-colors no-underline"
+                  >
+                    {content}
+                    <span className="material-icons text-[15px] text-muted">download</span>
+                  </a>
+                ) : (
+                  <span
+                    key={attachment.id}
+                    className="inline-flex items-center gap-2 px-3 py-2 border border-hairline bg-canvas-elevated rounded-sm text-xs text-ink"
+                  >
+                    {content}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Reply Box */}
@@ -163,12 +264,57 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
               placeholder={locale === 'es' ? 'Escribe tu respuesta aquí...' : 'Write your reply here...'}
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
-              required
             />
-            <div className="mt-3 flex justify-end">
+
+            {selectedFiles.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {selectedFiles.map((file, index) => (
+                  <span
+                    key={`${file.name}-${file.lastModified}-${index}`}
+                    className="inline-flex items-center gap-2 max-w-full px-3 py-2 border border-hairline bg-canvas rounded-sm text-xs"
+                  >
+                    <span className="material-icons text-[16px] text-primary">attach_file</span>
+                    <span className="truncate max-w-[220px]">{file.name}</span>
+                    <span className="text-muted shrink-0">{formatFileSize(file.size)}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeSelectedFile(index)}
+                      className="text-muted hover:text-red-400 transition-colors"
+                      aria-label={locale === 'es' ? `Quitar ${file.name}` : `Remove ${file.name}`}
+                    >
+                      <span className="material-icons text-[16px]">close</span>
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt"
+                  onChange={handleFileSelection}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={sending || selectedFiles.length >= 10}
+                  className="inline-flex items-center gap-2 px-3 py-2 border border-hairline rounded-sm text-xs font-semibold text-muted hover:text-ink hover:border-primary transition-colors disabled:opacity-50"
+                >
+                  <span className="material-icons text-[17px]">attach_file</span>
+                  {locale === 'es' ? 'Adjuntar archivos' : 'Attach files'}
+                </button>
+                <p className="mt-1 text-[10px] text-muted">
+                  {locale === 'es' ? 'Máx. 10 MB por archivo · 25 MB total' : 'Max. 10 MB per file · 25 MB total'}
+                </p>
+              </div>
               <button
                 type="submit"
-                disabled={sending}
+                disabled={sending || (!replyText.trim() && selectedFiles.length === 0)}
                 className="bg-primary text-on-primary px-5 py-2 rounded-sm font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 shadow-sm"
               >
                 {sending ? (

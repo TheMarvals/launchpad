@@ -10,6 +10,7 @@ import LocaleSwitcher from '@/components/LocaleSwitcher';
 import DashboardMobileNav, { MobileNavTrigger } from '@/components/DashboardMobileNav';
 import { MobileNavProvider } from '@/components/MobileNavProvider';
 import SidebarDropdown from '@/components/SidebarDropdown';
+import PushNotificationControl from '@/components/PushNotificationControl';
 
 export default async function DashboardLayout({
   children,
@@ -36,7 +37,7 @@ export default async function DashboardLayout({
 
   // Fetch permissions directly from DB so changes take effect without re-login
   const dbUser = await prisma.user.findUnique({
-    where: { id: (session.user as any).id },
+    where: { id: session.user.id },
     select: { permissions: true },
   });
   // Unread contacts count for sidebar badge
@@ -360,6 +361,7 @@ export default async function DashboardLayout({
             <h2 className="text-title-md font-medium text-ink hidden sm:block">{t('dashboard')}</h2>
           </div>
           <div className="flex items-center space-x-sm">
+            <PushNotificationControl locale={locale} />
             <LocaleSwitcher />
             <div className="flex items-center space-x-xxs">
               <div className="text-right hidden sm:block">

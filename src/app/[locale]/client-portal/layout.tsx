@@ -5,6 +5,7 @@ import { redirect } from '@/i18n/routing';
 import { MobileClientNav } from '@/components/MobileClientNav';
 import { getTranslations } from 'next-intl/server';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
+import PushNotificationControl from '@/components/PushNotificationControl';
 
 export default async function ClientPortalLayout({
   children,
@@ -17,7 +18,7 @@ export default async function ClientPortalLayout({
   const t = await getTranslations('Navigation');
   const session = await auth();
   
-  if (!session?.user || (session.user as any).role !== 'CLIENT') {
+  if (!session?.user || session.user.role !== 'CLIENT') {
     redirect({ href: '/login', locale });
     return null; // Satisfy TypeScript
   }
@@ -44,21 +45,21 @@ export default async function ClientPortalLayout({
                 <span className="material-icons mr-xxs text-sm opacity-70">dashboard</span> {t('dashboard')}
               </Link>
             </li>
-            {(session.user as any).permissions?.includes('servers') && (
+            {session.user.permissions.includes('servers') && (
               <li>
                 <Link href="/client-portal/servers" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
                   <span className="material-icons mr-xxs text-sm opacity-70">dns</span> {t('servers')}
                 </Link>
               </li>
             )}
-            {(session.user as any).permissions?.includes('quotes') && (
+            {session.user.permissions.includes('quotes') && (
               <li>
                 <Link href="/client-portal/quotes" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
                   <span className="material-icons mr-xxs text-sm opacity-70">receipt_long</span> {t('quotes')}
                 </Link>
               </li>
             )}
-            {(session.user as any).permissions?.includes('tickets') && (
+            {session.user.permissions.includes('tickets') && (
               <li>
                 <Link href="/client-portal/tickets" className="h-[48px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
                   <span className="material-icons mr-xxs text-sm opacity-70">support_agent</span> {t('tickets')}
@@ -82,6 +83,7 @@ export default async function ClientPortalLayout({
               <div className="text-caption text-muted truncate">{session.user.email}</div>
             </div>
           </div>
+          <PushNotificationControl locale={locale} />
           <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }); }}>
             <button title={t('logout')} className="text-muted hover:text-primary transition-colors cursor-pointer">
               <span className="material-icons text-[18px]">logout</span>
@@ -94,12 +96,15 @@ export default async function ClientPortalLayout({
       <main className="flex-grow flex flex-col h-screen overflow-hidden bg-canvas">
         <header className="md:hidden h-16 bg-canvas border-b border-hairline flex items-center justify-between px-sm shrink-0 z-50">
           <div className="flex items-center">
-            <MobileClientNav permissions={(session.user as any).permissions || []} />
+            <MobileClientNav permissions={session.user.permissions} />
             <h1 className="text-2xl font-black tracking-tighter stroke-text">LAUNCHPAD</h1>
           </div>
-          <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }); }}>
-             <button className="w-10 h-10 flex items-center justify-center text-muted hover:text-primary transition-colors cursor-pointer" title={t('logout')}><span className="material-icons">logout</span></button>
-          </form>
+          <div className="flex items-center">
+            <PushNotificationControl locale={locale} />
+            <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }); }}>
+              <button className="w-10 h-10 flex items-center justify-center text-muted hover:text-primary transition-colors cursor-pointer" title={t('logout')}><span className="material-icons">logout</span></button>
+            </form>
+          </div>
         </header>
 
         <div className="flex-grow overflow-y-auto p-sm md:p-lg">

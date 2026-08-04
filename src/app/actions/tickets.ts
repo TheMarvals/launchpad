@@ -5,6 +5,12 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { sendNewTicketNotificationToAdmin, sendTicketReplyNotificationToClient } from '@/lib/email';
+import { notifyAdminsWithPermission, notifyClientUsers } from '@/lib/push-notifications';
+
+function notificationExcerpt(message: string) {
+  const normalized = message.replace(/\s+/g, ' ').trim();
+  return normalized.length > 140 ? `${normalized.slice(0, 137)}...` : normalized;
+}
 
 // Crear un nuevo ticket
 export async function createTicket(data: { subject: string; priority: string; message: string }) {
@@ -56,11 +62,18 @@ export async function createTicket(data: { subject: string; priority: string; me
       senderRole: session.user.role || 'CLIENT',
     }, userLocale).catch(e => console.error('[Tickets] Error catch sending ticket email to admin:', e));
 
+    await notifyAdminsWithPermission('tickets', {
+      title: `Nuevo ticket: ${data.subject}`,
+      body: `${client?.razonSocial || session.user.name || 'Cliente'} · ${notificationExcerpt(data.message)}`,
+      url: `/dashboard/tickets/${ticket.id}`,
+      tag: `ticket-${ticket.id}`,
+    }).catch((error) => console.error('[Tickets] Failed to send admin push notification:', error));
+
     revalidatePath('/client-portal/tickets');
     revalidatePath('/dashboard/tickets');
     
     return { success: true, ticketId: ticket.id };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating ticket:', error);
     return { error: 'Error al crear el ticket.' };
   }
@@ -205,6 +218,13 @@ export async function sendTicketMessage(ticketId: string, message: string) {
         senderRole: 'ADMIN',
         replyMessage: message,
       }, userLocale).catch(e => console.error('[Tickets] Error catch sending reply email to client:', e));
+
+      await notifyClientUsers(ticket.clientId, {
+        title: `Respuesta a tu ticket: ${ticket.subject}`,
+        body: notificationExcerpt(message),
+        url: `/client-portal/tickets/${ticket.id}`,
+        tag: `ticket-${ticket.id}`,
+      }, session.user.id).catch((error) => console.error('[Tickets] Failed to send client push notification:', error));
     } else if (session.user.role === 'CLIENT') {
       // El cliente responde al ticket
       const clientInfo = await prisma.client.findUnique({ where: { id: ticket.clientId } });
@@ -219,6 +239,13 @@ export async function sendTicketMessage(ticketId: string, message: string) {
         senderName: session.user.name || 'Usuario',
         senderRole: 'CLIENT',
       }, userLocale).catch(e => console.error('[Tickets] Error catch sending reply email to admin:', e));
+
+      await notifyAdminsWithPermission('tickets', {
+        title: `Nueva respuesta: ${ticket.subject}`,
+        body: `${session.user.name || 'Cliente'} · ${notificationExcerpt(message)}`,
+        url: `/dashboard/tickets/${ticket.id}`,
+        tag: `ticket-${ticket.id}`,
+      }, session.user.id).catch((error) => console.error('[Tickets] Failed to send admin push notification:', error));
     }
 
     revalidatePath(`/client-portal/tickets/${ticketId}`);
@@ -227,7 +254,7 @@ export async function sendTicketMessage(ticketId: string, message: string) {
     revalidatePath('/dashboard/tickets');
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error enviando mensaje:', error);
     return { error: 'No se pudo enviar el mensaje' };
   }
@@ -262,7 +289,7 @@ export async function updateTicketStatus(ticketId: string, status: 'OPEN' | 'IN_
     revalidatePath('/dashboard/tickets');
 
     return { success: true };
-  } catch (error: any) {
+  } catch {
     return { error: 'Error al actualizar el ticket' };
   }
 }
