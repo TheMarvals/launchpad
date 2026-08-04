@@ -1,7 +1,7 @@
 import React from 'react';
 import { getTranslations } from 'next-intl/server';
 import { getEmails } from '@/app/actions/emails';
-import EmailSidebar from '@/components/emails/EmailSidebar';
+import EmailWorkspace from '@/components/emails/EmailWorkspace';
 
 export default async function EmailsLayout({
   children,
@@ -13,7 +13,7 @@ export default async function EmailsLayout({
   const { locale } = await params;
   const t = await getTranslations('Navigation');
 
-  let emails: any[] = [];
+  let emails: Awaited<ReturnType<typeof getEmails>> = [];
   try {
     emails = await getEmails();
   } catch (error) {
@@ -29,18 +29,9 @@ export default async function EmailsLayout({
         </div>
       </div>
 
-      {/* Contenedor dividido */}
-      <div className="flex flex-1 overflow-hidden">
-        
-        {/* Panel Izquierdo: Lista de correos con pestañas (Client Component) */}
-        <EmailSidebar initialEmails={emails} locale={locale} />
-
-        {/* Panel Derecho: Contenido (children) */}
-        <div className="hidden md:flex flex-1 min-w-0 flex-col overflow-hidden bg-canvas-elevated/10">
-          {children}
-        </div>
-        
-      </div>
+      <EmailWorkspace emails={emails} locale={locale}>
+        {children}
+      </EmailWorkspace>
     </div>
   );
 }

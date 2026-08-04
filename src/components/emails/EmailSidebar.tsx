@@ -5,13 +5,15 @@ import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { formatDistanceToNow } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
 import { deleteEmail } from '@/app/actions/emails';
+import type { EmailMessage } from '@prisma/client';
 
 type EmailSidebarProps = {
-  initialEmails: any[];
+  initialEmails: EmailMessage[];
   locale: string;
+  mobileHidden?: boolean;
 };
 
-export default function EmailSidebar({ initialEmails, locale }: EmailSidebarProps) {
+export default function EmailSidebar({ initialEmails, locale, mobileHidden = false }: EmailSidebarProps) {
   const [activeTab, setActiveTab] = useState<'inbox' | 'sent'>('inbox');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const pathname = usePathname(); // e.g. /dashboard/emails or /dashboard/emails/123
@@ -26,7 +28,7 @@ export default function EmailSidebar({ initialEmails, locale }: EmailSidebarProp
   });
 
   return (
-    <div className="w-full md:w-1/3 lg:w-[400px] border-r border-hairline overflow-y-auto bg-canvas shrink-0 flex flex-col h-full">
+    <div className={`${mobileHidden ? 'hidden md:flex' : 'flex'} w-full md:w-1/3 lg:w-[400px] border-r border-hairline overflow-y-auto bg-canvas shrink-0 flex-col h-full`}>
       {/* Tabs Header */}
       <div className="flex border-b border-hairline shrink-0 bg-canvas items-center relative">
         <button
@@ -73,7 +75,7 @@ export default function EmailSidebar({ initialEmails, locale }: EmailSidebarProp
           </div>
         ) : (
           <div className="divide-y divide-hairline">
-            {filteredEmails.map((email: any) => {
+            {filteredEmails.map((email) => {
               const isActive = pathname === `/dashboard/emails/${email.id}`;
               
               const handleDeleteClick = async (e: React.MouseEvent) => {
@@ -97,10 +99,9 @@ export default function EmailSidebar({ initialEmails, locale }: EmailSidebarProp
               };
 
               return (
-                <Link 
-                  href={`/dashboard/emails/${email.id}`} 
+                <div
                   key={email.id}
-                  className={`block p-4 transition-colors group relative ${
+                  className={`group relative transition-colors ${
                     isActive 
                       ? 'bg-canvas-elevated border-l-4 border-l-primary' 
                       : email.status === 'UNREAD' && activeTab === 'inbox'
@@ -108,32 +109,38 @@ export default function EmailSidebar({ initialEmails, locale }: EmailSidebarProp
                         : 'border-l-4 border-l-transparent hover:bg-canvas-elevated'
                   }`}
                 >
-                  <div className="flex justify-between items-start mb-1 gap-2">
-                    <span className={`font-semibold truncate text-sm flex-1 pr-6 ${email.status === 'UNREAD' && activeTab === 'inbox' ? 'text-ink' : 'text-body'}`}>
-                      {activeTab === 'inbox' ? email.from : `Para: ${email.to}`}
-                    </span>
-                    <span className="text-[10px] text-muted whitespace-nowrap shrink-0 mt-1">
-                      {formatDistanceToNow(new Date(email.createdAt), { addSuffix: true, locale: dateLocale })}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <h3 className={`text-xs truncate pr-6 ${email.status === 'UNREAD' && activeTab === 'inbox' ? 'font-bold text-ink' : 'text-muted'}`}>
-                      {email.subject || '(Sin asunto)'}
-                    </h3>
-                  </div>
+                  <Link
+                    href={`/dashboard/emails/${email.id}`}
+                    className="block p-4 pr-12"
+                  >
+                    <div className="flex justify-between items-start mb-1 gap-2">
+                      <span className={`font-semibold truncate text-sm flex-1 ${email.status === 'UNREAD' && activeTab === 'inbox' ? 'text-ink' : 'text-body'}`}>
+                        {activeTab === 'inbox' ? email.from : `Para: ${email.to}`}
+                      </span>
+                      <span className="text-[10px] text-muted whitespace-nowrap shrink-0 mt-1">
+                        {formatDistanceToNow(new Date(email.createdAt), { addSuffix: true, locale: dateLocale })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <h3 className={`text-xs truncate ${email.status === 'UNREAD' && activeTab === 'inbox' ? 'font-bold text-ink' : 'text-muted'}`}>
+                        {email.subject || '(Sin asunto)'}
+                      </h3>
+                    </div>
+                  </Link>
                   
-                  {/* Delete Button (visible on hover) */}
                   <button
+                    type="button"
                     onClick={handleDeleteClick}
                     disabled={deletingId === email.id}
-                    className="absolute top-1/2 -translate-y-1/2 right-2 w-8 h-8 rounded-sm bg-canvas border border-hairline flex items-center justify-center text-red-500 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 hover:bg-red-500/10 hover:border-red-500/30"
+                    className="absolute top-1/2 -translate-y-1/2 right-2 w-8 h-8 rounded-sm bg-canvas border border-hairline flex items-center justify-center text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity disabled:opacity-50 hover:bg-red-500/10 hover:border-red-500/30"
                     title={locale === 'es' ? 'Eliminar' : 'Delete'}
+                    aria-label={locale === 'es' ? 'Eliminar correo' : 'Delete email'}
                   >
                     <span className="material-icons text-[16px]">
                       {deletingId === email.id ? 'refresh' : 'delete'}
                     </span>
                   </button>
-                </Link>
+                </div>
               );
             })}
           </div>

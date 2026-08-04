@@ -156,8 +156,10 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
       {/* Mobile Back Button - Only visible on small screens */}
       <div className="md:hidden p-4 border-b border-hairline flex items-center gap-3">
         <button 
+          type="button"
           onClick={() => router.push('/dashboard/emails')}
           className="w-8 h-8 flex items-center justify-center bg-canvas-elevated hover:bg-hairline rounded-sm transition-colors shrink-0"
+          aria-label={locale === 'es' ? 'Volver a correos' : 'Back to emails'}
         >
           <span className="material-icons text-sm">arrow_back</span>
         </button>
