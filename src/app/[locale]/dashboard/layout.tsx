@@ -1,4 +1,5 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { Link } from '@/i18n/routing';
 import { auth, signOut } from '@/lib/auth';
 import { redirect } from '@/i18n/routing';
@@ -11,6 +12,25 @@ import DashboardMobileNav, { MobileNavTrigger } from '@/components/DashboardMobi
 import { MobileNavProvider } from '@/components/MobileNavProvider';
 import SidebarDropdown from '@/components/SidebarDropdown';
 import PushNotificationControl from '@/components/PushNotificationControl';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const manifestLocale = locale === 'en' ? 'en' : 'es';
+
+  return {
+    applicationName: 'LAUNCHPAD',
+    manifest: `/manifest-admin-${manifestLocale}.webmanifest`,
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'black-translucent',
+      title: 'LAUNCHPAD',
+    },
+  };
+}
 
 export default async function DashboardLayout({
   children,
@@ -361,7 +381,7 @@ export default async function DashboardLayout({
             <h2 className="text-title-md font-medium text-ink hidden sm:block">{t('dashboard')}</h2>
           </div>
           <div className="flex items-center space-x-sm">
-            <PushNotificationControl locale={locale} />
+            <PushNotificationControl locale={locale} scope={`/${locale}/dashboard`} />
             <LocaleSwitcher />
             <div className="flex items-center space-x-xxs">
               <div className="text-right hidden sm:block">

@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'launchpad-pwa';
-const STATIC_CACHE = `${CACHE_PREFIX}-static-v1`;
+const STATIC_CACHE = `${CACHE_PREFIX}-static-v2`;
 const OFFLINE_URL = '/offline.html';
 const PRECACHE_URLS = [
   OFFLINE_URL,
@@ -94,9 +94,20 @@ self.addEventListener('notificationclick', (event) => {
     destination = new URL('/', self.location.origin);
   }
 
+  // Notification payloads use locale-neutral application paths. Keep clicks
+  // inside the locale and area owned by this scoped worker so an installed
+  // admin PWA does not escape to the landing page or a browser tab.
+  const registrationScope = new URL(self.registration.scope);
+  const scopedArea = registrationScope.pathname.match(/^\/(en|es)\/(dashboard|client-portal)\/?$/);
+  if (scopedArea && destination.pathname.startsWith(`/${scopedArea[2]}`)) {
+    destination = new URL(`/${scopedArea[1]}${destination.pathname}${destination.search}${destination.hash}`, self.location.origin);
+  }
+
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (clientList) => {
-      const existingClient = clientList.find((client) => new URL(client.url).origin === self.location.origin);
+      const scopedClient = clientList.find((client) => client.url.startsWith(self.registration.scope));
+      const existingClient = scopedClient
+        || clientList.find((client) => new URL(client.url).origin === self.location.origin);
 
       if (existingClient) {
         await existingClient.navigate(destination.href);

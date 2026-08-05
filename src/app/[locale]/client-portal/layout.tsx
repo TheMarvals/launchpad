@@ -83,7 +83,7 @@ export default async function ClientPortalLayout({
               <div className="text-caption text-muted truncate">{session.user.email}</div>
             </div>
           </div>
-          <PushNotificationControl locale={locale} />
+          <PushNotificationControl locale={locale} scope={`/${locale}/client-portal`} />
           <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }); }}>
             <button title={t('logout')} className="text-muted hover:text-primary transition-colors cursor-pointer">
               <span className="material-icons text-[18px]">logout</span>
@@ -100,7 +100,7 @@ export default async function ClientPortalLayout({
             <h1 className="text-2xl font-black tracking-tighter stroke-text">LAUNCHPAD</h1>
           </div>
           <div className="flex items-center">
-            <PushNotificationControl locale={locale} />
+            <PushNotificationControl locale={locale} scope={`/${locale}/client-portal`} />
             <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }); }}>
               <button className="w-10 h-10 flex items-center justify-center text-muted hover:text-primary transition-colors cursor-pointer" title={t('logout')}><span className="material-icons">logout</span></button>
             </form>

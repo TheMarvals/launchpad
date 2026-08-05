@@ -10,13 +10,6 @@ export const metadata: Metadata = {
   title: "LAUNCHPAD · Admin Panel",
   description: "Plataforma administrativa y centro de productividad integral de LAUNCHPAD.",
   metadataBase: new URL(process.env.SITE_ORIGIN || 'https://thelaunchpad.help'),
-  applicationName: 'LAUNCHPAD',
-  manifest: '/manifest.webmanifest',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'LAUNCHPAD',
-  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -63,7 +56,7 @@ export default async function RootLayout({
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
       </head>
       <body className="min-h-full flex flex-col bg-canvas text-ink" suppressHydrationWarning>
-        <PWARegistration />
+        <PWARegistration scope={`/${locale}/dashboard`} />
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>

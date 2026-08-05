@@ -2,6 +2,8 @@
 
 LAUNCHPAD stores one Web Push subscription per browser/device and associates it with the authenticated user. Push delivery requires HTTPS in production and the following server environment variables:
 
+The installable PWA is exposed only from the localized admin dashboard. Its manifest and service-worker scope are limited to `/es/dashboard` or `/en/dashboard`; the public landing page is not part of the installed application. Existing root-scoped installations are migrated when they next load the site. Depending on the mobile browser, users may need to remove and reinstall the home-screen icon once for the new manifest scope to be reflected.
+
 ```dotenv
 VAPID_PUBLIC_KEY=
 VAPID_PRIVATE_KEY=

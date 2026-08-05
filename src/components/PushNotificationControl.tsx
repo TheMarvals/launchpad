@@ -2,9 +2,28 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
+const PUSH_MIGRATION_KEY = 'launchpad:push-scope-migration';
+
+function hasPendingPushMigration() {
+  try {
+    return window.localStorage.getItem(PUSH_MIGRATION_KEY) === 'pending';
+  } catch {
+    return false;
+  }
+}
+
+function clearPendingPushMigration() {
+  try {
+    window.localStorage.removeItem(PUSH_MIGRATION_KEY);
+  } catch {
+    // Ignore unavailable storage; the active scoped subscription is enough.
+  }
+}
+
 interface PushStatusResponse {
   configured: boolean;
   publicKey: string | null;
+  subscribed: boolean;
 }
 
 function urlBase64ToUint8Array(base64String: string) {
@@ -14,17 +33,41 @@ function urlBase64ToUint8Array(base64String: string) {
   return Uint8Array.from([...rawData].map((character) => character.charCodeAt(0)));
 }
 
-async function getServiceWorkerRegistration() {
-  const existingRegistration = await navigator.serviceWorker.getRegistration('/');
+function normalizeScope(scope: string) {
+  const withLeadingSlash = scope.startsWith('/') ? scope : `/${scope}`;
+  return withLeadingSlash.length > 1 ? withLeadingSlash.replace(/\/+$/, '') : '/';
+}
+
+async function findScopedServiceWorkerRegistration(scope: string) {
+  const expectedScope = new URL(normalizeScope(scope), window.location.origin).href;
+  const registrations = await navigator.serviceWorker.getRegistrations();
+  return registrations.find((registration) => registration.scope === expectedScope) ?? null;
+}
+
+async function getServiceWorkerRegistration(scope: string) {
+  const existingRegistration = await findScopedServiceWorkerRegistration(scope);
   if (existingRegistration) return existingRegistration;
 
   return navigator.serviceWorker.register('/sw.js', {
-    scope: '/',
+    scope: normalizeScope(scope),
     updateViaCache: 'none',
   });
 }
 
-export default function PushNotificationControl({ locale }: { locale: string }) {
+async function persistSubscription(subscription: PushSubscription) {
+  const response = await fetch('/api/push/subscriptions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(subscription.toJSON()),
+  });
+
+  if (!response.ok) {
+    const result = await response.json().catch(() => null) as { error?: string } | null;
+    throw new Error(result?.error || 'Unable to save push subscription');
+  }
+}
+
+export default function PushNotificationControl({ locale, scope }: { locale: string; scope: string }) {
   const [configured, setConfigured] = useState(false);
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
@@ -47,8 +90,30 @@ export default function PushNotificationControl({ locale }: { locale: string }) 
         if (!response.ok) throw new Error('Unable to load push settings');
 
         const status = await response.json() as PushStatusResponse;
-        const registration = await navigator.serviceWorker.getRegistration('/');
-        const currentSubscription = await registration?.pushManager.getSubscription() ?? null;
+        let registration = await findScopedServiceWorkerRegistration(scope);
+        let currentSubscription = await registration?.pushManager.getSubscription() ?? null;
+        const migrationPending = hasPendingPushMigration();
+
+        // Migrate users who had enabled Push on the former root-scoped worker.
+        // Notification permission is already granted, so this does not prompt.
+        if (
+          !currentSubscription
+          && (status.subscribed || migrationPending)
+          && status.configured
+          && status.publicKey
+          && Notification.permission === 'granted'
+        ) {
+          registration = registration || await getServiceWorkerRegistration(scope);
+          currentSubscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(status.publicKey),
+          });
+          await persistSubscription(currentSubscription);
+        }
+
+        if (currentSubscription) {
+          clearPendingPushMigration();
+        }
 
         setConfigured(status.configured);
         setPublicKey(status.publicKey);
@@ -60,7 +125,7 @@ export default function PushNotificationControl({ locale }: { locale: string }) 
     };
 
     void loadStatus();
-  }, [isSpanish, supported]);
+  }, [isSpanish, scope, supported]);
 
   const enableNotifications = async () => {
     if (!publicKey) return;
@@ -70,23 +135,14 @@ export default function PushNotificationControl({ locale }: { locale: string }) 
       throw new Error(isSpanish ? 'Permiso de notificaciones denegado' : 'Notification permission denied');
     }
 
-    const registration = await getServiceWorkerRegistration();
+    const registration = await getServiceWorkerRegistration(scope);
     const currentSubscription = await registration.pushManager.getSubscription();
     const nextSubscription = currentSubscription || await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(publicKey),
     });
 
-    const response = await fetch('/api/push/subscriptions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(nextSubscription.toJSON()),
-    });
-
-    if (!response.ok) {
-      const result = await response.json().catch(() => null) as { error?: string } | null;
-      throw new Error(result?.error || 'Unable to save push subscription');
-    }
+    await persistSubscription(nextSubscription);
 
     setSubscription(nextSubscription);
   };

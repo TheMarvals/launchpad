@@ -1,0 +1,27 @@
+{
+  "id": "/",
+  "name": "LAUNCHPAD · Panel Administrativo",
+  "short_name": "LAUNCHPAD",
+  "description": "Panel administrativo y centro de productividad de LAUNCHPAD.",
+  "start_url": "/es/dashboard",
+  "scope": "/es/dashboard",
+  "display": "standalone",
+  "background_color": "#131314",
+  "theme_color": "#131314",
+  "orientation": "any",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
