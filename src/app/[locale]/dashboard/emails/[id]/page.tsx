@@ -5,6 +5,7 @@ import { useRouter } from '@/i18n/routing';
 import { getEmailById, deleteEmail } from '@/app/actions/emails';
 import { format } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
+import EmailHtmlFrame from '@/components/emails/EmailHtmlFrame';
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -227,9 +228,12 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 text-body prose prose-sm max-w-none">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 text-body">
         {email.htmlBody ? (
-          <div dangerouslySetInnerHTML={{ __html: email.htmlBody }} />
+          <EmailHtmlFrame
+            html={email.htmlBody}
+            title={locale === 'es' ? `Contenido de ${email.subject || 'correo'}` : `Content of ${email.subject || 'email'}`}
+          />
         ) : email.textBody ? (
           <pre className="whitespace-pre-wrap font-sans text-sm">{email.textBody}</pre>
         ) : (
