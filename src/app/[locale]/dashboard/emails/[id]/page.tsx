@@ -13,7 +13,7 @@ function getErrorMessage(error: unknown, fallback: string) {
 function deliveryLabel(status: string | null, locale: string) {
   const labels: Record<string, [string, string]> = {
     SENT: ['Enviado', 'Sent'],
-    DELIVERED: ['Entregado al servidor', 'Delivered to server'],
+    DELIVERED: ['Aceptado por el servidor', 'Accepted by recipient server'],
     DELAYED: ['Entrega demorada', 'Delivery delayed'],
     BOUNCED: ['Correo rebotado', 'Email bounced'],
     FAILED: ['Envío fallido', 'Delivery failed'],
@@ -206,6 +206,8 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
             <div>
               <div className="font-bold text-ink text-sm">{email.from}</div>
               <div className="text-xs text-muted">Para: {email.to}</div>
+              {email.cc && <div className="text-xs text-muted">CC: {email.cc}</div>}
+              {email.bcc && <div className="text-xs text-muted">{locale === 'es' ? 'CCO' : 'BCC'}: {email.bcc}</div>}
             </div>
           </div>
           <div className="text-xs text-muted sm:text-right shrink-0">

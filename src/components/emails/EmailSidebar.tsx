@@ -26,7 +26,7 @@ const DELIVERY_ICONS: Record<string, string> = {
 function deliveryLabel(status: string | null, locale: string) {
   const labels: Record<string, [string, string]> = {
     SENT: ['Enviado', 'Sent'],
-    DELIVERED: ['Entregado', 'Delivered'],
+    DELIVERED: ['Aceptado por servidor', 'Accepted by server'],
     DELAYED: ['Demorado', 'Delayed'],
     BOUNCED: ['Rebotado', 'Bounced'],
     FAILED: ['Fallido', 'Failed'],

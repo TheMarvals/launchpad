@@ -519,21 +519,23 @@ model CompanyProfile {
 }
 
 model EmailMessage {
-  id                String   @id @default(uuid())
-  messageId         String?  @unique
-  providerEmailId   String?  @unique
+  id                String    @id @default(uuid())
+  messageId         String?   @unique
+  providerEmailId   String?   @unique
   senderIdentityId  String?
   from              String
   to                String
+  cc                String?
+  bcc               String?
   subject           String?
-  textBody          String?  @db.Text
-  htmlBody          String?  @db.Text
-  direction         String   @default("INBOUND") // INBOUND or OUTBOUND
-  status            String   @default("UNREAD") // UNREAD, READ, REPLIED
+  textBody          String?   @db.Text
+  htmlBody          String?   @db.Text
+  direction         String    @default("INBOUND") // INBOUND or OUTBOUND
+  status            String    @default("UNREAD") // UNREAD, READ, REPLIED, SENT
   deliveryStatus    String? // SENT, DELIVERED, DELAYED, BOUNCED, FAILED, COMPLAINED, SUPPRESSED
   deliveryUpdatedAt DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   attachments    EmailAttachment[]
   senderIdentity EmailSenderIdentity? @relation(fields: [senderIdentityId], references: [id], onDelete: SetNull)

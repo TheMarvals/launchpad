@@ -5,6 +5,7 @@ import { auth } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { sendEmailReply } from '@/lib/email-replies';
 import { findActiveSenderIdentity } from '@/lib/email-sender-identities';
+import { syncOutboundEmailDeliveryStatus } from '@/lib/email-delivery-status';
 
 export async function getEmails() {
   const session = await auth();
@@ -25,6 +26,25 @@ export async function getEmails() {
   });
 
   return emails;
+}
+
+export async function getActiveEmailSenderIdentities() {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Unauthorized');
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true, permissions: true, isActive: true },
+  });
+
+  if (!dbUser?.isActive || dbUser.role !== 'ADMIN' || !dbUser.permissions.includes('emails')) {
+    throw new Error('Forbidden');
+  }
+
+  return prisma.emailSenderIdentity.findMany({
+    where: { isActive: true },
+    orderBy: { email: 'asc' },
+  });
 }
 
 export async function getEmailById(id: string) {
@@ -52,6 +72,13 @@ export async function getEmailById(id: string) {
 
   if (!email) throw new Error('Email not found');
 
+  const syncedDelivery = email.direction === 'OUTBOUND'
+    ? await syncOutboundEmailDeliveryStatus(email)
+    : {
+        deliveryStatus: email.deliveryStatus,
+        deliveryUpdatedAt: email.deliveryUpdatedAt,
+      };
+
   // Mark as read if INBOUND and UNREAD
   if (email.direction === 'INBOUND' && email.status === 'UNREAD') {
     await prisma.emailMessage.update({
@@ -64,7 +91,7 @@ export async function getEmailById(id: string) {
     ? await findActiveSenderIdentity(email.to)
     : null;
 
-  return { ...email, replySenderIdentity };
+  return { ...email, ...syncedDelivery, replySenderIdentity };
 }
 
 export async function replyToEmail(originalEmailId: string, replyBody: string) {
