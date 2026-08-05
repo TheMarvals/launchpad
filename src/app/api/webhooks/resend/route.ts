@@ -1,9 +1,26 @@
 import { NextResponse } from 'next/server';
-import { Resend, type EmailReceivedEvent } from 'resend';
+import { Resend, type WebhookEventPayload } from 'resend';
 import { prisma } from '@/lib/prisma';
 import { notifyAdminsWithPermission } from '@/lib/push-notifications';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+const DELIVERY_EVENT_STATUS = {
+  'email.sent': 'SENT',
+  'email.delivered': 'DELIVERED',
+  'email.delivery_delayed': 'DELAYED',
+  'email.bounced': 'BOUNCED',
+  'email.failed': 'FAILED',
+  'email.complained': 'COMPLAINED',
+  'email.suppressed': 'SUPPRESSED',
+} as const;
+
+type DeliveryEventType = keyof typeof DELIVERY_EVENT_STATUS;
+type DeliveryEvent = Extract<WebhookEventPayload, { type: DeliveryEventType }>;
+
+function isDeliveryEvent(event: WebhookEventPayload): event is DeliveryEvent {
+  return Object.prototype.hasOwnProperty.call(DELIVERY_EVENT_STATUS, event.type);
+}
 
 function emailExcerpt(text: string) {
   const normalized = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -18,7 +35,7 @@ async function verifyWebhook(request: Request, rawBody: string) {
       throw new Error('RESEND_WEBHOOK_SECRET is not configured');
     }
 
-    return JSON.parse(rawBody) as EmailReceivedEvent;
+    return JSON.parse(rawBody) as WebhookEventPayload;
   }
 
   return resend.webhooks.verify({
@@ -41,6 +58,26 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('[Resend Webhook] Verification failed:', error instanceof Error ? error.message : error);
     return NextResponse.json({ error: 'Invalid webhook' }, { status: 400 });
+  }
+
+  if (isDeliveryEvent(event)) {
+    const eventTimestamp = new Date(event.created_at);
+    const result = await prisma.emailMessage.updateMany({
+      where: {
+        providerEmailId: event.data.email_id,
+        direction: 'OUTBOUND',
+        OR: [
+          { deliveryUpdatedAt: null },
+          { deliveryUpdatedAt: { lte: eventTimestamp } },
+        ],
+      },
+      data: {
+        deliveryStatus: DELIVERY_EVENT_STATUS[event.type],
+        deliveryUpdatedAt: eventTimestamp,
+      },
+    });
+
+    return NextResponse.json({ success: true, matched: result.count > 0 });
   }
 
   if (event.type !== 'email.received') {

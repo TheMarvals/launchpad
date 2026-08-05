@@ -519,20 +519,39 @@ model CompanyProfile {
 }
 
 model EmailMessage {
-  id              String   @id @default(uuid())
-  messageId       String?  @unique
-  providerEmailId String?  @unique
-  from            String
-  to              String
-  subject         String?
-  textBody        String?  @db.Text
-  htmlBody        String?  @db.Text
-  direction       String   @default("INBOUND") // INBOUND or OUTBOUND
-  status          String   @default("UNREAD") // UNREAD, READ, REPLIED
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                String   @id @default(uuid())
+  messageId         String?  @unique
+  providerEmailId   String?  @unique
+  senderIdentityId  String?
+  from              String
+  to                String
+  subject           String?
+  textBody          String?  @db.Text
+  htmlBody          String?  @db.Text
+  direction         String   @default("INBOUND") // INBOUND or OUTBOUND
+  status            String   @default("UNREAD") // UNREAD, READ, REPLIED
+  deliveryStatus    String? // SENT, DELIVERED, DELAYED, BOUNCED, FAILED, COMPLAINED, SUPPRESSED
+  deliveryUpdatedAt DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  attachments EmailAttachment[]
+  attachments    EmailAttachment[]
+  senderIdentity EmailSenderIdentity? @relation(fields: [senderIdentityId], references: [id], onDelete: SetNull)
+
+  @@index([senderIdentityId])
+  @@index([deliveryStatus])
+}
+
+model EmailSenderIdentity {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  displayName String
+  signature   String   @default("") @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  messages EmailMessage[]
 }
 
 model EmailAttachment {

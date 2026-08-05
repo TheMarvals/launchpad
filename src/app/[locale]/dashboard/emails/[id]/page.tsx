@@ -10,6 +10,21 @@ function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
+function deliveryLabel(status: string | null, locale: string) {
+  const labels: Record<string, [string, string]> = {
+    SENT: ['Enviado', 'Sent'],
+    DELIVERED: ['Entregado al servidor', 'Delivered to server'],
+    DELAYED: ['Entrega demorada', 'Delivery delayed'],
+    BOUNCED: ['Correo rebotado', 'Email bounced'],
+    FAILED: ['Envío fallido', 'Delivery failed'],
+    COMPLAINED: ['Marcado como spam', 'Marked as spam'],
+    SUPPRESSED: ['Envío suprimido', 'Delivery suppressed'],
+  };
+
+  if (!status || !labels[status]) return locale === 'es' ? 'Estado pendiente' : 'Status pending';
+  return locale === 'es' ? labels[status][0] : labels[status][1];
+}
+
 export default function EmailDetailPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale, id } = use(params);
   const router = useRouter();
@@ -199,6 +214,11 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
               <span className="bg-canvas-elevated px-2 py-0.5 text-[9px] uppercase font-bold rounded-sm border border-hairline">
                 {email.direction}
               </span>
+              {email.direction === 'OUTBOUND' && (
+                <span className={`px-2 py-0.5 text-[9px] uppercase font-bold rounded-sm border ${['BOUNCED', 'FAILED', 'COMPLAINED', 'SUPPRESSED'].includes(email.deliveryStatus || '') ? 'text-red-400 border-red-400/30' : email.deliveryStatus === 'DELIVERED' ? 'text-emerald-400 border-emerald-400/30' : 'text-muted border-hairline'}`}>
+                  {deliveryLabel(email.deliveryStatus, locale)}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -261,11 +281,33 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
       {email.direction === 'INBOUND' && (
         <div className="p-4 md:p-6 border-t border-hairline bg-canvas-elevated/20 shrink-0">
           <form onSubmit={handleReply} className="max-w-4xl">
+            {email.replySenderIdentity ? (
+              <div className="mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+                <span className="text-muted">
+                  {locale === 'es' ? 'Responder como' : 'Reply as'}:{' '}
+                  <strong className="text-ink">{email.replySenderIdentity.displayName}</strong>{' '}
+                  &lt;{email.replySenderIdentity.email}&gt;
+                </span>
+                {email.replySenderIdentity.signature && (
+                  <span className="text-muted">
+                    <span className="material-icons text-[14px] align-middle mr-1">draw</span>
+                    {locale === 'es' ? 'Firma automática activa' : 'Automatic signature enabled'}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <div className="mb-3 border border-amber-400/30 bg-amber-400/10 p-3 text-xs text-amber-300">
+                {locale === 'es'
+                  ? `No hay una identidad activa configurada para ${email.to}. Agrégala en Configuración → Remitentes de correo.`
+                  : `There is no active identity configured for ${email.to}. Add it under Settings → Email senders.`}
+              </div>
+            )}
             <textarea
               className="w-full bg-canvas border border-hairline p-3 rounded-sm min-h-[100px] focus:outline-none focus:border-primary text-sm shadow-sm"
               placeholder={locale === 'es' ? 'Escribe tu respuesta aquí...' : 'Write your reply here...'}
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
+              disabled={!email.replySenderIdentity}
             />
 
             {selectedFiles.length > 0 && (
@@ -304,7 +346,7 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={sending || selectedFiles.length >= 10}
+                  disabled={sending || selectedFiles.length >= 10 || !email.replySenderIdentity}
                   className="inline-flex items-center gap-2 px-3 py-2 border border-hairline rounded-sm text-xs font-semibold text-muted hover:text-ink hover:border-primary transition-colors disabled:opacity-50"
                 >
                   <span className="material-icons text-[17px]">attach_file</span>
@@ -316,7 +358,7 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
               </div>
               <button
                 type="submit"
-                disabled={sending || (!replyText.trim() && selectedFiles.length === 0)}
+                disabled={sending || !email.replySenderIdentity || (!replyText.trim() && selectedFiles.length === 0)}
                 className="bg-primary text-on-primary px-5 py-2 rounded-sm font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 shadow-sm"
               >
                 {sending ? (

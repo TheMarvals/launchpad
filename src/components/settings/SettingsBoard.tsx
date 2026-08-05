@@ -1,47 +1,35 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import type { getAdmins, getCompanyProfile } from '@/app/actions/settings';
+import type { getProductivitySettings } from '@/app/actions/productivity';
 import CompanyProfileBoard from './CompanyProfileBoard';
 import TeamManagementBoard from './TeamManagementBoard';
 import ProductivitySettingsBoard from '../productivity/ProductivitySettingsBoard';
 import CloudinaryCleanupBoard from './CloudinaryCleanupBoard';
 import PartnersManager from './PartnersManager';
 import PrismaMetricsBoard from './PrismaMetricsBoard';
+import EmailSenderIdentitiesBoard from './EmailSenderIdentitiesBoard';
+import type { EmailSenderIdentity } from '@prisma/client';
 
 interface SettingsBoardProps {
-  initialProfile: any;
-  initialAdmins: any[];
-  initialProductivitySettings: any;
+  initialProfile: Awaited<ReturnType<typeof getCompanyProfile>>;
+  initialAdmins: Awaited<ReturnType<typeof getAdmins>>;
+  initialProductivitySettings: Awaited<ReturnType<typeof getProductivitySettings>>;
+  initialEmailSenderIdentities: EmailSenderIdentity[];
   currentUserId?: string;
 }
 
-export default function SettingsBoard({ initialProfile, initialAdmins, initialProductivitySettings, currentUserId }: SettingsBoardProps) {
+export default function SettingsBoard({ initialProfile, initialAdmins, initialProductivitySettings, initialEmailSenderIdentities, currentUserId }: SettingsBoardProps) {
   const t = useTranslations('Settings');
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'company');
+  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'company');
 
-  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-
-  // Sync tab when search params change
-  useEffect(() => {
-    const tabFromUrl = searchParams.get('tab');
-    if (tabFromUrl) {
-      setActiveTab(tabFromUrl);
-    }
-  }, [searchParams]);
-
-  // Smooth scroll to the active tab button
-  useEffect(() => {
-    const btn = tabRefs.current[activeTab];
-    if (btn) {
-      btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }
-  }, [activeTab]);
-
-  const setTabRef = (tab: string) => (el: HTMLButtonElement | null) => {
-    tabRefs.current[tab] = el;
+  const selectTab = (tab: string, button: HTMLButtonElement) => {
+    setActiveTab(tab);
+    button.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   };
 
   return (
@@ -53,8 +41,7 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
 
       <div className="flex space-x-sm border-b border-hairline mb-xs overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <button
-          ref={setTabRef('company')}
-          onClick={() => setActiveTab('company')}
+          onClick={(event) => selectTab('company', event.currentTarget)}
           className={`py-xs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
             activeTab === 'company' 
               ? 'border-primary text-primary' 
@@ -64,8 +51,7 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
           {t('tabs.company')}
         </button>
         <button
-          ref={setTabRef('team')}
-          onClick={() => setActiveTab('team')}
+          onClick={(event) => selectTab('team', event.currentTarget)}
           className={`py-xs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
             activeTab === 'team' 
               ? 'border-primary text-primary' 
@@ -75,8 +61,17 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
           {t('tabs.team')}
         </button>
         <button
-          ref={setTabRef('productivity')}
-          onClick={() => setActiveTab('productivity')}
+          onClick={(event) => selectTab('emailSenders', event.currentTarget)}
+          className={`py-xs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
+            activeTab === 'emailSenders'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted hover:text-ink'
+          }`}
+        >
+          {t('tabs.emailSenders')}
+        </button>
+        <button
+          onClick={(event) => selectTab('productivity', event.currentTarget)}
           className={`py-xs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
             activeTab === 'productivity' 
               ? 'border-primary text-primary' 
@@ -86,8 +81,7 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
           {t('tabs.productivity')}
         </button>
         <button
-          ref={setTabRef('cleanup')}
-          onClick={() => setActiveTab('cleanup')}
+          onClick={(event) => selectTab('cleanup', event.currentTarget)}
           className={`py-xs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
             activeTab === 'cleanup' 
               ? 'border-primary text-primary' 
@@ -97,8 +91,7 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
           {t('tabs.cleanup')}
         </button>
         <button
-          ref={setTabRef('partners')}
-          onClick={() => setActiveTab('partners')}
+          onClick={(event) => selectTab('partners', event.currentTarget)}
           className={`py-xs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
             activeTab === 'partners' 
               ? 'border-primary text-primary' 
@@ -108,8 +101,7 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
           {t('tabs.partners')}
         </button>
         <button
-          ref={setTabRef('prisma')}
-          onClick={() => setActiveTab('prisma')}
+          onClick={(event) => selectTab('prisma', event.currentTarget)}
           className={`py-xs text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
             activeTab === 'prisma' 
               ? 'border-primary text-primary' 
@@ -126,6 +118,9 @@ export default function SettingsBoard({ initialProfile, initialAdmins, initialPr
         )}
         {activeTab === 'team' && (
           <TeamManagementBoard initialAdmins={initialAdmins} currentUserId={currentUserId} />
+        )}
+        {activeTab === 'emailSenders' && (
+          <EmailSenderIdentitiesBoard initialIdentities={initialEmailSenderIdentities} />
         )}
         {activeTab === 'productivity' && (
           <ProductivitySettingsBoard initialSettings={initialProductivitySettings} />

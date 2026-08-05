@@ -1,5 +1,10 @@
 import { Resend } from 'resend';
 import { prisma } from '@/lib/prisma';
+import {
+  appendEmailSignature,
+  findActiveSenderIdentity,
+  formatSenderAddress,
+} from '@/lib/email-sender-identities';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -8,24 +13,6 @@ export interface EmailReplyAttachment {
   contentType: string;
   sizeBytes: number;
   content: Buffer;
-}
-
-function getReplySender(recipient: string) {
-  const firstRecipient = recipient.split(',')[0]?.trim() || '';
-  const emailMatch = firstRecipient.match(/<([^>]+)>/);
-  let email = emailMatch?.[1] || firstRecipient;
-
-  if (!email.includes('@')) {
-    email = process.env.USERM || 'soporte@thelaunchpad.help';
-  }
-
-  const prefix = email.split('@')[0];
-  const departmentName = prefix.charAt(0).toUpperCase() + prefix.slice(1);
-
-  return {
-    email,
-    formatted: `LAUNCHPAD ${departmentName} <${email}>`,
-  };
 }
 
 export async function sendEmailReply(
@@ -40,16 +27,22 @@ export async function sendEmailReply(
   if (!originalEmail) throw new Error('Original email not found');
   if (originalEmail.direction !== 'INBOUND') throw new Error('Only inbound emails can be replied to');
 
-  const sender = getReplySender(originalEmail.to || '');
+  const sender = await findActiveSenderIdentity(originalEmail.to || '');
+  if (!sender) {
+    throw new Error(`No hay un remitente activo configurado para ${originalEmail.to}`);
+  }
+
+  const finalReplyBody = appendEmailSignature(replyBody, sender.signature);
   const subject = originalEmail.subject?.toLowerCase().startsWith('re:')
     ? originalEmail.subject
     : `Re: ${originalEmail.subject || ''}`;
 
   const response = await resend.emails.send({
-    from: sender.formatted,
+    from: formatSenderAddress(sender.displayName, sender.email),
     to: originalEmail.from,
+    replyTo: sender.email,
     subject,
-    text: replyBody,
+    text: finalReplyBody,
     headers: originalEmail.messageId
       ? {
           'In-Reply-To': originalEmail.messageId,
@@ -63,6 +56,13 @@ export async function sendEmailReply(
           content: attachment.content,
         }))
       : undefined,
+    tags: [
+      { name: 'category', value: 'platform_reply' },
+      {
+        name: 'sender',
+        value: sender.email.split('@')[0].replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 256),
+      },
+    ],
   });
 
   if (response.error || !response.data) {
@@ -78,12 +78,15 @@ export async function sendEmailReply(
   const outboundEmail = await prisma.$transaction(async (transaction) => {
     const createdEmail = await transaction.emailMessage.create({
       data: {
+        senderIdentityId: sender.id,
         from: sender.email,
         to: originalEmail.from,
         subject,
-        textBody: replyBody,
+        textBody: finalReplyBody,
         direction: 'OUTBOUND',
         status: 'REPLIED',
+        deliveryStatus: 'SENT',
+        deliveryUpdatedAt: new Date(),
         providerEmailId,
         attachments: {
           create: attachments.map((attachment, index) => ({

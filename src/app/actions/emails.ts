@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { sendEmailReply } from '@/lib/email-replies';
+import { findActiveSenderIdentity } from '@/lib/email-sender-identities';
 
 export async function getEmails() {
   const session = await auth();
@@ -45,6 +46,7 @@ export async function getEmailById(id: string) {
       attachments: {
         orderBy: { createdAt: 'asc' },
       },
+      senderIdentity: true,
     },
   });
 
@@ -58,7 +60,11 @@ export async function getEmailById(id: string) {
     });
   }
 
-  return email;
+  const replySenderIdentity = email.direction === 'INBOUND'
+    ? await findActiveSenderIdentity(email.to)
+    : null;
+
+  return { ...email, replySenderIdentity };
 }
 
 export async function replyToEmail(originalEmailId: string, replyBody: string) {

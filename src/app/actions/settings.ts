@@ -4,6 +4,11 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
+import type { CompanyProfile } from '@prisma/client';
+import {
+  validateSenderIdentityInput,
+  type EmailSenderIdentityInput,
+} from '@/lib/email-sender-identities';
 
 /**
  * Ensures the user is an ADMIN before allowing access.
@@ -53,13 +58,32 @@ export async function getCompanyProfile() {
   return profile;
 }
 
-export async function updateCompanyProfile(data: any) {
+type CompanyProfileFormData = Pick<
+  CompanyProfile,
+  | 'taxIdLabel'
+  | 'taxId'
+  | 'email'
+  | 'systemsTitle'
+  | 'systemsSubtitle'
+  | 'brandNameHeader'
+  | 'brandNameFooter'
+  | 'address'
+>;
+
+export async function updateCompanyProfile(data: CompanyProfileFormData) {
   const user = await ensureAdmin();
-  // Strip out relation before update to prevent Prisma crash
-  const { user: userRelation, ...profileData } = data;
   const profile = await prisma.companyProfile.update({
     where: { userId: user.id },
-    data: profileData,
+    data: {
+      taxIdLabel: data.taxIdLabel,
+      taxId: data.taxId,
+      email: data.email,
+      systemsTitle: data.systemsTitle,
+      systemsSubtitle: data.systemsSubtitle,
+      brandNameHeader: data.brandNameHeader,
+      brandNameFooter: data.brandNameFooter,
+      address: data.address,
+    },
     include: {
       user: {
         select: {
@@ -73,6 +97,60 @@ export async function updateCompanyProfile(data: any) {
   });
   revalidatePath('/dashboard/settings');
   return profile;
+}
+
+// --- EMAIL SENDER IDENTITIES ---
+
+export async function getEmailSenderIdentities() {
+  await ensureAdmin();
+  return prisma.emailSenderIdentity.findMany({
+    orderBy: [{ isActive: 'desc' }, { email: 'asc' }],
+  });
+}
+
+export async function createEmailSenderIdentity(data: EmailSenderIdentityInput) {
+  await ensureAdmin();
+  const normalized = validateSenderIdentityInput(data);
+  const existingIdentity = await prisma.emailSenderIdentity.findUnique({
+    where: { email: normalized.email },
+  });
+
+  if (existingIdentity) {
+    throw new Error('Ya existe una identidad para este correo');
+  }
+
+  const identity = await prisma.emailSenderIdentity.create({ data: normalized });
+  revalidatePath('/dashboard/settings');
+  return identity;
+}
+
+export async function updateEmailSenderIdentity(id: string, data: EmailSenderIdentityInput) {
+  await ensureAdmin();
+  const normalized = validateSenderIdentityInput(data);
+  const existingIdentity = await prisma.emailSenderIdentity.findFirst({
+    where: {
+      email: normalized.email,
+      id: { not: id },
+    },
+  });
+
+  if (existingIdentity) {
+    throw new Error('Ya existe otra identidad para este correo');
+  }
+
+  const identity = await prisma.emailSenderIdentity.update({
+    where: { id },
+    data: normalized,
+  });
+  revalidatePath('/dashboard/settings');
+  return identity;
+}
+
+export async function deleteEmailSenderIdentity(id: string) {
+  await ensureAdmin();
+  await prisma.emailSenderIdentity.delete({ where: { id } });
+  revalidatePath('/dashboard/settings');
+  return { success: true };
 }
 
 // --- TEAM MANAGEMENT (ADMINS) ---

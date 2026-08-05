@@ -13,6 +13,31 @@ type EmailSidebarProps = {
   mobileHidden?: boolean;
 };
 
+const DELIVERY_ICONS: Record<string, string> = {
+  SENT: 'schedule_send',
+  DELIVERED: 'done_all',
+  DELAYED: 'schedule',
+  BOUNCED: 'error',
+  FAILED: 'error',
+  COMPLAINED: 'report',
+  SUPPRESSED: 'block',
+};
+
+function deliveryLabel(status: string | null, locale: string) {
+  const labels: Record<string, [string, string]> = {
+    SENT: ['Enviado', 'Sent'],
+    DELIVERED: ['Entregado', 'Delivered'],
+    DELAYED: ['Demorado', 'Delayed'],
+    BOUNCED: ['Rebotado', 'Bounced'],
+    FAILED: ['Fallido', 'Failed'],
+    COMPLAINED: ['Marcado como spam', 'Marked as spam'],
+    SUPPRESSED: ['Suprimido', 'Suppressed'],
+  };
+
+  if (!status || !labels[status]) return locale === 'es' ? 'Estado pendiente' : 'Status pending';
+  return locale === 'es' ? labels[status][0] : labels[status][1];
+}
+
 export default function EmailSidebar({ initialEmails, locale, mobileHidden = false }: EmailSidebarProps) {
   const [activeTab, setActiveTab] = useState<'inbox' | 'sent'>('inbox');
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -125,6 +150,15 @@ export default function EmailSidebar({ initialEmails, locale, mobileHidden = fal
                       <h3 className={`text-xs truncate ${email.status === 'UNREAD' && activeTab === 'inbox' ? 'font-bold text-ink' : 'text-muted'}`}>
                         {email.subject || '(Sin asunto)'}
                       </h3>
+                      {activeTab === 'sent' && (
+                        <span
+                          className={`material-icons text-[14px] shrink-0 ${['BOUNCED', 'FAILED', 'COMPLAINED', 'SUPPRESSED'].includes(email.deliveryStatus || '') ? 'text-red-400' : email.deliveryStatus === 'DELIVERED' ? 'text-emerald-400' : 'text-muted'}`}
+                          title={deliveryLabel(email.deliveryStatus, locale)}
+                          aria-label={deliveryLabel(email.deliveryStatus, locale)}
+                        >
+                          {DELIVERY_ICONS[email.deliveryStatus || ''] || 'schedule'}
+                        </span>
+                      )}
                     </div>
                   </Link>
                   
