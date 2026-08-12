@@ -378,7 +378,7 @@ export default function FileManagerPage() {
             <span className="material-icons text-[18px]">folder_open</span>
             <span className="text-[10px] font-black uppercase tracking-[0.4em]">Explorador de Archivos</span>
           </div>
-          <div className="text-slate-300 font-mono text-sm opacity-60 bg-black/30 px-3 py-1.5 rounded-lg border border-white/5 truncate max-w-md">
+          <div className="text-slate-300 font-mono text-sm opacity-60 bg-black/30 px-3 py-1.5 rounded-lg border border-white/5 truncate max-w-[28rem]">
             {currentPath}
           </div>
         </div>
@@ -411,7 +411,7 @@ export default function FileManagerPage() {
 
       {authModal ? (
         <div className="flex-1 flex items-center justify-center p-6 bg-[#0a041a]">
-          <div className="w-full max-w-md bg-slate-900 border border-white/10 rounded-[2.5rem] p-10 shadow-2xl text-center">
+          <div className="w-full max-w-[28rem] bg-slate-900 border border-white/10 rounded-[2.5rem] p-10 shadow-2xl text-center">
             <h2 className="text-2xl font-black text-white mb-2 tracking-tight">Autenticación SFTP</h2>
             <p className="text-slate-400 text-sm mb-8">Ingresa la contraseña del usuario root para acceder a los archivos del servidor.</p>
             

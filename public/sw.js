@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'launchpad-pwa';
-const STATIC_CACHE = `${CACHE_PREFIX}-static-v2`;
+const STATIC_CACHE = `${CACHE_PREFIX}-static-v3`;
 const OFFLINE_URL = '/offline.html';
 const PRECACHE_URLS = [
   OFFLINE_URL,
@@ -73,16 +73,24 @@ self.addEventListener('push', (event) => {
     payload = { body: event.data.text() };
   }
 
-  event.waitUntil(
-    self.registration.showNotification(payload.title || 'LAUNCHPAD', {
+  const showNotification = self.registration.showNotification(payload.title || 'LAUNCHPAD', {
       body: payload.body || '',
       icon: payload.icon || '/icon-192x192.png',
       badge: payload.badge || '/icon-192x192.png',
       tag: payload.tag,
+      renotify: Boolean(payload.tag),
       data: {
         url: payload.url || '/',
       },
-    }),
+    });
+  const notifyOpenClients = payload.type
+    ? self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+        clientList.forEach((client) => client.postMessage({ type: payload.type }));
+      })
+    : Promise.resolve();
+
+  event.waitUntil(
+    Promise.all([showNotification, notifyOpenClients]),
   );
 });
 

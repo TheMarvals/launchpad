@@ -384,7 +384,7 @@ export default function EmptyState({
           <h3 className="text-title-sm font-medium text-ink mb-[4px] empty-state-title">{title}</h3>
         )}
         {message && (
-          <p className="text-sm text-muted/80 leading-relaxed min-w-[250px] max-w-[280px] sm:max-w-md mx-auto px-sm animate-fade-in animation-delay-2">{message}</p>
+          <p className="text-sm text-muted/80 leading-relaxed min-w-[250px] max-w-[280px] sm:max-w-[28rem] mx-auto px-sm animate-fade-in animation-delay-2">{message}</p>
         )}
         {action && (
           <div className="mt-sm empty-state-action">

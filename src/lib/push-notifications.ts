@@ -5,6 +5,7 @@ export interface PushPayload {
   title: string;
   body: string;
   url: string;
+  type?: 'EMAIL_RECEIVED' | 'TICKET_UPDATED';
   icon?: string;
   badge?: string;
   tag?: string;
@@ -58,6 +59,13 @@ export async function sendPushToUsers(userIds: string[], payload: PushPayload) {
     where: { userId: { in: uniqueUserIds } },
   });
 
+  if (subscriptions.length === 0) {
+    console.warn('[Push] No subscribed devices found for notification recipients:', {
+      recipientCount: uniqueUserIds.length,
+      tag: payload.tag,
+    });
+  }
+
   let sent = 0;
   let failed = 0;
 
@@ -82,7 +90,7 @@ export async function sendPushToUsers(userIds: string[], payload: PushPayload) {
       failed += 1;
       const statusCode = getPushStatusCode(error);
 
-      if (statusCode === 404 || statusCode === 410) {
+      if (statusCode && [400, 403, 404, 410].includes(statusCode)) {
         await prisma.pushSubscription.delete({ where: { id: subscription.id } }).catch(() => undefined);
         return;
       }
@@ -94,7 +102,13 @@ export async function sendPushToUsers(userIds: string[], payload: PushPayload) {
     }
   }));
 
-  return { sent, failed, disabled: false };
+  const result = { sent, failed, disabled: false };
+  console.info('[Push] Delivery attempt completed:', {
+    ...result,
+    subscriptionCount: subscriptions.length,
+    tag: payload.tag,
+  });
+  return result;
 }
 
 export async function notifyAdminsWithPermission(

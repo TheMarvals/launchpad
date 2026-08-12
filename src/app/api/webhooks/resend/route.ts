@@ -136,6 +136,7 @@ export async function POST(request: Request) {
       title: `Nuevo correo: ${subject}`,
       body: `${from} · ${emailExcerpt(textBody || htmlBody || 'Nuevo mensaje recibido')}`,
       url: `/dashboard/emails/${email.id}`,
+      type: 'EMAIL_RECEIVED',
       tag: `email-${email.id}`,
     }).catch((error) => console.error('[Resend Webhook] Push notification failed:', error));
 

@@ -67,6 +67,16 @@ async function persistSubscription(subscription: PushSubscription) {
   }
 }
 
+function subscriptionUsesKey(subscription: PushSubscription, publicKey: string) {
+  const subscriptionKey = subscription.options.applicationServerKey;
+  if (!subscriptionKey) return false;
+
+  const expectedKey = urlBase64ToUint8Array(publicKey);
+  const currentKey = new Uint8Array(subscriptionKey);
+  return currentKey.length === expectedKey.length
+    && currentKey.every((value, index) => value === expectedKey[index]);
+}
+
 export default function PushNotificationControl({ locale, scope }: { locale: string; scope: string }) {
   const [configured, setConfigured] = useState(false);
   const [publicKey, setPublicKey] = useState<string | null>(null);
@@ -94,6 +104,16 @@ export default function PushNotificationControl({ locale, scope }: { locale: str
         let currentSubscription = await registration?.pushManager.getSubscription() ?? null;
         const migrationPending = hasPendingPushMigration();
 
+        if (
+          currentSubscription
+          && status.configured
+          && status.publicKey
+          && !subscriptionUsesKey(currentSubscription, status.publicKey)
+        ) {
+          await currentSubscription.unsubscribe();
+          currentSubscription = null;
+        }
+
         // Migrate users who had enabled Push on the former root-scoped worker.
         // Notification permission is already granted, so this does not prompt.
         if (
@@ -108,10 +128,12 @@ export default function PushNotificationControl({ locale, scope }: { locale: str
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(status.publicKey),
           });
-          await persistSubscription(currentSubscription);
         }
 
         if (currentSubscription) {
+          // Refresh the server record on every authenticated load. This repairs
+          // subscriptions after a user change on the same browser/device.
+          await persistSubscription(currentSubscription);
           clearPendingPushMigration();
         }
 

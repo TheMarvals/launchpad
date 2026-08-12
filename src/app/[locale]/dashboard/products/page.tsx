@@ -55,7 +55,7 @@ export default async function ProductsPage({
                       <td className="px-sm py-xs font-medium text-ink text-sm">
                         {product.nombre}
                       </td>
-                      <td className="px-sm py-xs text-body text-muted max-w-xs truncate">
+                      <td className="px-sm py-xs text-body text-muted max-w-[20rem] truncate">
                         {product.descripcion || '—'}
                       </td>
                       <td className="px-sm py-xs text-right font-medium text-ink">

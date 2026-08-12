@@ -73,7 +73,7 @@ export default function VpsEditModal({ server }: { server: any }) {
 
       {isOpen && (
         <div className="fixed inset-0 bg-ink/90 backdrop-blur-md z-50 flex items-center justify-center p-sm">
-          <div className="bg-canvas-elevated border border-hairline w-full max-w-md">
+          <div className="bg-canvas-elevated border border-hairline w-full max-w-[28rem]">
             <div className="p-sm border-b border-hairline flex justify-between items-center">
               <h3 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
                 <span className="material-icons mr-xxs text-primary">dns</span>

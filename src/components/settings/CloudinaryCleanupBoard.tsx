@@ -294,7 +294,7 @@ export default function CloudinaryCleanupBoard() {
       <div className="border-t border-hairline pt-sm">
         <h2 className="text-caption-uppercase text-ink font-semibold mb-xs">{t('testEmailTitle')}</h2>
         <p className="text-body text-muted text-xs mb-sm">{t('testEmailSubtitle')}</p>
-        <div className="flex gap-xxs max-w-md">
+        <div className="flex gap-xxs max-w-[28rem]">
           <input
             type="email"
             value={testEmail}

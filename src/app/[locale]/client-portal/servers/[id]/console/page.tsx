@@ -194,7 +194,7 @@ export default function ConsolePage() {
   if (error) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white p-6">
-        <div className="max-w-md w-full bg-slate-800 border border-slate-700 rounded-2xl p-8 text-center shadow-2xl">
+        <div className="max-w-[28rem] w-full bg-slate-800 border border-slate-700 rounded-2xl p-8 text-center shadow-2xl">
           <span className="material-icons text-red-500 text-6xl mb-4">error_outline</span>
           <h2 className="text-2xl font-bold mb-2">Error de Conexión</h2>
           <p className="text-slate-400 mb-6">{error}</p>

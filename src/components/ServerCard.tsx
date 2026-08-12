@@ -325,7 +325,7 @@ export default function ServerCard({ server }: { server: any }) {
       {/* OTP Modal */}
       {showOtpModal && (
         <div className="fixed inset-0 bg-ink/90 backdrop-blur-md z-50 flex items-center justify-center p-sm">
-          <div className="bg-canvas-elevated border border-hairline w-full max-w-md">
+          <div className="bg-canvas-elevated border border-hairline w-full max-w-[28rem]">
             <div className="p-sm">
               <div className="flex items-center space-x-xxs mb-xs">
                 <div className="w-[40px] h-[40px] bg-semantic-warning/10 flex items-center justify-center text-semantic-warning">

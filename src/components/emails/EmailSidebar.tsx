@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { formatDistanceToNow } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
-import { deleteEmail } from '@/app/actions/emails';
+import { deleteEmail, getEmails } from '@/app/actions/emails';
 import type { EmailMessage } from '@prisma/client';
 
 type EmailSidebarProps = {
@@ -41,12 +41,49 @@ function deliveryLabel(status: string | null, locale: string) {
 export default function EmailSidebar({ initialEmails, locale, mobileHidden = false }: EmailSidebarProps) {
   const [activeTab, setActiveTab] = useState<'inbox' | 'sent'>('inbox');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [emails, setEmails] = useState(initialEmails);
+  const syncInProgress = useRef(false);
   const pathname = usePathname(); // e.g. /dashboard/emails or /dashboard/emails/123
   const router = useRouter();
   const dateLocale = locale === 'es' ? es : enUS;
 
+  const syncEmails = useCallback(async () => {
+    if (syncInProgress.current) return;
+
+    syncInProgress.current = true;
+    try {
+      setEmails(await getEmails());
+    } catch (error) {
+      // Keep the last successful inbox visible during transient network errors.
+      console.error('[Emails] Automatic inbox sync failed:', error);
+    } finally {
+      syncInProgress.current = false;
+    }
+  }, []);
+
+  useEffect(() => {
+    const syncIfVisible = () => {
+      if (document.visibilityState === 'visible') void syncEmails();
+    };
+    const syncAfterPush = (event: MessageEvent) => {
+      if (event.data?.type === 'EMAIL_RECEIVED') void syncEmails();
+    };
+
+    const intervalId = window.setInterval(syncIfVisible, 10_000);
+    window.addEventListener('focus', syncIfVisible);
+    document.addEventListener('visibilitychange', syncIfVisible);
+    navigator.serviceWorker?.addEventListener('message', syncAfterPush);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', syncIfVisible);
+      document.removeEventListener('visibilitychange', syncIfVisible);
+      navigator.serviceWorker?.removeEventListener('message', syncAfterPush);
+    };
+  }, [syncEmails]);
+
   // Filter emails based on the active tab
-  const filteredEmails = initialEmails.filter((email) => {
+  const filteredEmails = emails.filter((email) => {
     if (activeTab === 'inbox') return email.direction === 'INBOUND';
     if (activeTab === 'sent') return email.direction === 'OUTBOUND';
     return true;
@@ -76,13 +113,11 @@ export default function EmailSidebar({ initialEmails, locale, mobileHidden = fal
         >
           {locale === 'es' ? 'Enviados' : 'Sent'}
         </button>
-        <button 
-          onClick={() => router.refresh()}
-          className="absolute right-2 w-8 h-8 flex items-center justify-center text-muted hover:text-ink hover:bg-canvas-elevated rounded-sm transition-colors"
-          title={locale === 'es' ? 'Actualizar' : 'Refresh'}
-        >
-          <span className="material-icons text-[18px]">refresh</span>
-        </button>
+        <span
+          className="absolute right-3 w-2 h-2 rounded-full bg-emerald-400"
+          title={locale === 'es' ? 'Actualización automática activa' : 'Automatic updates active'}
+          aria-label={locale === 'es' ? 'Actualización automática activa' : 'Automatic updates active'}
+        />
       </div>
 
       {/* Email List */}
@@ -111,6 +146,7 @@ export default function EmailSidebar({ initialEmails, locale, mobileHidden = fal
                 setDeletingId(email.id);
                 try {
                   await deleteEmail(email.id);
+                  setEmails((currentEmails) => currentEmails.filter((currentEmail) => currentEmail.id !== email.id));
                   if (isActive) {
                     router.push('/dashboard/emails');
                   }
