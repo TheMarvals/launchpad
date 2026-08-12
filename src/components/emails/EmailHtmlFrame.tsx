@@ -16,11 +16,19 @@ function buildIsolatedEmailDocument(html: string) {
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https: http: data:; media-src https: http: data:; style-src 'unsafe-inline'; font-src https: data:; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none';">
     <base target="_blank">
     <style>
-      html, body { margin: 0; padding: 0; max-width: 100%; overflow-wrap: anywhere; }
-      body { background: transparent; color: #d7d7dc; font: 14px/1.55 Arial, Helvetica, sans-serif; }
-      img { max-width: 100%; height: auto; }
-      table { max-width: 100%; }
-      pre { white-space: pre-wrap; }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; width: 100%; max-width: 100%; overflow-x: hidden; overflow-wrap: anywhere; }
+      body { background: transparent; color: #d7d7dc; font: 14px/1.6 Arial, Helvetica, sans-serif; -webkit-text-size-adjust: 100%; }
+      img, video { max-width: 100% !important; height: auto !important; }
+      table { width: 100% !important; max-width: 100% !important; }
+      td, th { max-width: 100%; overflow-wrap: anywhere; }
+      pre { max-width: 100%; white-space: pre-wrap; }
+      a { overflow-wrap: anywhere; }
+      blockquote { margin-left: 0.75rem; margin-right: 0; padding-left: 0.75rem; }
+      @media (max-width: 640px) {
+        body { font-size: 16px !important; line-height: 1.65 !important; }
+        p, li, td, th, a { font-size: max(16px, 1em) !important; line-height: 1.65 !important; }
+      }
     </style>
   </head>
   <body>${html}</body>
@@ -64,7 +72,7 @@ export default function EmailHtmlFrame({ html, title }: EmailHtmlFrameProps) {
       referrerPolicy="no-referrer"
       onLoad={resizeFrame}
       style={{ height }}
-      className="block w-full max-h-[6000px] border-0 bg-transparent"
+      className="block w-full min-w-0 max-h-[6000px] border-0 bg-transparent"
     />
   );
 }

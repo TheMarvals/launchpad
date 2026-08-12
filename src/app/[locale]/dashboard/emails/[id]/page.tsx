@@ -168,24 +168,24 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-canvas">
+    <div className="flex-1 flex flex-col h-full overflow-y-auto md:overflow-hidden bg-canvas">
       {/* Mobile Back Button - Only visible on small screens */}
-      <div className="md:hidden p-4 border-b border-hairline flex items-center gap-3">
+      <div className="md:hidden sticky top-0 z-10 px-3 py-2.5 border-b border-hairline flex items-center gap-3 bg-canvas/95 backdrop-blur-sm">
         <button 
           type="button"
           onClick={() => router.push('/dashboard/emails')}
-          className="w-8 h-8 flex items-center justify-center bg-canvas-elevated hover:bg-hairline rounded-sm transition-colors shrink-0"
+          className="w-10 h-10 flex items-center justify-center bg-canvas-elevated hover:bg-hairline rounded-full transition-colors shrink-0"
           aria-label={locale === 'es' ? 'Volver a correos' : 'Back to emails'}
         >
-          <span className="material-icons text-sm">arrow_back</span>
+          <span className="material-icons text-[20px]">arrow_back</span>
         </button>
-        <h1 className="text-sm font-black truncate">{locale === 'es' ? 'Volver a Correos' : 'Back to Inbox'}</h1>
+        <h1 className="text-sm font-bold">{locale === 'es' ? 'Bandeja de entrada' : 'Inbox'}</h1>
       </div>
 
       {/* Header */}
-      <div className="p-4 md:p-6 border-b border-hairline shrink-0">
-        <div className="flex justify-between items-start gap-4 mb-4">
-          <h1 className="text-xl md:text-2xl font-black tracking-tighter">
+      <div className="px-4 py-5 md:p-6 border-b border-hairline shrink-0">
+        <div className="flex justify-between items-start gap-3 mb-5 md:mb-4">
+          <h1 className="min-w-0 text-[22px] leading-7 md:text-2xl font-black tracking-tighter break-words">
             {email.subject || '(Sin asunto)'}
           </h1>
           <button
@@ -199,16 +199,16 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
             </span>
           </button>
         </div>
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <div className="flex gap-3">
-            <div className="w-10 h-10 bg-canvas-elevated border border-hairline rounded-sm flex items-center justify-center font-bold text-ink shrink-0">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 md:gap-4">
+          <div className="flex min-w-0 gap-3">
+            <div className="w-11 h-11 bg-canvas-elevated border border-hairline rounded-full flex items-center justify-center font-bold text-ink shrink-0">
               {email.from.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <div className="font-bold text-ink text-sm">{email.from}</div>
-              <div className="text-xs text-muted">Para: {email.to}</div>
-              {email.cc && <div className="text-xs text-muted">CC: {email.cc}</div>}
-              {email.bcc && <div className="text-xs text-muted">{locale === 'es' ? 'CCO' : 'BCC'}: {email.bcc}</div>}
+            <div className="min-w-0">
+              <div className="font-bold text-ink text-[15px] break-all">{email.from}</div>
+              <div className="text-xs leading-5 text-muted break-all">Para: {email.to}</div>
+              {email.cc && <div className="text-xs leading-5 text-muted break-all">CC: {email.cc}</div>}
+              {email.bcc && <div className="text-xs leading-5 text-muted break-all">{locale === 'es' ? 'CCO' : 'BCC'}: {email.bcc}</div>}
             </div>
           </div>
           <div className="text-xs text-muted sm:text-right shrink-0">
@@ -228,14 +228,14 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 text-body">
+      <div className="flex-none md:flex-1 md:overflow-y-auto px-4 py-5 md:p-6 text-body">
         {email.htmlBody ? (
           <EmailHtmlFrame
             html={email.htmlBody}
             title={locale === 'es' ? `Contenido de ${email.subject || 'correo'}` : `Content of ${email.subject || 'email'}`}
           />
         ) : email.textBody ? (
-          <pre className="whitespace-pre-wrap font-sans text-sm">{email.textBody}</pre>
+          <pre className="whitespace-pre-wrap break-words font-sans text-base leading-7 md:text-sm md:leading-normal">{email.textBody}</pre>
         ) : (
           <div className="italic text-muted opacity-70">
             {locale === 'es' ? '(Este correo no tiene contenido o no se pudo cargar)' : '(This email has no content or could not be loaded)'}
@@ -285,7 +285,7 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
 
       {/* Reply Box */}
       {email.direction === 'INBOUND' && (
-        <div className="p-4 md:p-6 border-t border-hairline bg-canvas-elevated/20 shrink-0">
+        <div className="px-4 py-5 md:p-6 border-t border-hairline bg-canvas-elevated/20 shrink-0">
           <form onSubmit={handleReply} className="max-w-4xl">
             {email.replySenderIdentity ? (
               <div className="mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
@@ -339,8 +339,8 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
               </div>
             )}
 
-            <div className="mt-3 flex items-center justify-between gap-3">
-              <div>
+            <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="min-w-0">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -365,7 +365,7 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
               <button
                 type="submit"
                 disabled={sending || !email.replySenderIdentity || (!replyText.trim() && selectedFiles.length === 0)}
-                className="bg-primary text-on-primary px-5 py-2 rounded-sm font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 shadow-sm"
+                className="w-full sm:w-auto justify-center bg-primary text-on-primary px-5 py-3 sm:py-2 rounded-sm font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 shadow-sm"
               >
                 {sending ? (
                   <span className="material-icons animate-spin text-[16px]">refresh</span>
