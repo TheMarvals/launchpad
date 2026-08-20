@@ -168,7 +168,7 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-y-auto md:overflow-hidden bg-canvas">
+    <div className="flex-1 min-w-0 min-h-0 flex flex-col h-full overflow-y-auto md:overflow-hidden bg-canvas">
       {/* Mobile Back Button - Only visible on small screens */}
       <div className="md:hidden sticky top-0 z-10 px-3 py-2.5 border-b border-hairline flex items-center gap-3 bg-canvas/95 backdrop-blur-sm">
         <button 
@@ -228,7 +228,7 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-none md:flex-1 md:overflow-y-auto px-4 py-5 md:p-6 text-body">
+      <div className="flex-none md:flex-1 md:min-h-0 md:overflow-y-auto px-4 py-5 md:p-6 text-body">
         {email.htmlBody ? (
           <EmailHtmlFrame
             html={email.htmlBody}

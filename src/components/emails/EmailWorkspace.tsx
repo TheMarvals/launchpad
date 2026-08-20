@@ -17,7 +17,7 @@ export default function EmailWorkspace({ children, emails, header, locale }: Ema
   const isDetailView = /\/dashboard\/emails\/[^/]+\/?$/.test(pathname);
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-80px)] md:h-[calc(100vh-130px)] -mx-sm md:-mx-lg -mt-4 bg-canvas">
+    <div className="flex flex-col h-[calc(100dvh-80px)] md:h-[calc(100dvh-64px)] -mx-sm -mt-4 md:-m-lg bg-canvas">
       <div className={isDetailView ? 'hidden md:block' : 'block'}>
         {header}
       </div>

@@ -90,7 +90,7 @@ export default function EmailSidebar({ initialEmails, locale, mobileHidden = fal
   });
 
   return (
-    <div className={`${mobileHidden ? 'hidden md:flex' : 'flex'} w-full md:w-1/3 lg:w-[400px] border-r border-hairline overflow-y-auto bg-canvas shrink-0 flex-col h-full`}>
+    <div className={`${mobileHidden ? 'hidden md:flex' : 'flex'} w-full md:w-[320px] lg:w-[360px] xl:w-[400px] border-r border-hairline overflow-hidden bg-canvas shrink-0 flex-col h-full`}>
       {/* Tabs Header */}
       <div className="flex border-b border-hairline shrink-0 bg-canvas items-center relative">
         <button
