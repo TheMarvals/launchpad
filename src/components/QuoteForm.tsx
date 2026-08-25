@@ -721,7 +721,8 @@ export default function QuoteForm({ clients, admins = [], companyProfile, initia
                     <label className="block text-caption-uppercase text-ink font-semibold">{t('quantity')}</label>
                     <input 
                       type="number" 
-                      min="1"
+                      step="any"
+                      min="0.001"
                       className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors text-center font-semibold px-xs py-xxs text-sm"
                       value={item.cantidad}
                       onChange={(e) => updateItem(idx, 'cantidad', e.target.value)}
@@ -736,6 +737,7 @@ export default function QuoteForm({ clients, admins = [], companyProfile, initia
                       <span className="absolute left-xs top-1/2 -translate-y-1/2 text-muted font-semibold">$</span>
                       <input 
                         type="number" 
+                        step="any"
                         min="0"
                         className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors font-semibold pl-md px-xs py-xxs text-sm"
                         value={item.precioUnitario}

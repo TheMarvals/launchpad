@@ -317,7 +317,8 @@ export default function InvoiceForm({ clients, admins = [], companyProfile, init
                         <label className="block text-caption-uppercase text-ink font-semibold">{tForm('quantity')}</label>
                         <input 
                           type="number" 
-                          min="1"
+                          step="any"
+                          min="0.001"
                           className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors text-center font-semibold px-xs py-xxs text-sm"
                           placeholder={tForm('quantity')}
                           value={item.cantidad}
@@ -333,6 +334,8 @@ export default function InvoiceForm({ clients, admins = [], companyProfile, init
                           <span className="absolute left-xs top-1/2 -translate-y-1/2 text-muted font-semibold">$</span>
                           <input 
                             type="number" 
+                            step="any"
+                            min="0"
                             className="w-full border border-hairline bg-canvas text-ink focus:border-primary outline-none transition-colors font-semibold pl-md px-xs py-xxs text-sm"
                             placeholder={tForm('unitPrice')}
                             value={item.precioUnitario}
