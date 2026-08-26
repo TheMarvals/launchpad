@@ -9,6 +9,7 @@
     "quotes": "Cotizaciones",
     "invoices": "Facturación",
     "sows": "SOWs",
+    "rfis": "RFIs",
     "products": "Productos",
     "commercial": "Comercial",
     "tickets": "Soporte",
@@ -134,6 +135,34 @@
       "issueDate": "Fecha Emisión",
       "validity": "Validez",
       "total": "Total",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "pagination": {
+      "showing": "Mostrando {start}–{end} de {total}",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    }
+  },
+  "Rfis": {
+    "title": "Requests for Information",
+    "subtitle": "{count} RFI{count, plural, one {} other {s}} registrado{count, plural, one {} other {s}}.",
+    "newRfi": "Nuevo RFI",
+    "editRfi": "Editar RFI",
+    "duplicate": "Duplicar",
+    "duplicateError": "Error al duplicar el RFI.",
+    "noRfis": "No hay RFIs disponibles.",
+    "status": {
+      "Borrador": "Borrador",
+      "Enviada": "Enviada",
+      "Respondida": "Respondida",
+      "Cerrada": "Cerrada"
+    },
+    "table": {
+      "number": "Nº",
+      "client": "Cliente",
+      "issueDate": "Fecha Emisión",
+      "validity": "Fecha Límite",
       "status": "Estado",
       "actions": "Acciones"
     },

@@ -9,6 +9,7 @@
     "quotes": "Quotes",
     "invoices": "Billing",
     "sows": "SOWs",
+    "rfis": "RFIs",
     "products": "Products",
     "commercial": "Sales",
     "tickets": "Support",
@@ -134,6 +135,34 @@
       "issueDate": "Issue Date",
       "validity": "Validity",
       "total": "Total",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "pagination": {
+      "showing": "Showing {start}–{end} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "Rfis": {
+    "title": "Requests for Information",
+    "subtitle": "{count} RFI{count, plural, one {} other {s}} registered.",
+    "newRfi": "New RFI",
+    "editRfi": "Edit RFI",
+    "duplicate": "Duplicate",
+    "duplicateError": "Error duplicating RFI.",
+    "noRfis": "No RFIs available.",
+    "status": {
+      "Borrador": "Draft",
+      "Enviada": "Sent",
+      "Respondida": "Answered",
+      "Cerrada": "Closed"
+    },
+    "table": {
+      "number": "Nº",
+      "client": "Client",
+      "issueDate": "Issue Date",
+      "validity": "Deadline",
       "status": "Status",
       "actions": "Actions"
     },

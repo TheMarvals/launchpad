@@ -34,6 +34,7 @@ model User {
   ticketMessages TicketMessage[]
   quotes         Quote[]
   sentInvoices   Invoice[]       @relation("SentInvoices")
+  rfis           Rfi[]
 
   // FreelanceHub Integration (Admin Only)
   projects          Project[]
@@ -64,6 +65,7 @@ model Client {
   quotes      Quote[]
   invoices    Invoice[]
   sows        Sow[]
+  rfis        Rfi[]
   users       User[]
   servers     VpsService[]
   tickets     Ticket[]
@@ -231,6 +233,23 @@ model SowItem {
   esExento       Boolean @default(false)
 
   sow Sow @relation(fields: [sowId], references: [id], onDelete: Cascade)
+}
+
+model Rfi {
+  id               String   @id @default(uuid())
+  correlativo      Int      @unique @default(autoincrement())
+  clientId         String
+  userId           String?  // Admin sender
+  fechaEmision     DateTime @default(now())
+  fechaValidez     DateTime // Fecha límite de respuesta / validez
+  estado           String   @default("Borrador") // Borrador, Enviada, Respondida, Cerrada
+  propuesta        String?  // Rich text with proposal / questions / information request
+  notasCondiciones String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id])
+  user   User?  @relation(fields: [userId], references: [id])
 }
 
 model Project {

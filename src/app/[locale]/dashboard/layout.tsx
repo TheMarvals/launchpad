@@ -90,8 +90,8 @@ export default async function DashboardLayout({
                 </Link>
               </li>
             )}
-            {(can(PERMISSIONS.QUOTES) || can(PERMISSIONS.SOWS) || can(PERMISSIONS.INVOICES)) && (
-              <SidebarDropdown title={t('commercial')} icon="storefront" activePaths={['/quotes', '/sows', '/invoices']}>
+            {(can(PERMISSIONS.QUOTES) || can(PERMISSIONS.SOWS) || can(PERMISSIONS.RFIS) || can(PERMISSIONS.INVOICES)) && (
+              <SidebarDropdown title={t('commercial')} icon="storefront" activePaths={['/quotes', '/sows', '/rfis', '/invoices']}>
                 {can(PERMISSIONS.QUOTES) && (
                   <li>
                     <Link href="/dashboard/quotes" className="h-[40px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
@@ -103,6 +103,13 @@ export default async function DashboardLayout({
                   <li>
                     <Link href="/dashboard/sows" className="h-[40px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
                       <span className="material-icons mr-xxs text-[16px] opacity-70">assignment</span> {t('sows')}
+                    </Link>
+                  </li>
+                )}
+                {can(PERMISSIONS.RFIS) && (
+                  <li>
+                    <Link href="/dashboard/rfis" className="h-[40px] flex items-center px-sm hover:bg-canvas-elevated text-xs font-semibold uppercase tracking-[0.65px] transition-colors rounded-sm text-body hover:text-ink">
+                      <span className="material-icons mr-xxs text-[16px] opacity-70">help_outline</span> {t('rfis')}
                     </Link>
                   </li>
                 )}
