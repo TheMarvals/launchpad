@@ -604,12 +604,12 @@ export default function PitchViewer({
       {/* Bottom Deck Controls (Deck Mode) */}
       {viewMode === 'deck' && !isEditorPreview && (
         <footer className="relative z-30 px-4 md:px-8 py-3 flex items-center justify-between border-t border-white/5 backdrop-blur-sm shrink-0">
-          <div className="text-xs font-bold text-slate-400 tracking-wider">
+          <div className="flex-1 min-w-0 text-left text-xs font-bold text-slate-400 tracking-wider truncate pr-4">
             {clientDisplayName ? <span className="text-white uppercase">{clientDisplayName}</span> : brandName}
           </div>
 
-          {/* Slide Navigation Buttons */}
-          <div className="flex items-center gap-3">
+          {/* Slide Navigation Buttons - Absolutely centered */}
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
             <button
               type="button"
               onClick={prevSlide}
@@ -619,7 +619,7 @@ export default function PitchViewer({
               <span className="material-icons text-lg">chevron_left</span>
             </button>
 
-            <span className="text-xs font-black uppercase tracking-widest text-primary px-2">
+            <span className="text-xs font-black uppercase tracking-widest text-primary px-2 min-w-[52px] text-center">
               {currentSlideIndex + 1} / {totalSlides}
             </span>
 
@@ -633,7 +633,7 @@ export default function PitchViewer({
             </button>
           </div>
 
-          <div className="text-[10px] uppercase tracking-widest text-slate-500 hidden sm:block">
+          <div className="flex-1 min-w-0 text-right text-[10px] uppercase tracking-widest text-slate-500 hidden sm:block pl-4">
             Usa las flechas ← → o barra espaciadora
           </div>
         </footer>
