@@ -35,6 +35,7 @@ model User {
   quotes         Quote[]
   sentInvoices   Invoice[]       @relation("SentInvoices")
   rfis           Rfi[]
+  pitches        Pitch[]
 
   // FreelanceHub Integration (Admin Only)
   projects          Project[]
@@ -66,6 +67,7 @@ model Client {
   invoices    Invoice[]
   sows        Sow[]
   rfis        Rfi[]
+  pitches     Pitch[]
   users       User[]
   servers     VpsService[]
   tickets     Ticket[]
@@ -250,6 +252,24 @@ model Rfi {
 
   client Client @relation(fields: [clientId], references: [id])
   user   User?  @relation(fields: [userId], references: [id])
+}
+
+model Pitch {
+  id          String   @id @default(uuid())
+  correlativo Int      @unique @default(autoincrement())
+  title       String
+  subtitle    String?
+  clientName  String?
+  clientId    String?
+  userId      String?
+  status      String   @default("Borrador") // Borrador, Activo, Presentado, Aceptado, Archivado
+  theme       String   @default("midnight")
+  slides      Json     @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client Client? @relation(fields: [clientId], references: [id])
+  user   User?   @relation(fields: [userId], references: [id])
 }
 
 model Project {

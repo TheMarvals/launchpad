@@ -10,6 +10,7 @@
     "invoices": "Facturación",
     "sows": "SOWs",
     "rfis": "RFIs",
+    "pitches": "Pitches",
     "products": "Productos",
     "commercial": "Comercial",
     "tickets": "Soporte",
@@ -163,6 +164,35 @@
       "client": "Cliente",
       "issueDate": "Fecha Emisión",
       "validity": "Fecha Límite",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "pagination": {
+      "showing": "Mostrando {start}–{end} de {total}",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    }
+  },
+  "Pitches": {
+    "title": "Pitch Decks",
+    "subtitle": "{count} presentación{count, plural, one {} other {es}} registrada{count, plural, one {} other {s}}.",
+    "newPitch": "Nuevo Pitch",
+    "editPitch": "Editar Pitch",
+    "duplicate": "Duplicar",
+    "duplicateError": "Error al duplicar el Pitch.",
+    "noPitches": "No hay Pitches disponibles.",
+    "status": {
+      "Borrador": "Borrador",
+      "Activo": "Activo",
+      "Presentado": "Presentado",
+      "Aceptado": "Aceptado",
+      "Archivado": "Archivado"
+    },
+    "table": {
+      "number": "Nº",
+      "pitchTitle": "Título",
+      "client": "Cliente",
+      "slidesCount": "Diapositivas",
       "status": "Estado",
       "actions": "Acciones"
     },
