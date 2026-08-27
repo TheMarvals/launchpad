@@ -166,7 +166,7 @@ export default function EmailSenderIdentitiesBoard({
                 maxLength={100}
                 value={form.displayName}
                 onChange={(event) => setForm((current) => ({ ...current, displayName: event.target.value }))}
-                placeholder="LAUNCHPAD Contacto"
+                placeholder="LAUNCHPAD Contact"
                 className="w-full border border-hairline bg-canvas px-xs py-xxs text-sm outline-none focus:border-primary"
               />
             </label>

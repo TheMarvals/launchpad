@@ -54,6 +54,9 @@ export async function POST(request: Request) {
   const subjectValue = formData.get('subject');
   const bodyValue = formData.get('body');
   const requestId = formData.get('requestId');
+  const templateType = formData.get('templateType');
+  const pitchId = formData.get('pitchId');
+  const locale = formData.get('locale');
 
   if (typeof senderIdentityId !== 'string' || !senderIdentityId) {
     return NextResponse.json({ error: 'Selecciona un remitente' }, { status: 400 });
@@ -92,6 +95,9 @@ export async function POST(request: Request) {
       subject: subjectValue.trim(),
       body: bodyValue.trim(),
       requestId,
+      templateType: templateType === 'pitch' ? 'pitch' : 'standard',
+      pitchId: typeof pitchId === 'string' && pitchId ? pitchId : undefined,
+      locale: typeof locale === 'string' && locale ? locale : 'es',
     }, attachments);
 
     return NextResponse.json(result);

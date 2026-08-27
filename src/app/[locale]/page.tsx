@@ -275,7 +275,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
             </h3>
           </div>
           <p className="text-caption-uppercase text-muted tracking-[0.1em] text-xs">
-            © {new Date().getFullYear()} {t('brand')}. by Masterminds
+            © {new Date().getFullYear()} {t('brand')}
           </p>
         </div>
       </footer>

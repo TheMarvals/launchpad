@@ -6,6 +6,8 @@ import {
   formatSenderAddress,
 } from '@/lib/email-sender-identities';
 import type { OutboundEmailAttachment } from '@/lib/email-attachments';
+import { PitchInvitationEmail } from '@/emails/PitchInvitationEmail';
+import { parsePitchTheme } from '@/lib/pitch-theme';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -112,6 +114,9 @@ export interface NewEmailInput {
   subject: string;
   body: string;
   requestId: string;
+  templateType?: 'standard' | 'pitch';
+  pitchId?: string;
+  locale?: string;
 }
 
 export async function sendNewEmail(
@@ -130,6 +135,55 @@ export async function sendNewEmail(
   }
 
   const finalBody = appendEmailSignature(input.body, sender.signature);
+
+  let reactComponent: React.ReactElement | undefined = undefined;
+
+  if (input.templateType === 'pitch' && input.pitchId) {
+    const pitch = await prisma.pitch.findUnique({
+      where: { id: input.pitchId },
+      include: {
+        client: true,
+        user: {
+          select: { name: true, cargo: true, email: true },
+        },
+      },
+    });
+
+    if (pitch) {
+      const clientName = pitch.client?.razonSocial || pitch.clientName || 'Cliente';
+      const { color: accentColor } = parsePitchTheme(pitch.theme, pitch.title, clientName);
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://launchpad.themarvals.com';
+      const pitchUrl = `${appUrl}/${input.locale || 'es'}/pitches/${pitch.id}`;
+
+      const slides = Array.isArray(pitch.slides) ? (pitch.slides as any[]) : [];
+      const pillarsSlide = slides.find((s) => s.type === 'pillars');
+      const keyPillars = pillarsSlide && Array.isArray(pillarsSlide.cards) && pillarsSlide.cards.length > 0
+        ? pillarsSlide.cards.map((c: any) => ({
+            title: c.title,
+            subtitle: c.subtitle || (c.description ? c.description.slice(0, 50) : undefined),
+          }))
+        : [
+            { title: 'Ecosistema Digital 360°', subtitle: 'Estrategia y Arquitectura' },
+            { title: 'Experiencia & UI/UX', subtitle: 'Diseño de Alto Impacto' },
+            { title: 'Roadmap & Rendimiento', subtitle: 'Ejecución y Escalamiento' },
+          ];
+
+      reactComponent = PitchInvitationEmail({
+        introMessage: input.body,
+        pitchTitle: pitch.title,
+        pitchSubtitle: pitch.subtitle || undefined,
+        clientName,
+        pitchUrl,
+        accentColor,
+        keyPillars,
+        senderName: (sender.displayName || pitch.user?.name || 'LAUNCHPAD Contact').replace(/LAUNCHPAD Contacto/gi, 'LAUNCHPAD Contact'),
+        senderRole: pitch.user?.cargo || 'Lead Solution Architect',
+        senderEmail: sender.email,
+        locale: input.locale || 'es',
+      });
+    }
+  }
+
   const response = await resend.emails.send({
     from: formatSenderAddress(sender.displayName, sender.email),
     to: input.to,
@@ -138,6 +192,7 @@ export async function sendNewEmail(
     replyTo: sender.email,
     subject: input.subject,
     text: finalBody,
+    react: reactComponent,
     attachments: attachments.length > 0
       ? attachments.map((attachment) => ({
           filename: attachment.filename,
@@ -146,7 +201,7 @@ export async function sendNewEmail(
         }))
       : undefined,
     tags: [
-      { name: 'category', value: 'platform_new_email' },
+      { name: 'category', value: input.templateType === 'pitch' ? 'pitch_invitation' : 'platform_new_email' },
       {
         name: 'sender',
         value: sender.email.split('@')[0].replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 256),

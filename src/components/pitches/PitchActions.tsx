@@ -72,6 +72,14 @@ export default function PitchActions({ pitchId }: PitchActionsProps) {
       </button>
 
       <Link 
+        href={`/dashboard/emails/new?pitchId=${pitchId}`}
+        className="w-8 h-8 flex items-center justify-center text-muted hover:text-primary transition-colors"
+        title="Enviar por Correo (Plantilla VIP)"
+      >
+        <span className="material-icons text-[18px]">email</span>
+      </Link>
+
+      <Link 
         href={`/dashboard/pitches/edit/${pitchId}`}
         className="w-8 h-8 flex items-center justify-center text-muted hover:text-ink transition-colors"
         title={t('edit')}
