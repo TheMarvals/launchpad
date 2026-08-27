@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { createPitch, updatePitch } from '@/app/actions/pitches';
 import { useTranslations, useLocale } from 'next-intl';
-import PitchViewer, { PitchSlide } from './PitchViewer';
+import PitchViewer, { PitchSlide, ShowcaseItem } from './PitchViewer';
 
 interface Client {
   id: string;
@@ -16,6 +16,7 @@ interface PitchFormProps {
   clients: Client[];
   admins?: any[];
   companyProfile?: any;
+  showcaseProjects?: any[];
   initialData?: any;
 }
 
@@ -27,30 +28,30 @@ const DEFAULT_LAUNCHPAD_SLIDES: PitchSlide[] = [
     title: 'LAUNCHPAD',
     subtitle: 'Where ideas take off',
     content: 'Ideas are only the beginning. We design, build, and scale high-performance digital ecosystems that drive measurable growth. From cloud architecture and web platforms to content, automation, and marketing, every solution is engineered with business outcomes in mind.',
-    clientName: 'Cliente Corporativo',
+    clientName: 'Corporate Client',
     cta: {
-      text: 'Agendar Reunión',
-      secondaryText: 'Explorar Propuesta',
+      text: 'Schedule Meeting',
+      secondaryText: 'Explore Proposal',
     },
   },
   {
     id: 'slide-2',
     type: 'problem_solution',
-    badge: 'El Desafío & La Oportunidad',
-    title: 'El Reto del Negocio',
-    subtitle: 'Transformando la fricción técnica y comercial en un motor de crecimiento escalable',
+    badge: 'The Challenge & The Opportunity',
+    title: 'The Business Challenge',
+    subtitle: 'Transforming technical and operational friction into a scalable growth engine',
     cards: [
       {
-        title: 'Fricción Operativa & Fragmentación',
-        subtitle: 'SITUACIÓN ACTUAL',
-        description: 'Múltiples proveedores desconectados, infraestructura con cuellos de botella y herramientas que no conversan entre sí generan sobrecostos y retrasos en la entrega.',
+        title: 'Operational Friction & Silos',
+        subtitle: 'CURRENT SITUATION',
+        description: 'Disconnected vendors, infrastructure bottlenecks, and misaligned tooling create high overhead and delivery delays.',
         icon: 'warning_amber',
         highlight: false,
       },
       {
-        title: 'Ecosistema Unificado de Alto Rendimiento',
-        subtitle: 'SOLUCIÓN LAUNCHPAD',
-        description: 'Arquitectura cloud robusta, interfaces de usuario de alta fidelidad y automatización integral gestionada por un solo equipo estratégico.',
+        title: 'Unified High-Performance Ecosystem',
+        subtitle: 'LAUNCHPAD SOLUTION',
+        description: 'Resilient cloud architecture, high-fidelity UI/UX, and end-to-end creative production managed by a dedicated agile team.',
         icon: 'verified',
         highlight: true,
       },
@@ -59,82 +60,113 @@ const DEFAULT_LAUNCHPAD_SLIDES: PitchSlide[] = [
   {
     id: 'slide-3',
     type: 'pillars',
-    badge: 'Nuestra Propuesta de Valor',
-    title: 'Nuestros Pilares 360°',
-    subtitle: 'Soluciones integrales de diseño, ingeniería y crecimiento digital',
+    badge: 'Core Value Proposition',
+    title: 'Our 360° Pillars',
+    subtitle: 'End-to-end design, engineering, and digital growth capabilities',
     cards: [
       {
         title: 'Design & Creative',
         subtitle: 'Branding, Video & UX',
-        description: 'Construimos experiencias digitales que impulsan el engagement y reducen la fricción cognitiva. Desde identidad corporativa hasta producción de video de alto impacto.',
+        description: 'Crafting digital experiences that maximize engagement and reduce cognitive load. From brand systems to high-impact video production.',
         icon: 'palette',
         tags: ['Branding', 'Video', 'UI/UX'],
       },
       {
         title: 'Engineering & Cloud',
-        subtitle: 'Web Apps & Arquitectura Cloud',
-        description: 'Diseñamos infraestructura digital resistente y de alto rendimiento. Gestionamos la complejidad técnica para garantizar estabilidad operativa y cero caídas.',
+        subtitle: 'Web Apps & Cloud Architecture',
+        description: 'Engineering resilient, scalable digital infrastructure. We manage technical complexity to guarantee zero downtime and maximum security.',
         icon: 'code',
         tags: ['Web Apps', 'Cloud', 'DevOps'],
       },
       {
         title: '360° Growth & Marketing',
-        subtitle: 'Campañas, Contenido & Estrategia',
-        description: 'Convertimos tus plataformas en motores de crecimiento. Desde campañas 360° hasta optimización de conversiones para asegurar ROI escalable.',
+        subtitle: 'Campaigns, Content & Strategy',
+        description: 'Transforming platforms into growth drivers with high-cadence creative assets, video production, and conversion optimization.',
         icon: 'trending_up',
-        tags: ['Campañas', 'Contenido', 'Analytics'],
+        tags: ['Campaigns', 'Content', 'Analytics'],
       },
     ],
   },
   {
     id: 'slide-4',
-    type: 'metrics',
-    badge: 'Resultados y Rendimiento',
-    title: 'Métricas de Impacto',
-    subtitle: 'Resultados medibles y garantizados en rendimiento, seguridad y conversión',
-    metrics: [
-      { value: '99.99%', label: 'Disponibilidad Cloud', subtext: 'Alta resiliencia', icon: 'cloud_done' },
-      { value: '+140%', label: 'Conversión Media', subtext: 'Optimización de embudos', icon: 'speed' },
-      { value: '3x', label: 'Velocidad de Carga', subtext: 'Core Web Vitals', icon: 'bolt' },
-      { value: '24/7', label: 'Monitoreo & Soporte', subtext: 'Respuesta en <15 min', icon: 'support_agent' },
+    type: 'showcase',
+    badge: 'Proven Work & Case Studies',
+    title: 'Featured Case Studies',
+    subtitle: 'Selected creative, video production, and presentation design work',
+    showcaseItems: [
+      {
+        id: 'work-1',
+        title: 'Corporate Presentation & Visual Storytelling',
+        subtitle: 'Executive Slides & Infographics',
+        description: 'High-impact slide decks and executive data visualization designed for global leadership communications.',
+        mediaType: 'slide',
+        mediaUrl: 'https://res.cloudinary.com/djwuzrjvz/image/upload/v1781051038/launchpad/showcase/oau4ej9gfeaq1zirzwjc.webp',
+        thumbnailUrl: 'https://res.cloudinary.com/djwuzrjvz/image/upload/v1781051038/launchpad/showcase/oau4ej9gfeaq1zirzwjc.webp',
+        tags: ['Executive Decks', 'Data Viz', 'Canva', 'PPT'],
+        client: 'Global Corporate',
+      },
+      {
+        id: 'work-2',
+        title: 'Digital Ecosystem & Brand Assets',
+        subtitle: 'Branding, Key Visuals & UI',
+        description: 'Complete brand identity rollout and digital communication assets across multiple internal and external channels.',
+        mediaType: 'image',
+        mediaUrl: 'https://res.cloudinary.com/djwuzrjvz/image/upload/v1781103426/launchpad/showcase/cyp2seahjnpzl6xjjmwv.webp',
+        thumbnailUrl: 'https://res.cloudinary.com/djwuzrjvz/image/upload/v1781103426/launchpad/showcase/cyp2seahjnpzl6xjjmwv.webp',
+        tags: ['Branding', 'Key Visuals', 'D-Hub', 'Figma'],
+        client: 'Pantalla+',
+      },
     ],
   },
   {
     id: 'slide-5',
-    type: 'roadmap',
-    badge: 'Metodología y Ejecución',
-    title: 'Roadmap de Implementación',
-    subtitle: 'Estructura de trabajo iterativa orientada a entregables de valor rápido',
-    timeline: [
-      {
-        phase: 'Fase 1',
-        title: 'Discovery & Arquitectura',
-        duration: 'Semanas 1 - 2',
-        deliverables: ['Levantamiento de requerimientos', 'Definición de stack y arquitectura', 'Wireframes y prototipos UI/UX'],
-      },
-      {
-        phase: 'Fase 2',
-        title: 'Desarrollo & Despliegue',
-        duration: 'Semanas 3 - 6',
-        deliverables: ['Desarrollo modular continuo', 'Integración de servicios y APIs', 'Pruebas de carga y seguridad'],
-      },
-      {
-        phase: 'Fase 3',
-        title: 'Lanzamiento & Crecimiento',
-        duration: 'Semanas 7+',
-        deliverables: ['Puesta en producción con cero downtime', 'Capacitación y documentación', 'Optimización y analítica en tiempo real'],
-      },
+    type: 'metrics',
+    badge: 'Results & Reliability',
+    title: 'Impact Metrics',
+    subtitle: 'Measurable excellence in turnaround speed, security, and quality',
+    metrics: [
+      { value: '<24h', label: 'Fast Turnaround SLA', subtext: 'Daily comms & banners', icon: 'timer' },
+      { value: '100%', label: 'Security Compliance', subtext: 'Enterprise-grade protocols', icon: 'security' },
+      { value: '3', label: 'Language Coverage', subtext: 'EN / ES Bilingual + CN Support', icon: 'translate' },
+      { value: '24/7', label: 'Dedicated Support', subtext: 'Peak period surge capacity', icon: 'support_agent' },
     ],
   },
   {
     id: 'slide-6',
+    type: 'roadmap',
+    badge: 'Methodology & Execution',
+    title: 'Implementation Roadmap',
+    subtitle: 'Iterative, sprint-based workflow delivering fast, high-quality deliverables',
+    timeline: [
+      {
+        phase: 'Phase 1',
+        title: 'Discovery & Onboarding',
+        duration: 'Weeks 1 - 2',
+        deliverables: ['Requirements & brand guidelines intake', 'Dedicated Account Lead onboarding', 'Tooling & VRA alignment'],
+      },
+      {
+        phase: 'Phase 2',
+        title: 'Continuous Agile Production',
+        duration: 'Weeks 3 - 6',
+        deliverables: ['Daily comms creative pod (<24-48h SLA)', 'Infographics & executive slide decks', 'Bilingual EN/ES + CN production'],
+      },
+      {
+        phase: 'Phase 3',
+        title: 'Major Event Production',
+        duration: 'Flagship Events',
+        deliverables: ['Video shooting, editing & color grading', '2D/3D motion graphics & openers', 'Live event on-screen branding'],
+      },
+    ],
+  },
+  {
+    id: 'slide-7',
     type: 'cta',
-    badge: 'Próximos Pasos',
-    title: 'Hagamos Despegar tu Proyecto',
-    subtitle: 'Estamos listos para transformar tu visión en un ecosistema digital líder',
-    content: 'Coordinemos una llamada de alineación técnica para revisar fechas de inicio, alcances específicos y conformación del equipo dedicado.',
+    badge: 'Next Steps',
+    title: "Let's Power Your Global Comms",
+    subtitle: 'Ready to partner and accelerate your communication objectives',
+    content: 'We are eager to review scope details and align on dedicated team availability for the upcoming cycle.',
     cta: {
-      text: 'Agendar Discovery Call',
+      text: 'Schedule Technical Discovery',
     },
   },
 ];
@@ -143,6 +175,7 @@ export default function PitchForm({
   clients,
   admins = [],
   companyProfile,
+  showcaseProjects = [],
   initialData,
 }: PitchFormProps) {
   const t = useTranslations('Pitches');
@@ -150,12 +183,12 @@ export default function PitchForm({
   const router = useRouter();
   const isEditing = !!initialData;
 
-  const [title, setTitle] = useState(initialData?.title || 'Launchpad Executive Pitch');
-  const [subtitle, setSubtitle] = useState(initialData?.subtitle || 'Where ideas take off');
+  const [title, setTitle] = useState(initialData?.title || 'DiDi Global IC • Creative & Multimedia Production RFI');
+  const [subtitle, setSubtitle] = useState(initialData?.subtitle || 'Where ideas take off • 2026 Daily Comms & Major Event Production');
   const [clientId, setClientId] = useState(initialData?.clientId || '');
   const [clientName, setClientName] = useState(initialData?.clientName || '');
   const [userId, setUserId] = useState(initialData?.userId || '');
-  const [status, setStatus] = useState(initialData?.status || 'Borrador');
+  const [status, setStatus] = useState(initialData?.status || 'Activo');
   const [theme, setTheme] = useState(initialData?.theme || 'midnight');
 
   const [slides, setSlides] = useState<PitchSlide[]>(() => {
@@ -168,6 +201,7 @@ export default function PitchForm({
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showImportShowcaseModal, setShowImportShowcaseModal] = useState(false);
 
   const activeSlide = slides[activeSlideIndex] || slides[0];
 
@@ -182,18 +216,31 @@ export default function PitchForm({
     const newSlide: PitchSlide = {
       id: `slide-${Date.now()}`,
       type,
-      badge: 'Sección Informativa',
-      title: 'Nueva Diapositiva',
-      subtitle: 'Subtítulo descriptivo de la diapositiva',
-      content: 'Descripción y texto explicativo para el cliente.',
+      badge: type === 'showcase' ? 'Case Studies & Examples' : 'Section Badge',
+      title: type === 'showcase' ? 'Featured Work & Case Studies' : 'New Slide',
+      subtitle: 'Descriptive subtitle for this slide',
+      content: 'Detailed description and explanatory text.',
       cards: type === 'pillars' ? [
-        { title: 'Pilar 1', subtitle: 'Subtítulo', description: 'Descripción detallada', icon: 'star', tags: ['Tag 1'] },
-        { title: 'Pilar 2', subtitle: 'Subtítulo', description: 'Descripción detallada', icon: 'code', tags: ['Tag 2'] },
-        { title: 'Pilar 3', subtitle: 'Subtítulo', description: 'Descripción detallada', icon: 'trending_up', tags: ['Tag 3'] },
+        { title: 'Pillar 1', subtitle: 'Subtitle', description: 'Detailed description', icon: 'star', tags: ['Tag 1'] },
+        { title: 'Pillar 2', subtitle: 'Subtitle', description: 'Detailed description', icon: 'code', tags: ['Tag 2'] },
+        { title: 'Pillar 3', subtitle: 'Subtitle', description: 'Detailed description', icon: 'trending_up', tags: ['Tag 3'] },
+      ] : undefined,
+      showcaseItems: type === 'showcase' ? [
+        {
+          id: `item-${Date.now()}`,
+          title: 'Corporate Presentation Deck',
+          subtitle: 'Executive Slides',
+          description: 'High-impact slide deck crafted for executive presentations.',
+          mediaType: 'slide',
+          mediaUrl: 'https://res.cloudinary.com/djwuzrjvz/image/upload/v1781051038/launchpad/showcase/oau4ej9gfeaq1zirzwjc.webp',
+          thumbnailUrl: 'https://res.cloudinary.com/djwuzrjvz/image/upload/v1781051038/launchpad/showcase/oau4ej9gfeaq1zirzwjc.webp',
+          tags: ['Slides', 'Canva', 'PowerPoint'],
+          client: 'Corporate Client',
+        }
       ] : undefined,
       metrics: type === 'metrics' ? [
-        { value: '100%', label: 'Métrica 1', subtext: 'Detalle' },
-        { value: '+50%', label: 'Métrica 2', subtext: 'Detalle' },
+        { value: '<24h', label: 'Fast SLA', subtext: 'Daily comms' },
+        { value: '100%', label: 'Compliance', subtext: 'VRA & InfoSec' },
       ] : undefined,
     };
 
@@ -224,9 +271,60 @@ export default function PitchForm({
     setActiveSlideIndex(targetIndex);
   };
 
+  // Showcase item manager methods
+  const addShowcaseItem = () => {
+    const currentItems = activeSlide.showcaseItems || [];
+    const newItem: ShowcaseItem = {
+      id: `item-${Date.now()}`,
+      title: 'New Work Example',
+      subtitle: 'Video / Graphic / Slide',
+      description: 'Overview of the project, creative direction, and business impact.',
+      mediaType: 'image',
+      mediaUrl: 'https://res.cloudinary.com/djwuzrjvz/image/upload/v1781103426/launchpad/showcase/cyp2seahjnpzl6xjjmwv.webp',
+      thumbnailUrl: 'https://res.cloudinary.com/djwuzrjvz/image/upload/v1781103426/launchpad/showcase/cyp2seahjnpzl6xjjmwv.webp',
+      tags: ['Creative', 'Design'],
+      client: 'DiDi / Corporate',
+    };
+    updateActiveSlide({ showcaseItems: [...currentItems, newItem] });
+  };
+
+  const updateShowcaseItem = (itemIndex: number, fields: Partial<ShowcaseItem>) => {
+    const currentItems = [...(activeSlide.showcaseItems || [])];
+    currentItems[itemIndex] = { ...currentItems[itemIndex], ...fields };
+    updateActiveSlide({ showcaseItems: currentItems });
+  };
+
+  const deleteShowcaseItem = (itemIndex: number) => {
+    const currentItems = (activeSlide.showcaseItems || []).filter((_, i) => i !== itemIndex);
+    updateActiveSlide({ showcaseItems: currentItems });
+  };
+
+  const importFromProject = (project: any, img?: any) => {
+    const currentItems = activeSlide.showcaseItems || [];
+    const targetUrl = img ? img.url : (project.images && project.images[0] ? project.images[0].url : '');
+    const isSlideCategory = project.category === 'design' || project.title.toLowerCase().includes('slide');
+    const isVideoCategory = project.title.toLowerCase().includes('video') || project.title.toLowerCase().includes('motion');
+
+    const newItem: ShowcaseItem = {
+      id: `project-${project.id}-${Date.now()}`,
+      title: project.title,
+      subtitle: project.technologies || project.category,
+      description: project.descriptionEn || project.description || '',
+      mediaType: isVideoCategory ? 'video' : isSlideCategory ? 'slide' : 'image',
+      mediaUrl: targetUrl,
+      thumbnailUrl: targetUrl,
+      tags: project.technologies ? project.technologies.split(',').map((t: string) => t.trim()) : [project.category],
+      client: project.clientName || 'DiDi / Corporate',
+      externalUrl: project.projectUrl || undefined,
+    };
+
+    updateActiveSlide({ showcaseItems: [...currentItems, newItem] });
+    setShowImportShowcaseModal(false);
+  };
+
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!title) return alert('Por favor ingresa un título para el Pitch.');
+    if (!title) return alert('Please enter a Pitch title.');
 
     setIsSubmitting(true);
     try {
@@ -252,7 +350,7 @@ export default function PitchForm({
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert('Error al guardar el Pitch.');
+      alert('Error saving Pitch.');
     } finally {
       setIsSubmitting(false);
     }
@@ -277,7 +375,7 @@ export default function PitchForm({
             {isEditing ? t('editPitch') : t('newPitch')}
           </h1>
           <p className="text-body text-muted mt-[4px]">
-            Diseña y personaliza presentaciones comerciales con el estilo oficial de Launchpad.
+            Design, edit, and present high-impact pitch decks and case studies in the official Launchpad aesthetic.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -287,7 +385,7 @@ export default function PitchForm({
             className="px-xs py-xxs text-xs font-semibold uppercase tracking-wider text-muted hover:text-ink border border-hairline hover:bg-canvas transition-colors flex items-center gap-1"
           >
             <span className="material-icons text-sm">auto_awesome</span>
-            Cargar Plantilla Launchpad
+            Load Launchpad Template
           </button>
           <button
             type="button"
@@ -295,7 +393,7 @@ export default function PitchForm({
             className="px-xs py-xxs text-xs font-semibold uppercase tracking-wider text-primary border border-primary/30 hover:bg-primary/10 transition-colors flex items-center gap-1"
           >
             <span className="material-icons text-sm">visibility</span>
-            Vista Completa
+            Fullscreen Preview
           </button>
         </div>
       </div>
@@ -307,41 +405,41 @@ export default function PitchForm({
           {/* General Metadata */}
           <div className="bg-canvas-elevated border border-hairline p-sm space-y-sm">
             <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
-              <span className="material-icons mr-xxs text-primary">tune</span> Datos del Pitch
+              <span className="material-icons mr-xxs text-primary">tune</span> Pitch Details
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
-              <div className="space-y-xxs">
-                <label className="block text-caption-uppercase text-ink font-semibold">Título del Pitch</label>
+              <div className="space-y-xxs md:col-span-2">
+                <label className="block text-caption-uppercase text-ink font-semibold">Pitch Title</label>
                 <input
                   type="text"
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none"
-                  placeholder="Ej. Propuesta de Arquitectura y Crecimiento 360°"
+                  className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none font-bold"
+                  placeholder="e.g. DiDi Global IC • Creative & Multimedia Production RFI"
                 />
               </div>
 
-              <div className="space-y-xxs">
-                <label className="block text-caption-uppercase text-ink font-semibold">Subtítulo / Tagline</label>
+              <div className="space-y-xxs md:col-span-2">
+                <label className="block text-caption-uppercase text-ink font-semibold">Subtitle / Tagline</label>
                 <input
                   type="text"
                   value={subtitle}
                   onChange={(e) => setSubtitle(e.target.value)}
                   className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none"
-                  placeholder="Ej. Where ideas take off"
+                  placeholder="e.g. Where ideas take off • 2026 Daily Comms & Major Event Production"
                 />
               </div>
 
               <div className="space-y-xxs">
-                <label className="block text-caption-uppercase text-ink font-semibold">Cliente Registrado</label>
+                <label className="block text-caption-uppercase text-ink font-semibold">Registered Client</label>
                 <select
                   value={clientId}
                   onChange={(e) => setClientId(e.target.value)}
                   className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none cursor-pointer"
                 >
-                  <option value="">Seleccionar cliente (o escribir nombre abajo)</option>
+                  <option value="">Select client (or enter custom name below)</option>
                   {clients.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.razonSocial} ({c.rut})
@@ -351,24 +449,24 @@ export default function PitchForm({
               </div>
 
               <div className="space-y-xxs">
-                <label className="block text-caption-uppercase text-ink font-semibold">Nombre Cliente Personalizado</label>
+                <label className="block text-caption-uppercase text-ink font-semibold">Custom Client Name</label>
                 <input
                   type="text"
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
                   className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none"
-                  placeholder="Ej. Acme Corporation"
+                  placeholder="e.g. DiDi Global (IBG)"
                 />
               </div>
 
               <div className="space-y-xxs">
-                <label className="block text-caption-uppercase text-ink font-semibold">Presentador (Admin)</label>
+                <label className="block text-caption-uppercase text-ink font-semibold">Presenter (Admin)</label>
                 <select
                   value={userId}
                   onChange={(e) => setUserId(e.target.value)}
                   className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none cursor-pointer"
                 >
-                  <option value="">Seleccionar presentador</option>
+                  <option value="">Select presenter</option>
                   {admins.map((a) => (
                     <option key={a.id} value={a.id}>
                       {a.name} ({a.cargo || 'Admin'})
@@ -378,17 +476,17 @@ export default function PitchForm({
               </div>
 
               <div className="space-y-xxs">
-                <label className="block text-caption-uppercase text-ink font-semibold">Estado</label>
+                <label className="block text-caption-uppercase text-ink font-semibold">Status</label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                   className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none cursor-pointer"
                 >
-                  <option value="Borrador">Borrador</option>
-                  <option value="Activo">Activo</option>
-                  <option value="Presentado">Presentado</option>
-                  <option value="Aceptado">Aceptado</option>
-                  <option value="Archivado">Archivado</option>
+                  <option value="Borrador">Draft</option>
+                  <option value="Activo">Active</option>
+                  <option value="Presentado">Presented</option>
+                  <option value="Aceptado">Accepted</option>
+                  <option value="Archivado">Archived</option>
                 </select>
               </div>
             </div>
@@ -398,29 +496,36 @@ export default function PitchForm({
           <div className="bg-canvas-elevated border border-hairline p-sm space-y-sm">
             <div className="flex justify-between items-center">
               <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
-                <span className="material-icons mr-xxs text-primary">view_carousel</span> Diapositivas ({slides.length})
+                <span className="material-icons mr-xxs text-primary">view_carousel</span> Slides ({slides.length})
               </h2>
-              <div className="flex items-center gap-1">
+              <div className="flex flex-wrap items-center gap-1">
                 <button
                   type="button"
                   onClick={() => addSlide('hero')}
                   className="px-xxs py-1 bg-canvas hover:bg-canvas/80 text-ink text-[11px] font-bold uppercase tracking-wider border border-hairline"
                 >
-                  + Portada
+                  + Hero
                 </button>
                 <button
                   type="button"
                   onClick={() => addSlide('pillars')}
                   className="px-xxs py-1 bg-canvas hover:bg-canvas/80 text-ink text-[11px] font-bold uppercase tracking-wider border border-hairline"
                 >
-                  + Pilares
+                  + Pillars
+                </button>
+                <button
+                  type="button"
+                  onClick={() => addSlide('showcase')}
+                  className="px-xxs py-1 bg-primary/20 hover:bg-primary/30 text-primary text-[11px] font-bold uppercase tracking-wider border border-primary/40"
+                >
+                  + Case Studies
                 </button>
                 <button
                   type="button"
                   onClick={() => addSlide('metrics')}
                   className="px-xxs py-1 bg-canvas hover:bg-canvas/80 text-ink text-[11px] font-bold uppercase tracking-wider border border-hairline"
                 >
-                  + Métricas
+                  + Metrics
                 </button>
                 <button
                   type="button"
@@ -456,7 +561,7 @@ export default function PitchForm({
                 <div className="flex justify-between items-center border-b border-hairline pb-2">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-black uppercase tracking-widest text-primary">
-                      Editando Slide {activeSlideIndex + 1} ({activeSlide.type})
+                      Editing Slide {activeSlideIndex + 1} ({activeSlide.type})
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
@@ -465,7 +570,7 @@ export default function PitchForm({
                       onClick={() => moveSlide(activeSlideIndex, 'up')}
                       disabled={activeSlideIndex === 0}
                       className="p-1 text-muted hover:text-ink disabled:opacity-30"
-                      title="Mover arriba"
+                      title="Move up"
                     >
                       <span className="material-icons text-sm">arrow_upward</span>
                     </button>
@@ -474,7 +579,7 @@ export default function PitchForm({
                       onClick={() => moveSlide(activeSlideIndex, 'down')}
                       disabled={activeSlideIndex === slides.length - 1}
                       className="p-1 text-muted hover:text-ink disabled:opacity-30"
-                      title="Mover abajo"
+                      title="Move down"
                     >
                       <span className="material-icons text-sm">arrow_downward</span>
                     </button>
@@ -482,7 +587,7 @@ export default function PitchForm({
                       type="button"
                       onClick={() => removeSlide(activeSlideIndex)}
                       className="p-1 text-muted hover:text-semantic-error"
-                      title="Eliminar slide"
+                      title="Delete slide"
                     >
                       <span className="material-icons text-sm">delete_outline</span>
                     </button>
@@ -491,66 +596,188 @@ export default function PitchForm({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
                   <div className="space-y-xxs">
-                    <label className="block text-caption-uppercase text-ink font-semibold">Tipo de Diapositiva</label>
+                    <label className="block text-caption-uppercase text-ink font-semibold">Slide Layout Type</label>
                     <select
                       value={activeSlide.type}
                       onChange={(e) => updateActiveSlide({ type: e.target.value as any })}
                       className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none cursor-pointer"
                     >
-                      <option value="hero">Hero / Portada Principal</option>
-                      <option value="pillars">Pilares de Servicios (3 Columnas)</option>
-                      <option value="problem_solution">Problema vs Solución</option>
-                      <option value="metrics">Métricas de Impacto</option>
-                      <option value="roadmap">Roadmap de Ejecución</option>
-                      <option value="cta">Llamado a la Acción / Contacto</option>
-                      <option value="custom">Contenido Libre</option>
+                      <option value="hero">Hero / Cover Slide</option>
+                      <option value="pillars">Pillars of Service (3 Columns)</option>
+                      <option value="problem_solution">Problem vs Solution</option>
+                      <option value="showcase">Case Studies & Examples (Videos / Slides / Images)</option>
+                      <option value="metrics">Impact Metrics</option>
+                      <option value="roadmap">Implementation Roadmap</option>
+                      <option value="cta">Call to Action / Contact</option>
+                      <option value="custom">Custom Content</option>
                     </select>
                   </div>
 
                   <div className="space-y-xxs">
-                    <label className="block text-caption-uppercase text-ink font-semibold">Badge Superior</label>
+                    <label className="block text-caption-uppercase text-ink font-semibold">Top Badge</label>
                     <input
                       type="text"
                       value={activeSlide.badge || ''}
                       onChange={(e) => updateActiveSlide({ badge: e.target.value })}
                       className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none"
-                      placeholder="Ej. 360° Creative & Technology Support"
+                      placeholder="e.g. Proven Work & Case Studies"
                     />
                   </div>
 
                   <div className="space-y-xxs md:col-span-2">
-                    <label className="block text-caption-uppercase text-ink font-semibold">Título de la Diapositiva</label>
+                    <label className="block text-caption-uppercase text-ink font-semibold">Slide Title</label>
                     <input
                       type="text"
                       value={activeSlide.title || ''}
                       onChange={(e) => updateActiveSlide({ title: e.target.value })}
                       className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none font-bold"
-                      placeholder="Ej. LAUNCHPAD o Nuestros Pilares"
+                      placeholder="e.g. Featured Case Studies & Creative Work"
                     />
                   </div>
 
                   <div className="space-y-xxs md:col-span-2">
-                    <label className="block text-caption-uppercase text-ink font-semibold">Subtítulo / Bajada</label>
+                    <label className="block text-caption-uppercase text-ink font-semibold">Subtitle</label>
                     <input
                       type="text"
                       value={activeSlide.subtitle || ''}
                       onChange={(e) => updateActiveSlide({ subtitle: e.target.value })}
                       className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none"
-                      placeholder="Ej. Where ideas take off"
+                      placeholder="e.g. Proven video production, slide decks, and digital asset examples"
                     />
                   </div>
 
-                  <div className="space-y-xxs md:col-span-2">
-                    <label className="block text-caption-uppercase text-ink font-semibold">Texto / Contenido Principal</label>
-                    <textarea
-                      rows={3}
-                      value={activeSlide.content || ''}
-                      onChange={(e) => updateActiveSlide({ content: e.target.value })}
-                      className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none"
-                      placeholder="Descripción detallada de la diapositiva..."
-                    />
-                  </div>
+                  {activeSlide.type !== 'showcase' && (
+                    <div className="space-y-xxs md:col-span-2">
+                      <label className="block text-caption-uppercase text-ink font-semibold">Content Text</label>
+                      <textarea
+                        rows={3}
+                        value={activeSlide.content || ''}
+                        onChange={(e) => updateActiveSlide({ content: e.target.value })}
+                        className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none"
+                        placeholder="Explanatory text for the slide..."
+                      />
+                    </div>
+                  )}
                 </div>
+
+                {/* SHOWCASE / CASE STUDIES EDITOR */}
+                {activeSlide.type === 'showcase' && (
+                  <div className="mt-4 pt-4 border-t border-hairline space-y-3">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1">
+                        <span className="material-icons text-sm">collections</span>
+                        Work Examples ({(activeSlide.showcaseItems || []).length})
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        {showcaseProjects.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setShowImportShowcaseModal(true)}
+                            className="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1"
+                          >
+                            <span className="material-icons text-xs">download</span>
+                            Import from Portfolio
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={addShowcaseItem}
+                          className="px-2 py-1 bg-primary text-black text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1"
+                        >
+                          <span className="material-icons text-xs">add</span>
+                          Add Example
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {(activeSlide.showcaseItems || []).map((item, itemIdx) => (
+                        <div key={item.id || itemIdx} className="bg-canvas-elevated border border-hairline p-3 rounded-sm space-y-2 relative">
+                          <div className="flex justify-between items-center border-b border-hairline pb-2">
+                            <span className="text-[11px] font-bold text-ink">Example #{itemIdx + 1}</span>
+                            <button
+                              type="button"
+                              onClick={() => deleteShowcaseItem(itemIdx)}
+                              className="text-muted hover:text-semantic-error text-xs"
+                            >
+                              <span className="material-icons text-sm">delete</span>
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">Project Title</label>
+                              <input
+                                type="text"
+                                value={item.title || ''}
+                                onChange={(e) => updateShowcaseItem(itemIdx, { title: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none"
+                                placeholder="e.g. DiDi Event Video Opener"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">Media Type</label>
+                              <select
+                                value={item.mediaType || 'image'}
+                                onChange={(e) => updateShowcaseItem(itemIdx, { mediaType: e.target.value as any })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none"
+                              >
+                                <option value="video">Video (MP4 / YouTube / Vimeo)</option>
+                                <option value="slide">Slide Deck / Document</option>
+                                <option value="image">Graphic / Banner / Image</option>
+                              </select>
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">Client</label>
+                              <input
+                                type="text"
+                                value={item.client || ''}
+                                onChange={(e) => updateShowcaseItem(itemIdx, { client: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none"
+                                placeholder="e.g. DiDi Global"
+                              />
+                            </div>
+
+                            <div className="space-y-1 md:col-span-2">
+                              <label className="block text-[10px] font-bold uppercase text-muted">Media URL (Video, Image or Slide URL)</label>
+                              <input
+                                type="text"
+                                value={item.mediaUrl || ''}
+                                onChange={(e) => updateShowcaseItem(itemIdx, { mediaUrl: e.target.value, thumbnailUrl: item.thumbnailUrl || e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none font-mono"
+                                placeholder="https://res.cloudinary.com/... or https://youtu.be/..."
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">Tags (comma-separated)</label>
+                              <input
+                                type="text"
+                                value={(item.tags || []).join(', ')}
+                                onChange={(e) => updateShowcaseItem(itemIdx, { tags: e.target.value.split(',').map(t => t.trim()) })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none"
+                                placeholder="e.g. After Effects, 4K, Banners"
+                              />
+                            </div>
+
+                            <div className="space-y-1 md:col-span-3">
+                              <label className="block text-[10px] font-bold uppercase text-muted">Description / Deliverables</label>
+                              <textarea
+                                rows={2}
+                                value={item.description || ''}
+                                onChange={(e) => updateShowcaseItem(itemIdx, { description: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none"
+                                placeholder="Summary of scope, creative approach, and results..."
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -561,9 +788,9 @@ export default function PitchForm({
           <div className="flex items-center justify-between px-xs py-xxs bg-canvas border border-hairline">
             <span className="text-caption-uppercase text-muted font-bold text-xs flex items-center gap-1">
               <span className="material-icons text-sm text-primary">visibility</span>
-              Vista Previa en Vivo
+              Live Real-Time Preview
             </span>
-            <span className="text-[10px] text-muted uppercase tracking-wider">Slide {activeSlideIndex + 1} de {slides.length}</span>
+            <span className="text-[10px] text-muted uppercase tracking-wider">Slide {activeSlideIndex + 1} of {slides.length}</span>
           </div>
 
           <div className="border border-hairline rounded-sm overflow-hidden bg-[#07070b] h-[550px] flex flex-col shadow-2xl relative">
@@ -587,7 +814,7 @@ export default function PitchForm({
           className="text-muted font-semibold hover:text-ink transition-colors text-xs uppercase tracking-wider flex items-center"
         >
           <span className="material-icons text-sm mr-xxs">arrow_back</span>
-          Volver
+          Back
         </button>
 
         <div className="flex items-center gap-sm">
@@ -597,7 +824,7 @@ export default function PitchForm({
             className="text-ink font-semibold hover:text-primary transition-colors text-xs uppercase tracking-wider flex items-center"
           >
             <span className="material-icons text-sm mr-xxs">fullscreen</span>
-            Pantalla Completa
+            Fullscreen
           </button>
 
           <button
@@ -607,7 +834,7 @@ export default function PitchForm({
             className="px-lg h-[40px] bg-primary text-black font-semibold hover:bg-primary/90 transition-all flex items-center justify-center uppercase tracking-wider text-xs disabled:opacity-50"
           >
             <span className="material-icons mr-xxs text-sm">save</span>
-            {isSubmitting ? 'Guardando...' : (isEditing ? 'Actualizar Pitch' : 'Guardar Pitch')}
+            {isSubmitting ? 'Saving...' : (isEditing ? 'Update Pitch' : 'Save Pitch')}
           </button>
         </div>
       </div>
@@ -622,13 +849,66 @@ export default function PitchForm({
               className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1 backdrop-blur-md"
             >
               <span className="material-icons text-sm">close</span>
-              Cerrar
+              Close
             </button>
           </div>
           <PitchViewer
             pitch={mockPitch}
             companyProfile={companyProfile}
           />
+        </div>
+      )}
+
+      {/* Import from Portfolio Modal */}
+      {showImportShowcaseModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-canvas-elevated border border-hairline max-w-2xl w-full p-5 rounded-lg shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+            <div className="flex justify-between items-center border-b border-hairline pb-3">
+              <h3 className="text-base font-bold text-ink flex items-center gap-2">
+                <span className="material-icons text-primary">collections</span>
+                Select Work Example from Portfolio
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowImportShowcaseModal(false)}
+                className="text-muted hover:text-ink text-sm"
+              >
+                <span className="material-icons">close</span>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+              {showcaseProjects.map((p: any) => (
+                <div
+                  key={p.id}
+                  className="bg-canvas border border-hairline p-3 rounded-md hover:border-primary/50 transition-colors flex items-center justify-between gap-4"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    {p.images && p.images[0] ? (
+                      <img src={p.images[0].url} alt={p.title} className="w-16 h-12 object-cover rounded-sm border border-hairline" />
+                    ) : (
+                      <div className="w-16 h-12 bg-white/5 flex items-center justify-center text-muted">
+                        <span className="material-icons text-sm">image</span>
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <h4 className="text-xs font-bold text-ink truncate">{p.title}</h4>
+                      <p className="text-[10px] text-primary uppercase font-semibold">{p.category} • {p.clientName || 'Launchpad'}</p>
+                      <p className="text-[11px] text-muted line-clamp-1">{p.descriptionEn || p.description}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => importFromProject(p)}
+                    className="px-3 py-1 bg-primary text-black text-xs font-bold uppercase tracking-wider rounded-sm shrink-0 hover:bg-primary/80"
+                  >
+                    Add to Slide
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>

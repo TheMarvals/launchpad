@@ -3,6 +3,19 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocale } from 'next-intl';
 
+export interface ShowcaseItem {
+  id?: string;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  mediaType?: 'image' | 'video' | 'slide' | 'embed';
+  mediaUrl: string;
+  thumbnailUrl?: string;
+  tags?: string[];
+  client?: string;
+  externalUrl?: string;
+}
+
 export interface PitchSlide {
   id: string;
   type: 'hero' | 'pillars' | 'problem_solution' | 'metrics' | 'roadmap' | 'showcase' | 'cta' | 'custom';
@@ -18,6 +31,7 @@ export interface PitchSlide {
     tags?: string[];
     highlight?: boolean;
   }>;
+  showcaseItems?: ShowcaseItem[];
   metrics?: Array<{
     value: string;
     label: string;
@@ -68,6 +82,9 @@ export default function PitchViewer({
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [viewMode, setViewMode] = useState<'deck' | 'scroll'>(initialMode);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [activeMediaModal, setActiveMediaModal] = useState<ShowcaseItem | null>(null);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const rawSlides = Array.isArray(pitch.slides) ? pitch.slides : [];
@@ -79,16 +96,34 @@ export default function PitchViewer({
       title: pitch.title || 'LAUNCHPAD',
       subtitle: pitch.subtitle || 'Where ideas take off',
       content: 'We design, build, and scale high-performance digital ecosystems that drive measurable growth.',
-      clientName: pitch.client?.razonSocial || pitch.clientName || 'Cliente Especial',
+      clientName: pitch.client?.razonSocial || pitch.clientName || 'Special Client',
       cta: {
-        text: 'Agendar Reunión',
-        secondaryText: 'Explorar Propuesta',
+        text: 'Explore Proposal',
+        secondaryText: 'View Case Studies',
       },
     },
   ];
 
   const totalSlides = slides.length;
   const currentSlide = slides[currentSlideIndex] || slides[0];
+
+  const clientDisplayName = pitch.client?.razonSocial || pitch.clientName || currentSlide.clientName;
+  const brandName = companyProfile?.brandNameHeader || 'LAUNCHPAD';
+  const presenterName = currentSlide.presenterName || pitch.user?.name || companyProfile?.user?.name || 'Eduardo Marval';
+  const presenterRole = currentSlide.presenterRole || pitch.user?.cargo || companyProfile?.user?.cargo || 'Lead Solution Architect';
+  const presenterEmail = companyProfile?.email || 'e.marval@themarvals.com';
+  const presenterPhone = companyProfile?.phone || '+569 94438833';
+
+  // Check if this pitch is customized for DiDi / Orange theme
+  const isDiDi = Boolean(
+    pitch.theme === 'orange' ||
+    pitch.theme === 'didi' ||
+    (pitch.title && pitch.title.toLowerCase().includes('didi')) ||
+    (clientDisplayName && clientDisplayName.toLowerCase().includes('didi'))
+  );
+
+  const accentColor = isDiDi ? '#FF7D00' : '#a855f7';
+  const accentGlow = isDiDi ? 'rgba(255, 125, 0, 0.25)' : 'rgba(168, 85, 247, 0.22)';
 
   const nextSlide = useCallback(() => {
     setCurrentSlideIndex((prev) => (prev < totalSlides - 1 ? prev + 1 : 0));
@@ -97,6 +132,41 @@ export default function PitchViewer({
   const prevSlide = useCallback(() => {
     setCurrentSlideIndex((prev) => (prev > 0 ? prev - 1 : totalSlides - 1));
   }, [totalSlides]);
+
+  const goToSlideByType = useCallback((type: string) => {
+    const targetIdx = slides.findIndex((s) => s.type === type);
+    if (targetIdx !== -1) {
+      setCurrentSlideIndex(targetIdx);
+    } else {
+      nextSlide();
+    }
+  }, [slides, nextSlide]);
+
+  const handlePrimaryCtaClick = (link?: string, slideType?: string) => {
+    if (link) {
+      if (link.startsWith('http') || link.startsWith('mailto:') || link.startsWith('tel:')) {
+        window.open(link, '_blank');
+      } else {
+        window.location.href = link;
+      }
+    } else if (slideType === 'hero') {
+      nextSlide();
+    } else {
+      setShowContactModal(true);
+    }
+  };
+
+  const handleSecondaryCtaClick = (link?: string) => {
+    if (link) {
+      if (link.startsWith('http')) {
+        window.open(link, '_blank');
+      } else {
+        window.location.href = link;
+      }
+    } else {
+      goToSlideByType('showcase');
+    }
+  };
 
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
@@ -119,6 +189,14 @@ export default function PitchViewer({
   useEffect(() => {
     if (isEditorPreview) return;
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (activeMediaModal) {
+        if (e.key === 'Escape') setActiveMediaModal(null);
+        return;
+      }
+      if (showContactModal) {
+        if (e.key === 'Escape') setShowContactModal(false);
+        return;
+      }
       if (viewMode !== 'deck') return;
       if (['ArrowRight', 'Space', 'PageDown'].includes(e.code)) {
         e.preventDefault();
@@ -135,12 +213,54 @@ export default function PitchViewer({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isEditorPreview, viewMode, nextSlide, prevSlide]);
+  }, [isEditorPreview, viewMode, nextSlide, prevSlide, activeMediaModal, showContactModal]);
 
-  const clientDisplayName = pitch.client?.razonSocial || pitch.clientName || currentSlide.clientName;
-  const brandName = companyProfile?.brandNameHeader || 'LAUNCHPAD';
-  const presenterName = currentSlide.presenterName || pitch.user?.name || companyProfile?.user?.name || 'Eduardo Marval';
-  const presenterRole = currentSlide.presenterRole || pitch.user?.cargo || companyProfile?.user?.cargo || 'Lead Solution Architect';
+  // Title styling helper: clean typography with glowing DiDi orange highlights
+  const renderStyledTitle = (text: string, isHero: boolean = false) => {
+    if (!text) return null;
+    const parts = text.split(/(DiDi|DIDI)/i);
+
+    if (isHero) {
+      return (
+        <h1
+          className="text-[clamp(3.5rem,11vw,7.5rem)] font-black tracking-tighter leading-none mb-3 select-none"
+          style={{
+            WebkitTextFillColor: 'transparent',
+            WebkitTextStrokeColor: '#ffffff',
+            WebkitTextStrokeWidth: '1.5px',
+            fontFamily: "'Outfit', sans-serif",
+          }}
+        >
+          {text}
+        </h1>
+      );
+    }
+
+    return (
+      <h2
+        className="text-[clamp(2rem,3.8vw,3.2rem)] font-black tracking-tight uppercase leading-tight"
+        style={{ fontFamily: "'Outfit', sans-serif" }}
+      >
+        {parts.map((part, pIdx) => {
+          if (part.toLowerCase() === 'didi') {
+            return (
+              <span
+                key={pIdx}
+                className="text-[#FF7D00] inline-block drop-shadow-[0_0_25px_rgba(255,125,0,0.5)] font-black"
+              >
+                {part}
+              </span>
+            );
+          }
+          return (
+            <span key={pIdx} className="text-white">
+              {part}
+            </span>
+          );
+        })}
+      </h2>
+    );
+  };
 
   // Render a single slide
   const renderSlideContent = (slide: PitchSlide, index: number) => {
@@ -149,22 +269,15 @@ export default function PitchViewer({
         return (
           <div className="relative z-10 max-w-[900px] w-full text-center px-4 md:px-6 my-auto animate-fade-in">
             {slide.badge && (
-              <p className="text-[clamp(0.65rem,1.2vw,0.85rem)] uppercase tracking-[0.3em] text-primary font-bold mb-4">
-                {slide.badge}
-              </p>
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-white/5 border border-white/10 rounded-full mb-4 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: accentColor }} />
+                <span className="text-[clamp(0.65rem,1.2vw,0.8rem)] uppercase tracking-[0.25em] font-bold" style={{ color: accentColor }}>
+                  {slide.badge}
+                </span>
+              </div>
             )}
 
-            <h1
-              className="text-[clamp(3.5rem,11vw,7.5rem)] font-black tracking-tighter leading-none mb-3 select-none"
-              style={{
-                WebkitTextFillColor: 'transparent',
-                WebkitTextStrokeColor: '#ffffff',
-                WebkitTextStrokeWidth: '1.5px',
-                fontFamily: "'Outfit', sans-serif",
-              }}
-            >
-              {slide.title || brandName}
-            </h1>
+            {renderStyledTitle(slide.title || brandName, true)}
 
             {slide.subtitle && (
               <p
@@ -176,8 +289,10 @@ export default function PitchViewer({
             )}
 
             {clientDisplayName && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full mb-6 backdrop-blur-md">
-                <span className="text-[10px] uppercase tracking-widest text-primary font-semibold">PREPARADO PARA:</span>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/5 border border-white/10 rounded-full mb-6 backdrop-blur-md">
+                <span className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: accentColor }}>
+                  {locale === 'en' ? 'PREPARED FOR:' : 'PREPARADO PARA:'}
+                </span>
                 <span className="text-xs font-bold text-white uppercase">{clientDisplayName}</span>
               </div>
             )}
@@ -191,15 +306,28 @@ export default function PitchViewer({
             {slide.cta && (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 {slide.cta.text && (
-                  <div className="bg-primary text-black font-bold uppercase tracking-[0.2em] px-8 h-[48px] rounded-sm text-xs flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-                    <span className="material-icons mr-2 text-[18px]">calendar_today</span>
+                  <button
+                    type="button"
+                    onClick={() => handlePrimaryCtaClick(slide.cta?.link, slide.type)}
+                    className="text-black font-extrabold uppercase tracking-[0.2em] px-8 h-[48px] rounded-sm text-xs flex items-center justify-center transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+                    style={{
+                      backgroundColor: accentColor,
+                      boxShadow: `0 0 25px ${accentGlow}`,
+                    }}
+                  >
+                    <span className="material-icons mr-2 text-[18px]">explore</span>
                     {slide.cta.text}
-                  </div>
+                  </button>
                 )}
                 {slide.cta.secondaryText && (
-                  <div className="border border-white/20 text-white hover:border-primary/50 px-6 h-[48px] rounded-sm text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={() => handleSecondaryCtaClick(slide.cta?.secondaryLink)}
+                    className="border border-white/20 hover:border-white/50 text-white px-6 h-[48px] rounded-sm text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center transition-all transform hover:scale-105 active:scale-95 cursor-pointer bg-white/5 hover:bg-white/10"
+                  >
+                    <span className="material-icons mr-2 text-[16px]">collections</span>
                     {slide.cta.secondaryText}
-                  </div>
+                  </button>
                 )}
               </div>
             )}
@@ -211,42 +339,32 @@ export default function PitchViewer({
           <div className="relative z-10 max-w-[1100px] w-full px-4 md:px-6 my-auto animate-fade-in">
             <div className="text-center mb-8">
               {slide.badge && (
-                <span className="text-[10px] uppercase tracking-[0.25em] text-primary font-bold mb-2 block">
+                <span className="text-[10px] uppercase tracking-[0.25em] font-bold mb-2 block" style={{ color: accentColor }}>
                   {slide.badge}
                 </span>
               )}
-              <h2
-                className="text-[clamp(2rem,4vw,3.2rem)] font-black tracking-tighter uppercase"
-                style={{
-                  WebkitTextFillColor: 'transparent',
-                  WebkitTextStrokeColor: '#ffffff',
-                  WebkitTextStrokeWidth: '1.2px',
-                  fontFamily: "'Outfit', sans-serif",
-                }}
-              >
-                {slide.title}
-              </h2>
+              {renderStyledTitle(slide.title)}
               {slide.subtitle && (
                 <p className="text-slate-300 text-sm md:text-base max-w-[600px] mx-auto mt-2">
                   {slide.subtitle}
                 </p>
               )}
-              <div className="h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent mx-auto mt-3 w-24"></div>
+              <div className="h-[2px] mx-auto mt-3 w-24" style={{ background: `linear-gradient(to right, transparent, ${accentColor}, transparent)` }}></div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {(slide.cards || []).map((card, cIdx) => (
                 <div
                   key={cIdx}
-                  className="relative bg-[#0d0d14] border border-white/10 hover:border-primary/50 p-6 rounded-xl transition-all duration-300 group hover:-translate-y-1"
+                  className="relative bg-[#0d0d14] border border-white/10 hover:border-white/40 p-6 rounded-xl transition-all duration-300 group hover:-translate-y-1"
                 >
-                  <div className="absolute top-0 left-4 right-4 h-[1.5px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 text-primary">
+                  <div className="absolute top-0 left-4 right-4 h-[1.5px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `linear-gradient(to right, transparent, ${accentColor}, transparent)` }} />
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 border" style={{ backgroundColor: `${accentColor}15`, borderColor: `${accentColor}40`, color: accentColor }}>
                     <span className="material-icons text-[24px]">{card.icon || 'star'}</span>
                   </div>
                   <h3 className="text-lg font-bold text-white mb-1">{card.title}</h3>
                   {card.subtitle && (
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-primary font-bold mb-3">
+                    <p className="text-[10px] uppercase tracking-[0.15em] font-bold mb-3" style={{ color: accentColor }}>
                       {card.subtitle}
                     </p>
                   )}
@@ -274,21 +392,11 @@ export default function PitchViewer({
           <div className="relative z-10 max-w-[1000px] w-full px-4 md:px-6 my-auto animate-fade-in">
             <div className="text-center mb-8">
               {slide.badge && (
-                <span className="text-[10px] uppercase tracking-[0.25em] text-primary font-bold mb-2 block">
+                <span className="text-[10px] uppercase tracking-[0.25em] font-bold mb-2 block" style={{ color: accentColor }}>
                   {slide.badge}
                 </span>
               )}
-              <h2
-                className="text-[clamp(2rem,4vw,3.2rem)] font-black tracking-tighter uppercase"
-                style={{
-                  WebkitTextFillColor: 'transparent',
-                  WebkitTextStrokeColor: '#ffffff',
-                  WebkitTextStrokeWidth: '1.2px',
-                  fontFamily: "'Outfit', sans-serif",
-                }}
-              >
-                {slide.title}
-              </h2>
+              {renderStyledTitle(slide.title)}
               {slide.subtitle && (
                 <p className="text-slate-300 text-sm md:text-base max-w-[650px] mx-auto mt-2">
                   {slide.subtitle}
@@ -302,12 +410,13 @@ export default function PitchViewer({
                   key={cIdx}
                   className={`p-6 rounded-xl border relative ${
                     card.highlight
-                      ? 'bg-gradient-to-b from-[#161226] to-[#0d0d14] border-primary/40 shadow-[0_0_30px_rgba(168,85,247,0.15)]'
+                      ? 'bg-gradient-to-b from-[#191410] to-[#0d0d14] shadow-2xl'
                       : 'bg-[#0d0d14] border-white/10'
                   }`}
+                  style={card.highlight ? { borderColor: `${accentColor}50` } : {}}
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <span className={`material-icons text-2xl ${card.highlight ? 'text-primary' : 'text-slate-400'}`}>
+                    <span className="material-icons text-2xl" style={{ color: card.highlight ? accentColor : '#94a3b8' }}>
                       {card.icon || (card.highlight ? 'verified' : 'warning')}
                     </span>
                     <div>
@@ -324,27 +433,114 @@ export default function PitchViewer({
           </div>
         );
 
+      case 'showcase':
+        const showcaseList = slide.showcaseItems || [];
+        return (
+          <div className="relative z-10 max-w-[1200px] w-full px-4 md:px-6 my-auto animate-fade-in">
+            <div className="text-center mb-8">
+              {slide.badge && (
+                <span className="text-[10px] uppercase tracking-[0.25em] font-bold mb-2 block" style={{ color: accentColor }}>
+                  {slide.badge}
+                </span>
+              )}
+              {renderStyledTitle(slide.title)}
+              {slide.subtitle && (
+                <p className="text-slate-300 text-sm md:text-base max-w-[650px] mx-auto mt-2">
+                  {slide.subtitle}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {showcaseList.map((item, sIdx) => {
+                const isVideo = item.mediaType === 'video' || (item.mediaUrl && item.mediaUrl.match(/\.(mp4|webm|mov)$/i));
+                const isSlide = item.mediaType === 'slide';
+                const previewImg = item.thumbnailUrl || item.mediaUrl;
+
+                return (
+                  <div
+                    key={sIdx}
+                    onClick={() => setActiveMediaModal(item)}
+                    className="group relative bg-[#0d0d14] border border-white/10 hover:border-white/40 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1.5 shadow-lg"
+                  >
+                    {/* Media Thumbnail Container */}
+                    <div className="aspect-video w-full relative overflow-hidden bg-black/50">
+                      {previewImg ? (
+                        <img
+                          src={previewImg}
+                          alt={item.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-white/5 text-slate-500">
+                          <span className="material-icons text-3xl">image</span>
+                        </div>
+                      )}
+
+                      {/* Type Badge & Play Icon */}
+                      <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10 flex items-center gap-1.5 text-[9px] uppercase tracking-wider font-bold text-white">
+                        <span className="material-icons text-xs" style={{ color: accentColor }}>
+                          {isVideo ? 'play_circle' : isSlide ? 'slideshow' : 'visibility'}
+                        </span>
+                        <span>{item.mediaType || (isVideo ? 'Video' : isSlide ? 'Slide' : 'Image')}</span>
+                      </div>
+
+                      {item.client && (
+                        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-sm border border-white/10 text-[9px] uppercase tracking-widest text-slate-300 font-semibold">
+                          {item.client}
+                        </div>
+                      )}
+
+                      {isVideo && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/10 transition-colors">
+                          <div className="w-12 h-12 rounded-full text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform" style={{ backgroundColor: accentColor }}>
+                            <span className="material-icons text-2xl">play_arrow</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Metadata Content */}
+                    <div className="p-4 space-y-2">
+                      <h3 className="text-sm md:text-base font-bold text-white transition-colors">
+                        {item.title}
+                      </h3>
+                      {item.description && (
+                        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                          {item.description}
+                        </p>
+                      )}
+                      {item.tags && item.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 pt-2">
+                          {item.tags.map((tag, tIdx) => (
+                            <span
+                              key={tIdx}
+                              className="text-[8px] uppercase tracking-wider text-slate-300 bg-white/5 border border-white/10 px-1.5 py-0.5 rounded-sm"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+
       case 'metrics':
         return (
           <div className="relative z-10 max-w-[1000px] w-full px-4 md:px-6 my-auto animate-fade-in text-center">
             {slide.badge && (
-              <span className="text-[10px] uppercase tracking-[0.25em] text-primary font-bold mb-2 block">
+              <span className="text-[10px] uppercase tracking-[0.25em] font-bold mb-2 block" style={{ color: accentColor }}>
                 {slide.badge}
               </span>
             )}
-            <h2
-              className="text-[clamp(2rem,4vw,3.2rem)] font-black tracking-tighter uppercase mb-3"
-              style={{
-                WebkitTextFillColor: 'transparent',
-                WebkitTextStrokeColor: '#ffffff',
-                WebkitTextStrokeWidth: '1.2px',
-                fontFamily: "'Outfit', sans-serif",
-              }}
-            >
-              {slide.title}
-            </h2>
+            {renderStyledTitle(slide.title)}
             {slide.subtitle && (
-              <p className="text-slate-300 text-sm md:text-base max-w-[600px] mx-auto mb-10">
+              <p className="text-slate-300 text-sm md:text-base max-w-[600px] mx-auto mb-10 mt-2">
                 {slide.subtitle}
               </p>
             )}
@@ -353,11 +549,13 @@ export default function PitchViewer({
               {(slide.metrics || []).map((metric, mIdx) => (
                 <div
                   key={mIdx}
-                  className="bg-[#0d0d14] border border-white/10 p-6 rounded-xl relative group hover:border-primary/40 transition-colors"
+                  className="bg-[#0d0d14] border border-white/10 p-6 rounded-xl relative group hover:border-white/30 transition-colors"
                 >
                   <div className="text-[clamp(2rem,3.5vw,3rem)] font-black tracking-tight text-white mb-1" style={{ fontFamily: "'Outfit', sans-serif" }}>
-                    <span className="text-primary">{metric.value.charAt(0) === '+' || metric.value.charAt(0) === '$' ? metric.value.charAt(0) : ''}</span>
-                    {metric.value.replace(/^[+$]/, '')}
+                    <span style={{ color: accentColor }}>
+                      {metric.value.charAt(0) === '+' || metric.value.charAt(0) === '$' || metric.value.charAt(0) === '<' ? metric.value.charAt(0) : ''}
+                    </span>
+                    {metric.value.replace(/^[+$<]/, '')}
                   </div>
                   <div className="text-xs font-bold uppercase tracking-wider text-slate-200 mb-1">{metric.label}</div>
                   {metric.subtext && <div className="text-[10px] text-slate-400">{metric.subtext}</div>}
@@ -372,21 +570,11 @@ export default function PitchViewer({
           <div className="relative z-10 max-w-[1100px] w-full px-4 md:px-6 my-auto animate-fade-in">
             <div className="text-center mb-8">
               {slide.badge && (
-                <span className="text-[10px] uppercase tracking-[0.25em] text-primary font-bold mb-2 block">
+                <span className="text-[10px] uppercase tracking-[0.25em] font-bold mb-2 block" style={{ color: accentColor }}>
                   {slide.badge}
                 </span>
               )}
-              <h2
-                className="text-[clamp(2rem,4vw,3.2rem)] font-black tracking-tighter uppercase"
-                style={{
-                  WebkitTextFillColor: 'transparent',
-                  WebkitTextStrokeColor: '#ffffff',
-                  WebkitTextStrokeWidth: '1.2px',
-                  fontFamily: "'Outfit', sans-serif",
-                }}
-              >
-                {slide.title}
-              </h2>
+              {renderStyledTitle(slide.title)}
               {slide.subtitle && (
                 <p className="text-slate-300 text-sm md:text-base max-w-[600px] mx-auto mt-2">
                   {slide.subtitle}
@@ -398,14 +586,14 @@ export default function PitchViewer({
               {(slide.timeline || []).map((step, sIdx) => (
                 <div key={sIdx} className="bg-[#0d0d14] border border-white/10 p-6 rounded-xl relative">
                   <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-3">
-                    <span className="text-xs font-black uppercase tracking-widest text-primary">{step.phase}</span>
+                    <span className="text-xs font-black uppercase tracking-widest" style={{ color: accentColor }}>{step.phase}</span>
                     {step.duration && <span className="text-[10px] font-bold text-slate-400">{step.duration}</span>}
                   </div>
                   <h3 className="text-base font-bold text-white mb-3">{step.title}</h3>
                   <ul className="space-y-1.5">
                     {step.deliverables.map((item, dIdx) => (
                       <li key={dIdx} className="text-xs text-slate-300 flex items-start gap-2">
-                        <span className="material-icons text-[14px] text-primary mt-0.5">check_circle</span>
+                        <span className="material-icons text-[14px] mt-0.5" style={{ color: accentColor }}>check_circle</span>
                         <span>{item}</span>
                       </li>
                     ))}
@@ -418,49 +606,79 @@ export default function PitchViewer({
 
       case 'cta':
         return (
-          <div className="relative z-10 max-w-[800px] w-full text-center px-4 md:px-6 my-auto animate-fade-in">
+          <div className="relative z-10 max-w-[950px] w-full text-center px-4 md:px-6 my-auto animate-fade-in">
             {slide.badge && (
-              <span className="text-[10px] uppercase tracking-[0.25em] text-primary font-bold mb-3 block">
-                {slide.badge}
-              </span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-full mb-4 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: accentColor }} />
+                <span className="text-[10px] uppercase tracking-[0.25em] font-bold" style={{ color: accentColor }}>
+                  {slide.badge}
+                </span>
+              </div>
             )}
-            <h2
-              className="text-[clamp(2.5rem,5vw,4.5rem)] font-black tracking-tighter leading-none mb-4 uppercase"
-              style={{
-                WebkitTextFillColor: 'transparent',
-                WebkitTextStrokeColor: '#ffffff',
-                WebkitTextStrokeWidth: '1.5px',
-                fontFamily: "'Outfit', sans-serif",
-              }}
-            >
-              {slide.title}
-            </h2>
+
+            {renderStyledTitle(slide.title)}
+
             {slide.subtitle && (
-              <p className="text-lg md:text-xl font-semibold text-white/90 mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <p className="text-base md:text-lg font-semibold text-white/90 mb-6 max-w-[700px] mx-auto mt-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>
                 {slide.subtitle}
               </p>
             )}
-            {slide.content && (
-              <p className="text-slate-300 text-sm md:text-base leading-relaxed mb-8 max-w-[600px] mx-auto">
-                {slide.content}
-              </p>
-            )}
 
-            <div className="bg-[#0d0d14] border border-white/10 p-6 rounded-xl max-w-[450px] mx-auto mb-8 text-left space-y-2">
-              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Contacto Directo</div>
-              <div className="text-base font-bold text-white">{presenterName}</div>
-              <div className="text-xs text-primary font-medium">{presenterRole}</div>
-              <div className="text-xs text-slate-300 pt-2 border-t border-white/10">
-                {companyProfile?.email || 'e.marval@themarvals.com'} • {companyProfile?.phone || '+569 94438833'}
+            {/* Two Value Proposition Pillars on Closing */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto mb-6 text-left">
+              <div className="bg-[#0d0d14] border border-white/10 p-5 rounded-xl space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="material-icons text-lg" style={{ color: accentColor }}>speed</span>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Agile Daily Comms</h4>
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Rapid <span className="font-bold text-white">&lt;24-48h turnaround</span> for banners, email templates, D-Hub & D-Channel assets with bilingual English/Spanish agility and Chinese (CN) support.
+                </p>
+              </div>
+
+              <div className="bg-[#0d0d14] border border-white/10 p-5 rounded-xl space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="material-icons text-lg" style={{ color: accentColor }}>verified_user</span>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Major Events & VRA</h4>
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  End-to-end multimedia for <span className="font-bold text-white">Get-Together & Value Star</span>, with 100% compliance readiness for DiDi Vendor Risk Assessment (VRA).
+                </p>
               </div>
             </div>
 
-            {slide.cta?.text && (
-              <div className="inline-flex bg-primary text-black font-bold uppercase tracking-[0.2em] px-8 h-[50px] rounded-sm text-xs items-center justify-center shadow-[0_0_25px_rgba(168,85,247,0.3)]">
-                <span className="material-icons mr-2 text-[18px]">rocket_launch</span>
-                {slide.cta.text}
+            {/* Direct Contact Box */}
+            <div className="bg-[#12121a] border border-white/15 p-5 rounded-xl max-w-xl mx-auto text-left flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="space-y-1 text-center sm:text-left">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  {locale === 'en' ? 'Primary Account Lead' : 'Contacto Directo'}
+                </div>
+                <div className="text-base font-bold text-white">{presenterName}</div>
+                <div className="text-xs font-medium" style={{ color: accentColor }}>{presenterRole}</div>
+                <div className="text-xs text-slate-300 pt-1">
+                  {presenterEmail} • {presenterPhone}
+                </div>
               </div>
-            )}
+
+              <div className="flex items-center gap-2">
+                <a
+                  href={`mailto:${presenterEmail}?subject=${encodeURIComponent('[DiDi RFI 2026] Creative & Multimedia Support - Launchpad')}`}
+                  className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-sm text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors"
+                >
+                  <span className="material-icons text-sm">email</span>
+                  Email
+                </a>
+                <button
+                  type="button"
+                  onClick={() => goToSlideByType('showcase')}
+                  className="px-4 py-2.5 rounded-sm text-xs font-extrabold uppercase tracking-wider text-black flex items-center gap-1.5 transition-all shadow-md"
+                  style={{ backgroundColor: accentColor }}
+                >
+                  <span className="material-icons text-sm">collections</span>
+                  Portfolio
+                </button>
+              </div>
+            </div>
           </div>
         );
 
@@ -469,23 +687,13 @@ export default function PitchViewer({
         return (
           <div className="relative z-10 max-w-[900px] w-full px-4 md:px-6 my-auto animate-fade-in">
             {slide.badge && (
-              <span className="text-[10px] uppercase tracking-[0.25em] text-primary font-bold mb-2 block text-center">
+              <span className="text-[10px] uppercase tracking-[0.25em] font-bold mb-2 block text-center" style={{ color: accentColor }}>
                 {slide.badge}
               </span>
             )}
-            <h2
-              className="text-[clamp(2rem,4vw,3.2rem)] font-black tracking-tighter uppercase text-center mb-6"
-              style={{
-                WebkitTextFillColor: 'transparent',
-                WebkitTextStrokeColor: '#ffffff',
-                WebkitTextStrokeWidth: '1.2px',
-                fontFamily: "'Outfit', sans-serif",
-              }}
-            >
-              {slide.title}
-            </h2>
+            {renderStyledTitle(slide.title)}
             <div
-              className="prose prose-invert max-w-none text-slate-300 leading-relaxed text-sm md:text-base space-y-4"
+              className="prose prose-invert max-w-none text-slate-300 leading-relaxed text-sm md:text-base space-y-4 mt-6"
               dangerouslySetInnerHTML={{ __html: slide.content || '' }}
             />
           </div>
@@ -503,8 +711,8 @@ export default function PitchViewer({
       {/* Background glow effects */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
         <div
-          className="absolute -top-[250px] -right-[150px] w-[600px] h-[600px] pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse at center, rgba(168,85,247,0.22) 0%, transparent 70%)' }}
+          className="absolute -top-[250px] -right-[150px] w-[600px] h-[600px] pointer-events-none transition-all duration-700"
+          style={{ background: `radial-gradient(ellipse at center, ${accentGlow} 0%, transparent 70%)` }}
         />
         <div
           className="absolute -bottom-[200px] -left-[150px] w-[500px] h-[500px] pointer-events-none"
@@ -544,8 +752,8 @@ export default function PitchViewer({
             >
               {brandName}
             </span>
-            <span className="text-[10px] uppercase tracking-widest text-primary font-bold px-2 py-0.5 bg-primary/10 border border-primary/20 rounded-full hidden sm:inline">
-              PITCH DECK
+            <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full hidden sm:inline border" style={{ backgroundColor: `${accentColor}15`, borderColor: `${accentColor}30`, color: accentColor }}>
+              {isDiDi ? 'DIDI RFI DECK' : 'PITCH DECK'}
             </span>
           </div>
 
@@ -556,8 +764,9 @@ export default function PitchViewer({
                 type="button"
                 onClick={() => setViewMode('deck')}
                 className={`px-3 py-1 rounded-full transition-colors flex items-center gap-1 ${
-                  viewMode === 'deck' ? 'bg-primary text-black' : 'text-slate-400 hover:text-white'
+                  viewMode === 'deck' ? 'text-black font-extrabold' : 'text-slate-400 hover:text-white'
                 }`}
+                style={viewMode === 'deck' ? { backgroundColor: accentColor } : {}}
               >
                 <span className="material-icons text-xs">slideshow</span>
                 Deck
@@ -566,19 +775,35 @@ export default function PitchViewer({
                 type="button"
                 onClick={() => setViewMode('scroll')}
                 className={`px-3 py-1 rounded-full transition-colors flex items-center gap-1 ${
-                  viewMode === 'scroll' ? 'bg-primary text-black' : 'text-slate-400 hover:text-white'
+                  viewMode === 'scroll' ? 'text-black font-extrabold' : 'text-slate-400 hover:text-white'
                 }`}
+                style={viewMode === 'scroll' ? { backgroundColor: accentColor } : {}}
               >
                 <span className="material-icons text-xs">view_agenda</span>
                 Scroll
               </button>
             </div>
 
+            {/* Download PDF Button */}
+            {pitch.id && (
+              <a
+                href={`/api/pitches/${pitch.id}/pdf`}
+                target="_blank"
+                rel="noreferrer"
+                download
+                className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors"
+                title={locale === 'en' ? 'Download PDF Deck' : 'Descargar Presentación en PDF'}
+              >
+                <span className="material-icons text-sm" style={{ color: accentColor }}>picture_as_pdf</span>
+                <span className="hidden sm:inline">{locale === 'en' ? 'PDF' : 'PDF'}</span>
+              </a>
+            )}
+
             <button
               type="button"
               onClick={toggleFullscreen}
-              className="w-8 h-8 rounded-full bg-white/5 border border-white/10 hover:border-primary/40 flex items-center justify-center text-slate-300 hover:text-white transition-colors"
-              title={isFullscreen ? 'Salir de pantalla completa (F)' : 'Pantalla completa (F)'}
+              className="w-8 h-8 rounded-full bg-white/5 border border-white/10 hover:border-white/40 flex items-center justify-center text-slate-300 hover:text-white transition-colors"
+              title={isFullscreen ? (locale === 'en' ? 'Exit fullscreen (F)' : 'Salir de pantalla completa (F)') : (locale === 'en' ? 'Fullscreen (F)' : 'Pantalla completa (F)')}
             >
               <span className="material-icons text-sm">{isFullscreen ? 'fullscreen_exit' : 'fullscreen'}</span>
             </button>
@@ -613,30 +838,112 @@ export default function PitchViewer({
             <button
               type="button"
               onClick={prevSlide}
-              className="w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:border-primary/50 text-white flex items-center justify-center transition-colors"
-              title="Anterior (←)"
+              className="w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:border-white/40 text-white flex items-center justify-center transition-colors"
+              title={locale === 'en' ? 'Previous (←)' : 'Anterior (←)'}
             >
               <span className="material-icons text-lg">chevron_left</span>
             </button>
 
-            <span className="text-xs font-black uppercase tracking-widest text-primary px-2 min-w-[52px] text-center">
+            <span className="text-xs font-black uppercase tracking-widest px-2 min-w-[52px] text-center" style={{ color: accentColor }}>
               {currentSlideIndex + 1} / {totalSlides}
             </span>
 
             <button
               type="button"
               onClick={nextSlide}
-              className="w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:border-primary/50 text-white flex items-center justify-center transition-colors"
-              title="Siguiente (→)"
+              className="w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:border-white/40 text-white flex items-center justify-center transition-colors"
+              title={locale === 'en' ? 'Next (→)' : 'Siguiente (→)'}
             >
               <span className="material-icons text-lg">chevron_right</span>
             </button>
           </div>
 
           <div className="flex-1 min-w-0 text-right text-[10px] uppercase tracking-widest text-slate-500 hidden sm:block pl-4">
-            Usa las flechas ← → o barra espaciadora
+            {locale === 'en' ? 'Use arrow keys ← → or spacebar' : 'Usa las flechas ← → o barra espaciadora'}
           </div>
         </footer>
+      )}
+
+      {/* Interactive Media Lightbox Modal */}
+      {activeMediaModal && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-4 md:p-8 animate-fade-in">
+          <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+            {activeMediaModal.externalUrl && (
+              <a
+                href={activeMediaModal.externalUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1"
+              >
+                <span className="material-icons text-sm">open_in_new</span>
+                {locale === 'en' ? 'View Project' : 'Ver Proyecto'}
+              </a>
+            )}
+            <button
+              type="button"
+              onClick={() => setActiveMediaModal(null)}
+              className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1"
+            >
+              <span className="material-icons text-sm">close</span>
+              {locale === 'en' ? 'Close (Esc)' : 'Cerrar (Esc)'}
+            </button>
+          </div>
+
+          <div className="max-w-5xl w-full max-h-[85vh] flex flex-col bg-[#0d0d14] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="flex-1 overflow-hidden bg-black flex items-center justify-center relative min-h-[300px]">
+              {activeMediaModal.mediaType === 'video' || activeMediaModal.mediaUrl.match(/\.(mp4|webm|mov)$/i) ? (
+                <video
+                  src={activeMediaModal.mediaUrl}
+                  controls
+                  autoPlay
+                  className="max-h-[65vh] w-full object-contain"
+                />
+              ) : activeMediaModal.mediaUrl.includes('youtube.com') || activeMediaModal.mediaUrl.includes('vimeo.com') ? (
+                <iframe
+                  src={activeMediaModal.mediaUrl}
+                  className="w-full h-full min-h-[450px]"
+                  allow="autoplay; fullscreen; encrypted-media"
+                />
+              ) : (
+                <img
+                  src={activeMediaModal.mediaUrl}
+                  alt={activeMediaModal.title}
+                  className="max-h-[65vh] w-full object-contain"
+                />
+              )}
+            </div>
+
+            <div className="p-5 border-t border-white/10 space-y-2 bg-[#0a0a0f]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-white">{activeMediaModal.title}</h3>
+                  {activeMediaModal.subtitle && (
+                    <p className="text-xs font-bold uppercase tracking-wider" style={{ color: accentColor }}>{activeMediaModal.subtitle}</p>
+                  )}
+                </div>
+                {activeMediaModal.client && (
+                  <span className="text-xs font-semibold px-2.5 py-1 bg-white/5 border border-white/10 rounded-full text-slate-300">
+                    {activeMediaModal.client}
+                  </span>
+                )}
+              </div>
+              {activeMediaModal.description && (
+                <p className="text-xs text-slate-300 leading-relaxed max-w-3xl">
+                  {activeMediaModal.description}
+                </p>
+              )}
+              {activeMediaModal.tags && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {activeMediaModal.tags.map((t, idx) => (
+                    <span key={idx} className="text-[9px] uppercase tracking-wider bg-white/5 border border-white/10 text-slate-400 px-2 py-0.5 rounded-sm">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

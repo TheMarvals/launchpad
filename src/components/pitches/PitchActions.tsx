@@ -52,6 +52,17 @@ export default function PitchActions({ pitchId }: PitchActionsProps) {
         <span className="material-icons text-[18px]">slideshow</span>
       </Link>
 
+      <a
+        href={`/api/pitches/${pitchId}/pdf`}
+        className="w-8 h-8 flex items-center justify-center text-muted hover:text-primary transition-colors"
+        title="Descargar PDF"
+        target="_blank"
+        rel="noreferrer"
+        download
+      >
+        <span className="material-icons text-[18px]">picture_as_pdf</span>
+      </a>
+
       <button
         onClick={handleCopyLink}
         className="w-8 h-8 flex items-center justify-center text-muted hover:text-ink transition-colors"
