@@ -1079,12 +1079,43 @@ export default function PitchForm({
           <div className="flex items-center justify-between px-xs py-xxs bg-canvas border border-hairline">
             <span className="text-caption-uppercase text-muted font-bold text-xs flex items-center gap-1">
               <span className="material-icons text-sm text-primary">visibility</span>
-              Live Real-Time Preview
+              Live Preview
             </span>
-            <span className="text-[10px] text-muted uppercase tracking-wider">Slide {activeSlideIndex + 1} of {slides.length}</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setActiveSlideIndex((prev) => Math.max(0, prev - 1))}
+                disabled={activeSlideIndex === 0}
+                className="w-6 h-6 rounded bg-canvas-elevated hover:bg-canvas text-ink disabled:opacity-30 border border-hairline flex items-center justify-center text-xs"
+                title="Previous slide"
+              >
+                <span className="material-icons text-xs">chevron_left</span>
+              </button>
+              <span className="text-[10px] text-muted uppercase tracking-wider font-mono">
+                {activeSlideIndex + 1} / {slides.length} ({activeSlide?.type || 'slide'})
+              </span>
+              <button
+                type="button"
+                onClick={() => setActiveSlideIndex((prev) => Math.min(slides.length - 1, prev + 1))}
+                disabled={activeSlideIndex === slides.length - 1}
+                className="w-6 h-6 rounded bg-canvas-elevated hover:bg-canvas text-ink disabled:opacity-30 border border-hairline flex items-center justify-center text-xs"
+                title="Next slide"
+              >
+                <span className="material-icons text-xs">chevron_right</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowPreviewModal(true)}
+                className="px-2 py-0.5 bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold uppercase rounded border border-primary/30 flex items-center gap-0.5 ml-1"
+                title="Open fullscreen preview"
+              >
+                <span className="material-icons text-xs">fullscreen</span>
+                <span>Full</span>
+              </button>
+            </div>
           </div>
 
-          <div className="border border-hairline rounded-sm overflow-hidden bg-[#07070b] h-[550px] flex flex-col shadow-2xl relative">
+          <div className="border border-hairline rounded-sm overflow-hidden bg-[#07070b] h-[640px] flex flex-col shadow-2xl relative">
             <PitchViewer
               pitch={{
                 ...mockPitch,

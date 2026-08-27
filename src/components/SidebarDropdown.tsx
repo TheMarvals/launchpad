@@ -16,13 +16,13 @@ export default function SidebarDropdown({
 }) {
   const pathname = usePathname();
   // Check if current path matches any active paths
-  const isPathActive = activePaths.some(path => pathname.includes(path));
+  const isPathActive = activePaths.some(path => pathname?.includes(path));
   
   const [isOpen, setIsOpen] = useState(isPathActive);
 
   // Re-evaluate when pathname changes if it matches to auto-open
   useEffect(() => {
-    if (activePaths.some(path => pathname.includes(path))) {
+    if (activePaths.some(path => pathname?.includes(path))) {
       setIsOpen(true);
     }
   }, [pathname, activePaths]);

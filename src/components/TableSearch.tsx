@@ -10,11 +10,11 @@ interface TableSearchProps {
 export default function TableSearch({ placeholder = 'Search...' }: TableSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [value, setValue] = useState(searchParams.get('q') || '');
+  const [value, setValue] = useState(searchParams?.get('q') || '');
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() || '');
     if (value.trim()) {
       params.set('q', value.trim());
     } else {
@@ -26,7 +26,7 @@ export default function TableSearch({ placeholder = 'Search...' }: TableSearchPr
 
   const handleClear = useCallback(() => {
     setValue('');
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() || '');
     params.delete('q');
     params.delete('page');
     router.push(`?${params.toString()}`);

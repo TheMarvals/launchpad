@@ -25,7 +25,7 @@ interface SettingsBoardProps {
 export default function SettingsBoard({ initialProfile, initialAdmins, initialProductivitySettings, initialEmailSenderIdentities, currentUserId }: SettingsBoardProps) {
   const t = useTranslations('Settings');
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'company');
+  const [activeTab, setActiveTab] = useState(() => searchParams?.get('tab') || 'company');
 
   const selectTab = (tab: string, button: HTMLButtonElement) => {
     setActiveTab(tab);

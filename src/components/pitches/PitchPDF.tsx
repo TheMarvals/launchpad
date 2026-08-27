@@ -516,7 +516,7 @@ export default function PitchPDF({ pitch, companyProfile, locale = 'en' }: Pitch
             )}
 
             {slide.type === 'cta' && (
-              <div className="w-full max-w-3xl space-y-5">
+              <div className="w-full max-w-2xl mx-auto space-y-4">
                 <div>
                   {slide.badge && (
                     <span className="text-[10px] uppercase tracking-widest font-bold block mb-1" style={{ color: accentColor }}>
@@ -525,40 +525,39 @@ export default function PitchPDF({ pitch, companyProfile, locale = 'en' }: Pitch
                   )}
                   {renderStyledTitle(slide.title)}
                   {slide.subtitle && (
-                    <p className="text-sm font-semibold text-white/90 w-full max-w-xl mx-auto mt-1">
+                    <p className="text-xs font-medium text-slate-300 w-full max-w-lg mx-auto mt-1">
                       {slide.subtitle}
                     </p>
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-left w-full">
-                  <div className="bg-[#0d0d14] border border-white/10 p-4 rounded-xl space-y-1">
+                <div className="grid grid-cols-2 gap-3.5 text-left w-full">
+                  <div className="bg-[#0d0d14] border border-white/10 p-3.5 rounded-xl space-y-1">
                     <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: accentColor }}>
                       Agile Daily Comms
                     </h4>
-                    <p className="text-[11px] text-slate-300 leading-relaxed">
-                      &lt;24-48h turnaround for banners, email templates, and D-Hub/D-Channel assets.
+                    <p className="text-[10px] text-slate-300 leading-relaxed">
+                      &lt;24-48h turnaround for banners, email templates, and D-Hub/D-Channel assets with bilingual EN/ES & CN agility.
                     </p>
                   </div>
-                  <div className="bg-[#0d0d14] border border-white/10 p-4 rounded-xl space-y-1">
+                  <div className="bg-[#0d0d14] border border-white/10 p-3.5 rounded-xl space-y-1">
                     <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: accentColor }}>
                       Major Events & VRA
                     </h4>
-                    <p className="text-[11px] text-slate-300 leading-relaxed">
-                      Multimedia production for Get-Together & Value Star with 100% VRA InfoSec compliance.
+                    <p className="text-[10px] text-slate-300 leading-relaxed">
+                      Multimedia production for Get-Together & Value Star with 100% VRA InfoSec compliance readiness.
                     </p>
                   </div>
                 </div>
 
-                <div className="w-full max-w-md mx-auto bg-[#12121a] border border-white/15 p-4 rounded-xl text-left space-y-1.5 shadow-lg">
-                  <div className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Account Lead Contact</div>
+                <div className="w-full max-w-sm mx-auto bg-[#12121a] border border-white/15 p-4 rounded-xl text-center space-y-1 shadow-lg">
+                  <div className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Account Lead</div>
                   <div className="text-sm font-bold text-white">{presenterName}</div>
                   <div className="text-xs font-medium" style={{ color: accentColor }}>
                     {presenterRole}
                   </div>
-                  <div className="text-xs text-slate-300 pt-2 border-t border-white/10 flex items-center justify-between">
+                  <div className="text-xs text-slate-300 pt-2 border-t border-white/10">
                     <span>{presenterEmail}</span>
-                    <span>{presenterPhone}</span>
                   </div>
                 </div>
               </div>

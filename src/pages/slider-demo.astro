@@ -1,0 +1,31 @@
+---
+import JesperSlider from '../components/JesperSlider.vue';
+import { sliderDemoProjects } from '../data/slider-demo';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jesper Landberg Infinite Horizontal Slider Demo</title>
+    <style is:global>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body, html {
+        width: 100%;
+        height: 100%;
+        background: #000000;
+        color: #ffffff;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <JesperSlider client:load items={sliderDemoProjects} />
+  </body>
+</html>

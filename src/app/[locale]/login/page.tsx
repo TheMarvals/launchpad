@@ -14,10 +14,10 @@ function LoginForm() {
   const g = useTranslations('Gate');
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard';
 
   // Gate token verification (replaces direct ?email=)
-  const gateToken = searchParams.get('token') || '';
+  const gateToken = searchParams?.get('token') || '';
   const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(true);
   const [tokenError, setTokenError] = useState(false);

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocale } from 'next-intl';
+import ProjectDetailModal from './ProjectDetailModal';
 
 export interface ShowcaseItem {
   id?: string;
@@ -189,25 +190,45 @@ export function Jesper3DCylinderShowcase({
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollXRef = useRef(0);
   const targetScrollXRef = useRef(0);
+  const previousScrollXRef = useRef(0);
+  const velocityXRef = useRef(0);
   const [, forceRender] = useState(0);
   const [isPointerDown, setIsPointerDown] = useState(false);
   const [containerWidth, setContainerWidth] = useState(1200);
 
-  const startPointerX = useRef(0);
-  const startScrollX = useRef(0);
-  const velocity = useRef(0);
-  const lastPointerX = useRef(0);
-  const lastTime = useRef(0);
+  const didDragRef = useRef(false);
+  const gestureRef = useRef({
+    pointerId: -1,
+    startX: 0,
+    startY: 0,
+    startScrollX: 0,
+    lastX: 0,
+    lastTime: 0,
+    velocity: 0,
+    didDrag: false,
+  });
   const animFrameId = useRef<number | null>(null);
-  const isDragging = useRef(false);
 
-  const cardCount = items.length;
-  // Jesper's cards: generous proportions with clear floating separation
+  // Repeat items virtually if count is small for continuous 3D track
+  const minItemsForLoop = 6;
+  const repeatCount = items.length > 0 ? Math.max(1, Math.ceil(minItemsForLoop / items.length)) : 1;
+  const virtualItems: Array<{ item: ShowcaseItem; originalIndex: number; virtualId: string }> = [];
+  for (let r = 0; r < repeatCount; r++) {
+    items.forEach((item, oIdx) => {
+      virtualItems.push({
+        item,
+        originalIndex: oIdx,
+        virtualId: `${item.id || oIdx}-${r}`,
+      });
+    });
+  }
+
+  // Dimensions & Layout
   const cardHeight = typeof window !== 'undefined' ? Math.min(480, Math.max(280, window.innerHeight * 0.42)) : 380;
   const cardWidth = Math.min(640, Math.round(cardHeight * 1.55));
   const cardGap = Math.max(48, Math.round(cardWidth * 0.14));
   const itemStride = cardWidth + cardGap;
-  const maxScroll = Math.max(0, (cardCount - 1) * itemStride);
+  const totalTrackWidth = virtualItems.length * itemStride;
 
   // Resize listener
   useEffect(() => {
@@ -221,15 +242,24 @@ export function Jesper3DCylinderShowcase({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Smooth animation loop — lerp toward target with spring-like momentum
+  // 60fps RequestAnimationFrame Physics & Render Loop
   useEffect(() => {
     const loop = () => {
       const diff = targetScrollXRef.current - scrollXRef.current;
-      if (Math.abs(diff) > 0.08) {
+      if (Math.abs(diff) > 0.05) {
         scrollXRef.current += diff * 0.085;
       } else {
         scrollXRef.current = targetScrollXRef.current;
       }
+
+      velocityXRef.current = scrollXRef.current - previousScrollXRef.current;
+      previousScrollXRef.current = scrollXRef.current;
+
+      if (containerRef.current) {
+        containerRef.current.style.setProperty('--velocity-x', velocityXRef.current.toFixed(3));
+        containerRef.current.style.setProperty('--velocity', Math.abs(velocityXRef.current).toFixed(3));
+      }
+
       forceRender((n) => n + 1);
       animFrameId.current = requestAnimationFrame(loop);
     };
@@ -239,66 +269,82 @@ export function Jesper3DCylinderShowcase({
     };
   }, []);
 
-  const clampTarget = (val: number) => Math.max(-itemStride * 0.35, Math.min(maxScroll + itemStride * 0.35, val));
-
-  // Pointer drag events
-  const handlePointerDown = (e: React.PointerEvent) => {
-    if ((e.target as HTMLElement).closest('.interactive-card-element')) return;
-    setIsPointerDown(true);
-    isDragging.current = false;
-    startPointerX.current = e.clientX;
-    lastPointerX.current = e.clientX;
-    lastTime.current = performance.now();
-    startScrollX.current = targetScrollXRef.current;
-    velocity.current = 0;
-    if (containerRef.current) {
-      containerRef.current.setPointerCapture(e.pointerId);
+  // Wheel scroll (horizontal & vertical)
+  const handleWheel = (e: React.WheelEvent) => {
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (Math.abs(delta) > 1) {
+      targetScrollXRef.current += delta * 1.0;
     }
+  };
+
+  // Drag Gesture Handlers on Container
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (e.button !== 0) return;
+
+    targetScrollXRef.current = scrollXRef.current;
+    setIsPointerDown(true);
+    didDragRef.current = false;
+
+    gestureRef.current = {
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      startScrollX: scrollXRef.current,
+      lastX: e.clientX,
+      lastTime: performance.now(),
+      velocity: 0,
+      didDrag: false,
+    };
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isPointerDown) return;
+    const gesture = gestureRef.current;
+    if (gesture.pointerId !== e.pointerId) return;
+
     const now = performance.now();
-    const dt = Math.max(1, now - lastTime.current);
-    const dx = e.clientX - lastPointerX.current;
-    velocity.current = (dx / dt) * 16;
-    lastPointerX.current = e.clientX;
-    lastTime.current = now;
+    const dt = Math.max(1, now - gesture.lastTime);
+    const dx = e.clientX - gesture.lastX;
+    gesture.velocity = (dx / dt) * 16;
+    gesture.lastX = e.clientX;
+    gesture.lastTime = now;
 
-    const totalDx = e.clientX - startPointerX.current;
-    if (Math.abs(totalDx) > 5) isDragging.current = true;
-    targetScrollXRef.current = clampTarget(startScrollX.current - totalDx);
+    const totalDx = e.clientX - gesture.startX;
+    const totalDy = e.clientY - gesture.startY;
+    const moveDist = Math.hypot(totalDx, totalDy);
+
+    if (moveDist >= 15) {
+      gesture.didDrag = true;
+      didDragRef.current = true;
+      targetScrollXRef.current = gesture.startScrollX - totalDx * 1.2;
+    }
   };
 
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (!isPointerDown) return;
+  const finishPointerGesture = (e: React.PointerEvent) => {
+    const gesture = gestureRef.current;
+    if (gesture.pointerId !== e.pointerId) return;
+
     setIsPointerDown(false);
-    if (containerRef.current) {
-      try { containerRef.current.releasePointerCapture(e.pointerId); } catch {}
+    if (gesture.didDrag) {
+      targetScrollXRef.current += gesture.velocity * -18;
+      setTimeout(() => {
+        didDragRef.current = false;
+      }, 80);
+    } else {
+      didDragRef.current = false;
     }
-    // Momentum coast
-    const inertia = velocity.current * -18;
-    const projected = targetScrollXRef.current + inertia;
-    targetScrollXRef.current = Math.max(0, Math.min(maxScroll, projected));
-  };
-
-  // Mouse wheel scroll
-  const handleWheel = (e: React.WheelEvent) => {
-    const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
-    if (Math.abs(delta) > 3) {
-      targetScrollXRef.current = Math.max(0, Math.min(maxScroll, targetScrollXRef.current + delta * 0.9));
-    }
+    gesture.pointerId = -1;
   };
 
   const scrollX = scrollXRef.current;
+  const halfTotal = totalTrackWidth / 2;
 
   return (
     <div
       ref={containerRef}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
+      onPointerUp={finishPointerGesture}
+      onPointerCancel={finishPointerGesture}
       onWheel={handleWheel}
       className={`relative w-full flex items-center justify-center select-none overflow-hidden touch-none ${
         isPointerDown ? 'cursor-grabbing' : 'cursor-grab'
@@ -327,56 +373,60 @@ export function Jesper3DCylinderShowcase({
         }}
       />
 
-      {/* 3D Card Ribbon Track with Spacetime Distortion */}
-      <div
-        className="relative w-full h-full flex items-center justify-center"
-        style={{ transformStyle: 'preserve-3d' }}
-      >
-        {items.map((item, idx) => {
-          const cardCenterOffset = idx * itemStride - scrollX;
+      {/* 3D Infinite Track with True Modulo Wrapping & Spacetime Curvature */}
+      <div className="relative w-full h-full flex items-center justify-center">
+        {virtualItems.map((vItem, idx) => {
+          const baseX = idx * itemStride;
+          const rawOffset = baseX - scrollX;
+
+          const wrappedOffset = totalTrackWidth > 0
+            ? ((((rawOffset + halfTotal) % totalTrackWidth) + totalTrackWidth) % totalTrackWidth) - halfTotal
+            : rawOffset;
+
           const halfWidth = containerWidth * 0.5 || 600;
-          const normDist = cardCenterOffset / halfWidth;
+          const normDist = wrappedOffset / halfWidth;
           const absNorm = Math.abs(normDist);
 
-          // Spacetime well curve physics
-          // When black hole is active, extra gravitational pull & distortion
-          const rotateY = normDist * (isBlackHoleOpen ? -24 : -19);
-          const translateZ = -Math.min(240, absNorm * (isBlackHoleOpen ? 160 : 130));
-          const translateY = isBlackHoleOpen ? Math.min(25, Math.pow(absNorm, 2) * 12) : 0;
+          const rotateY = normDist * (isBlackHoleOpen ? -32 : -27);
+          const translateZ = -Math.min(320, absNorm * (isBlackHoleOpen ? 220 : 170));
+          const translateY = Math.pow(absNorm, 2) * (isBlackHoleOpen ? 22 : 12);
           const scale = isBlackHoleOpen
-            ? Math.max(0.82, 1 - absNorm * 0.08)
-            : Math.max(0.9, 1 - absNorm * 0.05);
+            ? Math.max(0.8, 1 - absNorm * 0.1)
+            : Math.max(0.85, 1 - absNorm * 0.07);
           const opacity = isBlackHoleOpen
-            ? Math.max(0.35, 1 - absNorm * 0.45)
+            ? Math.max(0.3, 1 - absNorm * 0.45)
             : Math.max(0.45, 1 - absNorm * 0.4);
           const isCenter = absNorm < 0.38;
 
+          // Dynamic z-index: center cards always have the highest stacking context
+          const dynamicZIndex = Math.max(1, Math.round(100 - absNorm * 50));
+          const isClickable = absNorm <= 1.25;
+
           return (
             <div
-              key={item.id || idx}
+              key={vItem.virtualId}
               style={{
                 position: 'absolute',
                 width: `${cardWidth}px`,
                 height: `${cardHeight}px`,
-                transform: `translate3d(${cardCenterOffset.toFixed(1)}px, ${translateY.toFixed(1)}px, ${translateZ.toFixed(1)}px) rotateY(${rotateY.toFixed(2)}deg) scale(${scale.toFixed(4)})`,
-                transformStyle: 'preserve-3d',
+                transform: `perspective(1100px) translate3d(${wrappedOffset.toFixed(1)}px, ${translateY.toFixed(1)}px, ${translateZ.toFixed(1)}px) rotateY(${rotateY.toFixed(2)}deg) scale(${scale.toFixed(4)})`,
+                transformOrigin: '50% 50%',
                 opacity,
-                zIndex: isCenter ? 30 : Math.round(20 - absNorm * 10),
+                zIndex: dynamicZIndex,
+                pointerEvents: isClickable ? 'auto' : 'none',
                 transition: isPointerDown ? 'none' : 'opacity 0.15s ease-out',
+                filter: absNorm > 0.6 ? `brightness(${Math.max(0.65, 1 - absNorm * 0.35)})` : 'none',
               }}
             >
               <JesperCard
-                item={item}
-                index={idx}
+                item={vItem.item}
+                index={vItem.originalIndex}
                 isCenter={isCenter}
                 accentColor={accentColor}
                 locale={locale}
-                onClick={() => {
-                  if (isDragging.current) return;
-                  if (isCenter) {
-                    onOpen(item, 0);
-                  } else {
-                    targetScrollXRef.current = idx * itemStride;
+                onOpen={() => {
+                  if (!didDragRef.current) {
+                    onOpen(vItem.item, 0);
                   }
                 }}
               />
@@ -390,8 +440,6 @@ export function Jesper3DCylinderShowcase({
 
 // ═══════════════════════════════════════════════════════════════════
 // JesperCard — Clean, minimal card matching jesperlandberg.com
-// Only shows: full-bleed image + project title at bottom-left
-// Multi-image scrubbing via mousemove is invisible (no UI chrome)
 // ═══════════════════════════════════════════════════════════════════
 export function JesperCard({
   item,
@@ -399,46 +447,39 @@ export function JesperCard({
   isCenter,
   accentColor,
   locale,
-  onClick,
+  onOpen,
 }: {
   item: ShowcaseItem;
   index: number;
   isCenter: boolean;
   accentColor: string;
   locale: string;
-  onClick: () => void;
+  onOpen?: () => void;
 }) {
-  const images: string[] = Array.isArray(item.images) && item.images.length > 0
-    ? item.images
-    : (item.mediaUrl ? [item.mediaUrl] : (item.thumbnailUrl ? [item.thumbnailUrl] : []));
-
-  const [activeImgIdx, setActiveImgIdx] = useState(0);
-  const currentImg = images[activeImgIdx] || item.thumbnailUrl || item.mediaUrl;
-
-  // Invisible multi-image scrubber: mouse position controls which image is shown
-  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    if (images.length <= 1) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const pct = Math.max(0, Math.min(0.999, x / rect.width));
-    const newIdx = Math.floor(pct * images.length);
-    if (newIdx !== activeImgIdx) setActiveImgIdx(newIdx);
-  };
+  const firstImg = Array.isArray(item.images) && item.images.length > 0
+    ? item.images[0]
+    : (item.mediaUrl || item.thumbnailUrl || '');
 
   return (
     <article
-      onClick={onClick}
-      onMouseMove={handleMouseMove}
-      className="group relative w-full h-full rounded-[2rem] overflow-hidden cursor-pointer bg-black"
+      data-showcase-idx={index}
+      onClick={(e) => {
+        e.stopPropagation();
+        onOpen?.();
+      }}
+      className="group relative w-full h-full rounded-[2rem] overflow-hidden cursor-pointer bg-black select-none"
+      style={{
+        transform: 'skewX(calc(var(--velocity-x, 0) * -0.06deg))',
+        transition: 'transform 0.15s ease-out, box-shadow 0.4s ease',
+      }}
     >
-      {/* Full-bleed image */}
-      <div className="absolute inset-0">
-        {currentImg ? (
+      {/* Full-bleed image — always first image */}
+      <div className="absolute inset-0 overflow-hidden">
+        {firstImg ? (
           <img
-            key={currentImg}
-            src={currentImg}
+            src={firstImg}
             alt={item.title}
-            className="w-full h-full object-cover select-none pointer-events-none"
+            className="w-full h-full object-cover select-none pointer-events-none transition-transform duration-700 ease-out group-hover:scale-105"
             draggable={false}
           />
         ) : (
@@ -447,38 +488,19 @@ export function JesperCard({
       </div>
 
       {/* Subtle bottom gradient for title legibility */}
-      <div className="absolute inset-x-0 bottom-0 h-[40%] bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
 
-      {/* Bottom title — Jesper style: just the name, nothing else */}
+      {/* Bottom title — Jesper style: clean minimal name */}
       <div className="absolute bottom-[1rem] inset-x-[1rem] md:bottom-[1.2rem] md:inset-x-[2rem] flex items-end justify-between pointer-events-none z-10">
-        <span className="text-[1.1rem] md:text-[1.25rem] tracking-[-0.04em] text-white whitespace-nowrap">
+        <span className="text-[1.1rem] md:text-[1.25rem] font-bold tracking-[-0.04em] text-white whitespace-nowrap drop-shadow-lg">
           {item.title}
         </span>
 
-        {/* Small circle button (invisible until hover, like Jesper's arrow) */}
-        <span
-          className={`inline-flex items-center justify-center w-[2.2rem] h-[2.2rem] rounded-full bg-black text-white text-sm transition-all duration-300 ${
-            isCenter ? 'opacity-0 group-hover:opacity-100' : 'opacity-0'
-          }`}
-        >
+        {/* Small circle arrow button — visible across ALL cards on hover */}
+        <span className="inline-flex items-center justify-center w-[2.2rem] h-[2.2rem] rounded-full bg-white/20 group-hover:bg-white text-white group-hover:text-black border border-white/30 backdrop-blur-md text-sm transition-all duration-300 shadow-xl opacity-75 group-hover:opacity-100 group-hover:scale-110">
           <span className="material-icons text-sm">arrow_outward</span>
         </span>
       </div>
-
-      {/* Multi-image indicator dots — minimal, only visible on hover when multiple images */}
-      {images.length > 1 && (
-        <div className="absolute bottom-[3.2rem] md:bottom-[3.5rem] left-[1rem] md:left-[2rem] flex items-center gap-[3px] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-          {images.map((_, i) => (
-            <span
-              key={i}
-              className={`block rounded-full transition-all duration-200 ${
-                i === activeImgIdx ? 'w-4 h-[3px]' : 'w-[3px] h-[3px] bg-white/40'
-              }`}
-              style={i === activeImgIdx ? { backgroundColor: accentColor } : {}}
-            />
-          ))}
-        </div>
-      )}
     </article>
   );
 }
@@ -557,32 +579,12 @@ export default function PitchViewer({
   const [viewMode, setViewMode] = useState<'deck' | 'scroll'>(initialMode);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeMediaModal, setActiveMediaModal] = useState<ShowcaseItem | null>(null);
-  const [modalGalleryIndex, setModalGalleryIndex] = useState(0);
   const [showContactModal, setShowContactModal] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const openMediaModal = (item: ShowcaseItem, startIdx: number = 0) => {
+  const openMediaModal = (item: ShowcaseItem) => {
     setActiveMediaModal(item);
-    setModalGalleryIndex(startIdx);
-  };
-
-  const modalImages: string[] = activeMediaModal ? (
-    Array.isArray(activeMediaModal.images) && activeMediaModal.images.length > 0
-      ? activeMediaModal.images
-      : (activeMediaModal.mediaUrl ? [activeMediaModal.mediaUrl] : [])
-  ) : [];
-
-  const currentModalMedia = modalImages[modalGalleryIndex] || activeMediaModal?.mediaUrl || '';
-
-  const navigateModalImage = (direction: 'next' | 'prev', e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    if (modalImages.length <= 1) return;
-    if (direction === 'next') {
-      setModalGalleryIndex((prev) => (prev + 1) % modalImages.length);
-    } else {
-      setModalGalleryIndex((prev) => (prev - 1 + modalImages.length) % modalImages.length);
-    }
   };
 
   const rawSlides = Array.isArray(pitch.slides) ? pitch.slides : [];
@@ -689,8 +691,6 @@ export default function PitchViewer({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (activeMediaModal) {
         if (e.key === 'Escape') setActiveMediaModal(null);
-        if (e.key === 'ArrowRight') navigateModalImage('next');
-        if (e.key === 'ArrowLeft') navigateModalImage('prev');
         return;
       }
       if (showContactModal) {
@@ -713,7 +713,7 @@ export default function PitchViewer({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isEditorPreview, viewMode, nextSlide, prevSlide, activeMediaModal, showContactModal, modalImages.length]);
+  }, [isEditorPreview, viewMode, nextSlide, prevSlide, activeMediaModal, showContactModal]);
 
   // Title styling helper: clean typography with glowing brand/client highlights
   const renderStyledTitle = (text: string, isHero: boolean = false) => {
@@ -1157,30 +1157,15 @@ export default function PitchViewer({
             </div>
 
             {/* Direct Contact Box */}
-            <div className="bg-[#12121a] border border-white/15 p-5 md:p-6 rounded-2xl w-full max-w-2xl mx-auto text-left flex flex-col sm:flex-row items-center justify-between gap-5 shadow-2xl">
-              <div className="space-y-1 text-center sm:text-left flex-1 min-w-0">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 justify-center sm:justify-start">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: accentColor }} />
-                  Direct Contact
-                </div>
-                <div className="text-base md:text-lg font-bold text-white tracking-tight">{presenterName}</div>
-                <div className="text-xs font-semibold" style={{ color: accentColor }}>{presenterRole}</div>
-                <div className="text-xs text-slate-300 pt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 justify-center sm:justify-start">
-                  <a href={`mailto:${presenterEmail}`} className="hover:underline hover:text-white transition-colors">{presenterEmail}</a>
-                  <span className="text-slate-500">•</span>
-                  <span>{presenterPhone}</span>
-                </div>
+            <div className="bg-[#12121a] border border-white/15 p-6 rounded-2xl w-full max-w-lg mx-auto text-center shadow-2xl space-y-2">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 justify-center">
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: accentColor }} />
+                Direct Contact
               </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <a
-                  href={`mailto:${presenterEmail}?subject=${encodeURIComponent('[DiDi RFI 2026] Creative & Multimedia Support - Launchpad')}`}
-                  className="px-6 py-3 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 shadow-lg text-white"
-                  style={{ backgroundColor: accentColor, boxShadow: `0 0 20px ${accentGlow}` }}
-                >
-                  <span className="material-icons text-base">email</span>
-                  Email
-                </a>
+              <div className="text-lg md:text-xl font-bold text-white tracking-tight">{presenterName}</div>
+              <div className="text-xs font-semibold" style={{ color: accentColor }}>{presenterRole}</div>
+              <div className="text-sm text-slate-300 pt-1">
+                <a href={`mailto:${presenterEmail}`} className="hover:underline hover:text-white transition-colors font-mono">{presenterEmail}</a>
               </div>
             </div>
           </div>
@@ -1208,7 +1193,7 @@ export default function PitchViewer({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full min-h-screen bg-[#07070b] text-white font-sans overflow-hidden select-none flex flex-col ${
+      className={`relative w-full ${isEditorPreview ? 'h-full min-h-full' : 'min-h-screen'} bg-[#07070b] text-white font-sans overflow-hidden select-none flex flex-col ${
         isFullscreen ? 'fixed inset-0 z-50' : ''
       }`}
     >
@@ -1368,171 +1353,16 @@ export default function PitchViewer({
         </footer>
       )}
 
-      {/* ═══ Jesper Landberg Gravitational Black Hole Portal ═══
-           The slider remains visible and active behind, warped by the lens.
-           A massive circular portal opens with chromatic aberration rings
-           and iridescent event horizon. Content floats inside the void.
-           Dragging outside the portal continues moving the slider in real-time. */}
-      {activeMediaModal && (
-        <div
-          className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center animate-fade-in"
-          style={{
-            // The backdrop lets the slide content show through, distorted
-            backdropFilter: 'blur(1.5px) brightness(0.45)',
-            WebkitBackdropFilter: 'blur(1.5px) brightness(0.45)',
-          }}
-        >
-          {/* Gravitational Lens Distortion Field — warps the background */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: 'radial-gradient(circle at 50% 50%, transparent 20%, rgba(0,0,0,0.25) 35%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.9) 100%)',
-            }}
-          />
-
-          {/* Top Bar */}
-          <div className="absolute top-5 left-6 right-6 flex items-center justify-between z-30 pointer-events-none">
-            <span
-              className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/60 font-bold"
-              style={{ fontFamily: "'Outfit', sans-serif" }}
-            >
-              {brandName}
-            </span>
-            <button
-              type="button"
-              onClick={() => setActiveMediaModal(null)}
-              className="pointer-events-auto px-3 py-1 bg-black/60 hover:bg-white hover:text-black border border-white/20 rounded-full text-[10px] font-mono uppercase tracking-[0.2em] text-white/90 hover:text-black transition-all duration-300 shadow-xl"
-            >
-              Close ✕
-            </button>
-          </div>
-
-          {/* ═══ Event Horizon Portal (Interactive Void) ═══ */}
-          <div
-            className="relative w-[88vw] h-[88vw] max-w-[560px] max-h-[560px] rounded-full flex items-center justify-center select-text pointer-events-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Outer chromatic aberration rings */}
-            <div
-              className="absolute -inset-4 rounded-full pointer-events-none"
-              style={{
-                background: 'conic-gradient(from 0deg, rgba(255,100,100,0.15), rgba(100,255,100,0.1), rgba(100,100,255,0.15), rgba(255,255,100,0.1), rgba(255,100,255,0.12), rgba(100,255,255,0.1), rgba(255,100,100,0.15))',
-                filter: 'blur(8px)',
-                animation: 'spin 12s linear infinite',
-              }}
-            />
-            <div
-              className="absolute -inset-2 rounded-full pointer-events-none"
-              style={{
-                background: 'conic-gradient(from 180deg, rgba(200,200,200,0.25), rgba(255,255,255,0.4), rgba(200,200,200,0.2), rgba(255,255,255,0.35), rgba(200,200,200,0.25))',
-                filter: 'blur(3px)',
-              }}
-            />
-
-            {/* Iridescent event horizon ring */}
-            <div
-              className="absolute -inset-[3px] rounded-full pointer-events-none"
-              style={{
-                background: 'conic-gradient(from 90deg, #c0c0c0, #ffffff, #d0d0d0, #ffffff, #c0c0c0, #ffffff, #d0d0d0, #ffffff, #c0c0c0)',
-                maskImage: 'radial-gradient(circle, transparent 48%, #000 49%, #000 51%, transparent 52%)',
-                WebkitMaskImage: 'radial-gradient(circle, transparent 48%, #000 49%, #000 51%, transparent 52%)',
-              }}
-            />
-
-            {/* The Black Void */}
-            <div
-              className="absolute inset-0 rounded-full overflow-hidden"
-              style={{
-                background: 'radial-gradient(circle at 50% 50%, #000000 70%, #0a0a0a 90%, #111 100%)',
-                boxShadow: 'inset 0 0 120px rgba(0,0,0,1), inset 0 0 60px rgba(0,0,0,0.9)',
-              }}
-            />
-
-            {/* Content inside the void */}
-            <div className="relative z-10 flex flex-col items-center justify-center text-center px-8 sm:px-12 max-w-[420px] space-y-3">
-              {/* Client & Category */}
-              <div className="flex items-center gap-2 flex-wrap justify-center">
-                {activeMediaModal.client && (
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-white/8 border border-white/15 text-slate-300">
-                    {activeMediaModal.client}
-                  </span>
-                )}
-                {activeMediaModal.subtitle && (
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-white/50">
-                    {activeMediaModal.subtitle}
-                  </span>
-                )}
-              </div>
-
-              {/* Title */}
-              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white leading-tight">
-                {activeMediaModal.title}
-              </h2>
-
-              {/* Description */}
-              {activeMediaModal.description && (
-                <p className="text-[11px] sm:text-xs text-slate-400 leading-relaxed max-w-[320px]">
-                  {activeMediaModal.description}
-                </p>
-              )}
-
-              {/* Image filmstrip */}
-              {modalImages.length > 0 && (
-                <div className="flex items-center gap-1.5 py-1.5 overflow-x-auto max-w-full">
-                  {modalImages.map((img, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setModalGalleryIndex(idx)}
-                      className={`relative w-12 h-8 rounded-lg overflow-hidden border transition-all shrink-0 ${
-                        idx === modalGalleryIndex
-                          ? 'border-white scale-110 shadow-lg'
-                          : 'border-white/15 opacity-40 hover:opacity-90'
-                      }`}
-                    >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Tags */}
-              {activeMediaModal.tags && activeMediaModal.tags.length > 0 && (
-                <div className="flex flex-wrap items-center justify-center gap-1 pt-0.5">
-                  {activeMediaModal.tags.map((tag, tIdx) => (
-                    <span
-                      key={tIdx}
-                      className="text-[8px] uppercase font-mono tracking-widest text-slate-500 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Action */}
-              <div className="pt-1.5">
-                <a
-                  href={`mailto:${presenterEmail}?subject=${encodeURIComponent(`Case Inquiry: ${activeMediaModal.title}`)}`}
-                  className="px-4 py-2 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 shadow-lg text-white"
-                  style={{ backgroundColor: accentColor, boxShadow: `0 0 20px ${accentGlow}` }}
-                >
-                  <span className="material-icons text-xs">send</span>
-                  {locale === 'en' ? 'Inquire' : 'Consultar'}
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* CSS keyframe for chromatic ring rotation */}
-          <style>{`
-            @keyframes spin {
-              from { transform: rotate(0deg); }
-              to { transform: rotate(360deg); }
-            }
-          `}</style>
-        </div>
-      )}
+      {/* ═══ Project Detail Modal ═══ */}
+      <ProjectDetailModal
+        isOpen={Boolean(activeMediaModal)}
+        onClose={() => setActiveMediaModal(null)}
+        item={activeMediaModal}
+        accentColor={accentColor}
+        accentGlow={accentGlow}
+        locale={locale}
+        brandName={brandName}
+      />
     </div>
   );
 }

@@ -37,7 +37,7 @@ const swalTheme = {
 export default function FileManagerPage() {
   const params = useParams();
   const router = useRouter();
-  const serverId = params.id as string;
+  const serverId = params?.id as string;
 
   const [authModal, setAuthModal] = useState(true);
   const [password, setPassword] = useState('');

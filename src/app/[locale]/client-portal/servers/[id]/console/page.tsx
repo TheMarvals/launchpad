@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { getVncUrl } from '@/app/actions/provider';
 
 export default function ConsolePage() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id as string;
   const router = useRouter();
   const canvasRef = useRef<HTMLDivElement>(null);
   const rfbRef = useRef<any>(null);

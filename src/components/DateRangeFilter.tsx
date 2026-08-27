@@ -17,7 +17,7 @@ export default function DateRangeFilter({
 
   const buildHref = useCallback(
     (desde: string, hasta: string) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() || '');
       if (desde) params.set('desde', desde);
       else params.delete('desde');
       if (hasta) params.set('hasta', hasta);
