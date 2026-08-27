@@ -18,21 +18,28 @@ export default async function PitchPresentationPage({ params }: PitchPresentatio
     // Not authenticated
   }
 
-  const pitch = await prisma.pitch.findUnique({
-    where: { id },
-    include: {
-      client: true,
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          cargo: true,
-          telefono: true,
+  const [pitch, showcaseProjects] = await Promise.all([
+    prisma.pitch.findUnique({
+      where: { id },
+      include: {
+        client: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            cargo: true,
+            telefono: true,
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.showcaseProject.findMany({
+      where: { isActive: true },
+      include: { images: true },
+      orderBy: { order: 'asc' },
+    }),
+  ]);
 
   if (!pitch) {
     notFound();
@@ -43,6 +50,7 @@ export default async function PitchPresentationPage({ params }: PitchPresentatio
       <PitchViewer
         pitch={pitch}
         companyProfile={companyProfile}
+        showcaseProjects={showcaseProjects}
         initialMode="deck"
       />
     </div>

@@ -157,155 +157,334 @@ export function TiltCard({
   );
 }
 
-// Multi-Image Kinetic Project Card (Jesper Landberg Portfolio Aesthetic)
-export function ShowcaseProjectCard({
-  item,
-  index,
+// ═══════════════════════════════════════════════════════════════════
+// Jesper Landberg Showcase Slider — Faithful Replica
+// Reference: https://jesperlandberg.com/
+//
+// Key characteristics from the original:
+// • Cards are ~43.5svh tall, nearly half the viewport
+// • Only the project title at bottom-left — no badges, pills, counters
+// • Concave cylindrical curvature (rotateY + translateZ depth)
+// • 3D perspective grid floor beneath cards
+// • Fluid horizontal drag with momentum, no hard snapping
+// • Rounded corners ~2rem, subtle shadow
+// • Ultra-clean dark aesthetic — black background, white text
+// ═══════════════════════════════════════════════════════════════════
+
+export function Jesper3DCylinderShowcase({
+  items,
   accentColor,
   accentGlow,
   locale,
   onOpen,
+  isBlackHoleOpen = false,
 }: {
-  item: ShowcaseItem;
-  index: number;
+  items: ShowcaseItem[];
   accentColor: string;
   accentGlow: string;
   locale: string;
   onOpen: (item: ShowcaseItem, startIdx?: number) => void;
+  isBlackHoleOpen?: boolean;
 }) {
-  const images = Array.isArray(item.images) && item.images.length > 0
-    ? item.images
-    : (item.mediaUrl ? [item.mediaUrl] : []);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scrollXRef = useRef(0);
+  const targetScrollXRef = useRef(0);
+  const [, forceRender] = useState(0);
+  const [isPointerDown, setIsPointerDown] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(1200);
 
-  const [activeImgIdx, setActiveImgIdx] = useState(0);
-  const isVideo = item.mediaType === 'video' || (item.mediaUrl && item.mediaUrl.match(/\.(mp4|webm|mov)$/i));
-  const isSlide = item.mediaType === 'slide';
-  const currentImg = images[activeImgIdx] || item.thumbnailUrl || item.mediaUrl;
-  const projectNum = String(index + 1).padStart(2, '0');
+  const startPointerX = useRef(0);
+  const startScrollX = useRef(0);
+  const velocity = useRef(0);
+  const lastPointerX = useRef(0);
+  const lastTime = useRef(0);
+  const animFrameId = useRef<number | null>(null);
+  const isDragging = useRef(false);
+
+  const cardCount = items.length;
+  // Jesper's cards: generous proportions with clear floating separation
+  const cardHeight = typeof window !== 'undefined' ? Math.min(480, Math.max(280, window.innerHeight * 0.42)) : 380;
+  const cardWidth = Math.min(640, Math.round(cardHeight * 1.55));
+  const cardGap = Math.max(48, Math.round(cardWidth * 0.14));
+  const itemStride = cardWidth + cardGap;
+  const maxScroll = Math.max(0, (cardCount - 1) * itemStride);
+
+  // Resize listener
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.clientWidth);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Smooth animation loop — lerp toward target with spring-like momentum
+  useEffect(() => {
+    const loop = () => {
+      const diff = targetScrollXRef.current - scrollXRef.current;
+      if (Math.abs(diff) > 0.08) {
+        scrollXRef.current += diff * 0.085;
+      } else {
+        scrollXRef.current = targetScrollXRef.current;
+      }
+      forceRender((n) => n + 1);
+      animFrameId.current = requestAnimationFrame(loop);
+    };
+    animFrameId.current = requestAnimationFrame(loop);
+    return () => {
+      if (animFrameId.current) cancelAnimationFrame(animFrameId.current);
+    };
+  }, []);
+
+  const clampTarget = (val: number) => Math.max(-itemStride * 0.35, Math.min(maxScroll + itemStride * 0.35, val));
+
+  // Pointer drag events
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if ((e.target as HTMLElement).closest('.interactive-card-element')) return;
+    setIsPointerDown(true);
+    isDragging.current = false;
+    startPointerX.current = e.clientX;
+    lastPointerX.current = e.clientX;
+    lastTime.current = performance.now();
+    startScrollX.current = targetScrollXRef.current;
+    velocity.current = 0;
+    if (containerRef.current) {
+      containerRef.current.setPointerCapture(e.pointerId);
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isPointerDown) return;
+    const now = performance.now();
+    const dt = Math.max(1, now - lastTime.current);
+    const dx = e.clientX - lastPointerX.current;
+    velocity.current = (dx / dt) * 16;
+    lastPointerX.current = e.clientX;
+    lastTime.current = now;
+
+    const totalDx = e.clientX - startPointerX.current;
+    if (Math.abs(totalDx) > 5) isDragging.current = true;
+    targetScrollXRef.current = clampTarget(startScrollX.current - totalDx);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isPointerDown) return;
+    setIsPointerDown(false);
+    if (containerRef.current) {
+      try { containerRef.current.releasePointerCapture(e.pointerId); } catch {}
+    }
+    // Momentum coast
+    const inertia = velocity.current * -18;
+    const projected = targetScrollXRef.current + inertia;
+    targetScrollXRef.current = Math.max(0, Math.min(maxScroll, projected));
+  };
+
+  // Mouse wheel scroll
+  const handleWheel = (e: React.WheelEvent) => {
+    const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
+    if (Math.abs(delta) > 3) {
+      targetScrollXRef.current = Math.max(0, Math.min(maxScroll, targetScrollXRef.current + delta * 0.9));
+    }
+  };
+
+  const scrollX = scrollXRef.current;
 
   return (
-    <TiltCard
-      accentColor={accentColor}
-      className="group relative bg-[#0c0c12] border border-white/10 hover:border-white/40 rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-2 shadow-2xl flex flex-col"
-      onClick={() => onOpen(item, activeImgIdx)}
+    <div
+      ref={containerRef}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onWheel={handleWheel}
+      className={`relative w-full flex items-center justify-center select-none overflow-hidden touch-none ${
+        isPointerDown ? 'cursor-grabbing' : 'cursor-grab'
+      }`}
+      style={{
+        height: `${cardHeight + 80}px`,
+        perspective: '1600px',
+        perspectiveOrigin: '50% 48%',
+      }}
     >
-      {/* Visual Header / Media Container */}
-      <div className="aspect-[16/10] w-full relative overflow-hidden bg-black/60">
-        {currentImg ? (
-          <img
-            src={currentImg}
-            alt={item.title}
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-white/5 text-slate-500">
-            <span className="material-icons text-3xl">image</span>
-          </div>
-        )}
+      {/* 3D Perspective Spacetime Grid Floor */}
+      <div
+        className="absolute left-[-60%] w-[220%] pointer-events-none z-0 transition-transform duration-700"
+        style={{
+          bottom: '-24px',
+          height: '360px',
+          transform: isBlackHoleOpen ? 'rotateX(82deg) scale(1.08)' : 'rotateX(78deg)',
+          transformOrigin: '50% 100%',
+          backgroundImage: `
+            linear-gradient(to right, rgba(255,255,255,0.07) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px)
+          `,
+          backgroundSize: '48px 48px',
+          maskImage: 'radial-gradient(ellipse 75% 55% at 50% 10%, #000 25%, transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 75% 55% at 50% 10%, #000 25%, transparent 80%)',
+        }}
+      />
 
-        {/* Dark Vignette Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c12] via-transparent to-black/40 pointer-events-none" />
+      {/* 3D Card Ribbon Track with Spacetime Distortion */}
+      <div
+        className="relative w-full h-full flex items-center justify-center"
+        style={{ transformStyle: 'preserve-3d' }}
+      >
+        {items.map((item, idx) => {
+          const cardCenterOffset = idx * itemStride - scrollX;
+          const halfWidth = containerWidth * 0.5 || 600;
+          const normDist = cardCenterOffset / halfWidth;
+          const absNorm = Math.abs(normDist);
 
-        {/* Index number & Category Badge */}
-        <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between z-10">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[10px] font-black uppercase tracking-widest font-mono text-white flex items-center gap-1.5 shadow-md">
-              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: accentColor }} />
-              {projectNum}
-            </span>
-            <span className="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-[9px] font-bold uppercase tracking-wider text-slate-300">
-              {item.mediaType || (isVideo ? 'Video' : isSlide ? 'Slide' : 'Image')}
-            </span>
-          </div>
+          // Spacetime well curve physics
+          // When black hole is active, extra gravitational pull & distortion
+          const rotateY = normDist * (isBlackHoleOpen ? -24 : -19);
+          const translateZ = -Math.min(240, absNorm * (isBlackHoleOpen ? 160 : 130));
+          const translateY = isBlackHoleOpen ? Math.min(25, Math.pow(absNorm, 2) * 12) : 0;
+          const scale = isBlackHoleOpen
+            ? Math.max(0.82, 1 - absNorm * 0.08)
+            : Math.max(0.9, 1 - absNorm * 0.05);
+          const opacity = isBlackHoleOpen
+            ? Math.max(0.35, 1 - absNorm * 0.45)
+            : Math.max(0.45, 1 - absNorm * 0.4);
+          const isCenter = absNorm < 0.38;
 
-          {item.client && (
-            <span className="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[9px] font-bold uppercase tracking-widest text-slate-200 shadow-md">
-              {item.client}
-            </span>
-          )}
-        </div>
-
-        {/* Multi-Image Quick Switcher Strip (Jesper Landberg style) */}
-        {images.length > 1 && (
-          <div
-            className="absolute bottom-3 left-3.5 right-3.5 z-20 flex items-center justify-between bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15 opacity-90 group-hover:opacity-100 transition-opacity shadow-lg"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center gap-1.5">
-              {images.map((_, iIdx) => (
-                <button
-                  key={iIdx}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveImgIdx(iIdx);
-                  }}
-                  onMouseEnter={() => setActiveImgIdx(iIdx)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    iIdx === activeImgIdx
-                      ? 'w-5 shadow-sm'
-                      : 'w-1.5 bg-white/40 hover:bg-white/80'
-                  }`}
-                  style={iIdx === activeImgIdx ? { backgroundColor: accentColor } : {}}
-                  title={`Photo ${iIdx + 1}`}
-                />
-              ))}
-            </div>
-
-            <span className="text-[9px] font-mono font-bold tracking-widest text-slate-300">
-              {activeImgIdx + 1} / {images.length} {locale === 'en' ? 'ASSETS' : 'FOTOS'}
-            </span>
-          </div>
-        )}
-
-        {/* Video Play Icon */}
-        {isVideo && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          return (
             <div
-              className="w-14 h-14 rounded-full text-black flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.8)] group-hover:scale-110 transition-transform duration-300"
-              style={{ backgroundColor: accentColor }}
+              key={item.id || idx}
+              style={{
+                position: 'absolute',
+                width: `${cardWidth}px`,
+                height: `${cardHeight}px`,
+                transform: `translate3d(${cardCenterOffset.toFixed(1)}px, ${translateY.toFixed(1)}px, ${translateZ.toFixed(1)}px) rotateY(${rotateY.toFixed(2)}deg) scale(${scale.toFixed(4)})`,
+                transformStyle: 'preserve-3d',
+                opacity,
+                zIndex: isCenter ? 30 : Math.round(20 - absNorm * 10),
+                transition: isPointerDown ? 'none' : 'opacity 0.15s ease-out',
+              }}
             >
-              <span className="material-icons text-3xl">play_arrow</span>
+              <JesperCard
+                item={item}
+                index={idx}
+                isCenter={isCenter}
+                accentColor={accentColor}
+                locale={locale}
+                onClick={() => {
+                  if (isDragging.current) return;
+                  if (isCenter) {
+                    onOpen(item, 0);
+                  } else {
+                    targetScrollXRef.current = idx * itemStride;
+                  }
+                }}
+              />
             </div>
-          </div>
-        )}
+          );
+        })}
       </div>
-
-      {/* Project Metadata */}
-      <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
-        <div className="space-y-1.5">
-          {item.subtitle && (
-            <p className="text-[10px] font-mono uppercase font-bold tracking-widest truncate" style={{ color: accentColor }}>
-              {item.subtitle}
-            </p>
-          )}
-          <h3 className="text-base font-bold text-white group-hover:text-white transition-colors leading-snug">
-            {item.title}
-          </h3>
-          {item.description && (
-            <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-              {item.description}
-            </p>
-          )}
-        </div>
-
-        {/* Tags */}
-        {item.tags && item.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 pt-2 border-t border-white/5">
-            {item.tags.map((tag, tIdx) => (
-              <span
-                key={tIdx}
-                className="text-[9px] uppercase tracking-wider text-slate-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-md font-mono"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    </TiltCard>
+    </div>
   );
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// JesperCard — Clean, minimal card matching jesperlandberg.com
+// Only shows: full-bleed image + project title at bottom-left
+// Multi-image scrubbing via mousemove is invisible (no UI chrome)
+// ═══════════════════════════════════════════════════════════════════
+export function JesperCard({
+  item,
+  index,
+  isCenter,
+  accentColor,
+  locale,
+  onClick,
+}: {
+  item: ShowcaseItem;
+  index: number;
+  isCenter: boolean;
+  accentColor: string;
+  locale: string;
+  onClick: () => void;
+}) {
+  const images: string[] = Array.isArray(item.images) && item.images.length > 0
+    ? item.images
+    : (item.mediaUrl ? [item.mediaUrl] : (item.thumbnailUrl ? [item.thumbnailUrl] : []));
+
+  const [activeImgIdx, setActiveImgIdx] = useState(0);
+  const currentImg = images[activeImgIdx] || item.thumbnailUrl || item.mediaUrl;
+
+  // Invisible multi-image scrubber: mouse position controls which image is shown
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (images.length <= 1) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const pct = Math.max(0, Math.min(0.999, x / rect.width));
+    const newIdx = Math.floor(pct * images.length);
+    if (newIdx !== activeImgIdx) setActiveImgIdx(newIdx);
+  };
+
+  return (
+    <article
+      onClick={onClick}
+      onMouseMove={handleMouseMove}
+      className="group relative w-full h-full rounded-[2rem] overflow-hidden cursor-pointer bg-black"
+    >
+      {/* Full-bleed image */}
+      <div className="absolute inset-0">
+        {currentImg ? (
+          <img
+            key={currentImg}
+            src={currentImg}
+            alt={item.title}
+            className="w-full h-full object-cover select-none pointer-events-none"
+            draggable={false}
+          />
+        ) : (
+          <div className="w-full h-full bg-white/5" />
+        )}
+      </div>
+
+      {/* Subtle bottom gradient for title legibility */}
+      <div className="absolute inset-x-0 bottom-0 h-[40%] bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
+
+      {/* Bottom title — Jesper style: just the name, nothing else */}
+      <div className="absolute bottom-[1rem] inset-x-[1rem] md:bottom-[1.2rem] md:inset-x-[2rem] flex items-end justify-between pointer-events-none z-10">
+        <span className="text-[1.1rem] md:text-[1.25rem] tracking-[-0.04em] text-white whitespace-nowrap">
+          {item.title}
+        </span>
+
+        {/* Small circle button (invisible until hover, like Jesper's arrow) */}
+        <span
+          className={`inline-flex items-center justify-center w-[2.2rem] h-[2.2rem] rounded-full bg-black text-white text-sm transition-all duration-300 ${
+            isCenter ? 'opacity-0 group-hover:opacity-100' : 'opacity-0'
+          }`}
+        >
+          <span className="material-icons text-sm">arrow_outward</span>
+        </span>
+      </div>
+
+      {/* Multi-image indicator dots — minimal, only visible on hover when multiple images */}
+      {images.length > 1 && (
+        <div className="absolute bottom-[3.2rem] md:bottom-[3.5rem] left-[1rem] md:left-[2rem] flex items-center gap-[3px] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+          {images.map((_, i) => (
+            <span
+              key={i}
+              className={`block rounded-full transition-all duration-200 ${
+                i === activeImgIdx ? 'w-4 h-[3px]' : 'w-[3px] h-[3px] bg-white/40'
+              }`}
+              style={i === activeImgIdx ? { backgroundColor: accentColor } : {}}
+            />
+          ))}
+        </div>
+      )}
+    </article>
+  );
+}
+
+// Legacy alias so existing JSX references still compile
+export const Jesper3DCard = JesperCard;
 
 export interface PitchSlide {
   id: string;
@@ -359,6 +538,7 @@ interface PitchViewerProps {
     slides: PitchSlide[] | any;
   };
   companyProfile?: any;
+  showcaseProjects?: any[];
   isEditorPreview?: boolean;
   initialMode?: 'deck' | 'scroll';
   initialSlideIndex?: number;
@@ -367,6 +547,7 @@ interface PitchViewerProps {
 export default function PitchViewer({
   pitch,
   companyProfile,
+  showcaseProjects = [],
   isEditorPreview = false,
   initialMode = 'deck',
   initialSlideIndex = 0,
@@ -797,36 +978,64 @@ export default function PitchViewer({
         );
 
       case 'showcase':
-        const showcaseList = slide.showcaseItems || [];
+        const rawShowcaseList = slide.showcaseItems || [];
+        const enrichedShowcaseList: ShowcaseItem[] = rawShowcaseList.map((item) => {
+          const existingImages = Array.isArray(item.images) && item.images.length > 0 ? item.images : [];
+          const matchedProject = (showcaseProjects || []).find(
+            (p: any) =>
+              p.id === item.id ||
+              p.title?.toLowerCase() === item.title?.toLowerCase() ||
+              p.titleEn?.toLowerCase() === item.title?.toLowerCase() ||
+              (p.images && p.images.some((img: any) => (img.url === item.mediaUrl || img.url === item.thumbnailUrl))) ||
+              p.featuredImage === item.mediaUrl
+          );
+
+          if (matchedProject && matchedProject.images && matchedProject.images.length > 0) {
+            const projectImages = matchedProject.images
+              .map((i: any) => (typeof i === 'string' ? i : i.url))
+              .filter(Boolean);
+
+            if (projectImages.length > existingImages.length) {
+              return {
+                ...item,
+                images: projectImages,
+                mediaUrl: item.mediaUrl || projectImages[0],
+                thumbnailUrl: item.thumbnailUrl || projectImages[0],
+              };
+            }
+          }
+
+          return {
+            ...item,
+            images: existingImages.length > 0 ? existingImages : (item.mediaUrl ? [item.mediaUrl] : (item.thumbnailUrl ? [item.thumbnailUrl] : [])),
+          };
+        });
+
         return (
-          <div className="relative z-10 max-w-[1200px] w-full px-4 md:px-6 my-auto animate-fade-in">
-            <div className="text-center mb-8">
+          <div className="relative z-10 w-full flex flex-col items-center justify-center my-auto animate-fade-in">
+            <div className="text-center mb-2 px-4">
               {slide.badge && (
-                <span className="text-[10px] uppercase tracking-[0.25em] font-bold mb-2 block" style={{ color: accentColor }}>
+                <span className="text-[10px] uppercase tracking-[0.25em] font-bold mb-1 block" style={{ color: accentColor }}>
                   {slide.badge}
                 </span>
               )}
               {renderStyledTitle(slide.title)}
               {slide.subtitle && (
-                <p className="text-slate-300 text-sm md:text-base max-w-[650px] mx-auto mt-2">
+                <p className="text-slate-300 text-xs md:text-sm max-w-[650px] mx-auto mt-0.5">
                   {slide.subtitle}
                 </p>
               )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {showcaseList.map((item, sIdx) => (
-                <ShowcaseProjectCard
-                  key={item.id || sIdx}
-                  item={item}
-                  index={sIdx}
-                  accentColor={accentColor}
-                  accentGlow={accentGlow}
-                  locale={locale}
-                  onOpen={openMediaModal}
-                />
-              ))}
-            </div>
+            {/* Jesper Landberg 3D Curved Cylinder Carousel & 3D Grid Floor */}
+            <Jesper3DCylinderShowcase
+              items={enrichedShowcaseList}
+              accentColor={accentColor}
+              accentGlow={accentGlow}
+              locale={locale}
+              onOpen={openMediaModal}
+              isBlackHoleOpen={Boolean(activeMediaModal)}
+            />
           </div>
         );
 
@@ -1159,147 +1368,169 @@ export default function PitchViewer({
         </footer>
       )}
 
-      {/* Interactive Media Lightbox Modal */}
+      {/* ═══ Jesper Landberg Gravitational Black Hole Portal ═══
+           The slider remains visible and active behind, warped by the lens.
+           A massive circular portal opens with chromatic aberration rings
+           and iridescent event horizon. Content floats inside the void.
+           Dragging outside the portal continues moving the slider in real-time. */}
       {activeMediaModal && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-4 md:p-8 animate-fade-in">
-          <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
-            {activeMediaModal.externalUrl && (
-              <a
-                href={activeMediaModal.externalUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1"
-              >
-                <span className="material-icons text-sm">open_in_new</span>
-                {locale === 'en' ? 'View Project' : 'Ver Proyecto'}
-              </a>
-            )}
+        <div
+          className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center animate-fade-in"
+          style={{
+            // The backdrop lets the slide content show through, distorted
+            backdropFilter: 'blur(1.5px) brightness(0.45)',
+            WebkitBackdropFilter: 'blur(1.5px) brightness(0.45)',
+          }}
+        >
+          {/* Gravitational Lens Distortion Field — warps the background */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle at 50% 50%, transparent 20%, rgba(0,0,0,0.25) 35%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.9) 100%)',
+            }}
+          />
+
+          {/* Top Bar */}
+          <div className="absolute top-5 left-6 right-6 flex items-center justify-between z-30 pointer-events-none">
+            <span
+              className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/60 font-bold"
+              style={{ fontFamily: "'Outfit', sans-serif" }}
+            >
+              {brandName}
+            </span>
             <button
               type="button"
               onClick={() => setActiveMediaModal(null)}
-              className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1"
+              className="pointer-events-auto px-3 py-1 bg-black/60 hover:bg-white hover:text-black border border-white/20 rounded-full text-[10px] font-mono uppercase tracking-[0.2em] text-white/90 hover:text-black transition-all duration-300 shadow-xl"
             >
-              <span className="material-icons text-sm">close</span>
-              {locale === 'en' ? 'Close (Esc)' : 'Cerrar (Esc)'}
+              Close ✕
             </button>
           </div>
 
-          <div className="max-w-5xl w-full max-h-[85vh] flex flex-col bg-[#0d0d14] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-            {/* Media Gallery / Lightbox Frame */}
-            <div className="flex-1 overflow-hidden bg-black flex items-center justify-center relative min-h-[300px] group/gallery">
-              {/* Media Count Badge */}
-              {modalImages.length > 1 && (
-                <div className="absolute top-4 left-4 z-20 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg">
-                  <span className="material-icons text-xs" style={{ color: accentColor }}>collections</span>
-                  <span>{modalGalleryIndex + 1} / {modalImages.length}</span>
-                </div>
-              )}
+          {/* ═══ Event Horizon Portal (Interactive Void) ═══ */}
+          <div
+            className="relative w-[88vw] h-[88vw] max-w-[560px] max-h-[560px] rounded-full flex items-center justify-center select-text pointer-events-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Outer chromatic aberration rings */}
+            <div
+              className="absolute -inset-4 rounded-full pointer-events-none"
+              style={{
+                background: 'conic-gradient(from 0deg, rgba(255,100,100,0.15), rgba(100,255,100,0.1), rgba(100,100,255,0.15), rgba(255,255,100,0.1), rgba(255,100,255,0.12), rgba(100,255,255,0.1), rgba(255,100,100,0.15))',
+                filter: 'blur(8px)',
+                animation: 'spin 12s linear infinite',
+              }}
+            />
+            <div
+              className="absolute -inset-2 rounded-full pointer-events-none"
+              style={{
+                background: 'conic-gradient(from 180deg, rgba(200,200,200,0.25), rgba(255,255,255,0.4), rgba(200,200,200,0.2), rgba(255,255,255,0.35), rgba(200,200,200,0.25))',
+                filter: 'blur(3px)',
+              }}
+            />
 
-              {/* Navigation Left / Right Chevrons */}
-              {modalImages.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={(e) => navigateModalImage('prev', e)}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/20 hover:border-white/40 text-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-xl opacity-80 hover:opacity-100"
-                    title={locale === 'en' ? 'Previous image (←)' : 'Imagen anterior (←)'}
-                  >
-                    <span className="material-icons text-2xl">chevron_left</span>
-                  </button>
+            {/* Iridescent event horizon ring */}
+            <div
+              className="absolute -inset-[3px] rounded-full pointer-events-none"
+              style={{
+                background: 'conic-gradient(from 90deg, #c0c0c0, #ffffff, #d0d0d0, #ffffff, #c0c0c0, #ffffff, #d0d0d0, #ffffff, #c0c0c0)',
+                maskImage: 'radial-gradient(circle, transparent 48%, #000 49%, #000 51%, transparent 52%)',
+                WebkitMaskImage: 'radial-gradient(circle, transparent 48%, #000 49%, #000 51%, transparent 52%)',
+              }}
+            />
 
-                  <button
-                    type="button"
-                    onClick={(e) => navigateModalImage('next', e)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/20 hover:border-white/40 text-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-xl opacity-80 hover:opacity-100"
-                    title={locale === 'en' ? 'Next image (→)' : 'Siguiente imagen (→)'}
-                  >
-                    <span className="material-icons text-2xl">chevron_right</span>
-                  </button>
-                </>
-              )}
+            {/* The Black Void */}
+            <div
+              className="absolute inset-0 rounded-full overflow-hidden"
+              style={{
+                background: 'radial-gradient(circle at 50% 50%, #000000 70%, #0a0a0a 90%, #111 100%)',
+                boxShadow: 'inset 0 0 120px rgba(0,0,0,1), inset 0 0 60px rgba(0,0,0,0.9)',
+              }}
+            />
 
-              {/* Media Content Display */}
-              {activeMediaModal.mediaType === 'video' || (currentModalMedia && currentModalMedia.match(/\.(mp4|webm|mov)$/i)) ? (
-                <video
-                  key={currentModalMedia}
-                  src={currentModalMedia}
-                  controls
-                  autoPlay
-                  className="max-h-[65vh] w-full object-contain"
-                />
-              ) : currentModalMedia.includes('youtube.com') || currentModalMedia.includes('vimeo.com') ? (
-                <iframe
-                  key={currentModalMedia}
-                  src={currentModalMedia}
-                  className="w-full h-full min-h-[450px]"
-                  allow="autoplay; fullscreen; encrypted-media"
-                />
-              ) : (
-                <img
-                  key={currentModalMedia}
-                  src={currentModalMedia}
-                  alt={activeMediaModal.title}
-                  className="max-h-[65vh] w-full object-contain transition-opacity duration-300"
-                />
-              )}
-
-              {/* Interactive Thumbnail Filmstrip (Jesper Landberg style) */}
-              {modalImages.length > 1 && (
-                <div className="absolute bottom-3 left-4 right-4 z-20 flex items-center justify-center gap-2 overflow-x-auto py-1 pointer-events-auto">
-                  <div className="flex items-center gap-2 bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 max-w-full shadow-2xl">
-                    {modalImages.map((img, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setModalGalleryIndex(idx);
-                        }}
-                        className={`relative w-12 h-8 rounded overflow-hidden border transition-all shrink-0 ${
-                          idx === modalGalleryIndex
-                            ? 'ring-2 ring-white border-transparent scale-105 shadow-lg'
-                            : 'border-white/20 opacity-60 hover:opacity-100 hover:scale-105'
-                        }`}
-                        style={idx === modalGalleryIndex ? { borderColor: accentColor } : {}}
-                      >
-                        <img src={img} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="p-5 border-t border-white/10 space-y-2 bg-[#0a0a0f]">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-white">{activeMediaModal.title}</h3>
-                  {activeMediaModal.subtitle && (
-                    <p className="text-xs font-bold uppercase tracking-wider" style={{ color: accentColor }}>{activeMediaModal.subtitle}</p>
-                  )}
-                </div>
+            {/* Content inside the void */}
+            <div className="relative z-10 flex flex-col items-center justify-center text-center px-8 sm:px-12 max-w-[420px] space-y-3">
+              {/* Client & Category */}
+              <div className="flex items-center gap-2 flex-wrap justify-center">
                 {activeMediaModal.client && (
-                  <span className="text-xs font-semibold px-2.5 py-1 bg-white/5 border border-white/10 rounded-full text-slate-300">
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-white/8 border border-white/15 text-slate-300">
                     {activeMediaModal.client}
                   </span>
                 )}
+                {activeMediaModal.subtitle && (
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-white/50">
+                    {activeMediaModal.subtitle}
+                  </span>
+                )}
               </div>
+
+              {/* Title */}
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white leading-tight">
+                {activeMediaModal.title}
+              </h2>
+
+              {/* Description */}
               {activeMediaModal.description && (
-                <p className="text-xs text-slate-300 leading-relaxed max-w-3xl">
+                <p className="text-[11px] sm:text-xs text-slate-400 leading-relaxed max-w-[320px]">
                   {activeMediaModal.description}
                 </p>
               )}
-              {activeMediaModal.tags && (
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {activeMediaModal.tags.map((t, idx) => (
-                    <span key={idx} className="text-[9px] uppercase tracking-wider bg-white/5 border border-white/10 text-slate-400 px-2 py-0.5 rounded-sm">
-                      {t}
+
+              {/* Image filmstrip */}
+              {modalImages.length > 0 && (
+                <div className="flex items-center gap-1.5 py-1.5 overflow-x-auto max-w-full">
+                  {modalImages.map((img, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setModalGalleryIndex(idx)}
+                      className={`relative w-12 h-8 rounded-lg overflow-hidden border transition-all shrink-0 ${
+                        idx === modalGalleryIndex
+                          ? 'border-white scale-110 shadow-lg'
+                          : 'border-white/15 opacity-40 hover:opacity-90'
+                      }`}
+                    >
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Tags */}
+              {activeMediaModal.tags && activeMediaModal.tags.length > 0 && (
+                <div className="flex flex-wrap items-center justify-center gap-1 pt-0.5">
+                  {activeMediaModal.tags.map((tag, tIdx) => (
+                    <span
+                      key={tIdx}
+                      className="text-[8px] uppercase font-mono tracking-widest text-slate-500 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full"
+                    >
+                      {tag}
                     </span>
                   ))}
                 </div>
               )}
+
+              {/* Action */}
+              <div className="pt-1.5">
+                <a
+                  href={`mailto:${presenterEmail}?subject=${encodeURIComponent(`Case Inquiry: ${activeMediaModal.title}`)}`}
+                  className="px-4 py-2 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 shadow-lg text-white"
+                  style={{ backgroundColor: accentColor, boxShadow: `0 0 20px ${accentGlow}` }}
+                >
+                  <span className="material-icons text-xs">send</span>
+                  {locale === 'en' ? 'Inquire' : 'Consultar'}
+                </a>
+              </div>
             </div>
           </div>
+
+          {/* CSS keyframe for chromatic ring rotation */}
+          <style>{`
+            @keyframes spin {
+              from { transform: rotate(0deg); }
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
         </div>
       )}
     </div>

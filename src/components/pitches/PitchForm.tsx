@@ -1091,6 +1091,7 @@ export default function PitchForm({
                 slides: [activeSlide],
               }}
               companyProfile={companyProfile}
+              showcaseProjects={showcaseProjects}
               isEditorPreview={true}
             />
           </div>
@@ -1146,6 +1147,7 @@ export default function PitchForm({
           <PitchViewer
             pitch={mockPitch}
             companyProfile={companyProfile}
+            showcaseProjects={showcaseProjects}
             initialSlideIndex={activeSlideIndex}
           />
         </div>
