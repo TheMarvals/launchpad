@@ -40,10 +40,27 @@ export default function PitchPDF({ pitch, companyProfile, locale = 'en' }: Pitch
 
   const renderStyledTitle = (text: string, isHero: boolean = false) => {
     if (!text) return null;
+    const isLaunchpadWordmark = text.trim().toUpperCase() === 'LAUNCHPAD' || brandName.toUpperCase() === text.trim().toUpperCase();
     const clientKeyword = clientDisplayName || 'DiDi';
     const escapedKeyword = clientKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(${escapedKeyword}|DiDi|DIDI|LAUNCHPAD)`, 'gi');
     const parts = text.split(regex);
+
+    if (isHero && isLaunchpadWordmark) {
+      return (
+        <h1
+          className="text-5xl md:text-6xl font-black tracking-tight leading-tight mb-3 uppercase"
+          style={{
+            WebkitTextFillColor: 'transparent',
+            WebkitTextStrokeColor: '#ffffff',
+            WebkitTextStrokeWidth: '1.5px',
+            fontFamily: "'Outfit', sans-serif",
+          }}
+        >
+          {text}
+        </h1>
+      );
+    }
 
     if (isHero) {
       return (

@@ -193,6 +193,7 @@ export default function PitchForm({
   const initialThemeParsed = parsePitchTheme(initialData?.theme, initialData?.title, initialData?.clientName);
   const [accentColor, setAccentColor] = useState(initialThemeParsed.color);
   const [titleFont, setTitleFont] = useState(initialThemeParsed.font);
+  const [titleStyle, setTitleStyle] = useState<'solid' | 'outline'>(initialThemeParsed.style || 'solid');
   const [theme, setTheme] = useState(initialData?.theme || 'midnight');
 
   const [slides, setSlides] = useState<PitchSlide[]>(() => {
@@ -338,7 +339,7 @@ export default function PitchForm({
     setIsSubmitting(true);
     try {
       const selectedClient = clients.find(c => c.id === clientId);
-      const currentTheme = `${accentColor}|${titleFont}`;
+      const currentTheme = `${accentColor}|${titleFont}|${titleStyle}`;
       const payload = {
         title,
         subtitle,
@@ -366,7 +367,7 @@ export default function PitchForm({
     }
   };
 
-  const currentTheme = `${accentColor}|${titleFont}`;
+  const currentTheme = `${accentColor}|${titleFont}|${titleStyle}`;
   const mockPitch = {
     title,
     subtitle,
@@ -611,6 +612,50 @@ export default function PitchForm({
                           <div className="text-[9px] opacity-70 truncate">{f.desc}</div>
                         </button>
                       ))}
+                    </div>
+                  </div>
+
+                  {/* Title Style Selector (Solid vs Outline) */}
+                  <div className="md:col-span-2 pt-2 border-t border-hairline space-y-1.5">
+                    <span className="text-[10px] uppercase font-bold text-muted block tracking-wider">
+                      Title Rendering Style (Estilo de Título)
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setTitleStyle('solid')}
+                        className={`p-2 text-left rounded border transition-all flex items-center justify-between ${
+                          titleStyle === 'solid'
+                            ? 'bg-primary/10 border-primary text-white font-bold shadow-sm'
+                            : 'bg-canvas-elevated border-hairline text-muted hover:text-ink hover:border-muted'
+                        }`}
+                      >
+                        <div>
+                          <div className="text-xs font-bold text-ink">Solid Bold (Sólido Ejecutivo)</div>
+                          <div className="text-[10px] text-muted">Relleno nítido de alto contraste y legibilidad</div>
+                        </div>
+                        {titleStyle === 'solid' && (
+                          <span className="material-icons text-sm text-primary">check_circle</span>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setTitleStyle('outline')}
+                        className={`p-2 text-left rounded border transition-all flex items-center justify-between ${
+                          titleStyle === 'outline'
+                            ? 'bg-primary/10 border-primary text-white font-bold shadow-sm'
+                            : 'bg-canvas-elevated border-hairline text-muted hover:text-ink hover:border-muted'
+                        }`}
+                      >
+                        <div>
+                          <div className="text-xs font-bold text-ink">Outline Glow (Trazo Launchpad)</div>
+                          <div className="text-[10px] text-muted">Efecto de contorno con trazo exterior</div>
+                        </div>
+                        {titleStyle === 'outline' && (
+                          <span className="material-icons text-sm text-primary">check_circle</span>
+                        )}
+                      </button>
                     </div>
                   </div>
                 </div>

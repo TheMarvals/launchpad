@@ -27,12 +27,21 @@ export const parsePitchTheme = (themeStr?: string, pitchTitle?: string, clientNa
 
   let color = isDiDi ? '#FF7D00' : '#A855F7';
   let font = 'outfit'; // 'outfit' | 'montserrat' | 'inter' | 'geist'
+  let style: 'solid' | 'outline' = 'solid'; // default to crisp solid executive style!
 
   if (themeStr) {
     if (themeStr.includes('|')) {
-      const [c, f] = themeStr.split('|');
-      if (c) color = c.trim();
-      if (f) font = f.trim();
+      const parts = themeStr.split('|');
+      if (parts[0]) color = parts[0].trim();
+      if (parts[1]) font = parts[1].trim();
+      if (parts[2]) style = (parts[2].trim() as any) || 'solid';
+    } else if (themeStr.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(themeStr);
+        if (parsed.color) color = parsed.color;
+        if (parsed.font) font = parsed.font;
+        if (parsed.style) style = parsed.style;
+      } catch (e) {}
     } else if (themeStr.startsWith('#')) {
       color = themeStr.trim();
     } else if (themeStr === 'orange' || themeStr === 'didi') {
@@ -52,7 +61,7 @@ export const parsePitchTheme = (themeStr?: string, pitchTitle?: string, clientNa
     }
   }
 
-  return { color, font };
+  return { color, font, style };
 };
 
 export const hexToRgba = (hex: string, alpha: number = 0.25) => {
@@ -105,10 +114,11 @@ export function TiltCard({
     const y = e.clientY - rect.top;
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -5.5; // max 5.5 deg
-    const rotateY = ((x - centerX) / centerX) * 5.5;  // max 5.5 deg
 
-    setTransform(`perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.025, 1.025, 1.025)`);
+    const rotateX = ((y - centerY) / centerY) * -5;
+    const rotateY = ((x - centerX) / centerX) * 5;
+
+    setTransform(`perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`);
     setSpotlight({
       x: Math.round((x / rect.width) * 100),
       y: Math.round((y / rect.height) * 100),
@@ -144,6 +154,156 @@ export function TiltCard({
       />
       {children}
     </div>
+  );
+}
+
+// Multi-Image Kinetic Project Card (Jesper Landberg Portfolio Aesthetic)
+export function ShowcaseProjectCard({
+  item,
+  index,
+  accentColor,
+  accentGlow,
+  locale,
+  onOpen,
+}: {
+  item: ShowcaseItem;
+  index: number;
+  accentColor: string;
+  accentGlow: string;
+  locale: string;
+  onOpen: (item: ShowcaseItem, startIdx?: number) => void;
+}) {
+  const images = Array.isArray(item.images) && item.images.length > 0
+    ? item.images
+    : (item.mediaUrl ? [item.mediaUrl] : []);
+
+  const [activeImgIdx, setActiveImgIdx] = useState(0);
+  const isVideo = item.mediaType === 'video' || (item.mediaUrl && item.mediaUrl.match(/\.(mp4|webm|mov)$/i));
+  const isSlide = item.mediaType === 'slide';
+  const currentImg = images[activeImgIdx] || item.thumbnailUrl || item.mediaUrl;
+  const projectNum = String(index + 1).padStart(2, '0');
+
+  return (
+    <TiltCard
+      accentColor={accentColor}
+      className="group relative bg-[#0c0c12] border border-white/10 hover:border-white/40 rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-2 shadow-2xl flex flex-col"
+      onClick={() => onOpen(item, activeImgIdx)}
+    >
+      {/* Visual Header / Media Container */}
+      <div className="aspect-[16/10] w-full relative overflow-hidden bg-black/60">
+        {currentImg ? (
+          <img
+            src={currentImg}
+            alt={item.title}
+            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-white/5 text-slate-500">
+            <span className="material-icons text-3xl">image</span>
+          </div>
+        )}
+
+        {/* Dark Vignette Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c12] via-transparent to-black/40 pointer-events-none" />
+
+        {/* Index number & Category Badge */}
+        <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between z-10">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[10px] font-black uppercase tracking-widest font-mono text-white flex items-center gap-1.5 shadow-md">
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: accentColor }} />
+              {projectNum}
+            </span>
+            <span className="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-[9px] font-bold uppercase tracking-wider text-slate-300">
+              {item.mediaType || (isVideo ? 'Video' : isSlide ? 'Slide' : 'Image')}
+            </span>
+          </div>
+
+          {item.client && (
+            <span className="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[9px] font-bold uppercase tracking-widest text-slate-200 shadow-md">
+              {item.client}
+            </span>
+          )}
+        </div>
+
+        {/* Multi-Image Quick Switcher Strip (Jesper Landberg style) */}
+        {images.length > 1 && (
+          <div
+            className="absolute bottom-3 left-3.5 right-3.5 z-20 flex items-center justify-between bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15 opacity-90 group-hover:opacity-100 transition-opacity shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-1.5">
+              {images.map((_, iIdx) => (
+                <button
+                  key={iIdx}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveImgIdx(iIdx);
+                  }}
+                  onMouseEnter={() => setActiveImgIdx(iIdx)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    iIdx === activeImgIdx
+                      ? 'w-5 shadow-sm'
+                      : 'w-1.5 bg-white/40 hover:bg-white/80'
+                  }`}
+                  style={iIdx === activeImgIdx ? { backgroundColor: accentColor } : {}}
+                  title={`Photo ${iIdx + 1}`}
+                />
+              ))}
+            </div>
+
+            <span className="text-[9px] font-mono font-bold tracking-widest text-slate-300">
+              {activeImgIdx + 1} / {images.length} {locale === 'en' ? 'ASSETS' : 'FOTOS'}
+            </span>
+          </div>
+        )}
+
+        {/* Video Play Icon */}
+        {isVideo && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div
+              className="w-14 h-14 rounded-full text-black flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.8)] group-hover:scale-110 transition-transform duration-300"
+              style={{ backgroundColor: accentColor }}
+            >
+              <span className="material-icons text-3xl">play_arrow</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Project Metadata */}
+      <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+        <div className="space-y-1.5">
+          {item.subtitle && (
+            <p className="text-[10px] font-mono uppercase font-bold tracking-widest truncate" style={{ color: accentColor }}>
+              {item.subtitle}
+            </p>
+          )}
+          <h3 className="text-base font-bold text-white group-hover:text-white transition-colors leading-snug">
+            {item.title}
+          </h3>
+          {item.description && (
+            <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+              {item.description}
+            </p>
+          )}
+        </div>
+
+        {/* Tags */}
+        {item.tags && item.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-2 border-t border-white/5">
+            {item.tags.map((tag, tIdx) => (
+              <span
+                key={tIdx}
+                className="text-[9px] uppercase tracking-wider text-slate-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-md font-mono"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </TiltCard>
   );
 }
 
@@ -221,9 +381,9 @@ export default function PitchViewer({
   const [copiedEmail, setCopiedEmail] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const openMediaModal = (item: ShowcaseItem) => {
+  const openMediaModal = (item: ShowcaseItem, startIdx: number = 0) => {
     setActiveMediaModal(item);
-    setModalGalleryIndex(0);
+    setModalGalleryIndex(startIdx);
   };
 
   const modalImages: string[] = activeMediaModal ? (
@@ -272,9 +432,10 @@ export default function PitchViewer({
   const presenterPhone = companyProfile?.phone || '+569 94438833';
 
   // Dynamic Theme & Font resolution
-  const { color: accentColor, font: titleFont } = parsePitchTheme(pitch.theme, pitch.title, clientDisplayName);
+  const { color: accentColor, font: titleFont, style: titleStyle } = parsePitchTheme(pitch.theme, pitch.title, clientDisplayName);
   const accentGlow = hexToRgba(accentColor, 0.25);
   const titleFontFamily = getFontFamily(titleFont);
+  const isOutline = titleStyle === 'outline';
   const isDiDi = Boolean(
     (pitch.title && pitch.title.toLowerCase().includes('didi')) ||
     (clientDisplayName && clientDisplayName.toLowerCase().includes('didi')) ||
@@ -376,20 +537,22 @@ export default function PitchViewer({
   // Title styling helper: clean typography with glowing brand/client highlights
   const renderStyledTitle = (text: string, isHero: boolean = false) => {
     if (!text) return null;
+    const isLaunchpadWordmark = text.trim().toUpperCase() === 'LAUNCHPAD' || brandName.toUpperCase() === text.trim().toUpperCase();
     const clientKeyword = clientDisplayName || 'DiDi';
     const escapedKeyword = clientKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(${escapedKeyword}|DiDi|DIDI|LAUNCHPAD)`, 'gi');
     const parts = text.split(regex);
 
-    if (isHero) {
+    // Official LAUNCHPAD Brand Wordmark: ALWAYS maintain iconic Outfit Outlined Stroke style
+    if (isHero && isLaunchpadWordmark) {
       return (
         <h1
-          className="text-[clamp(3.5rem,11vw,7.5rem)] font-black tracking-tighter leading-none mb-3 select-none"
+          className="text-[clamp(3.5rem,11vw,7.5rem)] font-black tracking-tighter leading-none mb-3 select-none text-transparent"
           style={{
             WebkitTextFillColor: 'transparent',
             WebkitTextStrokeColor: '#ffffff',
             WebkitTextStrokeWidth: '1.5px',
-            fontFamily: titleFontFamily,
+            fontFamily: "'Outfit', sans-serif",
           }}
         >
           {text}
@@ -397,10 +560,29 @@ export default function PitchViewer({
       );
     }
 
+    if (isHero) {
+      return (
+        <h1
+          className="text-[clamp(3rem,9vw,6.5rem)] font-black tracking-tighter leading-none mb-3 select-none text-white"
+          style={{
+            fontFamily: titleFontFamily,
+            WebkitTextFillColor: '#ffffff',
+            filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.6))',
+          }}
+        >
+          {text}
+        </h1>
+      );
+    }
+
+    // Slide Titles (Slide 2, 3, 4, 5, 6, 7, 8, etc.): Use selected Title Typography
     return (
       <h2
-        className="text-[clamp(2rem,3.8vw,3.2rem)] font-black tracking-tight uppercase leading-tight"
-        style={{ fontFamily: titleFontFamily }}
+        className="text-[clamp(1.8rem,3.5vw,3rem)] font-black tracking-tight uppercase leading-tight text-white"
+        style={{
+          fontFamily: titleFontFamily,
+          WebkitTextFillColor: '#ffffff',
+        }}
       >
         {parts.map((part, pIdx) => {
           const isHighlight =
@@ -415,6 +597,9 @@ export default function PitchViewer({
                 className="inline-block font-black"
                 style={{
                   color: accentColor,
+                  WebkitTextFillColor: accentColor,
+                  WebkitTextStrokeColor: 'transparent',
+                  WebkitTextStrokeWidth: '0px',
                   filter: `drop-shadow(0 0 25px ${accentGlow})`,
                 }}
               >
@@ -423,7 +608,7 @@ export default function PitchViewer({
             );
           }
           return (
-            <span key={pIdx} className="text-white">
+            <span key={pIdx}>
               {part}
             </span>
           );
@@ -629,90 +814,18 @@ export default function PitchViewer({
               )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {showcaseList.map((item, sIdx) => {
-                const isVideo = item.mediaType === 'video' || (item.mediaUrl && item.mediaUrl.match(/\.(mp4|webm|mov)$/i));
-                const isSlide = item.mediaType === 'slide';
-                const previewImg = item.thumbnailUrl || (item.images && item.images[0]) || item.mediaUrl;
-                const imagesCount = item.images && item.images.length > 0 ? item.images.length : (item.mediaUrl ? 1 : 0);
-
-                return (
-                  <div
-                    key={sIdx}
-                    onClick={() => openMediaModal(item)}
-                    className="group relative bg-[#0d0d14] border border-white/10 hover:border-white/40 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1.5 shadow-lg"
-                  >
-                    {/* Media Thumbnail Container */}
-                    <div className="aspect-video w-full relative overflow-hidden bg-black/50">
-                      {previewImg ? (
-                        <img
-                          src={previewImg}
-                          alt={item.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-white/5 text-slate-500">
-                          <span className="material-icons text-3xl">image</span>
-                        </div>
-                      )}
-
-                      {/* Type Badge & Play Icon */}
-                      <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10 flex items-center gap-1.5 text-[9px] uppercase tracking-wider font-bold text-white">
-                        <span className="material-icons text-xs" style={{ color: accentColor }}>
-                          {isVideo ? 'play_circle' : isSlide ? 'slideshow' : 'collections'}
-                        </span>
-                        <span>{item.mediaType || (isVideo ? 'Video' : isSlide ? 'Slide' : 'Image')}</span>
-                      </div>
-
-                      {item.client && (
-                        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-sm border border-white/10 text-[9px] uppercase tracking-widest text-slate-300 font-semibold">
-                          {item.client}
-                        </div>
-                      )}
-
-                      {/* Multiple Photos Badge Indicator */}
-                      {imagesCount > 1 && (
-                        <div className="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/20 text-[10px] font-bold text-white flex items-center gap-1">
-                          <span className="material-icons text-xs" style={{ color: accentColor }}>collections</span>
-                          <span>{imagesCount} {locale === 'en' ? 'photos' : 'fotos'}</span>
-                        </div>
-                      )}
-
-                      {isVideo && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/10 transition-colors">
-                          <div className="w-12 h-12 rounded-full text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform" style={{ backgroundColor: accentColor }}>
-                            <span className="material-icons text-2xl">play_arrow</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Metadata Content */}
-                    <div className="p-4 space-y-2">
-                      <h3 className="text-sm md:text-base font-bold text-white transition-colors">
-                        {item.title}
-                      </h3>
-                      {item.description && (
-                        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                          {item.description}
-                        </p>
-                      )}
-                      {item.tags && item.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 pt-2">
-                          {item.tags.map((tag, tIdx) => (
-                            <span
-                              key={tIdx}
-                              className="text-[8px] uppercase tracking-wider text-slate-300 bg-white/5 border border-white/10 px-1.5 py-0.5 rounded-sm"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {showcaseList.map((item, sIdx) => (
+                <ShowcaseProjectCard
+                  key={item.id || sIdx}
+                  item={item}
+                  index={sIdx}
+                  accentColor={accentColor}
+                  accentGlow={accentGlow}
+                  locale={locale}
+                  onOpen={openMediaModal}
+                />
+              ))}
             </div>
           </div>
         );
@@ -812,7 +925,7 @@ export default function PitchViewer({
             )}
 
             {/* Two Value Proposition Pillars on Closing */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto mb-6 text-left">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl mx-auto mb-6 text-left">
               <div className="bg-[#0d0d14] border border-white/10 p-5 rounded-xl space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="material-icons text-lg" style={{ color: accentColor }}>speed</span>
@@ -835,25 +948,28 @@ export default function PitchViewer({
             </div>
 
             {/* Direct Contact Box */}
-            <div className="bg-[#12121a] border border-white/15 p-5 rounded-xl max-w-xl mx-auto text-left flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="space-y-1 text-center sm:text-left">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  {isDiDi || locale === 'en' ? 'Direct Contact' : 'Direct Contact'}
+            <div className="bg-[#12121a] border border-white/15 p-5 md:p-6 rounded-2xl w-full max-w-2xl mx-auto text-left flex flex-col sm:flex-row items-center justify-between gap-5 shadow-2xl">
+              <div className="space-y-1 text-center sm:text-left flex-1 min-w-0">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 justify-center sm:justify-start">
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: accentColor }} />
+                  Direct Contact
                 </div>
-                <div className="text-base font-bold text-white">{presenterName}</div>
-                <div className="text-xs font-medium" style={{ color: accentColor }}>{presenterRole}</div>
-                <div className="text-xs text-slate-300 pt-1">
-                  {presenterEmail} • {presenterPhone}
+                <div className="text-base md:text-lg font-bold text-white tracking-tight">{presenterName}</div>
+                <div className="text-xs font-semibold" style={{ color: accentColor }}>{presenterRole}</div>
+                <div className="text-xs text-slate-300 pt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 justify-center sm:justify-start">
+                  <a href={`mailto:${presenterEmail}`} className="hover:underline hover:text-white transition-colors">{presenterEmail}</a>
+                  <span className="text-slate-500">•</span>
+                  <span>{presenterPhone}</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <a
                   href={`mailto:${presenterEmail}?subject=${encodeURIComponent('[DiDi RFI 2026] Creative & Multimedia Support - Launchpad')}`}
-                  className="px-4 py-2.5 rounded-sm text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors shadow-md text-white hover:opacity-90"
-                  style={{ backgroundColor: accentColor }}
+                  className="px-6 py-3 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 shadow-lg text-white"
+                  style={{ backgroundColor: accentColor, boxShadow: `0 0 20px ${accentGlow}` }}
                 >
-                  <span className="material-icons text-sm">email</span>
+                  <span className="material-icons text-base">email</span>
                   Email
                 </a>
               </div>
@@ -1127,25 +1243,29 @@ export default function PitchViewer({
                 />
               )}
 
-              {/* Interactive Dots Pagination */}
+              {/* Interactive Thumbnail Filmstrip (Jesper Landberg style) */}
               {modalImages.length > 1 && (
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10">
-                  {modalImages.map((_, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setModalGalleryIndex(idx);
-                      }}
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        idx === modalGalleryIndex
-                          ? 'w-6 shadow-md'
-                          : 'w-2 bg-white/40 hover:bg-white/70'
-                      }`}
-                      style={idx === modalGalleryIndex ? { backgroundColor: accentColor } : {}}
-                    />
-                  ))}
+                <div className="absolute bottom-3 left-4 right-4 z-20 flex items-center justify-center gap-2 overflow-x-auto py-1 pointer-events-auto">
+                  <div className="flex items-center gap-2 bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 max-w-full shadow-2xl">
+                    {modalImages.map((img, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setModalGalleryIndex(idx);
+                        }}
+                        className={`relative w-12 h-8 rounded overflow-hidden border transition-all shrink-0 ${
+                          idx === modalGalleryIndex
+                            ? 'ring-2 ring-white border-transparent scale-105 shadow-lg'
+                            : 'border-white/20 opacity-60 hover:opacity-100 hover:scale-105'
+                        }`}
+                        style={idx === modalGalleryIndex ? { borderColor: accentColor } : {}}
+                      >
+                        <img src={img} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
