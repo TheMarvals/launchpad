@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { createPitch, updatePitch } from '@/app/actions/pitches';
 import { useTranslations, useLocale } from 'next-intl';
-import PitchViewer, { PitchSlide, ShowcaseItem } from './PitchViewer';
+import PitchViewer, { PitchSlide, ShowcaseItem, parsePitchTheme } from './PitchViewer';
 
 interface Client {
   id: string;
@@ -26,26 +26,26 @@ const DEFAULT_LAUNCHPAD_SLIDES: PitchSlide[] = [
     type: 'hero',
     badge: '360° Creative & Technology Support',
     title: 'LAUNCHPAD',
-    subtitle: 'Where ideas take off',
-    content: 'Ideas are only the beginning. We design, build, and scale high-performance digital ecosystems that drive measurable growth. From cloud architecture and web platforms to content, automation, and marketing, every solution is engineered with business outcomes in mind.',
-    clientName: 'Corporate Client',
+    subtitle: 'Where ideas take off • 2026 Daily Comms & Major Event Production',
+    content: 'We design, build, and scale high-performance digital ecosystems and creative communications that drive measurable growth.',
+    clientName: 'DiDi Global (IBG)',
     cta: {
-      text: 'Schedule Meeting',
-      secondaryText: 'Explore Proposal',
+      text: 'Explore Proposal',
+      secondaryText: 'View Case Studies',
     },
   },
   {
     id: 'slide-2',
     type: 'problem_solution',
-    badge: 'The Challenge & The Opportunity',
-    title: 'The Business Challenge',
-    subtitle: 'Transforming technical and operational friction into a scalable growth engine',
+    badge: 'Strategic Alignment',
+    title: 'Bridging Creative Velocity & Enterprise Scale',
+    subtitle: 'Solving the bottleneck between fast turnaround times and high-touch creative quality',
     cards: [
       {
-        title: 'Operational Friction & Silos',
-        subtitle: 'CURRENT SITUATION',
-        description: 'Disconnected vendors, infrastructure bottlenecks, and misaligned tooling create high overhead and delivery delays.',
-        icon: 'warning_amber',
+        title: 'Fragmented Execution & Slow SLAs',
+        subtitle: 'TRADITIONAL AGENCY BOTTLENECK',
+        description: 'Multi-layered account management slows down daily asset delivery, causing missed campaign windows and misalignment.',
+        icon: 'warning',
         highlight: false,
       },
       {
@@ -189,6 +189,10 @@ export default function PitchForm({
   const [clientName, setClientName] = useState(initialData?.clientName || '');
   const [userId, setUserId] = useState(initialData?.userId || '');
   const [status, setStatus] = useState(initialData?.status || 'Activo');
+  
+  const initialThemeParsed = parsePitchTheme(initialData?.theme, initialData?.title, initialData?.clientName);
+  const [accentColor, setAccentColor] = useState(initialThemeParsed.color);
+  const [titleFont, setTitleFont] = useState(initialThemeParsed.font);
   const [theme, setTheme] = useState(initialData?.theme || 'midnight');
 
   const [slides, setSlides] = useState<PitchSlide[]>(() => {
@@ -301,9 +305,13 @@ export default function PitchForm({
 
   const importFromProject = (project: any, img?: any) => {
     const currentItems = activeSlide.showcaseItems || [];
-    const targetUrl = img ? img.url : (project.images && project.images[0] ? project.images[0].url : '');
+    const targetUrl = img ? img.url : (project.images && project.images[0] ? project.images[0].url : (project.featuredImage || ''));
     const isSlideCategory = project.category === 'design' || project.title.toLowerCase().includes('slide');
     const isVideoCategory = project.title.toLowerCase().includes('video') || project.title.toLowerCase().includes('motion');
+
+    const projectImages: string[] = project.images && project.images.length > 0
+      ? project.images.map((i: any) => (typeof i === 'string' ? i : i.url)).filter(Boolean)
+      : (project.featuredImage ? [project.featuredImage] : (targetUrl ? [targetUrl] : []));
 
     const newItem: ShowcaseItem = {
       id: `project-${project.id}-${Date.now()}`,
@@ -313,6 +321,7 @@ export default function PitchForm({
       mediaType: isVideoCategory ? 'video' : isSlideCategory ? 'slide' : 'image',
       mediaUrl: targetUrl,
       thumbnailUrl: targetUrl,
+      images: projectImages.length > 0 ? projectImages : (targetUrl ? [targetUrl] : []),
       tags: project.technologies ? project.technologies.split(',').map((t: string) => t.trim()) : [project.category],
       client: project.clientName || 'DiDi / Corporate',
       externalUrl: project.projectUrl || undefined,
@@ -329,6 +338,7 @@ export default function PitchForm({
     setIsSubmitting(true);
     try {
       const selectedClient = clients.find(c => c.id === clientId);
+      const currentTheme = `${accentColor}|${titleFont}`;
       const payload = {
         title,
         subtitle,
@@ -336,7 +346,7 @@ export default function PitchForm({
         clientName: selectedClient ? selectedClient.razonSocial : (clientName || null),
         userId: userId || null,
         status,
-        theme,
+        theme: currentTheme,
         slides,
       };
 
@@ -356,13 +366,14 @@ export default function PitchForm({
     }
   };
 
+  const currentTheme = `${accentColor}|${titleFont}`;
   const mockPitch = {
     title,
     subtitle,
     clientName: clients.find(c => c.id === clientId)?.razonSocial || clientName,
     client: clients.find(c => c.id === clientId),
     user: admins.find(a => a.id === userId),
-    theme,
+    theme: currentTheme,
     slides,
   };
 
@@ -378,14 +389,14 @@ export default function PitchForm({
             Design, edit, and present high-impact pitch decks and case studies in the official Launchpad aesthetic.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-xs">
           <button
             type="button"
             onClick={handleLoadTemplate}
-            className="px-xs py-xxs text-xs font-semibold uppercase tracking-wider text-muted hover:text-ink border border-hairline hover:bg-canvas transition-colors flex items-center gap-1"
+            className="px-sm py-xxs border border-hairline text-muted hover:text-ink text-xs font-semibold uppercase tracking-wider flex items-center transition-colors bg-canvas"
           >
-            <span className="material-icons text-sm">auto_awesome</span>
-            Load Launchpad Template
+            <span className="material-icons text-sm mr-xxs">refresh</span>
+            Reset to Template
           </button>
           <button
             type="button"
@@ -399,18 +410,18 @@ export default function PitchForm({
       </div>
 
       {/* Main Grid: Settings & Editor */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-md">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-md items-start">
         {/* Left Column: Form & Slide Editor (7 cols) */}
-        <div className="lg:col-span-7 space-y-sm">
+        <div className="lg:col-span-7 space-y-md">
           {/* General Metadata */}
           <div className="bg-canvas-elevated border border-hairline p-sm space-y-sm">
             <h2 className="text-title-sm font-medium text-ink uppercase tracking-wider flex items-center">
-              <span className="material-icons mr-xxs text-primary">tune</span> Pitch Details
+              <span className="material-icons mr-xxs text-primary">tune</span> Pitch Metadata & Client Setup
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
-              <div className="space-y-xxs md:col-span-2">
-                <label className="block text-caption-uppercase text-ink font-semibold">Pitch Title</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
+              <div className="sm:col-span-2 space-y-xxs">
+                <label className="block text-caption-uppercase text-ink font-semibold">Pitch Title *</label>
                 <input
                   type="text"
                   required
@@ -421,7 +432,7 @@ export default function PitchForm({
                 />
               </div>
 
-              <div className="space-y-xxs md:col-span-2">
+              <div className="sm:col-span-2 space-y-xxs">
                 <label className="block text-caption-uppercase text-ink font-semibold">Subtitle / Tagline</label>
                 <input
                   type="text"
@@ -489,6 +500,121 @@ export default function PitchForm({
                   <option value="Archivado">Archived</option>
                 </select>
               </div>
+
+              {/* Brand Color & Font Customization */}
+              <div className="sm:col-span-2 pt-xs border-t border-hairline mt-xxs space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="block text-caption-uppercase text-primary font-bold flex items-center gap-1">
+                    <span className="material-icons text-sm">palette</span>
+                    Client Brand Color & Title Typography
+                  </label>
+                  <span className="text-[11px] text-muted">
+                    Custom accents for buttons, glows & headings
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-canvas p-3 border border-hairline rounded-sm">
+                  {/* Accent Color Picker */}
+                  <div className="space-y-2">
+                    <span className="text-[10px] uppercase font-bold text-muted block tracking-wider">
+                      Accent Color (Acentos / Botones)
+                    </span>
+
+                    {/* Color Swatches */}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {[
+                        { name: 'DiDi Orange', hex: '#FF7D00' },
+                        { name: 'Launchpad Purple', hex: '#A855F7' },
+                        { name: 'Cyber Blue', hex: '#0062FF' },
+                        { name: 'Electric Cyan', hex: '#00DCE5' },
+                        { name: 'Emerald', hex: '#10B981' },
+                        { name: 'Crimson', hex: '#EF4444' },
+                        { name: 'Amber Gold', hex: '#F59E0B' },
+                        { name: 'Silver White', hex: '#E5E2E3' },
+                      ].map((swatch) => (
+                        <button
+                          key={swatch.hex}
+                          type="button"
+                          title={swatch.name}
+                          onClick={() => setAccentColor(swatch.hex)}
+                          className={`w-6 h-6 rounded-full border transition-all flex items-center justify-center ${
+                            accentColor.toUpperCase() === swatch.hex.toUpperCase()
+                              ? 'scale-110 ring-2 ring-white border-white shadow-md'
+                              : 'border-white/20 hover:scale-105 opacity-80 hover:opacity-100'
+                          }`}
+                          style={{ backgroundColor: swatch.hex }}
+                        >
+                          {accentColor.toUpperCase() === swatch.hex.toUpperCase() && (
+                            <span className="material-icons text-[12px] text-black drop-shadow font-black">check</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Custom Hex Picker & Input */}
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="color"
+                        value={accentColor.startsWith('#') ? accentColor : '#FF7D00'}
+                        onChange={(e) => setAccentColor(e.target.value)}
+                        className="w-7 h-7 rounded border border-hairline bg-transparent cursor-pointer shrink-0"
+                      />
+                      <input
+                        type="text"
+                        value={accentColor}
+                        onChange={(e) => setAccentColor(e.target.value)}
+                        className="w-28 border border-hairline bg-canvas-elevated text-ink px-2 py-1 text-xs font-mono uppercase focus:border-primary outline-none"
+                        placeholder="#FF7D00"
+                      />
+                      <span className="text-[10px] text-muted">Custom Hex</span>
+                    </div>
+                  </div>
+
+                  {/* Title Font Selector */}
+                  <div className="space-y-2">
+                    <span className="text-[10px] uppercase font-bold text-muted block tracking-wider">
+                      Title Typography (Fuente de Títulos)
+                    </span>
+
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {[
+                        { id: 'outfit', name: 'Outfit', desc: 'Moderna & Geométrica' },
+                        { id: 'montserrat', name: 'Montserrat', desc: 'Launchpad Brand Oficial' },
+                        { id: 'inter', name: 'Inter', desc: 'Minimalista & Clean' },
+                        { id: 'geist', name: 'Geist', desc: 'Tech Modern' },
+                      ].map((f) => (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() => setTitleFont(f.id)}
+                          className={`p-1.5 text-left rounded border transition-all ${
+                            titleFont === f.id
+                              ? 'bg-primary/10 border-primary text-white font-bold shadow-sm'
+                              : 'bg-canvas-elevated border-hairline text-muted hover:text-ink hover:border-muted'
+                          }`}
+                        >
+                          <div
+                            className="text-xs font-bold"
+                            style={{
+                              fontFamily:
+                                f.id === 'montserrat'
+                                  ? "'Montserrat', sans-serif"
+                                  : f.id === 'inter'
+                                  ? "'Inter', sans-serif"
+                                  : f.id === 'geist'
+                                  ? "'Geist', sans-serif"
+                                  : "'Outfit', sans-serif",
+                            }}
+                          >
+                            {f.name}
+                          </div>
+                          <div className="text-[9px] opacity-70 truncate">{f.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -499,38 +625,48 @@ export default function PitchForm({
                 <span className="material-icons mr-xxs text-primary">view_carousel</span> Slides ({slides.length})
               </h2>
               <div className="flex flex-wrap items-center gap-1">
+                <span className="text-[10px] text-muted uppercase font-bold mr-1">+ Add Slide:</span>
                 <button
                   type="button"
                   onClick={() => addSlide('hero')}
-                  className="px-xxs py-1 bg-canvas hover:bg-canvas/80 text-ink text-[11px] font-bold uppercase tracking-wider border border-hairline"
+                  className="px-2 py-1 bg-canvas hover:bg-canvas/80 text-ink text-[11px] font-bold uppercase tracking-wider border border-hairline rounded-sm"
                 >
                   + Hero
                 </button>
                 <button
                   type="button"
                   onClick={() => addSlide('pillars')}
-                  className="px-xxs py-1 bg-canvas hover:bg-canvas/80 text-ink text-[11px] font-bold uppercase tracking-wider border border-hairline"
+                  className="px-2 py-1 bg-canvas hover:bg-canvas/80 text-ink text-[11px] font-bold uppercase tracking-wider border border-hairline rounded-sm"
                 >
                   + Pillars
                 </button>
                 <button
                   type="button"
-                  onClick={() => addSlide('showcase')}
-                  className="px-xxs py-1 bg-primary/20 hover:bg-primary/30 text-primary text-[11px] font-bold uppercase tracking-wider border border-primary/40"
+                  onClick={() => {
+                    const existingIdx = slides.findIndex(s => s.type === 'showcase');
+                    if (existingIdx !== -1 && existingIdx !== activeSlideIndex) {
+                      setActiveSlideIndex(existingIdx);
+                    } else {
+                      addSlide('showcase');
+                    }
+                  }}
+                  className="px-2 py-1 bg-primary/20 hover:bg-primary/30 text-primary text-[11px] font-bold uppercase tracking-wider border border-primary/40 rounded-sm flex items-center gap-1"
+                  title="Edit existing Case Studies slide or add new"
                 >
-                  + Case Studies
+                  <span className="material-icons text-xs">collections</span>
+                  {slides.some(s => s.type === 'showcase') ? 'Case Studies Slide' : '+ Case Studies'}
                 </button>
                 <button
                   type="button"
                   onClick={() => addSlide('metrics')}
-                  className="px-xxs py-1 bg-canvas hover:bg-canvas/80 text-ink text-[11px] font-bold uppercase tracking-wider border border-hairline"
+                  className="px-2 py-1 bg-canvas hover:bg-canvas/80 text-ink text-[11px] font-bold uppercase tracking-wider border border-hairline rounded-sm"
                 >
                   + Metrics
                 </button>
                 <button
                   type="button"
                   onClick={() => addSlide('cta')}
-                  className="px-xxs py-1 bg-canvas hover:bg-canvas/80 text-ink text-[11px] font-bold uppercase tracking-wider border border-hairline"
+                  className="px-2 py-1 bg-canvas hover:bg-canvas/80 text-ink text-[11px] font-bold uppercase tracking-wider border border-hairline rounded-sm"
                 >
                   + CTA
                 </button>
@@ -545,11 +681,18 @@ export default function PitchForm({
                   onClick={() => setActiveSlideIndex(idx)}
                   className={`flex-shrink-0 px-3 py-2 border rounded-sm cursor-pointer transition-all ${
                     activeSlideIndex === idx
-                      ? 'border-primary bg-primary/10 text-white font-bold'
-                      : 'border-hairline bg-canvas text-muted hover:text-ink'
+                      ? 'border-primary bg-primary/10 text-white font-bold shadow-md ring-1 ring-primary'
+                      : 'border-hairline bg-canvas text-muted hover:text-ink hover:border-muted'
                   }`}
                 >
-                  <div className="text-[10px] uppercase tracking-wider">Slide {idx + 1}</div>
+                  <div className="text-[10px] uppercase tracking-wider flex items-center justify-between gap-1">
+                    <span>Slide {idx + 1}</span>
+                    {s.type === 'showcase' && (
+                      <span className="text-[9px] px-1 bg-primary/20 text-primary font-bold rounded">
+                        {(s.showcaseItems || []).length} items
+                      </span>
+                    )}
+                  </div>
                   <div className="text-xs truncate max-w-[120px] font-semibold">{s.title || s.type}</div>
                 </div>
               ))}
@@ -564,12 +707,12 @@ export default function PitchForm({
                       Editing Slide {activeSlideIndex + 1} ({activeSlide.type})
                     </span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     <button
                       type="button"
                       onClick={() => moveSlide(activeSlideIndex, 'up')}
                       disabled={activeSlideIndex === 0}
-                      className="p-1 text-muted hover:text-ink disabled:opacity-30"
+                      className="p-1 text-muted hover:text-ink disabled:opacity-30 border border-hairline rounded bg-canvas"
                       title="Move up"
                     >
                       <span className="material-icons text-sm">arrow_upward</span>
@@ -578,7 +721,7 @@ export default function PitchForm({
                       type="button"
                       onClick={() => moveSlide(activeSlideIndex, 'down')}
                       disabled={activeSlideIndex === slides.length - 1}
-                      className="p-1 text-muted hover:text-ink disabled:opacity-30"
+                      className="p-1 text-muted hover:text-ink disabled:opacity-30 border border-hairline rounded bg-canvas"
                       title="Move down"
                     >
                       <span className="material-icons text-sm">arrow_downward</span>
@@ -586,10 +729,11 @@ export default function PitchForm({
                     <button
                       type="button"
                       onClick={() => removeSlide(activeSlideIndex)}
-                      className="p-1 text-muted hover:text-semantic-error"
-                      title="Delete slide"
+                      className="px-2 py-1 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 hover:text-red-300 text-[10px] font-bold uppercase tracking-wider rounded flex items-center gap-1 transition-colors"
+                      title="Delete this slide"
                     >
-                      <span className="material-icons text-sm">delete_outline</span>
+                      <span className="material-icons text-xs">delete</span>
+                      Delete Slide
                     </button>
                   </div>
                 </div>
@@ -837,6 +981,34 @@ export default function PitchForm({
                             </div>
 
                             <div className="space-y-1 md:col-span-3">
+                              <div className="flex justify-between items-center">
+                                <label className="block text-[10px] font-bold uppercase text-muted">
+                                  Gallery Images (URLs separated by comma or new lines)
+                                </label>
+                                <span className="text-[10px] text-primary font-bold">
+                                  {(item.images || (item.mediaUrl ? [item.mediaUrl] : [])).length} image(s) in gallery
+                                </span>
+                              </div>
+                              <textarea
+                                rows={2}
+                                value={(item.images || (item.mediaUrl ? [item.mediaUrl] : [])).join('\n')}
+                                onChange={(e) => {
+                                  const urls = e.target.value
+                                    .split(/[\n,]+/)
+                                    .map((u) => u.trim())
+                                    .filter(Boolean);
+                                  updateShowcaseItem(itemIdx, {
+                                    images: urls,
+                                    mediaUrl: urls[0] || item.mediaUrl,
+                                    thumbnailUrl: urls[0] || item.thumbnailUrl,
+                                  });
+                                }}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none font-mono text-[11px]"
+                                placeholder="https://res.cloudinary.com/image1.webp&#10;https://res.cloudinary.com/image2.webp"
+                              />
+                            </div>
+
+                            <div className="space-y-1 md:col-span-3">
                               <label className="block text-[10px] font-bold uppercase text-muted">Description / Deliverables</label>
                               <textarea
                                 rows={2}
@@ -929,6 +1101,7 @@ export default function PitchForm({
           <PitchViewer
             pitch={mockPitch}
             companyProfile={companyProfile}
+            initialSlideIndex={activeSlideIndex}
           />
         </div>
       )}

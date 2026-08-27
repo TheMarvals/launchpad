@@ -25,8 +25,8 @@ export async function GET(
     await forwardCookies(page, request, baseUrl);
 
     await page.setViewport({
-      width: 1440,
-      height: 900,
+      width: 1123,
+      height: 794,
       deviceScaleFactor: 2,
     });
 
@@ -38,6 +38,21 @@ export async function GET(
     await page.waitForSelector('.pdf-page', { timeout: 30000 });
     await page.emulateMediaType('screen');
     await applyPdfStyles(page);
+
+    // Ensure all Google Fonts and images are fully rendered
+    await page.evaluateHandle('document.fonts.ready');
+    await page.evaluate(async () => {
+      const selectors = Array.from(document.images);
+      await Promise.all(
+        selectors.map((img) => {
+          if (img.complete) return;
+          return new Promise((resolve) => {
+            img.addEventListener('load', resolve);
+            img.addEventListener('error', resolve);
+          });
+        })
+      );
+    });
 
     const pdf = await page.pdf({
       format: 'A4',

@@ -11,9 +11,140 @@ export interface ShowcaseItem {
   mediaType?: 'image' | 'video' | 'slide' | 'embed';
   mediaUrl: string;
   thumbnailUrl?: string;
+  images?: string[];
   tags?: string[];
   client?: string;
   externalUrl?: string;
+}
+
+export const parsePitchTheme = (themeStr?: string, pitchTitle?: string, clientName?: string) => {
+  const isDiDi = Boolean(
+    (pitchTitle && pitchTitle.toLowerCase().includes('didi')) ||
+    (clientName && clientName.toLowerCase().includes('didi')) ||
+    themeStr === 'orange' ||
+    themeStr === 'didi'
+  );
+
+  let color = isDiDi ? '#FF7D00' : '#A855F7';
+  let font = 'outfit'; // 'outfit' | 'montserrat' | 'inter' | 'geist'
+
+  if (themeStr) {
+    if (themeStr.includes('|')) {
+      const [c, f] = themeStr.split('|');
+      if (c) color = c.trim();
+      if (f) font = f.trim();
+    } else if (themeStr.startsWith('#')) {
+      color = themeStr.trim();
+    } else if (themeStr === 'orange' || themeStr === 'didi') {
+      color = '#FF7D00';
+    } else if (themeStr === 'purple' || themeStr === 'midnight' || themeStr === 'launchpad') {
+      color = '#A855F7';
+    } else if (themeStr === 'blue' || themeStr === 'cyber') {
+      color = '#0062FF';
+    } else if (themeStr === 'cyan') {
+      color = '#00DCE5';
+    } else if (themeStr === 'emerald') {
+      color = '#10B981';
+    } else if (themeStr === 'crimson') {
+      color = '#EF4444';
+    } else if (themeStr === 'amber') {
+      color = '#F59E0B';
+    }
+  }
+
+  return { color, font };
+};
+
+export const hexToRgba = (hex: string, alpha: number = 0.25) => {
+  const cleanHex = hex.replace('#', '');
+  if (cleanHex.length === 6) {
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return `rgba(255, 125, 0, ${alpha})`;
+};
+
+export const getFontFamily = (fontName: string) => {
+  switch (fontName) {
+    case 'montserrat':
+      return "'Montserrat', sans-serif";
+    case 'inter':
+      return "'Inter', sans-serif";
+    case 'geist':
+      return "'Geist', sans-serif";
+    case 'outfit':
+    default:
+      return "'Outfit', sans-serif";
+  }
+};
+
+// Interactive 3D Tilt Card with dynamic cursor spotlight (Jesper Landberg / GSAP Aesthetic)
+export function TiltCard({
+  children,
+  className = '',
+  onClick,
+  accentColor = '#FF7D00',
+  style = {},
+}: {
+  children: React.ReactNode;
+  className?: string;
+  onClick?: () => void;
+  accentColor?: string;
+  style?: React.CSSProperties;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [transform, setTransform] = useState('');
+  const [spotlight, setSpotlight] = useState({ x: 50, y: 50, opacity: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -5.5; // max 5.5 deg
+    const rotateY = ((x - centerX) / centerX) * 5.5;  // max 5.5 deg
+
+    setTransform(`perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.025, 1.025, 1.025)`);
+    setSpotlight({
+      x: Math.round((x / rect.width) * 100),
+      y: Math.round((y / rect.height) * 100),
+      opacity: 0.18,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTransform('perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)');
+    setSpotlight((prev) => ({ ...prev, opacity: 0 }));
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      onClick={onClick}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className={`relative transition-all duration-300 ease-out will-change-transform ${className}`}
+      style={{
+        ...style,
+        transform: transform || undefined,
+        transformStyle: 'preserve-3d',
+      }}
+    >
+      {/* Dynamic Cursor Spotlight Overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none rounded-xl transition-opacity duration-300 z-20"
+        style={{
+          opacity: spotlight.opacity,
+          background: `radial-gradient(circle 240px at ${spotlight.x}% ${spotlight.y}%, ${accentColor} 0%, transparent 80%)`,
+        }}
+      />
+      {children}
+    </div>
+  );
 }
 
 export interface PitchSlide {
@@ -70,6 +201,7 @@ interface PitchViewerProps {
   companyProfile?: any;
   isEditorPreview?: boolean;
   initialMode?: 'deck' | 'scroll';
+  initialSlideIndex?: number;
 }
 
 export default function PitchViewer({
@@ -77,15 +209,40 @@ export default function PitchViewer({
   companyProfile,
   isEditorPreview = false,
   initialMode = 'deck',
+  initialSlideIndex = 0,
 }: PitchViewerProps) {
   const locale = useLocale();
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(initialSlideIndex);
   const [viewMode, setViewMode] = useState<'deck' | 'scroll'>(initialMode);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeMediaModal, setActiveMediaModal] = useState<ShowcaseItem | null>(null);
+  const [modalGalleryIndex, setModalGalleryIndex] = useState(0);
   const [showContactModal, setShowContactModal] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const openMediaModal = (item: ShowcaseItem) => {
+    setActiveMediaModal(item);
+    setModalGalleryIndex(0);
+  };
+
+  const modalImages: string[] = activeMediaModal ? (
+    Array.isArray(activeMediaModal.images) && activeMediaModal.images.length > 0
+      ? activeMediaModal.images
+      : (activeMediaModal.mediaUrl ? [activeMediaModal.mediaUrl] : [])
+  ) : [];
+
+  const currentModalMedia = modalImages[modalGalleryIndex] || activeMediaModal?.mediaUrl || '';
+
+  const navigateModalImage = (direction: 'next' | 'prev', e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (modalImages.length <= 1) return;
+    if (direction === 'next') {
+      setModalGalleryIndex((prev) => (prev + 1) % modalImages.length);
+    } else {
+      setModalGalleryIndex((prev) => (prev - 1 + modalImages.length) % modalImages.length);
+    }
+  };
 
   const rawSlides = Array.isArray(pitch.slides) ? pitch.slides : [];
   const slides: PitchSlide[] = rawSlides.length > 0 ? rawSlides : [
@@ -114,16 +271,15 @@ export default function PitchViewer({
   const presenterEmail = companyProfile?.email || 'e.marval@themarvals.com';
   const presenterPhone = companyProfile?.phone || '+569 94438833';
 
-  // Check if this pitch is customized for DiDi / Orange theme
+  // Dynamic Theme & Font resolution
+  const { color: accentColor, font: titleFont } = parsePitchTheme(pitch.theme, pitch.title, clientDisplayName);
+  const accentGlow = hexToRgba(accentColor, 0.25);
+  const titleFontFamily = getFontFamily(titleFont);
   const isDiDi = Boolean(
-    pitch.theme === 'orange' ||
-    pitch.theme === 'didi' ||
     (pitch.title && pitch.title.toLowerCase().includes('didi')) ||
-    (clientDisplayName && clientDisplayName.toLowerCase().includes('didi'))
+    (clientDisplayName && clientDisplayName.toLowerCase().includes('didi')) ||
+    accentColor.toUpperCase() === '#FF7D00'
   );
-
-  const accentColor = isDiDi ? '#FF7D00' : '#a855f7';
-  const accentGlow = isDiDi ? 'rgba(255, 125, 0, 0.25)' : 'rgba(168, 85, 247, 0.22)';
 
   const nextSlide = useCallback(() => {
     setCurrentSlideIndex((prev) => (prev < totalSlides - 1 ? prev + 1 : 0));
@@ -191,6 +347,8 @@ export default function PitchViewer({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (activeMediaModal) {
         if (e.key === 'Escape') setActiveMediaModal(null);
+        if (e.key === 'ArrowRight') navigateModalImage('next');
+        if (e.key === 'ArrowLeft') navigateModalImage('prev');
         return;
       }
       if (showContactModal) {
@@ -213,12 +371,15 @@ export default function PitchViewer({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isEditorPreview, viewMode, nextSlide, prevSlide, activeMediaModal, showContactModal]);
+  }, [isEditorPreview, viewMode, nextSlide, prevSlide, activeMediaModal, showContactModal, modalImages.length]);
 
-  // Title styling helper: clean typography with glowing DiDi orange highlights
+  // Title styling helper: clean typography with glowing brand/client highlights
   const renderStyledTitle = (text: string, isHero: boolean = false) => {
     if (!text) return null;
-    const parts = text.split(/(DiDi|DIDI)/i);
+    const clientKeyword = clientDisplayName || 'DiDi';
+    const escapedKeyword = clientKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedKeyword}|DiDi|DIDI|LAUNCHPAD)`, 'gi');
+    const parts = text.split(regex);
 
     if (isHero) {
       return (
@@ -228,7 +389,7 @@ export default function PitchViewer({
             WebkitTextFillColor: 'transparent',
             WebkitTextStrokeColor: '#ffffff',
             WebkitTextStrokeWidth: '1.5px',
-            fontFamily: "'Outfit', sans-serif",
+            fontFamily: titleFontFamily,
           }}
         >
           {text}
@@ -239,14 +400,23 @@ export default function PitchViewer({
     return (
       <h2
         className="text-[clamp(2rem,3.8vw,3.2rem)] font-black tracking-tight uppercase leading-tight"
-        style={{ fontFamily: "'Outfit', sans-serif" }}
+        style={{ fontFamily: titleFontFamily }}
       >
         {parts.map((part, pIdx) => {
-          if (part.toLowerCase() === 'didi') {
+          const isHighlight =
+            part.toLowerCase() === clientKeyword.toLowerCase() ||
+            part.toLowerCase() === 'didi' ||
+            part.toLowerCase() === 'launchpad';
+
+          if (isHighlight) {
             return (
               <span
                 key={pIdx}
-                className="text-[#FF7D00] inline-block drop-shadow-[0_0_25px_rgba(255,125,0,0.5)] font-black"
+                className="inline-block font-black"
+                style={{
+                  color: accentColor,
+                  filter: `drop-shadow(0 0 25px ${accentGlow})`,
+                }}
               >
                 {part}
               </span>
@@ -290,10 +460,18 @@ export default function PitchViewer({
 
             {clientDisplayName && (
               <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/5 border border-white/10 rounded-full mb-6 backdrop-blur-md">
-                <span className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: accentColor }}>
-                  {isDiDi || locale === 'en' ? 'PREPARED FOR:' : 'PREPARED FOR:'}
+                <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">
+                  {locale === 'es' ? 'PREPARADO PARA:' : 'PREPARED FOR:'}
                 </span>
-                <span className="text-xs font-bold text-white uppercase">{clientDisplayName}</span>
+                <span
+                  className="text-xs font-black uppercase tracking-wider"
+                  style={{
+                    color: accentColor,
+                    filter: `drop-shadow(0 0 12px ${accentGlow})`,
+                  }}
+                >
+                  {clientDisplayName}
+                </span>
               </div>
             )}
 
@@ -455,12 +633,13 @@ export default function PitchViewer({
               {showcaseList.map((item, sIdx) => {
                 const isVideo = item.mediaType === 'video' || (item.mediaUrl && item.mediaUrl.match(/\.(mp4|webm|mov)$/i));
                 const isSlide = item.mediaType === 'slide';
-                const previewImg = item.thumbnailUrl || item.mediaUrl;
+                const previewImg = item.thumbnailUrl || (item.images && item.images[0]) || item.mediaUrl;
+                const imagesCount = item.images && item.images.length > 0 ? item.images.length : (item.mediaUrl ? 1 : 0);
 
                 return (
                   <div
                     key={sIdx}
-                    onClick={() => setActiveMediaModal(item)}
+                    onClick={() => openMediaModal(item)}
                     className="group relative bg-[#0d0d14] border border-white/10 hover:border-white/40 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1.5 shadow-lg"
                   >
                     {/* Media Thumbnail Container */}
@@ -480,7 +659,7 @@ export default function PitchViewer({
                       {/* Type Badge & Play Icon */}
                       <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10 flex items-center gap-1.5 text-[9px] uppercase tracking-wider font-bold text-white">
                         <span className="material-icons text-xs" style={{ color: accentColor }}>
-                          {isVideo ? 'play_circle' : isSlide ? 'slideshow' : 'visibility'}
+                          {isVideo ? 'play_circle' : isSlide ? 'slideshow' : 'collections'}
                         </span>
                         <span>{item.mediaType || (isVideo ? 'Video' : isSlide ? 'Slide' : 'Image')}</span>
                       </div>
@@ -488,6 +667,14 @@ export default function PitchViewer({
                       {item.client && (
                         <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-sm border border-white/10 text-[9px] uppercase tracking-widest text-slate-300 font-semibold">
                           {item.client}
+                        </div>
+                      )}
+
+                      {/* Multiple Photos Badge Indicator */}
+                      {imagesCount > 1 && (
+                        <div className="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/20 text-[10px] font-bold text-white flex items-center gap-1">
+                          <span className="material-icons text-xs" style={{ color: accentColor }}>collections</span>
+                          <span>{imagesCount} {locale === 'en' ? 'photos' : 'fotos'}</span>
                         </div>
                       )}
 
@@ -663,20 +850,12 @@ export default function PitchViewer({
               <div className="flex items-center gap-2">
                 <a
                   href={`mailto:${presenterEmail}?subject=${encodeURIComponent('[DiDi RFI 2026] Creative & Multimedia Support - Launchpad')}`}
-                  className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-sm text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors"
+                  className="px-4 py-2.5 rounded-sm text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors shadow-md text-white hover:opacity-90"
+                  style={{ backgroundColor: accentColor }}
                 >
                   <span className="material-icons text-sm">email</span>
                   Email
                 </a>
-                <button
-                  type="button"
-                  onClick={() => goToSlideByType('showcase')}
-                  className="px-4 py-2.5 rounded-sm text-xs font-extrabold uppercase tracking-wider text-black flex items-center gap-1.5 transition-all shadow-md"
-                  style={{ backgroundColor: accentColor }}
-                >
-                  <span className="material-icons text-sm">collections</span>
-                  Portfolio
-                </button>
               </div>
             </div>
           </div>
@@ -890,26 +1069,84 @@ export default function PitchViewer({
           </div>
 
           <div className="max-w-5xl w-full max-h-[85vh] flex flex-col bg-[#0d0d14] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-            <div className="flex-1 overflow-hidden bg-black flex items-center justify-center relative min-h-[300px]">
-              {activeMediaModal.mediaType === 'video' || activeMediaModal.mediaUrl.match(/\.(mp4|webm|mov)$/i) ? (
+            {/* Media Gallery / Lightbox Frame */}
+            <div className="flex-1 overflow-hidden bg-black flex items-center justify-center relative min-h-[300px] group/gallery">
+              {/* Media Count Badge */}
+              {modalImages.length > 1 && (
+                <div className="absolute top-4 left-4 z-20 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg">
+                  <span className="material-icons text-xs" style={{ color: accentColor }}>collections</span>
+                  <span>{modalGalleryIndex + 1} / {modalImages.length}</span>
+                </div>
+              )}
+
+              {/* Navigation Left / Right Chevrons */}
+              {modalImages.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={(e) => navigateModalImage('prev', e)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/20 hover:border-white/40 text-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-xl opacity-80 hover:opacity-100"
+                    title={locale === 'en' ? 'Previous image (←)' : 'Imagen anterior (←)'}
+                  >
+                    <span className="material-icons text-2xl">chevron_left</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => navigateModalImage('next', e)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/20 hover:border-white/40 text-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-xl opacity-80 hover:opacity-100"
+                    title={locale === 'en' ? 'Next image (→)' : 'Siguiente imagen (→)'}
+                  >
+                    <span className="material-icons text-2xl">chevron_right</span>
+                  </button>
+                </>
+              )}
+
+              {/* Media Content Display */}
+              {activeMediaModal.mediaType === 'video' || (currentModalMedia && currentModalMedia.match(/\.(mp4|webm|mov)$/i)) ? (
                 <video
-                  src={activeMediaModal.mediaUrl}
+                  key={currentModalMedia}
+                  src={currentModalMedia}
                   controls
                   autoPlay
                   className="max-h-[65vh] w-full object-contain"
                 />
-              ) : activeMediaModal.mediaUrl.includes('youtube.com') || activeMediaModal.mediaUrl.includes('vimeo.com') ? (
+              ) : currentModalMedia.includes('youtube.com') || currentModalMedia.includes('vimeo.com') ? (
                 <iframe
-                  src={activeMediaModal.mediaUrl}
+                  key={currentModalMedia}
+                  src={currentModalMedia}
                   className="w-full h-full min-h-[450px]"
                   allow="autoplay; fullscreen; encrypted-media"
                 />
               ) : (
                 <img
-                  src={activeMediaModal.mediaUrl}
+                  key={currentModalMedia}
+                  src={currentModalMedia}
                   alt={activeMediaModal.title}
-                  className="max-h-[65vh] w-full object-contain"
+                  className="max-h-[65vh] w-full object-contain transition-opacity duration-300"
                 />
+              )}
+
+              {/* Interactive Dots Pagination */}
+              {modalImages.length > 1 && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10">
+                  {modalImages.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setModalGalleryIndex(idx);
+                      }}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        idx === modalGalleryIndex
+                          ? 'w-6 shadow-md'
+                          : 'w-2 bg-white/40 hover:bg-white/70'
+                      }`}
+                      style={idx === modalGalleryIndex ? { backgroundColor: accentColor } : {}}
+                    />
+                  ))}
+                </div>
               )}
             </div>
 
