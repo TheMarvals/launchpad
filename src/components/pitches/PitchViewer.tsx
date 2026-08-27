@@ -291,7 +291,7 @@ export default function PitchViewer({
             {clientDisplayName && (
               <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/5 border border-white/10 rounded-full mb-6 backdrop-blur-md">
                 <span className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: accentColor }}>
-                  {locale === 'en' ? 'PREPARED FOR:' : 'PREPARADO PARA:'}
+                  {isDiDi || locale === 'en' ? 'PREPARED FOR:' : 'PREPARED FOR:'}
                 </span>
                 <span className="text-xs font-bold text-white uppercase">{clientDisplayName}</span>
               </div>
@@ -651,7 +651,7 @@ export default function PitchViewer({
             <div className="bg-[#12121a] border border-white/15 p-5 rounded-xl max-w-xl mx-auto text-left flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="space-y-1 text-center sm:text-left">
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  {locale === 'en' ? 'Primary Account Lead' : 'Contacto Directo'}
+                  {isDiDi || locale === 'en' ? 'Direct Contact' : 'Direct Contact'}
                 </div>
                 <div className="text-base font-bold text-white">{presenterName}</div>
                 <div className="text-xs font-medium" style={{ color: accentColor }}>{presenterRole}</div>

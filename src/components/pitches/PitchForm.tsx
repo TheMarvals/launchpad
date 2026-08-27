@@ -662,45 +662,119 @@ export default function PitchForm({
 
                 {/* SHOWCASE / CASE STUDIES EDITOR */}
                 {activeSlide.type === 'showcase' && (
-                  <div className="mt-4 pt-4 border-t border-hairline space-y-3">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1">
-                        <span className="material-icons text-sm">collections</span>
-                        Work Examples ({(activeSlide.showcaseItems || []).length})
-                      </h3>
+                  <div className="mt-4 pt-4 border-t border-hairline space-y-4">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-canvas-elevated p-3 border border-hairline rounded-sm">
+                      <div>
+                        <h3 className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
+                          <span className="material-icons text-sm">collections</span>
+                          Case Studies & Examples ({(activeSlide.showcaseItems || []).length} Included)
+                        </h3>
+                        <p className="text-[11px] text-muted">
+                          Click any Showcase Project below to toggle it in this slide, or create custom work examples.
+                        </p>
+                      </div>
                       <div className="flex items-center gap-2">
-                        {showcaseProjects.length > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => setShowImportShowcaseModal(true)}
-                            className="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1"
-                          >
-                            <span className="material-icons text-xs">download</span>
-                            Import from Portfolio
-                          </button>
-                        )}
                         <button
                           type="button"
                           onClick={addShowcaseItem}
-                          className="px-2 py-1 bg-primary text-black text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1"
+                          className="px-2.5 py-1.5 bg-primary text-black text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1 hover:bg-primary/80"
                         >
                           <span className="material-icons text-xs">add</span>
-                          Add Example
+                          Custom Example
                         </button>
                       </div>
                     </div>
 
+                    {/* Quick 1-Click Showcase Projects Picker */}
+                    {showcaseProjects && showcaseProjects.length > 0 && (
+                      <div className="bg-canvas border border-hairline p-3 rounded-sm space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted flex items-center gap-1">
+                            <span className="material-icons text-xs text-primary">auto_awesome</span>
+                            Select from Showcase Portfolio ({showcaseProjects.length} available):
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[260px] overflow-y-auto pr-1">
+                          {showcaseProjects.map((p: any) => {
+                            const isIncluded = (activeSlide.showcaseItems || []).some(
+                              (item) => item.title === (p.titleEn || p.title) || item.mediaUrl === (p.images?.[0]?.url || p.featuredImage)
+                            );
+
+                            const toggleProject = () => {
+                              if (isIncluded) {
+                                const updated = (activeSlide.showcaseItems || []).filter(
+                                  (item) => item.title !== (p.titleEn || p.title) && item.mediaUrl !== (p.images?.[0]?.url || p.featuredImage)
+                                );
+                                updateActiveSlide({ showcaseItems: updated });
+                              } else {
+                                importFromProject(p);
+                              }
+                            };
+
+                            const imgUrl = p.images?.[0]?.url || p.featuredImage;
+
+                            return (
+                              <div
+                                key={p.id}
+                                onClick={toggleProject}
+                                className={`p-2 rounded border cursor-pointer transition-all flex items-center justify-between gap-2.5 select-none ${
+                                  isIncluded
+                                    ? 'bg-primary/10 border-primary shadow-sm'
+                                    : 'bg-canvas-elevated border-hairline hover:border-muted'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  {imgUrl ? (
+                                    <img src={imgUrl} alt={p.title} className="w-11 h-8 object-cover rounded border border-hairline shrink-0" />
+                                  ) : (
+                                    <div className="w-11 h-8 bg-white/5 rounded flex items-center justify-center shrink-0">
+                                      <span className="material-icons text-xs text-muted">image</span>
+                                    </div>
+                                  )}
+                                  <div className="min-w-0">
+                                    <h4 className="text-xs font-bold text-ink truncate">{p.titleEn || p.title}</h4>
+                                    <span className="text-[9px] uppercase font-semibold text-primary block truncate">{p.category} • {p.clientName || 'Portfolio'}</span>
+                                  </div>
+                                </div>
+
+                                <div className="shrink-0">
+                                  {isIncluded ? (
+                                    <span className="px-2 py-0.5 bg-primary text-black rounded text-[9px] font-black uppercase tracking-wider flex items-center gap-0.5">
+                                      <span className="material-icons text-[12px]">check</span> Added
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-0.5 bg-white/5 hover:bg-white/10 border border-hairline text-muted rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-0.5">
+                                      <span className="material-icons text-[12px]">add</span> Add
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Detailed Items List */}
                     <div className="space-y-3">
                       {(activeSlide.showcaseItems || []).map((item, itemIdx) => (
                         <div key={item.id || itemIdx} className="bg-canvas-elevated border border-hairline p-3 rounded-sm space-y-2 relative">
                           <div className="flex justify-between items-center border-b border-hairline pb-2">
-                            <span className="text-[11px] font-bold text-ink">Example #{itemIdx + 1}</span>
+                            <span className="text-[11px] font-bold text-ink flex items-center gap-1.5">
+                              <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] font-black flex items-center justify-center">
+                                {itemIdx + 1}
+                              </span>
+                              {item.title || 'Work Example'}
+                            </span>
                             <button
                               type="button"
                               onClick={() => deleteShowcaseItem(itemIdx)}
-                              className="text-muted hover:text-semantic-error text-xs"
+                              className="text-muted hover:text-semantic-error text-xs flex items-center gap-1"
+                              title="Delete Example"
                             >
                               <span className="material-icons text-sm">delete</span>
+                              <span className="text-[10px] uppercase font-semibold">Remove</span>
                             </button>
                           </div>
 
