@@ -345,12 +345,12 @@ export const PitchInvitationEmail = ({
                           fontFamily: 'monospace, Courier, sans-serif',
                         }}
                       >
-                        EM
+                        {senderName.split(' ').map((p) => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'EM'}
                       </span>
                     </td>
                     <td style={{ paddingLeft: '14px', verticalAlign: 'middle' }}>
                       <Text style={signerNameStyle}>{senderName}</Text>
-                      <Text style={signerRoleStyle}>{senderRole}</Text>
+                      <Text style={signerRoleStyle}>{(senderRole || 'CEO & Managing Director').replace(/\.$/, '')}</Text>
                     </td>
                   </tr>
                 </table>

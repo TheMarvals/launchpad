@@ -124,6 +124,8 @@ export interface PitchCardCustomizationInput {
   buttonText?: string;
   linkText?: string;
   badgeText?: string;
+  senderName?: string;
+  senderRole?: string;
 }
 
 export async function savePitchCardCustomization(pitchId: string, customData: PitchCardCustomizationInput) {
@@ -142,9 +144,9 @@ export async function savePitchCardCustomization(pitchId: string, customData: Pi
   if (heroIndex !== -1) {
     slides[heroIndex] = {
       ...slides[heroIndex],
+      title: customData.cardTitle || slides[heroIndex].title,
+      subtitle: customData.cardSubtitle !== undefined ? customData.cardSubtitle : slides[heroIndex].subtitle,
       clientName: customData.clientTag || slides[heroIndex].clientName,
-      title: slides[heroIndex].title || 'LAUNCHPAD',
-      subtitle: customData.cardSubtitle || slides[heroIndex].subtitle,
       cta: {
         ...slides[heroIndex].cta,
         text: customData.buttonText || slides[heroIndex].cta?.text,
@@ -184,6 +186,8 @@ export async function savePitchCardCustomization(pitchId: string, customData: Pi
     buttonText: customData.buttonText,
     linkText: customData.linkText,
     badgeText: customData.badgeText,
+    senderName: customData.senderName,
+    senderRole: customData.senderRole,
     updatedAt: new Date().toISOString(),
   };
 

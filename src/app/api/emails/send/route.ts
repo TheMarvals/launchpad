@@ -65,6 +65,8 @@ export async function POST(request: Request) {
   const buttonText = formData.get('buttonText');
   const linkText = formData.get('linkText');
   const badgeText = formData.get('badgeText');
+  const senderName = formData.get('senderName');
+  const senderRole = formData.get('senderRole');
   const locale = formData.get('locale');
 
   let keyPillarsParsed: Array<{ title: string; subtitle?: string }> | undefined = undefined;
@@ -124,6 +126,8 @@ export async function POST(request: Request) {
       buttonText: typeof buttonText === 'string' ? buttonText : undefined,
       linkText: typeof linkText === 'string' ? linkText : undefined,
       badgeText: typeof badgeText === 'string' && badgeText.trim() ? badgeText.trim() : undefined,
+      senderName: typeof senderName === 'string' && senderName.trim() ? senderName.trim() : undefined,
+      senderRole: typeof senderRole === 'string' && senderRole.trim() ? senderRole.trim() : undefined,
       locale: typeof locale === 'string' && locale ? locale : 'es',
     }, attachments);
 

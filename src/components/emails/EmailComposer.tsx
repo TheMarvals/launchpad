@@ -76,6 +76,8 @@ export default function EmailComposer({
   ]);
   const [buttonText, setButtonText] = useState(locale === 'es' ? 'VER PROPUESTA INTERACTIVA →' : 'VIEW INTERACTIVE PROPOSAL →');
   const [linkText, setLinkText] = useState(locale === 'es' ? 'Abrir propuesta interactiva en el navegador →' : 'Open interactive proposal in browser →');
+  const [senderName, setSenderName] = useState('Eduardo Marval');
+  const [senderRole, setSenderRole] = useState('CEO & MANAGING DIRECTOR');
   const [previewTab, setPreviewTab] = useState<'editor' | 'preview'>('editor');
   const [isSavingToPitch, setIsSavingToPitch] = useState(false);
   const [savePitchSuccess, setSavePitchSuccess] = useState(false);
@@ -169,6 +171,14 @@ export default function EmailComposer({
         ? source.linkText
         : (isSpanish ? 'Abrir propuesta interactiva en el navegador →' : 'Open interactive proposal in browser →');
 
+      const nextSenderName = (source.senderName !== undefined && source.senderName.trim() !== '')
+        ? source.senderName
+        : (selectedPitch.user?.name || (selectedIdentity?.displayName && !selectedIdentity.displayName.toLowerCase().includes('contact') ? selectedIdentity.displayName : 'Eduardo Marval'));
+
+      const nextSenderRole = (source.senderRole !== undefined && source.senderRole.trim() !== '')
+        ? source.senderRole
+        : (selectedPitch.user?.cargo || 'CEO & MANAGING DIRECTOR');
+
       setSubject(nextSubject);
       setBody(nextBody);
       setBadgeText(nextBadgeText);
@@ -180,6 +190,8 @@ export default function EmailComposer({
       setCustomPillars(nextPillars);
       setButtonText(nextButtonText);
       setLinkText(nextLinkText);
+      setSenderName(nextSenderName);
+      setSenderRole(nextSenderRole);
 
       if (!to && selectedPitch.client?.email) {
         setTo(selectedPitch.client.email);
@@ -206,10 +218,12 @@ export default function EmailComposer({
           customPillars,
           buttonText,
           linkText,
+          senderName,
+          senderRole,
         })
       );
     }
-  }, [loadedPitchId, selectedPitchId, subject, body, badgeText, clientTag, tagline, cardTitle, cardSubtitle, pillarsLabel, customPillars, buttonText, linkText, templateType]);
+  }, [loadedPitchId, selectedPitchId, subject, body, badgeText, clientTag, tagline, cardTitle, cardSubtitle, pillarsLabel, customPillars, buttonText, linkText, senderName, senderRole, templateType]);
 
   const saveToPitchDeck = async () => {
     if (!selectedPitchId) return;
@@ -230,6 +244,8 @@ export default function EmailComposer({
             customPillars,
             buttonText,
             linkText,
+            senderName,
+            senderRole,
           })
         );
       }
@@ -245,6 +261,8 @@ export default function EmailComposer({
         keyPillars: customPillars,
         buttonText,
         linkText,
+        senderName,
+        senderRole,
       });
       setSavePitchSuccess(true);
       setTimeout(() => setSavePitchSuccess(false), 3500);
@@ -296,6 +314,8 @@ export default function EmailComposer({
     }
     setButtonText(isSpanish ? 'VER PROPUESTA INTERACTIVA →' : 'VIEW INTERACTIVE PROPOSAL →');
     setLinkText(isSpanish ? 'Abrir propuesta interactiva en el navegador →' : 'Open interactive proposal in browser →');
+    setSenderName(selectedPitch.user?.name || (selectedIdentity?.displayName && !selectedIdentity.displayName.toLowerCase().includes('contact') ? selectedIdentity.displayName : 'Eduardo Marval'));
+    setSenderRole(selectedPitch.user?.cargo || 'CEO & MANAGING DIRECTOR');
   };
 
   // Extract selected pitch theme & key pillars
@@ -376,6 +396,8 @@ export default function EmailComposer({
             keyPillars: customPillars,
             buttonText,
             linkText,
+            senderName,
+            senderRole,
           }).catch(console.error);
         }
         if (cardTitle) formData.set('cardTitle', cardTitle);
@@ -389,6 +411,8 @@ export default function EmailComposer({
         }
         if (buttonText) formData.set('buttonText', buttonText);
         if (linkText) formData.set('linkText', linkText);
+        if (senderName) formData.set('senderName', senderName);
+        if (senderRole) formData.set('senderRole', senderRole);
       }
       formData.set('locale', locale);
       selectedFiles.forEach((file) => formData.append('attachments', file));
@@ -712,6 +736,34 @@ export default function EmailComposer({
                       />
                     </label>
                   </div>
+
+                  {/* Presenter Sign-off Customization */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-hairline/40">
+                    <label className="block space-y-1">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-muted">
+                        {isSpanish ? 'Nombre del Presentador / Firmante' : 'Presenter / Signer Name'}
+                      </span>
+                      <input
+                        type="text"
+                        value={senderName}
+                        onChange={(e) => setSenderName(e.target.value)}
+                        placeholder="Eduardo Marval"
+                        className="w-full border border-hairline bg-canvas px-3 py-2 text-xs text-ink outline-none focus:border-primary font-bold"
+                      />
+                    </label>
+                    <label className="block space-y-1">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-muted">
+                        {isSpanish ? 'Cargo / Título Ejecutivo' : 'Presenter Title / Executive Role'}
+                      </span>
+                      <input
+                        type="text"
+                        value={senderRole}
+                        onChange={(e) => setSenderRole(e.target.value)}
+                        placeholder="CEO & MANAGING DIRECTOR"
+                        className="w-full border border-hairline bg-canvas px-3 py-2 text-xs text-ink outline-none focus:border-primary font-mono"
+                      />
+                    </label>
+                  </div>
                 </div>
               </div>
             )}
@@ -971,18 +1023,14 @@ export default function EmailComposer({
                       color: accentColor,
                     }}
                   >
-                    EM
+                    {(senderName || 'Eduardo Marval').split(' ').map((p) => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'EM'}
                   </span>
                   <div className="text-left leading-snug">
                     <p className="text-xs font-bold text-white tracking-tight">
-                      {selectedIdentity?.displayName?.toLowerCase().includes('contact')
-                        ? 'Eduardo Marval'
-                        : selectedIdentity?.displayName || 'Eduardo Marval'}
+                      {senderName || 'Eduardo Marval'}
                     </p>
                     <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 mt-0.5">
-                      {selectedIdentity?.signature
-                        ? selectedIdentity.signature.split('\n').filter(Boolean).slice(-1)[0]
-                        : 'Lead Solution Architect'}
+                      {(senderRole || 'CEO & MANAGING DIRECTOR').replace(/\.$/, '')}
                     </p>
                   </div>
                 </div>

@@ -125,6 +125,8 @@ export interface NewEmailInput {
   buttonText?: string;
   linkText?: string;
   badgeText?: string;
+  senderName?: string;
+  senderRole?: string;
   locale?: string;
 }
 
@@ -188,19 +190,19 @@ export async function sendNewEmail(
 
       const senderSig = sender.signature?.trim() || '';
       const sigLines = senderSig.split('\n').map((l) => l.trim()).filter(Boolean);
-      let resolvedSenderName = sender.displayName || pitch.user?.name || 'Eduardo Marval';
-      let resolvedSenderRole = pitch.user?.cargo || 'Lead Solution Architect';
+      let resolvedSenderName = input.senderName?.trim() || sender.displayName || pitch.user?.name || 'Eduardo Marval';
+      let resolvedSenderRole = input.senderRole?.trim() || pitch.user?.cargo || 'CEO & Managing Director';
 
-      if (resolvedSenderName.toLowerCase().includes('contact') || resolvedSenderName.toLowerCase().includes('launchpad')) {
+      if (!input.senderName && (resolvedSenderName.toLowerCase().includes('contact') || resolvedSenderName.toLowerCase().includes('launchpad'))) {
         if (sigLines[0] && !sigLines[0].toLowerCase().includes('contact') && !sigLines[0].toLowerCase().includes('launchpad')) {
           resolvedSenderName = sigLines[0];
-          if (sigLines[1]) resolvedSenderRole = sigLines.slice(1).join(' · ');
+          if (!input.senderRole && sigLines[1]) resolvedSenderRole = sigLines.slice(1).join(' · ');
         } else if (pitch.user?.name) {
           resolvedSenderName = pitch.user.name;
         } else {
           resolvedSenderName = 'Eduardo Marval';
         }
-      } else if (sigLines.length > 0) {
+      } else if (!input.senderRole && sigLines.length > 0) {
         if (sigLines[0].toLowerCase() === resolvedSenderName.toLowerCase() && sigLines[1]) {
           resolvedSenderRole = sigLines.slice(1).join(' · ');
         } else if (sigLines.length > 0 && !sigLines[0].toLowerCase().includes('contact')) {
