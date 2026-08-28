@@ -1496,7 +1496,7 @@ export default function PitchViewer({
             )}
 
             {/* Two Value Proposition Pillars on Closing */}
-            {slide.cards && slide.cards.length > 0 ? (
+            {slide.cards && slide.cards.length > 0 && (
               <div className={`grid gap-4 w-full ${slide.cards.length === 1 ? 'max-w-md grid-cols-1' : slide.cards.length === 2 ? 'max-w-3xl grid-cols-1 md:grid-cols-2' : 'max-w-4xl grid-cols-1 md:grid-cols-3'} mx-auto mb-6 text-left`}>
                 {slide.cards.map((card, cIdx) => (
                   <div key={cIdx} className="bg-[#0d0d14] border border-white/10 p-5 rounded-xl space-y-2">
@@ -1510,29 +1510,7 @@ export default function PitchViewer({
                   </div>
                 ))}
               </div>
-            ) : isDiDi ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl mx-auto mb-6 text-left">
-                <div className="bg-[#0d0d14] border border-white/10 p-5 rounded-xl space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="material-icons text-lg" style={{ color: accentColor }}>speed</span>
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">Agile Daily Comms</h4>
-                  </div>
-                  <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
-                    Rapid <span className="font-bold text-white">&lt;24-48h turnaround</span> for banners, email templates, D-Hub & D-Channel assets with bilingual English/Spanish agility and Chinese (CN) support.
-                  </p>
-                </div>
-
-                <div className="bg-[#0d0d14] border border-white/10 p-5 rounded-xl space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="material-icons text-lg" style={{ color: accentColor }}>verified_user</span>
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">Major Events & VRA</h4>
-                  </div>
-                  <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
-                    End-to-end multimedia for <span className="font-bold text-white">Get-Together & Value Star</span>, with 100% compliance readiness for DiDi Vendor Risk Assessment (VRA).
-                  </p>
-                </div>
-              </div>
-            ) : null}
+            )}
 
             {/* Bottom Content Text */}
             {(slide.footerContent || slide.bottomContent) && (

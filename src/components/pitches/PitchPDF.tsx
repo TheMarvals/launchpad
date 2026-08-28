@@ -735,7 +735,7 @@ export default function PitchPDF({
                   )}
                 </div>
 
-                {slide.cards && slide.cards.length > 0 ? (
+                {slide.cards && slide.cards.length > 0 && (
                   <div className={`grid ${slide.cards.length === 1 ? 'grid-cols-1 max-w-md' : slide.cards.length === 2 ? 'grid-cols-2 max-w-3xl' : 'grid-cols-3 max-w-4xl'} gap-4 text-left w-full mx-auto`}>
                     {slide.cards.map((card, cIdx) => (
                       <div key={cIdx} className="bg-[#0d0d14] border border-white/10 p-4 rounded-xl space-y-1.5">
@@ -750,31 +750,6 @@ export default function PitchPDF({
                         )}
                       </div>
                     ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-4 text-left w-full max-w-3xl">
-                    <div className="bg-[#0d0d14] border border-white/10 p-4 rounded-xl space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="material-icons text-base" style={{ color: accentColor }}>speed</span>
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-white">
-                          Agile Daily Comms
-                        </h4>
-                      </div>
-                      <p className="text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">
-                        Rapid <span className="font-bold text-white">&lt;24-48h turnaround</span> for banners, email templates, and D-Hub/D-Channel assets with bilingual EN/ES & CN agility.
-                      </p>
-                    </div>
-                    <div className="bg-[#0d0d14] border border-white/10 p-4 rounded-xl space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="material-icons text-base" style={{ color: accentColor }}>verified_user</span>
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-white">
-                          Major Events & VRA
-                        </h4>
-                      </div>
-                      <p className="text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">
-                        Multimedia production for <span className="font-bold text-white">Get-Together & Value Star</span> with 100% VRA InfoSec compliance readiness.
-                      </p>
-                    </div>
                   </div>
                 )}
 
