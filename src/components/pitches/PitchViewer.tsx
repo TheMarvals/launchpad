@@ -464,6 +464,8 @@ export interface PitchSlide {
   title: string;
   subtitle?: string;
   content?: string;
+  footerContent?: string;
+  bottomContent?: string;
   columns?: number;
   cards?: Array<{
     title: string;
@@ -1051,6 +1053,13 @@ export default function PitchViewer({
               })}
             </div>
 
+            {/* Bottom Content Text after cards */}
+            {(slide.footerContent || slide.bottomContent) && (
+              <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-6 text-center leading-relaxed whitespace-pre-wrap">
+                {slide.footerContent || slide.bottomContent}
+              </p>
+            )}
+
             {/* Integrated Team Section on Slide */}
             {renderTeamSection(slide.teamMembers, slide.teamTitle)}
           </div>
@@ -1121,6 +1130,13 @@ export default function PitchViewer({
                 );
               })}
             </div>
+
+            {/* Bottom Content Text after cards */}
+            {(slide.footerContent || slide.bottomContent) && (
+              <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-6 text-center leading-relaxed whitespace-pre-wrap">
+                {slide.footerContent || slide.bottomContent}
+              </p>
+            )}
 
             {/* Integrated Team Section on Slide */}
             {renderTeamSection(slide.teamMembers, slide.teamTitle)}
@@ -1210,6 +1226,13 @@ export default function PitchViewer({
                 );
               })}
             </div>
+
+            {/* Bottom Content Text after cards */}
+            {(slide.footerContent || slide.bottomContent) && (
+              <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-6 text-center leading-relaxed whitespace-pre-wrap">
+                {slide.footerContent || slide.bottomContent}
+              </p>
+            )}
           </div>
         );
 
@@ -1272,6 +1295,13 @@ export default function PitchViewer({
                 );
               })}
             </div>
+
+            {/* Bottom Content Text after cards */}
+            {(slide.footerContent || slide.bottomContent) && (
+              <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-6 text-center leading-relaxed whitespace-pre-wrap">
+                {slide.footerContent || slide.bottomContent}
+              </p>
+            )}
           </div>
         );
 

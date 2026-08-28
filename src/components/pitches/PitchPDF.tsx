@@ -364,6 +364,12 @@ export default function PitchPDF({
                   })}
                 </div>
 
+                {(slide.footerContent || slide.bottomContent) && (
+                  <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 text-center leading-relaxed whitespace-pre-wrap">
+                    {slide.footerContent || slide.bottomContent}
+                  </p>
+                )}
+
                 {slide.teamMembers && slide.teamMembers.length > 0 && (
                   <div className="w-full mt-3 pt-3 border-t border-white/10">
                     <span className="text-[8px] uppercase tracking-widest font-bold block mb-2 text-center" style={{ color: accentColor }}>
@@ -450,6 +456,12 @@ export default function PitchPDF({
                     );
                   })}
                 </div>
+
+                {(slide.footerContent || slide.bottomContent) && (
+                  <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 text-center leading-relaxed whitespace-pre-wrap">
+                    {slide.footerContent || slide.bottomContent}
+                  </p>
+                )}
 
                 {slide.teamMembers && slide.teamMembers.length > 0 && (
                   <div className="w-full mt-3 pt-3 border-t border-white/10">

@@ -1068,13 +1068,30 @@ export default function PitchForm({
 
                   {activeSlide.type !== 'showcase' && (
                     <div className="space-y-xxs md:col-span-3">
-                      <label className="block text-caption-uppercase text-ink font-semibold">Content Text</label>
+                      <label className="block text-caption-uppercase text-ink font-semibold">
+                        {locale === 'es' ? 'Texto de Contenido (Superior)' : 'Content Text (Top / Header)'}
+                      </label>
                       <textarea
-                        rows={3}
+                        rows={2}
                         value={activeSlide.content || ''}
                         onChange={(e) => updateActiveSlide({ content: e.target.value })}
                         className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none"
-                        placeholder="Explanatory text for the slide..."
+                        placeholder={locale === 'es' ? 'Texto explicativo antes de las tarjetas...' : 'Explanatory text for the slide before cards...'}
+                      />
+                    </div>
+                  )}
+
+                  {(activeSlide.type === 'pillars' || activeSlide.type === 'problem_solution' || activeSlide.type === 'team' || activeSlide.type === 'logos' || activeSlide.type === 'metrics' || activeSlide.type === 'roadmap') && (
+                    <div className="space-y-xxs md:col-span-3">
+                      <label className="block text-caption-uppercase text-ink font-semibold">
+                        {locale === 'es' ? 'Texto de Contenido Inferior (Después de las Tarjetas)' : 'Bottom Content Text (After Cards)'}
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={activeSlide.footerContent || activeSlide.bottomContent || ''}
+                        onChange={(e) => updateActiveSlide({ footerContent: e.target.value, bottomContent: e.target.value })}
+                        className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none"
+                        placeholder={locale === 'es' ? 'Texto adicional que se muestra debajo de las tarjetas...' : 'Additional text displayed below the cards...'}
                       />
                     </div>
                   )}
