@@ -2282,6 +2282,19 @@ export default function PitchForm({
 
                   {(activeSlide.teamMembers || []).length > 0 && (
                     <div className="space-y-3">
+                      <div className="bg-canvas-elevated p-3 border border-hairline rounded-sm">
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-muted mb-1">
+                          {locale === 'es' ? 'Título de la Sección de Equipo (Opcional)' : 'Team Section Title (Optional)'}
+                        </label>
+                        <input
+                          type="text"
+                          value={activeSlide.teamTitle || ''}
+                          onChange={(e) => updateActiveSlide({ teamTitle: e.target.value })}
+                          placeholder={locale === 'es' ? 'Ej. CORE TEAM & LEADERSHIP / EQUIPO ASIGNADO' : 'e.g. CORE TEAM & LEADERSHIP'}
+                          className="w-full bg-canvas border border-hairline px-3 py-1.5 text-xs text-ink rounded-sm focus:border-primary outline-none"
+                        />
+                      </div>
+
                       {(activeSlide.teamMembers || []).map((member, mIdx) => (
                         <div key={mIdx} className="bg-canvas-elevated border border-hairline p-3 rounded-sm space-y-3 relative">
                           <div className="flex justify-between items-center border-b border-hairline pb-2">
