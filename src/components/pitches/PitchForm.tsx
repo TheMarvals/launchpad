@@ -1081,7 +1081,7 @@ export default function PitchForm({
                     </div>
                   )}
 
-                  {(activeSlide.type === 'pillars' || activeSlide.type === 'problem_solution' || activeSlide.type === 'team' || activeSlide.type === 'logos' || activeSlide.type === 'metrics' || activeSlide.type === 'roadmap') && (
+                  {(activeSlide.type === 'pillars' || activeSlide.type === 'problem_solution' || activeSlide.type === 'team' || activeSlide.type === 'logos' || activeSlide.type === 'metrics' || activeSlide.type === 'roadmap' || activeSlide.type === 'cta') && (
                     <div className="space-y-xxs md:col-span-3">
                       <label className="block text-caption-uppercase text-ink font-semibold">
                         {locale === 'es' ? 'Texto de Contenido Inferior (Después de las Tarjetas)' : 'Bottom Content Text (After Cards)'}
@@ -2230,51 +2230,99 @@ export default function PitchForm({
                       </div>
                     </div>
 
-                    {/* Optional Closing Proposition Cards */}
+                    {/* Value Proposition Cards on Closing Slide */}
                     <div className="bg-canvas-elevated p-3 border border-hairline rounded-sm space-y-3">
                       <div className="flex justify-between items-center">
                         <div>
                           <h4 className="text-[11px] font-bold uppercase tracking-wider text-ink">
-                            {locale === 'es' ? 'Tarjetas de Cierre / Propuesta' : 'Closing Value Proposition Cards'} ({(activeSlide.cards || []).length})
+                            {locale === 'es' ? 'Tarjetas de Propuesta de Valor' : 'Value Proposition Cards'} ({(activeSlide.cards || []).length})
                           </h4>
                           <span className="text-[10px] text-muted">
-                            {locale === 'es' ? 'Opcional: Si se configuran, reemplazan las tarjetas de cierre por defecto' : 'Optional: Replaces default closing pillars'}
+                            {locale === 'es' ? 'Edita los títulos, íconos y textos de las tarjetas de propuesta' : 'Edit titles, icons, and descriptions of closing proposition cards'}
                           </span>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => addCard({ title: 'Agile Daily Comms', description: 'Rapid turnaround for collateral...', icon: 'speed' })}
-                          className="px-2 py-1 bg-canvas border border-hairline hover:bg-canvas/80 text-ink text-[10px] font-bold uppercase rounded"
-                        >
-                          {locale === 'es' ? '+ Tarjeta de Cierre' : '+ Closing Card'}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          {(!activeSlide.cards || activeSlide.cards.length === 0) && (
+                            <button
+                              type="button"
+                              onClick={() => updateActiveSlide({
+                                cards: [
+                                  {
+                                    title: 'Agile Daily Comms',
+                                    description: 'Rapid <24-48h turnaround for banners, email templates, D-Hub & D-Channel assets with bilingual English/Spanish agility and Chinese (CN) support.',
+                                    icon: 'speed',
+                                  },
+                                  {
+                                    title: 'Major Events & VRA',
+                                    description: 'End-to-end multimedia for Get-Together & Value Star, with 100% compliance readiness for DiDi Vendor Risk Assessment (VRA).',
+                                    icon: 'verified_user',
+                                  },
+                                ]
+                              })}
+                              className="px-2 py-1 bg-primary/10 border border-primary/30 hover:bg-primary/20 text-primary text-[10px] font-bold uppercase rounded cursor-pointer"
+                            >
+                              {locale === 'es' ? 'Cargar Tarjetas Sugeridas' : 'Load Default Cards'}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => addCard({ title: 'Nueva Propuesta', description: 'Descripción del valor diferencial...', icon: 'verified' })}
+                            className="px-2 py-1 bg-canvas border border-hairline hover:bg-canvas/80 text-ink text-[10px] font-bold uppercase rounded cursor-pointer"
+                          >
+                            {locale === 'es' ? '+ Agregar Tarjeta' : '+ Add Card'}
+                          </button>
+                        </div>
                       </div>
 
                       {(activeSlide.cards || []).map((card, cIdx) => (
-                        <div key={cIdx} className="bg-canvas border border-hairline p-2.5 rounded space-y-2">
+                        <div key={cIdx} className="bg-canvas border border-hairline p-3 rounded space-y-2.5">
                           <div className="flex justify-between items-center">
                             <span className="text-xs font-bold text-ink">Tarjeta {cIdx + 1}</span>
                             <button
                               type="button"
                               onClick={() => deleteCard(cIdx)}
-                              className="text-red-400 hover:text-red-300 text-[10px] uppercase font-bold"
+                              className="text-red-400 hover:text-red-300 text-[10px] uppercase font-bold cursor-pointer"
                             >
                               {locale === 'es' ? 'Eliminar' : 'Remove'}
                             </button>
                           </div>
-                          <div className="space-y-1.5">
-                            <input
-                              type="text"
-                              value={card.title || ''}
-                              onChange={(e) => updateCard(cIdx, { title: e.target.value })}
-                              className="w-full border border-hairline bg-canvas-elevated text-ink px-2 py-1 text-xs outline-none font-bold"
-                              placeholder="Título de la tarjeta..."
-                            />
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <div className="space-y-1 md:col-span-2">
+                              <label className="block text-[9px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Título' : 'Title'}
+                              </label>
+                              <input
+                                type="text"
+                                value={card.title || ''}
+                                onChange={(e) => updateCard(cIdx, { title: e.target.value })}
+                                className="w-full border border-hairline bg-canvas-elevated text-ink px-2 py-1 text-xs outline-none font-bold focus:border-primary"
+                                placeholder="e.g. Agile Daily Comms"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="block text-[9px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Ícono (Material Icon)' : 'Icon'}
+                              </label>
+                              <input
+                                type="text"
+                                value={card.icon || ''}
+                                onChange={(e) => updateCard(cIdx, { icon: e.target.value })}
+                                className="w-full border border-hairline bg-canvas-elevated text-ink px-2 py-1 text-xs outline-none font-mono focus:border-primary"
+                                placeholder="speed / verified_user / star"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="block text-[9px] font-bold uppercase text-muted">
+                              {locale === 'es' ? 'Descripción' : 'Description'}
+                            </label>
                             <textarea
-                              rows={2}
+                              rows={3}
                               value={card.description || ''}
                               onChange={(e) => updateCard(cIdx, { description: e.target.value })}
-                              className="w-full border border-hairline bg-canvas-elevated text-ink px-2 py-1 text-xs outline-none"
+                              className="w-full border border-hairline bg-canvas-elevated text-ink px-2 py-1 text-xs outline-none focus:border-primary"
                               placeholder="Descripción..."
                             />
                           </div>

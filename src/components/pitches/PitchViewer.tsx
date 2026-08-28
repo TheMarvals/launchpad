@@ -1484,18 +1484,24 @@ export default function PitchViewer({
             {renderStyledTitle(slide.title || 'Empowering Global Comms')}
 
             {slide.subtitle && (
-              <p className="text-base md:text-lg font-semibold text-white/90 mb-6 max-w-[850px] mx-auto mt-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <p className="text-base md:text-lg font-semibold text-white/90 mb-3 max-w-[850px] mx-auto mt-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>
                 {slide.subtitle}
+              </p>
+            )}
+
+            {slide.content && (
+              <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-2 mb-6 leading-relaxed whitespace-pre-wrap">
+                {slide.content}
               </p>
             )}
 
             {/* Two Value Proposition Pillars on Closing */}
             {slide.cards && slide.cards.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl mx-auto mb-6 text-left">
+              <div className={`grid gap-4 w-full ${slide.cards.length === 1 ? 'max-w-md grid-cols-1' : slide.cards.length === 2 ? 'max-w-3xl grid-cols-1 md:grid-cols-2' : 'max-w-4xl grid-cols-1 md:grid-cols-3'} mx-auto mb-6 text-left`}>
                 {slide.cards.map((card, cIdx) => (
                   <div key={cIdx} className="bg-[#0d0d14] border border-white/10 p-5 rounded-xl space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="material-icons text-lg" style={{ color: accentColor }}>verified</span>
+                      <span className="material-icons text-lg" style={{ color: accentColor }}>{card.icon || 'verified'}</span>
                       <h4 className="text-xs font-bold text-white uppercase tracking-wider">{card.title}</h4>
                     </div>
                     {card.description && (
@@ -1511,7 +1517,7 @@ export default function PitchViewer({
                     <span className="material-icons text-lg" style={{ color: accentColor }}>speed</span>
                     <h4 className="text-xs font-bold text-white uppercase tracking-wider">Agile Daily Comms</h4>
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
+                  <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
                     Rapid <span className="font-bold text-white">&lt;24-48h turnaround</span> for banners, email templates, D-Hub & D-Channel assets with bilingual English/Spanish agility and Chinese (CN) support.
                   </p>
                 </div>
@@ -1521,12 +1527,19 @@ export default function PitchViewer({
                     <span className="material-icons text-lg" style={{ color: accentColor }}>verified_user</span>
                     <h4 className="text-xs font-bold text-white uppercase tracking-wider">Major Events & VRA</h4>
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
+                  <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
                     End-to-end multimedia for <span className="font-bold text-white">Get-Together & Value Star</span>, with 100% compliance readiness for DiDi Vendor Risk Assessment (VRA).
                   </p>
                 </div>
               </div>
             ) : null}
+
+            {/* Bottom Content Text */}
+            {(slide.footerContent || slide.bottomContent) && (
+              <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-3 mb-6 text-center leading-relaxed whitespace-pre-wrap">
+                {slide.footerContent || slide.bottomContent}
+              </p>
+            )}
 
             {/* Presenter Sign-off (Ultra discreto, elegante, minimalista) */}
             <div className="w-full max-w-xs mx-auto pt-5 border-t border-white/5 text-center space-y-0.5 flex flex-col items-center">
