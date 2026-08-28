@@ -315,6 +315,11 @@ export default function PitchPDF({
                       {slide.subtitle}
                     </p>
                   )}
+                  {slide.content && (
+                    <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 leading-relaxed">
+                      {slide.content}
+                    </p>
+                  )}
                 </div>
 
                 <div className={`grid gap-4 text-left w-full ${(slide.columns === 2 || (!slide.columns && (slide.cards || []).length === 2)) ? 'grid-cols-2 max-w-3xl mx-auto' : (slide.columns === 4 || (!slide.columns && (slide.cards || []).length >= 4)) ? 'grid-cols-4' : 'grid-cols-3'}`}>
@@ -356,6 +361,38 @@ export default function PitchPDF({
                     );
                   })}
                 </div>
+
+                {slide.teamMembers && slide.teamMembers.length > 0 && (
+                  <div className="w-full mt-3 pt-3 border-t border-white/10">
+                    <span className="text-[8px] uppercase tracking-widest font-bold block mb-2 text-center" style={{ color: accentColor }}>
+                      Core Team & Leadership
+                    </span>
+                    <div className={`grid gap-2 text-center w-full ${slide.teamMembers.length <= 2 ? 'grid-cols-2 max-w-xl mx-auto' : slide.teamMembers.length === 3 ? 'grid-cols-3 max-w-2xl mx-auto' : 'grid-cols-4'}`}>
+                      {slide.teamMembers.map((member, mIdx) => {
+                        const img = member.imageUrl || member.avatarUrl;
+                        const memberInitials = (member.name || 'TM').split(' ').map((p) => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'TM';
+                        return (
+                          <div key={mIdx} className="bg-[#0d0d14] border border-white/10 p-2.5 rounded-lg flex flex-col items-center">
+                            <div className="mb-1.5">
+                              {img ? (
+                                <div className="w-10 h-10 rounded-full overflow-hidden border p-0.5" style={{ borderColor: accentColor }}>
+                                  <img src={img} alt={member.name} className="w-full h-full object-cover rounded-full" />
+                                </div>
+                              ) : (
+                                <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs border" style={{ backgroundColor: `${accentColor}15`, borderColor: accentColor, color: accentColor }}>
+                                  {memberInitials}
+                                </div>
+                              )}
+                            </div>
+                            <h5 className="text-[11px] font-bold text-white mb-0.5">{member.name}</h5>
+                            <p className="text-[8px] uppercase tracking-wider font-bold mb-1 truncate max-w-full" style={{ color: accentColor }}>{member.role}</p>
+                            {member.bio && <p className="text-[9px] text-slate-300 leading-snug line-clamp-2">{member.bio}</p>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -371,6 +408,11 @@ export default function PitchPDF({
                   {slide.subtitle && (
                     <p className="text-xs text-slate-300 w-full max-w-3xl mx-auto mt-1 leading-relaxed">
                       {slide.subtitle}
+                    </p>
+                  )}
+                  {slide.content && (
+                    <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 leading-relaxed">
+                      {slide.content}
                     </p>
                   )}
                 </div>
@@ -406,6 +448,38 @@ export default function PitchPDF({
                     );
                   })}
                 </div>
+
+                {slide.teamMembers && slide.teamMembers.length > 0 && (
+                  <div className="w-full mt-3 pt-3 border-t border-white/10">
+                    <span className="text-[8px] uppercase tracking-widest font-bold block mb-2 text-center" style={{ color: accentColor }}>
+                      Core Team & Leadership
+                    </span>
+                    <div className={`grid gap-2 text-center w-full ${slide.teamMembers.length <= 2 ? 'grid-cols-2 max-w-xl mx-auto' : slide.teamMembers.length === 3 ? 'grid-cols-3 max-w-2xl mx-auto' : 'grid-cols-4'}`}>
+                      {slide.teamMembers.map((member, mIdx) => {
+                        const img = member.imageUrl || member.avatarUrl;
+                        const memberInitials = (member.name || 'TM').split(' ').map((p) => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'TM';
+                        return (
+                          <div key={mIdx} className="bg-[#0d0d14] border border-white/10 p-2.5 rounded-lg flex flex-col items-center">
+                            <div className="mb-1.5">
+                              {img ? (
+                                <div className="w-10 h-10 rounded-full overflow-hidden border p-0.5" style={{ borderColor: accentColor }}>
+                                  <img src={img} alt={member.name} className="w-full h-full object-cover rounded-full" />
+                                </div>
+                              ) : (
+                                <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs border" style={{ backgroundColor: `${accentColor}15`, borderColor: accentColor, color: accentColor }}>
+                                  {memberInitials}
+                                </div>
+                              )}
+                            </div>
+                            <h5 className="text-[11px] font-bold text-white mb-0.5">{member.name}</h5>
+                            <p className="text-[8px] uppercase tracking-wider font-bold mb-1 truncate max-w-full" style={{ color: accentColor }}>{member.role}</p>
+                            {member.bio && <p className="text-[9px] text-slate-300 leading-snug line-clamp-2">{member.bio}</p>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -669,6 +743,11 @@ export default function PitchPDF({
                       {slide.subtitle}
                     </p>
                   )}
+                  {slide.content && (
+                    <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 leading-relaxed">
+                      {slide.content}
+                    </p>
+                  )}
                 </div>
 
                 <div className={`grid gap-4 text-center w-full ${(slide.cards || []).length <= 2 ? 'grid-cols-2 max-w-2xl mx-auto' : (slide.cards || []).length === 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
@@ -728,6 +807,11 @@ export default function PitchPDF({
                   {slide.subtitle && (
                     <p className="text-xs text-slate-300 w-full max-w-3xl mx-auto mt-1 leading-relaxed">
                       {slide.subtitle}
+                    </p>
+                  )}
+                  {slide.content && (
+                    <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 leading-relaxed">
+                      {slide.content}
                     </p>
                   )}
                 </div>

@@ -448,6 +448,15 @@ export function JesperCard({
 // Legacy alias so existing JSX references still compile
 export const Jesper3DCard = JesperCard;
 
+export interface TeamMember {
+  name: string;
+  role: string;
+  bio?: string;
+  imageUrl?: string;
+  avatarUrl?: string;
+  tags?: string[];
+}
+
 export interface PitchSlide {
   id: string;
   type: 'hero' | 'pillars' | 'problem_solution' | 'metrics' | 'roadmap' | 'showcase' | 'cta' | 'custom' | 'team' | 'logos';
@@ -468,6 +477,7 @@ export interface PitchSlide {
     logoUrl?: string;
     role?: string;
   }>;
+  teamMembers?: TeamMember[];
   showcaseItems?: ShowcaseItem[];
   metrics?: Array<{
     value: string;
@@ -805,6 +815,67 @@ export default function PitchViewer({
     );
   };
 
+  // Render an integrated Team Section inside any slide
+  const renderTeamSection = (teamMembers?: TeamMember[]) => {
+    if (!teamMembers || teamMembers.length === 0) return null;
+    return (
+      <div className="w-full mt-7 pt-6 border-t border-white/10">
+        <div className="text-center mb-4">
+          <span className="text-[10px] uppercase tracking-[0.2em] font-bold block" style={{ color: accentColor }}>
+            {locale === 'es' ? 'Equipo Clave & Liderazgo' : 'Core Team & Leadership'}
+          </span>
+        </div>
+        <div className={`grid gap-4 ${teamMembers.length <= 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-xl mx-auto' : teamMembers.length === 3 ? 'grid-cols-1 sm:grid-cols-3 max-w-3xl mx-auto' : 'grid-cols-2 sm:grid-cols-4 max-w-4xl mx-auto'}`}>
+          {teamMembers.map((member, mIdx) => {
+            const memberInitials = (member.name || 'TM').split(' ').map((p) => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'TM';
+            const img = member.imageUrl || member.avatarUrl;
+            return (
+              <div
+                key={mIdx}
+                className="bg-[#0a0a10]/90 border border-white/10 hover:border-white/30 p-4 rounded-xl transition-all flex flex-col items-center text-center group"
+              >
+                <div className="relative mb-2.5">
+                  {img ? (
+                    <div className="w-14 h-14 rounded-full overflow-hidden border-2 p-0.5 shadow-md" style={{ borderColor: accentColor }}>
+                      <img src={img} alt={member.name} className="w-full h-full object-cover rounded-full" />
+                    </div>
+                  ) : (
+                    <div
+                      className="w-14 h-14 rounded-full flex items-center justify-center font-bold text-sm border-2 shadow-md"
+                      style={{
+                        backgroundColor: `${accentColor}15`,
+                        borderColor: accentColor,
+                        color: accentColor,
+                      }}
+                    >
+                      {memberInitials}
+                    </div>
+                  )}
+                </div>
+                <h4 className="text-xs md:text-sm font-bold text-white mb-0.5 truncate max-w-full">{member.name}</h4>
+                <p className="text-[10px] uppercase tracking-wider font-bold mb-1.5 truncate max-w-full" style={{ color: accentColor }}>
+                  {member.role}
+                </p>
+                {member.bio && (
+                  <p className="text-[11px] text-slate-400 leading-snug line-clamp-2">{member.bio}</p>
+                )}
+                {member.tags && member.tags.length > 0 && (
+                  <div className="flex flex-wrap justify-center gap-1 mt-2.5 pt-1.5 border-t border-white/10 w-full">
+                    {member.tags.map((t, tIdx) => (
+                      <span key={tIdx} className="text-[8px] uppercase tracking-wider text-slate-300 bg-white/5 border border-white/10 px-1.5 py-0.5 rounded-full font-medium">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   // Render a single slide
   const renderSlideContent = (slide: PitchSlide, index: number) => {
     switch (slide.type) {
@@ -917,6 +988,11 @@ export default function PitchViewer({
                   {slide.subtitle}
                 </p>
               )}
+              {slide.content && (
+                <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-3 leading-relaxed">
+                  {slide.content}
+                </p>
+              )}
               <div className="h-[2px] mx-auto mt-3 w-24" style={{ background: `linear-gradient(to right, transparent, ${accentColor}, transparent)` }}></div>
             </div>
 
@@ -961,6 +1037,9 @@ export default function PitchViewer({
                 );
               })}
             </div>
+
+            {/* Integrated Team Section on Slide */}
+            {renderTeamSection(slide.teamMembers)}
           </div>
         );
 
@@ -985,6 +1064,11 @@ export default function PitchViewer({
               {slide.subtitle && (
                 <p className="text-slate-300 text-sm md:text-base max-w-[850px] mx-auto mt-2">
                   {slide.subtitle}
+                </p>
+              )}
+              {slide.content && (
+                <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-3 leading-relaxed">
+                  {slide.content}
                 </p>
               )}
             </div>
@@ -1024,6 +1108,9 @@ export default function PitchViewer({
                 );
               })}
             </div>
+
+            {/* Integrated Team Section on Slide */}
+            {renderTeamSection(slide.teamMembers)}
           </div>
         );
 
@@ -1047,6 +1134,11 @@ export default function PitchViewer({
               {slide.subtitle && (
                 <p className="text-slate-300 text-sm md:text-base max-w-[850px] mx-auto mt-2">
                   {slide.subtitle}
+                </p>
+              )}
+              {slide.content && (
+                <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-3 leading-relaxed">
+                  {slide.content}
                 </p>
               )}
               <div className="h-[2px] mx-auto mt-3 w-24" style={{ background: `linear-gradient(to right, transparent, ${accentColor}, transparent)` }}></div>
@@ -1130,6 +1222,11 @@ export default function PitchViewer({
               {slide.subtitle && (
                 <p className="text-slate-300 text-sm md:text-base max-w-[850px] mx-auto mt-2">
                   {slide.subtitle}
+                </p>
+              )}
+              {slide.content && (
+                <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-3 leading-relaxed">
+                  {slide.content}
                 </p>
               )}
               <div className="h-[2px] mx-auto mt-3 w-24" style={{ background: `linear-gradient(to right, transparent, ${accentColor}, transparent)` }}></div>
@@ -1404,6 +1501,7 @@ export default function PitchViewer({
               className="prose prose-invert max-w-none text-slate-300 leading-relaxed text-sm md:text-base space-y-4 mt-6"
               dangerouslySetInnerHTML={{ __html: slide.content || '' }}
             />
+            {renderTeamSection(slide.teamMembers)}
           </div>
         );
     }

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { createPitch, updatePitch } from '@/app/actions/pitches';
 import { useTranslations, useLocale } from 'next-intl';
-import PitchViewer, { PitchSlide, ShowcaseItem, parsePitchTheme } from './PitchViewer';
+import PitchViewer, { PitchSlide, ShowcaseItem, TeamMember, parsePitchTheme } from './PitchViewer';
 
 interface Client {
   id: string;
@@ -292,6 +292,7 @@ export default function PitchForm({
 
   // Card manager (for team, logos, pillars, problem_solution, cta)
   const [uploadingCardImg, setUploadingCardImg] = useState<number | null>(null);
+  const [uploadingSlideMemberImg, setUploadingSlideMemberImg] = useState<number | null>(null);
 
   const handleUploadCardImage = async (cardIndex: number, file: File) => {
     setUploadingCardImg(cardIndex);
@@ -311,6 +312,49 @@ export default function PitchForm({
     } finally {
       setUploadingCardImg(null);
     }
+  };
+
+  const handleUploadSlideMemberImage = async (memberIndex: number, file: File) => {
+    setUploadingSlideMemberImg(memberIndex);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.url) {
+        updateSlideTeamMember(memberIndex, { imageUrl: data.url });
+      } else {
+        alert(locale === 'es' ? 'Error al subir la foto' : 'Failed to upload photo');
+      }
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert(locale === 'es' ? 'Error al subir la foto' : 'Failed to upload photo');
+    } finally {
+      setUploadingSlideMemberImg(null);
+    }
+  };
+
+  const addSlideTeamMember = (defaultMember?: Partial<TeamMember>) => {
+    const currentMembers = activeSlide.teamMembers || [];
+    const newMember: TeamMember = {
+      name: defaultMember?.name || 'Eduardo Marval',
+      role: defaultMember?.role || 'Managing Director & Executive Producer',
+      bio: defaultMember?.bio || '',
+      imageUrl: defaultMember?.imageUrl || '',
+      tags: defaultMember?.tags || ['Creative', 'Strategy'],
+    };
+    updateActiveSlide({ teamMembers: [...currentMembers, newMember] });
+  };
+
+  const updateSlideTeamMember = (memberIndex: number, fields: Partial<TeamMember>) => {
+    const currentMembers = [...(activeSlide.teamMembers || [])];
+    currentMembers[memberIndex] = { ...currentMembers[memberIndex], ...fields };
+    updateActiveSlide({ teamMembers: currentMembers });
+  };
+
+  const deleteSlideTeamMember = (memberIndex: number) => {
+    const currentMembers = (activeSlide.teamMembers || []).filter((_, i) => i !== memberIndex);
+    updateActiveSlide({ teamMembers: currentMembers });
   };
 
   const addCard = (defaultCard?: any) => {
@@ -2211,6 +2255,149 @@ export default function PitchForm({
                     </div>
                   </div>
                 )}
+
+                {/* ═══ OPTIONAL INTEGRATED TEAM SECTION FOR ANY SLIDE ═══ */}
+                <div className="mt-5 pt-4 border-t border-hairline space-y-3">
+                  <div className="flex justify-between items-center bg-canvas-elevated p-3 border border-hairline rounded-sm">
+                    <div>
+                      <h3 className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
+                        <span className="material-icons text-sm">groups</span>
+                        {locale === 'es' ? 'Sección de Equipo en esta Slide (Team Members)' : 'Slide Team Members Section'} ({(activeSlide.teamMembers || []).length})
+                      </h3>
+                      <p className="text-[11px] text-muted">
+                        {locale === 'es' 
+                          ? 'Muestra perfiles de equipo con foto, cargo y bio integrados en la parte inferior de esta diapositiva' 
+                          : 'Show team profiles with photo, role, and bio integrated into this slide'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => addSlideTeamMember()}
+                      className="px-2.5 py-1.5 bg-primary text-black text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1 hover:bg-primary/80 cursor-pointer"
+                    >
+                      <span className="material-icons text-xs">person_add</span>
+                      {locale === 'es' ? '+ Miembro de Equipo' : '+ Team Member'}
+                    </button>
+                  </div>
+
+                  {(activeSlide.teamMembers || []).length > 0 && (
+                    <div className="space-y-3">
+                      {(activeSlide.teamMembers || []).map((member, mIdx) => (
+                        <div key={mIdx} className="bg-canvas-elevated border border-hairline p-3 rounded-sm space-y-3 relative">
+                          <div className="flex justify-between items-center border-b border-hairline pb-2">
+                            <span className="text-[11px] font-bold text-ink flex items-center gap-1.5">
+                              <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] font-black flex items-center justify-center">
+                                {mIdx + 1}
+                              </span>
+                              {member.name || (locale === 'es' ? 'Miembro' : 'Member')}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => deleteSlideTeamMember(mIdx)}
+                              className="text-muted hover:text-red-400 text-xs flex items-center gap-1 cursor-pointer"
+                              title={locale === 'es' ? 'Eliminar miembro' : 'Remove member'}
+                            >
+                              <span className="material-icons text-xs">delete</span>
+                              {locale === 'es' ? 'Eliminar' : 'Remove'}
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                            {/* Photo / Avatar */}
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Foto de Perfil' : 'Profile Photo'}
+                              </label>
+                              <div className="flex items-center gap-2">
+                                {member.imageUrl ? (
+                                  <div className="w-10 h-10 rounded-full overflow-hidden border border-primary p-0.5 shrink-0 bg-black">
+                                    <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover rounded-full" />
+                                  </div>
+                                ) : (
+                                  <div className="w-10 h-10 rounded-full border border-hairline flex items-center justify-center bg-canvas shrink-0 text-muted">
+                                    <span className="material-icons text-base">person</span>
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <label className="cursor-pointer inline-flex items-center gap-1 px-2 py-1 bg-canvas border border-hairline hover:bg-canvas/80 text-[10px] font-bold uppercase tracking-wider text-ink rounded-sm">
+                                    <span className="material-icons text-xs">upload</span>
+                                    {uploadingSlideMemberImg === mIdx ? 'Subiendo...' : 'Subir Foto'}
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      disabled={uploadingSlideMemberImg === mIdx}
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) handleUploadSlideMemberImage(mIdx, file);
+                                      }}
+                                    />
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Name */}
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Nombre Completo' : 'Full Name'}
+                              </label>
+                              <input
+                                type="text"
+                                value={member.name || ''}
+                                onChange={(e) => updateSlideTeamMember(mIdx, { name: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-bold"
+                                placeholder="Eduardo Marval"
+                              />
+                            </div>
+
+                            {/* Role */}
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Cargo / Rol Ejecutivo' : 'Executive Role'}
+                              </label>
+                              <input
+                                type="text"
+                                value={member.role || ''}
+                                onChange={(e) => updateSlideTeamMember(mIdx, { role: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-mono text-primary font-bold"
+                                placeholder="Managing Director & Partner"
+                              />
+                            </div>
+
+                            {/* Bio */}
+                            <div className="space-y-1 md:col-span-2">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Biografía / Experiencia (Opcional)' : 'Bio / Experience (Optional)'}
+                              </label>
+                              <input
+                                type="text"
+                                value={member.bio || ''}
+                                onChange={(e) => updateSlideTeamMember(mIdx, { bio: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary"
+                                placeholder="Creative direction, brand systems, and executive production lead."
+                              />
+                            </div>
+
+                            {/* Tags */}
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Tags / Especialidades' : 'Specialty Tags'}
+                              </label>
+                              <input
+                                type="text"
+                                value={(member.tags || []).join(', ')}
+                                onChange={(e) => updateSlideTeamMember(mIdx, { tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary"
+                                placeholder="Strategy, Creative, Direction"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
