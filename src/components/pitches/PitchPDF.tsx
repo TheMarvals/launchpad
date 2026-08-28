@@ -21,6 +21,17 @@ interface PitchPDFProps {
   locale?: string;
 }
 
+const isVideoUrl = (url?: string) => {
+  if (!url) return false;
+  return Boolean(
+    url.match(/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i) ||
+    url.includes('/video/upload/') ||
+    url.includes('youtube.com') ||
+    url.includes('youtu.be') ||
+    url.includes('vimeo.com')
+  );
+};
+
 export default function PitchPDF({
   pitch,
   companyProfile,
@@ -28,7 +39,34 @@ export default function PitchPDF({
   showcaseProjects,
   locale = 'en',
 }: PitchPDFProps) {
-  const slides: PitchSlide[] = Array.isArray(pitch.slides) ? (pitch.slides as any[]).filter((s) => s.type !== 'emailConfig') : [];
+  // Omit videos for PDF creation: filter out video showcase items and slides that only contain videos
+  const slides: PitchSlide[] = Array.isArray(pitch.slides)
+    ? (pitch.slides as any[])
+        .filter((s) => s.type !== 'emailConfig')
+        .map((s) => {
+          if (s.type === 'showcase') {
+            const nonVideoItems = (s.showcaseItems || []).filter((item: any) => {
+              if (item.mediaType === 'video') return false;
+              const main = item.thumbnailUrl || (item.images && item.images[0]) || item.mediaUrl;
+              if (isVideoUrl(main) || isVideoUrl(item.mediaUrl)) return false;
+              return true;
+            }).map((item: any) => ({
+              ...item,
+              images: (item.images || []).filter((img: string) => !isVideoUrl(img)),
+            }));
+            return { ...s, showcaseItems: nonVideoItems };
+          }
+          return s;
+        })
+        .filter((s) => {
+          // If a showcase slide has 0 items after omitting videos, exclude it from PDF
+          if (s.type === 'showcase' && (!s.showcaseItems || s.showcaseItems.length === 0)) {
+            return false;
+          }
+          return true;
+        })
+    : [];
+
   const clientDisplayName = pitch.client?.razonSocial || pitch.clientName;
   const brandName = companyProfile?.brandNameHeader || 'LAUNCHPAD';
 
@@ -511,29 +549,27 @@ export default function PitchPDF({
                       {slide.subtitle}
                     </p>
                   )}
+                  {slide.content && (
+                    <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 leading-relaxed whitespace-pre-wrap">
+                      {slide.content}
+                    </p>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 text-left w-full">
+                <div className={`grid gap-4 text-left w-full ${(slide.showcaseItems || []).length === 1 ? 'grid-cols-1 max-w-md mx-auto' : (slide.showcaseItems || []).length === 2 ? 'grid-cols-2 max-w-3xl mx-auto' : 'grid-cols-3'}`}>
                   {(slide.showcaseItems || []).slice(0, 3).map((item, idx) => {
-                    const isVideo = item.mediaType === 'video' || Boolean(item.mediaUrl && (item.mediaUrl.match(/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i) || item.mediaUrl.includes('/video/upload/')));
                     const isSlide = item.mediaType === 'slide';
-                    const rawMainImg = item.thumbnailUrl || (item.images && item.images[0]) || item.mediaUrl;
-                    const isRawVideo = Boolean(rawMainImg && (rawMainImg.match(/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i) || rawMainImg.includes('/video/upload/')));
-                    const mainImg = isRawVideo && rawMainImg?.includes('/video/upload/') ? rawMainImg.replace(/\.(mp4|webm|mov|m4v)(\?.*)?$/i, '.jpg') : rawMainImg;
+                    const mainImg = item.thumbnailUrl || (item.images && item.images[0]) || item.mediaUrl;
                     const galleryImages = Array.isArray(item.images) && item.images.length > 1 ? item.images.slice(1, 4) : [];
-                    const clickUrl = item.externalUrl || item.mediaUrl;
 
                     return (
-                      <a
+                      <div
                         key={idx}
-                        href={clickUrl || '#'}
-                        target={clickUrl ? '_blank' : undefined}
-                        rel="noreferrer"
-                        className="bg-[#0d0d14] border border-white/15 rounded-xl overflow-hidden flex flex-col no-underline text-inherit block"
+                        className="bg-[#0d0d14] border border-white/15 rounded-xl overflow-hidden flex flex-col text-inherit block"
                       >
                         {/* Main Featured Image Container */}
                         <div className="aspect-video bg-black/60 overflow-hidden relative">
-                          {mainImg && (!isRawVideo || mainImg !== rawMainImg) ? (
+                          {mainImg ? (
                             <img
                               src={mainImg}
                               alt={item.title}
@@ -541,16 +577,16 @@ export default function PitchPDF({
                             />
                           ) : (
                             <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-slate-500">
-                              <span className="material-icons text-3xl opacity-40">videocam</span>
+                              <span className="material-icons text-3xl opacity-40">image</span>
                             </div>
                           )}
 
                           {/* Media Type Badge */}
                           <span className="absolute top-2 left-2 bg-black/80 backdrop-blur-sm px-2 py-0.5 text-[8px] uppercase font-bold text-white rounded border border-white/10 flex items-center gap-1">
                             <span className="material-icons text-[10px]" style={{ color: accentColor }}>
-                              {isVideo ? 'play_circle' : isSlide ? 'slideshow' : 'collections'}
+                              {isSlide ? 'slideshow' : 'collections'}
                             </span>
-                            <span>{item.mediaType || 'Work'}</span>
+                            <span>{isSlide ? 'Slide' : 'Design'}</span>
                           </span>
 
                           {/* Client Tag */}
@@ -559,37 +595,20 @@ export default function PitchPDF({
                               {item.client}
                             </span>
                           )}
-
-                          {/* Video Play Overlay */}
-                          {isVideo && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                              <div className="w-9 h-9 rounded-full text-black flex items-center justify-center shadow-lg" style={{ backgroundColor: accentColor }}>
-                                <span className="material-icons text-lg">play_arrow</span>
-                              </div>
-                            </div>
-                          )}
                         </div>
 
-                        {/* Mini Gallery Strip (Option A) */}
+                        {/* Mini Gallery Strip */}
                         {galleryImages.length > 0 && (
                           <div className="px-2 pt-1.5 pb-0.5 bg-black/40 flex items-center justify-between gap-1.5 border-t border-white/5">
                             <div className="flex items-center gap-1">
-                              {galleryImages.map((gImg, gIdx) => {
-                                const isGVid = Boolean(gImg && (gImg.match(/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i) || gImg.includes('/video/upload/')));
-                                const gPoster = isGVid && gImg.includes('/video/upload/') ? gImg.replace(/\.(mp4|webm|mov|m4v)(\?.*)?$/i, '.jpg') : gImg;
-                                return isGVid && gPoster === gImg ? (
-                                  <div key={gIdx} className="w-8 h-6 bg-zinc-800 rounded border border-white/10 flex items-center justify-center">
-                                    <span className="material-icons text-[10px] text-white">play_arrow</span>
-                                  </div>
-                                ) : (
-                                  <img
-                                    key={gIdx}
-                                    src={gPoster || gImg}
-                                    alt=""
-                                    className="w-8 h-6 object-cover rounded border border-white/10"
-                                  />
-                                );
-                              })}
+                              {galleryImages.map((gImg, gIdx) => (
+                                <img
+                                  key={gIdx}
+                                  src={gImg}
+                                  alt=""
+                                  className="w-8 h-6 object-cover rounded border border-white/10"
+                                />
+                              ))}
                             </div>
                             <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 px-1.5 py-0.5 rounded bg-white/5 border border-white/10">
                               +{(item.images || []).length} {locale === 'en' ? 'Photos' : 'Fotos'}
@@ -607,7 +626,7 @@ export default function PitchPDF({
                           )}
                           <p className="text-[10px] text-slate-300 line-clamp-2 leading-relaxed">{item.description}</p>
                         </div>
-                      </a>
+                      </div>
                     );
                   })}
                 </div>
