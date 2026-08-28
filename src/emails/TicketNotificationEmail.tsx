@@ -44,8 +44,9 @@ export const TicketNotificationEmail = ({
   const priorityColors: Record<string, string> = { LOW: '#22c55e', MEDIUM: '#f59e0b', HIGH: '#f97316', URGENT: '#ef4444' };
   const badgeColor = priorityColors[priority] || theme.primary;
 
-  const adminLink = `https://admin.themarvals.com/dashboard/tickets/${ticketId}`;
-  const clientLink = `https://admin.themarvals.com/client-portal/tickets/${ticketId}`;
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.SITE_ORIGIN || '').replace(/\/+$/, '');
+  const adminLink = `${appUrl}/dashboard/tickets/${ticketId}`;
+  const clientLink = `${appUrl}/client-portal/tickets/${ticketId}`;
 
   return (
     <Html>

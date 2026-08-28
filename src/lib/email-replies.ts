@@ -161,8 +161,13 @@ export async function sendNewEmail(
     if (pitch) {
       const clientName = pitch.client?.razonSocial || pitch.clientName || 'Cliente';
       const { color: accentColor } = parsePitchTheme(pitch.theme, pitch.title, clientName);
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://launchpad.themarvals.com';
-      const pitchUrl = `${appUrl}/${input.locale || 'es'}/pitches/${pitch.id}`;
+      const appUrl = (
+        process.env.NEXT_PUBLIC_APP_URL ||
+        process.env.SITE_ORIGIN ||
+        process.env.NEXTAUTH_URL ||
+        ''
+      ).replace(/\/+$/, '');
+      const pitchUrl = `${appUrl}/pitches/${pitch.id}`;
 
       const slides = Array.isArray(pitch.slides) ? (pitch.slides as any[]) : [];
       const pillarsSlide = slides.find((s) => s.type === 'pillars');

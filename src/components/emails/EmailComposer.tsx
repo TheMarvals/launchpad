@@ -931,22 +931,33 @@ export default function EmailComposer({
 
                   {/* CTA Button with generous breathing room */}
                   <div className="text-center pt-5 pb-1">
-                    <div
-                      className="inline-flex items-center justify-center px-8 py-3.5 rounded-sm text-xs font-bold uppercase tracking-[0.2em] text-white cursor-pointer transition-transform hover:-translate-y-0.5 text-center"
+                    <a
+                      href={selectedPitch ? `/pitches/${selectedPitch.id}` : '#'}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center justify-center px-8 py-3.5 rounded-sm text-xs font-bold uppercase tracking-[0.2em] text-white cursor-pointer transition-transform hover:-translate-y-0.5 text-center no-underline"
                       style={{
                         backgroundColor: accentColor,
                         color: accentColor.toUpperCase() === '#FFFFFF' ? '#000000' : '#ffffff',
                       }}
+                      title={isSpanish ? 'Abrir presentación interactiva' : 'Open interactive presentation'}
                     >
                       {buttonText || (isSpanish ? 'VER PROPUESTA INTERACTIVA →' : 'VIEW INTERACTIVE PROPOSAL →')}
-                    </div>
+                    </a>
                   </div>
 
                   <div className="text-center text-[10px] font-mono text-slate-400">
                     {isSpanish ? 'Enlace de acceso directo:' : 'Direct access link:'}{' '}
-                    <span className="underline cursor-pointer" style={{ color: accentColor }}>
+                    <a
+                      href={selectedPitch ? `/pitches/${selectedPitch.id}` : '#'}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline cursor-pointer"
+                      style={{ color: accentColor }}
+                      title={isSpanish ? 'Abrir propuesta en el navegador' : 'Open proposal in browser'}
+                    >
                       {linkText || (isSpanish ? 'Abrir propuesta en el navegador →' : 'Open proposal in browser →')}
-                    </span>
+                    </a>
                   </div>
                 </div>
 

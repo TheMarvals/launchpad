@@ -45,7 +45,7 @@ export const PitchInvitationEmail = ({
   tagline,
   pillarsLabel,
   badgeText,
-  pitchUrl = 'https://launchpad.themarvals.com',
+  pitchUrl = `${(process.env.NEXT_PUBLIC_APP_URL || process.env.SITE_ORIGIN || '').replace(/\/+$/, '')}`,
   accentColor = '#FF7D00',
   buttonText,
   linkText,

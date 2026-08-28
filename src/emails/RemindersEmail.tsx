@@ -42,7 +42,8 @@ export const RemindersEmail = ({
 }: RemindersEmailProps) => {
   const logoUrl = process.env.NEXT_PUBLIC_CLOUDINARY_LOGO_URL || process.env.CLOUDINARY_LOGO_URL || 'https://res.cloudinary.com/djwuzrjvz/image/upload/launchpad/lp_logo.png';
 
-  const controlCenterLink = `https://admin.themarvals.com/dashboard/productivity/reminders`;
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.SITE_ORIGIN || '').replace(/\/+$/, '');
+  const controlCenterLink = `${appUrl}/dashboard/productivity/reminders`;
 
   return (
     <Html>
