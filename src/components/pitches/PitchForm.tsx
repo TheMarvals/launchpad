@@ -276,6 +276,78 @@ export default function PitchForm({
     setActiveSlideIndex(targetIndex);
   };
 
+  // Card manager (for pillars, problem_solution, cta)
+  const addCard = (defaultCard?: any) => {
+    const currentCards = activeSlide.cards || [];
+    const newCard = {
+      title: defaultCard?.title || 'Nuevo Pilar / Tarjeta',
+      subtitle: defaultCard?.subtitle || 'SUBTÍTULO',
+      description: defaultCard?.description || 'Descripción detallada...',
+      icon: defaultCard?.icon || 'star',
+      tags: defaultCard?.tags || ['Tag 1', 'Tag 2'],
+      highlight: defaultCard?.highlight || false,
+    };
+    updateActiveSlide({ cards: [...currentCards, newCard] });
+  };
+
+  const updateCard = (cardIndex: number, fields: any) => {
+    const currentCards = [...(activeSlide.cards || [])];
+    currentCards[cardIndex] = { ...currentCards[cardIndex], ...fields };
+    updateActiveSlide({ cards: currentCards });
+  };
+
+  const deleteCard = (cardIndex: number) => {
+    const currentCards = (activeSlide.cards || []).filter((_, i) => i !== cardIndex);
+    updateActiveSlide({ cards: currentCards });
+  };
+
+  // Metric manager
+  const addMetric = () => {
+    const currentMetrics = activeSlide.metrics || [];
+    const newMetric = {
+      value: '100%',
+      label: 'Métrica Clave',
+      subtext: 'Descripción breve',
+      icon: 'trending_up',
+    };
+    updateActiveSlide({ metrics: [...currentMetrics, newMetric] });
+  };
+
+  const updateMetric = (metricIndex: number, fields: any) => {
+    const currentMetrics = [...(activeSlide.metrics || [])];
+    currentMetrics[metricIndex] = { ...currentMetrics[metricIndex], ...fields };
+    updateActiveSlide({ metrics: currentMetrics });
+  };
+
+  const deleteMetric = (metricIndex: number) => {
+    const currentMetrics = (activeSlide.metrics || []).filter((_, i) => i !== metricIndex);
+    updateActiveSlide({ metrics: currentMetrics });
+  };
+
+  // Timeline / Roadmap manager
+  const addTimelinePhase = () => {
+    const currentTimeline = activeSlide.timeline || [];
+    const phaseNum = currentTimeline.length + 1;
+    const newPhase = {
+      phase: `Phase ${phaseNum}`,
+      title: `Nueva Fase ${phaseNum}`,
+      duration: 'Semanas 1 - 2',
+      deliverables: ['Entregable 1', 'Entregable 2'],
+    };
+    updateActiveSlide({ timeline: [...currentTimeline, newPhase] });
+  };
+
+  const updateTimelinePhase = (phaseIndex: number, fields: any) => {
+    const currentTimeline = [...(activeSlide.timeline || [])];
+    currentTimeline[phaseIndex] = { ...currentTimeline[phaseIndex], ...fields };
+    updateActiveSlide({ timeline: currentTimeline });
+  };
+
+  const deleteTimelinePhase = (phaseIndex: number) => {
+    const currentTimeline = (activeSlide.timeline || []).filter((_, i) => i !== phaseIndex);
+    updateActiveSlide({ timeline: currentTimeline });
+  };
+
   // Showcase item manager methods
   const addShowcaseItem = () => {
     const currentItems = activeSlide.showcaseItems || [];
@@ -849,7 +921,289 @@ export default function PitchForm({
                   )}
                 </div>
 
-                {/* SHOWCASE / CASE STUDIES EDITOR */}
+                {/* ═══ HERO / COVER SLIDE EDITOR ═══ */}
+                {activeSlide.type === 'hero' && (
+                  <div className="mt-4 pt-4 border-t border-hairline space-y-3">
+                    <div className="bg-canvas-elevated p-3 border border-hairline rounded-sm space-y-3">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
+                        <span className="material-icons text-sm">smart_button</span>
+                        {locale === 'es' ? 'Botones de Acción & Etiqueta de Cliente' : 'Action Buttons & Client Tag'}
+                      </h3>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold uppercase text-muted">
+                            {locale === 'es' ? 'Etiqueta del Cliente (Pill)' : 'Client Pill / Tag'}
+                          </label>
+                          <input
+                            type="text"
+                            value={activeSlide.clientName || ''}
+                            onChange={(e) => updateActiveSlide({ clientName: e.target.value })}
+                            className="w-full border border-hairline bg-canvas text-ink px-2 py-1.5 text-xs outline-none focus:border-primary font-mono"
+                            placeholder="e.g. DiDi Global (IBG)"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold uppercase text-muted">
+                            {locale === 'es' ? 'Texto Botón Principal (CTA)' : 'Primary Button Text'}
+                          </label>
+                          <input
+                            type="text"
+                            value={activeSlide.cta?.text || ''}
+                            onChange={(e) => updateActiveSlide({ cta: { ...activeSlide.cta, text: e.target.value } })}
+                            className="w-full border border-hairline bg-canvas text-ink px-2 py-1.5 text-xs outline-none focus:border-primary font-bold"
+                            placeholder="e.g. Explore Proposal"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold uppercase text-muted">
+                            {locale === 'es' ? 'Texto Botón Secundario' : 'Secondary Button Text'}
+                          </label>
+                          <input
+                            type="text"
+                            value={activeSlide.cta?.secondaryText || ''}
+                            onChange={(e) => updateActiveSlide({ cta: { ...activeSlide.cta, text: activeSlide.cta?.text || '', secondaryText: e.target.value } })}
+                            className="w-full border border-hairline bg-canvas text-ink px-2 py-1.5 text-xs outline-none focus:border-primary"
+                            placeholder="e.g. View Case Studies"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ═══ PROBLEM VS SOLUTION SLIDE EDITOR ═══ */}
+                {activeSlide.type === 'problem_solution' && (
+                  <div className="mt-4 pt-4 border-t border-hairline space-y-3">
+                    <div className="flex justify-between items-center bg-canvas-elevated p-2.5 border border-hairline rounded-sm">
+                      <div>
+                        <h3 className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
+                          <span className="material-icons text-sm">compare_arrows</span>
+                          {locale === 'es' ? 'Tarjetas Problema vs Solución' : 'Problem vs Solution Cards'} ({(activeSlide.cards || []).length})
+                        </h3>
+                        <p className="text-[11px] text-muted">
+                          {locale === 'es' ? 'Define los cuellos de botella y la solución con acento visual' : 'Define bottlenecks vs solution with visual accent'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => addCard({ title: 'Nueva Tarjeta', subtitle: 'CATEGORÍA', description: 'Descripción detallada...', highlight: false })}
+                        className="px-2.5 py-1.5 bg-primary text-black text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1 hover:bg-primary/80"
+                      >
+                        <span className="material-icons text-xs">add</span>
+                        {locale === 'es' ? '+ Tarjeta' : '+ Card'}
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {(activeSlide.cards || []).map((card, cIdx) => (
+                        <div key={cIdx} className="bg-canvas-elevated border border-hairline p-3 rounded-sm space-y-2 relative">
+                          <div className="flex justify-between items-center border-b border-hairline pb-2">
+                            <span className="text-[11px] font-bold text-ink flex items-center gap-1.5">
+                              <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] font-black flex items-center justify-center">
+                                {cIdx + 1}
+                              </span>
+                              {card.title || (locale === 'es' ? 'Tarjeta' : 'Card')}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => deleteCard(cIdx)}
+                              className="text-muted hover:text-red-400 text-xs flex items-center gap-1"
+                            >
+                              <span className="material-icons text-sm">delete</span>
+                              <span className="text-[10px] uppercase font-semibold">{locale === 'es' ? 'Eliminar' : 'Remove'}</span>
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Título' : 'Title'}
+                              </label>
+                              <input
+                                type="text"
+                                value={card.title || ''}
+                                onChange={(e) => updateCard(cIdx, { title: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-bold"
+                                placeholder="e.g. Fragmented Execution & Slow SLAs"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Subtítulo / Categoría' : 'Subtitle / Category'}
+                              </label>
+                              <input
+                                type="text"
+                                value={card.subtitle || ''}
+                                onChange={(e) => updateCard(cIdx, { subtitle: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-mono"
+                                placeholder="e.g. TRADITIONAL AGENCY BOTTLENECK"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Ícono (Material Icon)' : 'Icon'}
+                              </label>
+                              <input
+                                type="text"
+                                value={card.icon || ''}
+                                onChange={(e) => updateCard(cIdx, { icon: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-mono"
+                                placeholder="warning / verified / bolt"
+                              />
+                            </div>
+
+                            <div className="space-y-1 md:col-span-3">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Descripción' : 'Description'}
+                              </label>
+                              <textarea
+                                rows={2}
+                                value={card.description || ''}
+                                onChange={(e) => updateCard(cIdx, { description: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary"
+                                placeholder="Detalle del problema o solución..."
+                              />
+                            </div>
+
+                            <div className="md:col-span-3 pt-1">
+                              <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-ink font-semibold">
+                                <input
+                                  type="checkbox"
+                                  checked={!!card.highlight}
+                                  onChange={(e) => updateCard(cIdx, { highlight: e.target.checked })}
+                                  className="rounded border-hairline text-primary focus:ring-primary w-4 h-4"
+                                />
+                                <span>{locale === 'es' ? 'Destacar tarjeta con acento y brillo (Solución)' : 'Highlight card with accent glow (Solution)'}</span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ═══ PILLARS SLIDE EDITOR ═══ */}
+                {activeSlide.type === 'pillars' && (
+                  <div className="mt-4 pt-4 border-t border-hairline space-y-3">
+                    <div className="flex justify-between items-center bg-canvas-elevated p-2.5 border border-hairline rounded-sm">
+                      <div>
+                        <h3 className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
+                          <span className="material-icons text-sm">view_column</span>
+                          {locale === 'es' ? 'Pilares de Servicio (Pillars)' : 'Service Pillars'} ({(activeSlide.cards || []).length})
+                        </h3>
+                        <p className="text-[11px] text-muted">
+                          {locale === 'es' ? 'Edita títulos, subtítulos, descripciones, íconos y tags de cada pilar' : 'Edit titles, subtitles, descriptions, icons, and tags of each pillar'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => addCard({ title: 'Nuevo Pilar', subtitle: 'SUBTÍTULO', description: 'Descripción...', icon: 'star', tags: ['Tag 1'] })}
+                        className="px-2.5 py-1.5 bg-primary text-black text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1 hover:bg-primary/80"
+                      >
+                        <span className="material-icons text-xs">add</span>
+                        {locale === 'es' ? '+ Pilar' : '+ Pillar'}
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {(activeSlide.cards || []).map((card, cIdx) => (
+                        <div key={cIdx} className="bg-canvas-elevated border border-hairline p-3 rounded-sm space-y-2 relative">
+                          <div className="flex justify-between items-center border-b border-hairline pb-2">
+                            <span className="text-[11px] font-bold text-ink flex items-center gap-1.5">
+                              <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] font-black flex items-center justify-center">
+                                {cIdx + 1}
+                              </span>
+                              {card.title || (locale === 'es' ? 'Pilar' : 'Pillar')}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => deleteCard(cIdx)}
+                              className="text-muted hover:text-red-400 text-xs flex items-center gap-1"
+                            >
+                              <span className="material-icons text-sm">delete</span>
+                              <span className="text-[10px] uppercase font-semibold">{locale === 'es' ? 'Eliminar' : 'Remove'}</span>
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Título del Pilar' : 'Pillar Title'}
+                              </label>
+                              <input
+                                type="text"
+                                value={card.title || ''}
+                                onChange={(e) => updateCard(cIdx, { title: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-bold"
+                                placeholder="e.g. Design & Creative"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Subtítulo / Bajada' : 'Subtitle / Detail'}
+                              </label>
+                              <input
+                                type="text"
+                                value={card.subtitle || ''}
+                                onChange={(e) => updateCard(cIdx, { subtitle: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-mono"
+                                placeholder="e.g. Branding, Video & UX"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Ícono (Material Icon)' : 'Icon'}
+                              </label>
+                              <input
+                                type="text"
+                                value={card.icon || ''}
+                                onChange={(e) => updateCard(cIdx, { icon: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-mono"
+                                placeholder="palette / code / trending_up"
+                              />
+                            </div>
+
+                            <div className="space-y-1 md:col-span-3">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Descripción' : 'Description'}
+                              </label>
+                              <textarea
+                                rows={2}
+                                value={card.description || ''}
+                                onChange={(e) => updateCard(cIdx, { description: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary"
+                                placeholder="Resumen del pilar y capacidades..."
+                              />
+                            </div>
+
+                            <div className="space-y-1 md:col-span-3">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Etiquetas / Tags (separadas por coma)' : 'Tags (comma separated)'}
+                              </label>
+                              <input
+                                type="text"
+                                value={(card.tags || []).join(', ')}
+                                onChange={(e) => updateCard(cIdx, { tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary"
+                                placeholder="Branding, Video, UI/UX"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ═══ SHOWCASE / CASE STUDIES EDITOR ═══ */}
                 {activeSlide.type === 'showcase' && (
                   <div className="mt-4 pt-4 border-t border-hairline space-y-4">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-canvas-elevated p-3 border border-hairline rounded-sm">
@@ -1063,6 +1417,331 @@ export default function PitchForm({
                                 placeholder="Summary of scope, creative approach, and results..."
                               />
                             </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ═══ METRICS SLIDE EDITOR ═══ */}
+                {activeSlide.type === 'metrics' && (
+                  <div className="mt-4 pt-4 border-t border-hairline space-y-3">
+                    <div className="flex justify-between items-center bg-canvas-elevated p-2.5 border border-hairline rounded-sm">
+                      <div>
+                        <h3 className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
+                          <span className="material-icons text-sm">speed</span>
+                          {locale === 'es' ? 'Métricas de Impacto' : 'Impact Metrics'} ({(activeSlide.metrics || []).length})
+                        </h3>
+                        <p className="text-[11px] text-muted">
+                          {locale === 'es' ? 'Agrega o edita los números y métricas clave de rendimiento' : 'Add or edit key performance metrics'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={addMetric}
+                        className="px-2.5 py-1.5 bg-primary text-black text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1 hover:bg-primary/80"
+                      >
+                        <span className="material-icons text-xs">add</span>
+                        {locale === 'es' ? '+ Métrica' : '+ Metric'}
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {(activeSlide.metrics || []).map((metric, mIdx) => (
+                        <div key={mIdx} className="bg-canvas-elevated border border-hairline p-3 rounded-sm space-y-2 relative">
+                          <div className="flex justify-between items-center border-b border-hairline pb-2">
+                            <span className="text-[11px] font-bold text-ink flex items-center gap-1.5">
+                              <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] font-black flex items-center justify-center">
+                                {mIdx + 1}
+                              </span>
+                              {metric.label || (locale === 'es' ? 'Métrica' : 'Metric')}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => deleteMetric(mIdx)}
+                              className="text-muted hover:text-red-400 text-xs flex items-center gap-1"
+                            >
+                              <span className="material-icons text-sm">delete</span>
+                              <span className="text-[10px] uppercase font-semibold">{locale === 'es' ? 'Eliminar' : 'Remove'}</span>
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Valor (Número/Texto)' : 'Value'}
+                              </label>
+                              <input
+                                type="text"
+                                value={metric.value || ''}
+                                onChange={(e) => updateMetric(mIdx, { value: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-black"
+                                placeholder="<24h / 100% / 3 / 24/7"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Ícono' : 'Icon'}
+                              </label>
+                              <input
+                                type="text"
+                                value={metric.icon || ''}
+                                onChange={(e) => updateMetric(mIdx, { icon: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-mono"
+                                placeholder="timer / security / translate"
+                              />
+                            </div>
+
+                            <div className="space-y-1 col-span-2">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Etiqueta Principal' : 'Label'}
+                              </label>
+                              <input
+                                type="text"
+                                value={metric.label || ''}
+                                onChange={(e) => updateMetric(mIdx, { label: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-bold"
+                                placeholder="Fast Turnaround SLA"
+                              />
+                            </div>
+
+                            <div className="space-y-1 col-span-2">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Texto Secundario / Bajada' : 'Subtext'}
+                              </label>
+                              <input
+                                type="text"
+                                value={metric.subtext || ''}
+                                onChange={(e) => updateMetric(mIdx, { subtext: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary"
+                                placeholder="Daily comms & banners"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ═══ ROADMAP SLIDE EDITOR ═══ */}
+                {activeSlide.type === 'roadmap' && (
+                  <div className="mt-4 pt-4 border-t border-hairline space-y-3">
+                    <div className="flex justify-between items-center bg-canvas-elevated p-2.5 border border-hairline rounded-sm">
+                      <div>
+                        <h3 className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
+                          <span className="material-icons text-sm">timeline</span>
+                          {locale === 'es' ? 'Fases del Roadmap' : 'Roadmap Phases'} ({(activeSlide.timeline || []).length})
+                        </h3>
+                        <p className="text-[11px] text-muted">
+                          {locale === 'es' ? 'Edita etapas, títulos, duración y entregables de cada fase' : 'Edit phases, titles, duration, and deliverables'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={addTimelinePhase}
+                        className="px-2.5 py-1.5 bg-primary text-black text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1 hover:bg-primary/80"
+                      >
+                        <span className="material-icons text-xs">add</span>
+                        {locale === 'es' ? '+ Fase' : '+ Phase'}
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {(activeSlide.timeline || []).map((step, sIdx) => (
+                        <div key={sIdx} className="bg-canvas-elevated border border-hairline p-3 rounded-sm space-y-2 relative">
+                          <div className="flex justify-between items-center border-b border-hairline pb-2">
+                            <span className="text-[11px] font-bold text-ink flex items-center gap-1.5">
+                              <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] font-black flex items-center justify-center">
+                                {sIdx + 1}
+                              </span>
+                              {step.title || (locale === 'es' ? 'Fase' : 'Phase')}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => deleteTimelinePhase(sIdx)}
+                              className="text-muted hover:text-red-400 text-xs flex items-center gap-1"
+                            >
+                              <span className="material-icons text-sm">delete</span>
+                              <span className="text-[10px] uppercase font-semibold">{locale === 'es' ? 'Eliminar' : 'Remove'}</span>
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Etiqueta de Fase' : 'Phase Tag'}
+                              </label>
+                              <input
+                                type="text"
+                                value={step.phase || ''}
+                                onChange={(e) => updateTimelinePhase(sIdx, { phase: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-mono"
+                                placeholder="Phase 1 / Fase 1"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Título de la Fase' : 'Phase Title'}
+                              </label>
+                              <input
+                                type="text"
+                                value={step.title || ''}
+                                onChange={(e) => updateTimelinePhase(sIdx, { title: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-bold"
+                                placeholder="Discovery & Onboarding"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Duración / Plazo' : 'Duration'}
+                              </label>
+                              <input
+                                type="text"
+                                value={step.duration || ''}
+                                onChange={(e) => updateTimelinePhase(sIdx, { duration: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary"
+                                placeholder="Weeks 1 - 2 / Semanas 1 - 2"
+                              />
+                            </div>
+
+                            <div className="space-y-1 md:col-span-3">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Entregables Clave (1 por línea)' : 'Key Deliverables (1 per line)'}
+                              </label>
+                              <textarea
+                                rows={3}
+                                value={(step.deliverables || []).join('\n')}
+                                onChange={(e) => {
+                                  const items = e.target.value.split('\n').map((l) => l.trim()).filter(Boolean);
+                                  updateTimelinePhase(sIdx, { deliverables: items });
+                                }}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary"
+                                placeholder="Entregable 1&#10;Entregable 2&#10;Entregable 3"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ═══ CTA / CLOSING SLIDE EDITOR ═══ */}
+                {activeSlide.type === 'cta' && (
+                  <div className="mt-4 pt-4 border-t border-hairline space-y-4">
+                    <div className="bg-canvas-elevated p-3 border border-hairline rounded-sm space-y-3">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
+                        <span className="material-icons text-sm">contact_support</span>
+                        {locale === 'es' ? 'Botón de Contacto & Presentador' : 'Call to Action & Presenter'}
+                      </h3>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold uppercase text-muted">
+                            {locale === 'es' ? 'Texto del Botón CTA' : 'CTA Button Text'}
+                          </label>
+                          <input
+                            type="text"
+                            value={activeSlide.cta?.text || ''}
+                            onChange={(e) => updateActiveSlide({ cta: { ...activeSlide.cta, text: e.target.value } })}
+                            className="w-full border border-hairline bg-canvas text-ink px-2 py-1.5 text-xs outline-none focus:border-primary font-bold"
+                            placeholder="Schedule Technical Discovery"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold uppercase text-muted">
+                            {locale === 'es' ? 'Enlace del Botón CTA (opcional)' : 'CTA Button Link (optional)'}
+                          </label>
+                          <input
+                            type="text"
+                            value={activeSlide.cta?.link || ''}
+                            onChange={(e) => updateActiveSlide({ cta: { ...activeSlide.cta, text: activeSlide.cta?.text || '', link: e.target.value } })}
+                            className="w-full border border-hairline bg-canvas text-ink px-2 py-1.5 text-xs outline-none focus:border-primary font-mono"
+                            placeholder="https://... o mailto:..."
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold uppercase text-muted">
+                            {locale === 'es' ? 'Nombre del Presentador / Firma (opcional)' : 'Presenter Name Override'}
+                          </label>
+                          <input
+                            type="text"
+                            value={activeSlide.presenterName || ''}
+                            onChange={(e) => updateActiveSlide({ presenterName: e.target.value })}
+                            className="w-full border border-hairline bg-canvas text-ink px-2 py-1.5 text-xs outline-none focus:border-primary"
+                            placeholder="Eduardo Marval (o vacío para automático)"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold uppercase text-muted">
+                            {locale === 'es' ? 'Cargo / Rol del Presentador (opcional)' : 'Presenter Role Override'}
+                          </label>
+                          <input
+                            type="text"
+                            value={activeSlide.presenterRole || ''}
+                            onChange={(e) => updateActiveSlide({ presenterRole: e.target.value })}
+                            className="w-full border border-hairline bg-canvas text-ink px-2 py-1.5 text-xs outline-none focus:border-primary"
+                            placeholder="CEO & Managing Director"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Optional Closing Proposition Cards */}
+                    <div className="bg-canvas-elevated p-3 border border-hairline rounded-sm space-y-3">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="text-[11px] font-bold uppercase tracking-wider text-ink">
+                            {locale === 'es' ? 'Tarjetas de Cierre / Propuesta' : 'Closing Value Proposition Cards'} ({(activeSlide.cards || []).length})
+                          </h4>
+                          <span className="text-[10px] text-muted">
+                            {locale === 'es' ? 'Opcional: Si se configuran, reemplazan las tarjetas de cierre por defecto' : 'Optional: Replaces default closing pillars'}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => addCard({ title: 'Agile Daily Comms', description: 'Rapid turnaround for collateral...', icon: 'speed' })}
+                          className="px-2 py-1 bg-canvas border border-hairline hover:bg-canvas/80 text-ink text-[10px] font-bold uppercase rounded"
+                        >
+                          {locale === 'es' ? '+ Tarjeta de Cierre' : '+ Closing Card'}
+                        </button>
+                      </div>
+
+                      {(activeSlide.cards || []).map((card, cIdx) => (
+                        <div key={cIdx} className="bg-canvas border border-hairline p-2.5 rounded space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-bold text-ink">Tarjeta {cIdx + 1}</span>
+                            <button
+                              type="button"
+                              onClick={() => deleteCard(cIdx)}
+                              className="text-red-400 hover:text-red-300 text-[10px] uppercase font-bold"
+                            >
+                              {locale === 'es' ? 'Eliminar' : 'Remove'}
+                            </button>
+                          </div>
+                          <div className="space-y-1.5">
+                            <input
+                              type="text"
+                              value={card.title || ''}
+                              onChange={(e) => updateCard(cIdx, { title: e.target.value })}
+                              className="w-full border border-hairline bg-canvas-elevated text-ink px-2 py-1 text-xs outline-none font-bold"
+                              placeholder="Título de la tarjeta..."
+                            />
+                            <textarea
+                              rows={2}
+                              value={card.description || ''}
+                              onChange={(e) => updateCard(cIdx, { description: e.target.value })}
+                              className="w-full border border-hairline bg-canvas-elevated text-ink px-2 py-1 text-xs outline-none"
+                              placeholder="Descripción..."
+                            />
                           </div>
                         </div>
                       ))}

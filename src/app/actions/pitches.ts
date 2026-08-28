@@ -104,9 +104,119 @@ export async function updatePitch(id: string, formData: any) {
 
   revalidatePath('/dashboard');
   revalidatePath('/dashboard/pitches');
+  revalidatePath(`/dashboard/pitches/edit/${id}`);
   revalidatePath(`/pitches/${id}`);
+  revalidatePath(`/es/pitches/${id}`);
+  revalidatePath(`/en/pitches/${id}`);
 
   return pitch;
+}
+
+export interface PitchCardCustomizationInput {
+  subject?: string;
+  introMessage?: string;
+  clientTag?: string;
+  tagline?: string;
+  cardTitle?: string;
+  cardSubtitle?: string;
+  pillarsLabel?: string;
+  keyPillars?: Array<{ title: string; subtitle?: string }>;
+  buttonText?: string;
+  linkText?: string;
+  badgeText?: string;
+}
+
+export async function savePitchCardCustomization(pitchId: string, customData: PitchCardCustomizationInput) {
+  const pitch = await prisma.pitch.findUnique({
+    where: { id: pitchId },
+  });
+
+  if (!pitch) {
+    throw new Error('Pitch not found');
+  }
+
+  const slides: any[] = Array.isArray(pitch.slides) ? [...(pitch.slides as any[])] : [];
+
+  // Update hero slide if present
+  const heroIndex = slides.findIndex((s) => s.type === 'hero');
+  if (heroIndex !== -1) {
+    slides[heroIndex] = {
+      ...slides[heroIndex],
+      clientName: customData.clientTag || slides[heroIndex].clientName,
+      title: slides[heroIndex].title || 'LAUNCHPAD',
+      subtitle: customData.cardSubtitle || slides[heroIndex].subtitle,
+      cta: {
+        ...slides[heroIndex].cta,
+        text: customData.buttonText || slides[heroIndex].cta?.text,
+      },
+    };
+  }
+
+  // Update pillars slide if present
+  const pillarsIndex = slides.findIndex((s) => s.type === 'pillars');
+  if (pillarsIndex !== -1 && customData.keyPillars && customData.keyPillars.length > 0) {
+    const existingCards = Array.isArray(slides[pillarsIndex].cards) ? slides[pillarsIndex].cards : [];
+    const updatedCards = customData.keyPillars.map((p, idx) => ({
+      ...existingCards[idx],
+      title: p.title,
+      subtitle: p.subtitle,
+      description: existingCards[idx]?.description || p.subtitle || '',
+      icon: existingCards[idx]?.icon || 'star',
+    }));
+    slides[pillarsIndex] = {
+      ...slides[pillarsIndex],
+      cards: updatedCards,
+    };
+  }
+
+  // Store/update persistent email configuration in slides metadata
+  const emailConfigIndex = slides.findIndex((s) => s.type === 'emailConfig');
+  const emailConfigData = {
+    type: 'emailConfig',
+    subject: customData.subject,
+    introMessage: customData.introMessage,
+    clientTag: customData.clientTag,
+    tagline: customData.tagline,
+    cardTitle: customData.cardTitle,
+    cardSubtitle: customData.cardSubtitle,
+    pillarsLabel: customData.pillarsLabel,
+    keyPillars: customData.keyPillars,
+    buttonText: customData.buttonText,
+    linkText: customData.linkText,
+    badgeText: customData.badgeText,
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (emailConfigIndex !== -1) {
+    slides[emailConfigIndex] = emailConfigData;
+  } else {
+    slides.push(emailConfigData);
+  }
+
+  const updatedPitch = await prisma.pitch.update({
+    where: { id: pitchId },
+    data: {
+      title: customData.cardTitle || pitch.title,
+      subtitle: customData.cardSubtitle !== undefined ? customData.cardSubtitle : pitch.subtitle,
+      clientName: customData.clientTag || pitch.clientName,
+      slides,
+    },
+  });
+
+  revalidatePath('/dashboard');
+  revalidatePath('/dashboard/pitches');
+  revalidatePath(`/dashboard/pitches/edit/${pitchId}`);
+  revalidatePath(`/dashboard/emails/new`);
+  revalidatePath(`/es/dashboard/emails/new`);
+  revalidatePath(`/en/dashboard/emails/new`);
+  revalidatePath(`/dashboard/emails`);
+  revalidatePath(`/es/dashboard/emails`);
+  revalidatePath(`/en/dashboard/emails`);
+  revalidatePath(`/pitches/${pitchId}`);
+  revalidatePath(`/es/pitches/${pitchId}`);
+  revalidatePath(`/en/pitches/${pitchId}`);
+
+  return { success: true, pitch: updatedPitch };
 }
 
 export async function updatePitchStatus(id: string, status: string) {

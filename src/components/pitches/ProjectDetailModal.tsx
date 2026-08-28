@@ -116,7 +116,17 @@ export default function ProjectDetailModal({
         <div className="lg:w-[58%] bg-black/60 flex flex-col justify-between p-4 sm:p-6 border-b lg:border-b-0 lg:border-r border-white/10 relative">
           {/* Main Featured Image Container */}
           <div className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 group">
-            {currentImage ? (
+            {item.mediaType === 'video' || (currentImage && currentImage.match(/\.(mp4|webm|mov)(\?.*)?$/i)) ? (
+              <video
+                src={currentImage}
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls
+                className="w-full h-full object-contain bg-black"
+              />
+            ) : currentImage ? (
               <img
                 src={currentImage}
                 alt={item.title}

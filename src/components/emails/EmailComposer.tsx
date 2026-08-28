@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from 'react';
 import type { EmailSenderIdentity } from '@prisma/client';
 import { Link, useRouter } from '@/i18n/routing';
 import { parsePitchTheme } from '@/components/pitches/PitchViewer';
+import { savePitchCardCustomization } from '@/app/actions/pitches';
 
 const ACCEPTED_FILE_TYPES = '.png,.jpg,.jpeg,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt';
 
@@ -47,6 +48,8 @@ export default function EmailComposer({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [senderIdentityId, setSenderIdentityId] = useState(identities[0]?.id || '');
   const [to, setTo] = useState(initialTo || '');
+  const [showCc, setShowCc] = useState(false);
+  const [showBcc, setShowBcc] = useState(false);
   const [cc, setCc] = useState('');
   const [bcc, setBcc] = useState('');
   const [subject, setSubject] = useState('');
@@ -59,59 +62,245 @@ export default function EmailComposer({
   // Template Mode & Pitch Selection
   const [templateType, setTemplateType] = useState<'standard' | 'pitch'>(initialPitchId ? 'pitch' : 'standard');
   const [selectedPitchId, setSelectedPitchId] = useState(initialPitchId || pitches[0]?.id || '');
+  const [loadedPitchId, setLoadedPitchId] = useState<string | null>(null);
+  const [badgeText, setBadgeText] = useState(locale === 'es' ? 'CONFIDENCIAL // ACCESO VIP' : 'CONFIDENTIAL // VIP ACCESS');
+  const [clientTag, setClientTag] = useState('');
+  const [tagline, setTagline] = useState('');
+  const [cardTitle, setCardTitle] = useState('');
+  const [cardSubtitle, setCardSubtitle] = useState('');
+  const [pillarsLabel, setPillarsLabel] = useState('');
+  const [customPillars, setCustomPillars] = useState<Array<{ title: string; subtitle: string }>>([
+    { title: 'Creative Assets & Digital Design', subtitle: 'D-Channel, D-Hub & Email' },
+    { title: 'Video & Motion Graphics', subtitle: 'Shooting, Editing & 2D/3D Motion' },
+    { title: 'Executive Slides & Data Viz', subtitle: 'Presentations & Infographics' },
+  ]);
+  const [buttonText, setButtonText] = useState(locale === 'es' ? 'VER PROPUESTA INTERACTIVA →' : 'VIEW INTERACTIVE PROPOSAL →');
+  const [linkText, setLinkText] = useState(locale === 'es' ? 'Abrir propuesta interactiva en el navegador →' : 'Open interactive proposal in browser →');
   const [previewTab, setPreviewTab] = useState<'editor' | 'preview'>('editor');
+  const [isSavingToPitch, setIsSavingToPitch] = useState(false);
+  const [savePitchSuccess, setSavePitchSuccess] = useState(false);
 
   const isSpanish = locale === 'es';
   const selectedIdentity = identities.find((identity) => identity.id === senderIdentityId) ?? null;
   const selectedPitch = pitches.find((p) => p.id === selectedPitchId) ?? null;
 
-  // Auto-populate subject, client email and intro message when pitch template is activated
+  // Auto-populate subject, client email, card details and intro message when pitch template is activated
   useEffect(() => {
     if (templateType === 'pitch' && selectedPitch) {
       const clientName = selectedPitch.client?.razonSocial || selectedPitch.clientName || 'Cliente';
+      const pitchSlides = Array.isArray(selectedPitch?.slides) ? (selectedPitch?.slides as any[]) : [];
+      const dbEmailConfig = pitchSlides.find((s) => s.type === 'emailConfig');
       
-      // Auto-set subject if blank or previous pitch template
-      setSubject((prev) => {
-        if (!prev || prev.startsWith('Propuesta Estratégica:') || prev.startsWith('Strategic Proposal:')) {
-          return isSpanish
-            ? `Propuesta Estratégica: ${selectedPitch.title} — ${clientName}`
-            : `Strategic Proposal: ${selectedPitch.title} — ${clientName}`;
+      let localData: any = null;
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem(`launchpad_email_vip_config_${selectedPitch.id}`);
+        if (saved) {
+          try {
+            localData = JSON.parse(saved);
+          } catch {}
         }
-        return prev;
-      });
+      }
 
-      // Auto-set recipient email if blank and client email is available
+      // Priority 1: localStorage draft
+      // Priority 2: database emailConfig
+      // Priority 3: pitch deck defaults
+      const source = localData || dbEmailConfig || {};
+
+      const nextSubject = (source.subject !== undefined && source.subject.trim() !== '')
+        ? source.subject
+        : (isSpanish
+            ? `Propuesta Estratégica: ${selectedPitch.title} — ${clientName}`
+            : `Strategic Proposal: ${selectedPitch.title} — ${clientName}`);
+
+      const nextBody = (source.body !== undefined && source.body.trim() !== '')
+        ? source.body
+        : (source.introMessage !== undefined && source.introMessage.trim() !== '')
+          ? source.introMessage
+          : (isSpanish
+              ? `Estimado equipo de ${clientName},\n\nEs un placer compartir con ustedes la propuesta estratégica y plan de ejecución que hemos desarrollado especialmente para su ecosistema digital.\n\nPueden acceder a la presentación interactiva y caso de estudio completo a través de la tarjeta que encontrarán a continuación.`
+              : `Dear ${clientName} team,\n\nIt is our pleasure to share with you the strategic proposal and execution plan we have crafted specifically for your digital ecosystem.\n\nYou can access the full interactive presentation and case study via the card below.`);
+
+      const nextBadgeText = (source.badgeText !== undefined && source.badgeText.trim() !== '')
+        ? source.badgeText
+        : (isSpanish ? 'CONFIDENCIAL // ACCESO VIP' : 'CONFIDENTIAL // VIP ACCESS');
+
+      const nextClientTag = (source.clientTag !== undefined && source.clientTag.trim() !== '')
+        ? source.clientTag
+        : clientName;
+
+      const nextTagline = (source.tagline !== undefined && source.tagline.trim() !== '')
+        ? source.tagline
+        : (isSpanish ? 'PROPUESTA ESTRATÉGICA' : 'STRATEGIC PROPOSAL');
+
+      const nextCardTitle = (source.cardTitle !== undefined && source.cardTitle.trim() !== '')
+        ? source.cardTitle
+        : (selectedPitch.title || '');
+
+      const nextCardSubtitle = (source.cardSubtitle !== undefined && source.cardSubtitle.trim() !== '')
+        ? source.cardSubtitle.replace(/^Where ideas take off\s*•?\s*/gi, '').trim()
+        : (selectedPitch.subtitle || '2026 Daily Comms & Major Event Production').replace(/^Where ideas take off\s*•?\s*/gi, '').trim();
+
+      const nextPillarsLabel = (source.pillarsLabel !== undefined && source.pillarsLabel.trim() !== '')
+        ? source.pillarsLabel
+        : (isSpanish ? 'PUNTOS CLAVE & ALCANCE DE LA PROPUESTA' : 'KEY PROPOSAL HIGHLIGHTS & SCOPE');
+
+      let nextPillars = source.customPillars || source.keyPillars;
+      if (!Array.isArray(nextPillars) || nextPillars.length === 0) {
+        const pillarsSlide = pitchSlides.find((s) => s.type === 'pillars');
+        if (pillarsSlide && Array.isArray(pillarsSlide.cards) && pillarsSlide.cards.length > 0) {
+          nextPillars = pillarsSlide.cards.slice(0, 3).map((c: any) => ({
+            title: c.title || '',
+            subtitle: c.subtitle || (c.description ? c.description.slice(0, 50) : ''),
+          }));
+        } else {
+          nextPillars = [
+            { title: 'Creative Assets & Digital Design', subtitle: 'D-Channel, D-Hub & Email' },
+            { title: 'Video & Motion Graphics', subtitle: 'Shooting, Editing & 2D/3D Motion' },
+            { title: 'Executive Slides & Data Viz', subtitle: 'Presentations & Infographics' },
+          ];
+        }
+      }
+
+      const nextButtonText = (source.buttonText !== undefined && source.buttonText.trim() !== '')
+        ? source.buttonText
+        : (isSpanish ? 'VER PROPUESTA INTERACTIVA →' : 'VIEW INTERACTIVE PROPOSAL →');
+
+      const nextLinkText = (source.linkText !== undefined && source.linkText.trim() !== '')
+        ? source.linkText
+        : (isSpanish ? 'Abrir propuesta interactiva en el navegador →' : 'Open interactive proposal in browser →');
+
+      setSubject(nextSubject);
+      setBody(nextBody);
+      setBadgeText(nextBadgeText);
+      setClientTag(nextClientTag);
+      setTagline(nextTagline);
+      setCardTitle(nextCardTitle);
+      setCardSubtitle(nextCardSubtitle);
+      setPillarsLabel(nextPillarsLabel);
+      setCustomPillars(nextPillars);
+      setButtonText(nextButtonText);
+      setLinkText(nextLinkText);
+
       if (!to && selectedPitch.client?.email) {
         setTo(selectedPitch.client.email);
       }
 
-      // Auto-set intro message if blank
-      if (!body) {
-        setBody(
-          isSpanish
-            ? `Estimado equipo de ${clientName},\n\nEs un placer compartir con ustedes la propuesta estratégica y plan de ejecución que hemos desarrollado especialmente para su ecosistema digital.\n\nPueden acceder a la presentación interactiva y caso de estudio completo a través de la tarjeta que encontrarán a continuación.`
-            : `Dear ${clientName} team,\n\nIt is our pleasure to share with you the strategic proposal and execution plan we have crafted specifically for your digital ecosystem.\n\nYou can access the full interactive presentation and case study via the card below.`
-        );
-      }
+      setLoadedPitchId(selectedPitch.id);
     }
   }, [templateType, selectedPitchId, isSpanish]);
 
+  // Sync to localStorage on every change ONLY AFTER this pitch is loaded
+  useEffect(() => {
+    if (templateType === 'pitch' && selectedPitchId && loadedPitchId === selectedPitchId && typeof window !== 'undefined') {
+      localStorage.setItem(
+        `launchpad_email_vip_config_${selectedPitchId}`,
+        JSON.stringify({
+          subject,
+          body,
+          badgeText,
+          clientTag,
+          tagline,
+          cardTitle,
+          cardSubtitle,
+          pillarsLabel,
+          customPillars,
+          buttonText,
+          linkText,
+        })
+      );
+    }
+  }, [loadedPitchId, selectedPitchId, subject, body, badgeText, clientTag, tagline, cardTitle, cardSubtitle, pillarsLabel, customPillars, buttonText, linkText, templateType]);
+
+  const saveToPitchDeck = async () => {
+    if (!selectedPitchId) return;
+    setIsSavingToPitch(true);
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(
+          `launchpad_email_vip_config_${selectedPitchId}`,
+          JSON.stringify({
+            subject,
+            body,
+            badgeText,
+            clientTag,
+            tagline,
+            cardTitle,
+            cardSubtitle,
+            pillarsLabel,
+            customPillars,
+            buttonText,
+            linkText,
+          })
+        );
+      }
+      await savePitchCardCustomization(selectedPitchId, {
+        subject,
+        introMessage: body,
+        badgeText,
+        clientTag,
+        tagline,
+        cardTitle,
+        cardSubtitle,
+        pillarsLabel,
+        keyPillars: customPillars,
+        buttonText,
+        linkText,
+      });
+      setSavePitchSuccess(true);
+      setTimeout(() => setSavePitchSuccess(false), 3500);
+    } catch (err) {
+      console.error('Failed to save to pitch deck:', err);
+    } finally {
+      setIsSavingToPitch(false);
+    }
+  };
+
+  const resetToPitchDefaults = () => {
+    if (!selectedPitch) return;
+    const clientName = selectedPitch.client?.razonSocial || selectedPitch.clientName || 'Cliente';
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(`launchpad_email_vip_config_${selectedPitch.id}`);
+    }
+    setSubject(
+      isSpanish
+        ? `Propuesta Estratégica: ${selectedPitch.title} — ${clientName}`
+        : `Strategic Proposal: ${selectedPitch.title} — ${clientName}`
+    );
+    setBody(
+      isSpanish
+        ? `Estimado equipo de ${clientName},\n\nEs un placer compartir con ustedes la propuesta estratégica y plan de ejecución que hemos desarrollado especialmente para su ecosistema digital.\n\nPueden acceder a la presentación interactiva y caso de estudio completo a través de la tarjeta que encontrarán a continuación.`
+        : `Dear ${clientName} team,\n\nIt is our pleasure to share with you the strategic proposal and execution plan we have crafted specifically for your digital ecosystem.\n\nYou can access the full interactive presentation and case study via the card below.`
+    );
+    setBadgeText(isSpanish ? 'CONFIDENCIAL // ACCESO VIP' : 'CONFIDENTIAL // VIP ACCESS');
+    setClientTag(clientName);
+    setTagline(isSpanish ? 'PROPUESTA ESTRATÉGICA' : 'STRATEGIC PROPOSAL');
+    setCardTitle(selectedPitch.title || '');
+    setCardSubtitle((selectedPitch.subtitle || '2026 Daily Comms & Major Event Production').replace(/^Where ideas take off\s*•?\s*/gi, '').trim());
+    setPillarsLabel(isSpanish ? 'PUNTOS CLAVE & ALCANCE DE LA PROPUESTA' : 'KEY PROPOSAL HIGHLIGHTS & SCOPE');
+
+    const pitchSlides = Array.isArray(selectedPitch?.slides) ? (selectedPitch?.slides as any[]) : [];
+    const pillarsSlide = pitchSlides.find((s) => s.type === 'pillars');
+    if (pillarsSlide && Array.isArray(pillarsSlide.cards) && pillarsSlide.cards.length > 0) {
+      setCustomPillars(
+        pillarsSlide.cards.slice(0, 3).map((c: any) => ({
+          title: c.title || '',
+          subtitle: c.subtitle || (c.description ? c.description.slice(0, 50) : ''),
+        }))
+      );
+    } else {
+      setCustomPillars([
+        { title: 'Creative Assets & Digital Design', subtitle: 'D-Channel, D-Hub & Email' },
+        { title: 'Video & Motion Graphics', subtitle: 'Shooting, Editing & 2D/3D Motion' },
+        { title: 'Executive Slides & Data Viz', subtitle: 'Presentations & Infographics' },
+      ]);
+    }
+    setButtonText(isSpanish ? 'VER PROPUESTA INTERACTIVA →' : 'VIEW INTERACTIVE PROPOSAL →');
+    setLinkText(isSpanish ? 'Abrir propuesta interactiva en el navegador →' : 'Open interactive proposal in browser →');
+  };
+
   // Extract selected pitch theme & key pillars
-  const pitchClientName = selectedPitch?.client?.razonSocial || selectedPitch?.clientName || 'Cliente';
-  const { color: accentColor } = parsePitchTheme(selectedPitch?.theme || undefined, selectedPitch?.title || '', pitchClientName);
-  
-  const pitchSlides = Array.isArray(selectedPitch?.slides) ? (selectedPitch?.slides as any[]) : [];
-  const pillarsSlide = pitchSlides.find((s) => s.type === 'pillars');
-  const keyPillars = pillarsSlide && Array.isArray(pillarsSlide.cards) && pillarsSlide.cards.length > 0
-    ? pillarsSlide.cards.map((c: any) => ({
-        title: c.title,
-        subtitle: c.subtitle || (c.description ? c.description.slice(0, 50) : undefined),
-      }))
-    : [
-        { title: 'Ecosistema Digital 360°', subtitle: 'Estrategia y Arquitectura' },
-        { title: 'Experiencia & UI/UX', subtitle: 'Diseño de Alto Impacto' },
-        { title: 'Roadmap & Rendimiento', subtitle: 'Ejecución y Escalamiento' },
-      ];
+  const pitchClientName = clientTag || selectedPitch?.client?.razonSocial || selectedPitch?.clientName || 'Cliente';
+  const { color: accentColor } = parsePitchTheme(selectedPitch?.theme || undefined, cardTitle || selectedPitch?.title || '', pitchClientName);
 
   const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     const incomingFiles = Array.from(event.target.files || []);
@@ -142,6 +331,15 @@ export default function EmailComposer({
     event.target.value = '';
   };
 
+  const updatePillar = (index: number, field: 'title' | 'subtitle', value: string) => {
+    setCustomPillars((prev) => {
+      const next = [...prev];
+      if (!next[index]) next[index] = { title: '', subtitle: '' };
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!senderIdentityId || !to.trim() || !subject.trim() || !body.trim()) return;
@@ -162,8 +360,35 @@ export default function EmailComposer({
       formData.set('body', body);
       formData.set('requestId', effectiveRequestId);
       formData.set('templateType', templateType);
-      if (templateType === 'pitch' && selectedPitchId) {
-        formData.set('pitchId', selectedPitchId);
+      if (templateType === 'pitch') {
+        if (selectedPitchId) {
+          formData.set('pitchId', selectedPitchId);
+          // Persist to database in background
+          savePitchCardCustomization(selectedPitchId, {
+            subject,
+            introMessage: body,
+            badgeText,
+            clientTag,
+            tagline,
+            cardTitle,
+            cardSubtitle,
+            pillarsLabel,
+            keyPillars: customPillars,
+            buttonText,
+            linkText,
+          }).catch(console.error);
+        }
+        if (cardTitle) formData.set('cardTitle', cardTitle);
+        if (cardSubtitle) formData.set('cardSubtitle', cardSubtitle);
+        if (clientTag) formData.set('clientTag', clientTag);
+        if (tagline) formData.set('tagline', tagline);
+        if (pillarsLabel) formData.set('pillarsLabel', pillarsLabel);
+        if (badgeText) formData.set('badgeText', badgeText);
+        if (customPillars && customPillars.length > 0) {
+          formData.set('keyPillars', JSON.stringify(customPillars));
+        }
+        if (buttonText) formData.set('buttonText', buttonText);
+        if (linkText) formData.set('linkText', linkText);
       }
       formData.set('locale', locale);
       selectedFiles.forEach((file) => formData.append('attachments', file));
@@ -299,6 +524,195 @@ export default function EmailComposer({
                     </div>
                   )}
                 </div>
+
+                {/* Advanced VIP Card Customization Fields */}
+                <div className="pt-2 space-y-3 border-t border-hairline/60">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-canvas p-2.5 border border-hairline rounded-sm">
+                    <div>
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-primary block">
+                        {isSpanish ? 'Personalizar Contenido de la Tarjeta VIP' : 'Customize VIP Card Content'}
+                      </span>
+                      <span className="text-[10px] text-muted">
+                        {isSpanish ? 'Tus cambios se guardan automáticamente en esta propuesta' : 'Changes are automatically saved to this pitch'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {savePitchSuccess && (
+                        <span className="text-[10px] font-bold text-semantic-success flex items-center gap-1 animate-fade-in">
+                          <span className="material-icons text-xs">check_circle</span>
+                          {isSpanish ? '¡Guardado en la propuesta!' : 'Saved to pitch!'}
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={saveToPitchDeck}
+                        disabled={isSavingToPitch}
+                        className="px-2.5 py-1 bg-primary/10 hover:bg-primary/20 border border-primary/40 text-primary text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1 transition-colors disabled:opacity-50"
+                        title={isSpanish ? 'Guardar permanentemente en la base de datos de esta propuesta' : 'Permanently save to database for this pitch deck'}
+                      >
+                        <span className="material-icons text-xs">{isSavingToPitch ? 'hourglass_empty' : 'save'}</span>
+                        {isSavingToPitch ? (isSpanish ? 'Guardando…' : 'Saving…') : (isSpanish ? 'Guardar en Propuesta' : 'Save to Pitch')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={resetToPitchDefaults}
+                        className="px-2 py-1 bg-white/5 hover:bg-white/10 border border-hairline text-muted hover:text-ink text-[10px] font-semibold uppercase tracking-wider rounded-sm flex items-center gap-1 transition-colors"
+                        title={isSpanish ? 'Restaurar a los valores por defecto del Pitch Deck' : 'Reset to pitch deck defaults'}
+                      >
+                        <span className="material-icons text-xs">restart_alt</span>
+                        {isSpanish ? 'Restaurar' : 'Reset'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Top Header Badge + Client Tag + Tagline */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <label className="block space-y-1">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-muted">
+                        {isSpanish ? 'Badge Superior / Acceso VIP' : 'Top Header Badge'}
+                      </span>
+                      <input
+                        type="text"
+                        value={badgeText}
+                        onChange={(e) => setBadgeText(e.target.value)}
+                        placeholder={isSpanish ? 'CONFIDENCIAL // ACCESO VIP' : 'CONFIDENTIAL // VIP ACCESS'}
+                        className="w-full border border-hairline bg-canvas px-3 py-2 text-xs text-ink outline-none focus:border-primary font-mono"
+                      />
+                    </label>
+                    <label className="block space-y-1">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-muted">
+                        {isSpanish ? 'Etiqueta / Cliente [ BADGE ]' : 'Badge / Client [ BADGE ]'}
+                      </span>
+                      <input
+                        type="text"
+                        value={clientTag}
+                        onChange={(e) => setClientTag(e.target.value)}
+                        placeholder="DIDI"
+                        className="w-full border border-hairline bg-canvas px-3 py-2 text-xs text-ink outline-none focus:border-primary font-mono"
+                      />
+                    </label>
+                    <label className="block space-y-1">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-muted">
+                        {isSpanish ? 'Categoría / Tagline Superior' : 'Top Tagline / Category'}
+                      </span>
+                      <input
+                        type="text"
+                        value={tagline}
+                        onChange={(e) => setTagline(e.target.value)}
+                        placeholder={isSpanish ? 'PROPUESTA ESTRATÉGICA' : 'STRATEGIC PROPOSAL'}
+                        className="w-full border border-hairline bg-canvas px-3 py-2 text-xs text-ink outline-none focus:border-primary font-mono"
+                      />
+                    </label>
+                  </div>
+
+                  {/* Card Title & Subtitle */}
+                  <div className="space-y-3">
+                    <label className="block space-y-1">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-muted">
+                        {isSpanish ? 'Título Principal de la Tarjeta' : 'Main Card Title'}
+                      </span>
+                      <input
+                        type="text"
+                        value={cardTitle}
+                        onChange={(e) => setCardTitle(e.target.value)}
+                        placeholder="DiDi Global IC • Creative & Multimedia Production RFI"
+                        className="w-full border border-hairline bg-canvas px-3 py-2 text-xs text-ink outline-none focus:border-primary font-bold"
+                      />
+                    </label>
+
+                    <label className="block space-y-1">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-muted">
+                        {isSpanish ? 'Subtítulo / Bajada de la Tarjeta' : 'Card Subtitle / Description'}
+                      </span>
+                      <input
+                        type="text"
+                        value={cardSubtitle}
+                        onChange={(e) => setCardSubtitle(e.target.value)}
+                        placeholder="2026 Daily Comms & Major Event Production"
+                        className="w-full border border-hairline bg-canvas px-3 py-2 text-xs text-ink outline-none focus:border-primary"
+                      />
+                    </label>
+                  </div>
+
+                  {/* Pillars Section */}
+                  <div className="pt-2 space-y-2 border-t border-hairline/40">
+                    <label className="block space-y-1">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-muted">
+                        {isSpanish ? 'Título de la Sección de Puntos Clave' : 'Highlights Section Label'}
+                      </span>
+                      <input
+                        type="text"
+                        value={pillarsLabel}
+                        onChange={(e) => setPillarsLabel(e.target.value)}
+                        placeholder={isSpanish ? 'PUNTOS CLAVE & ALCANCE DE LA PROPUESTA' : 'KEY PROPOSAL HIGHLIGHTS & SCOPE'}
+                        className="w-full border border-hairline bg-canvas px-3 py-1.5 text-xs text-ink outline-none focus:border-primary font-mono"
+                      />
+                    </label>
+
+                    <div className="space-y-2 pt-1">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-muted block">
+                        {isSpanish ? 'Puntos Clave / Squads (01, 02, 03)' : 'Key Highlights / Squads (01, 02, 03)'}
+                      </span>
+                      {customPillars.map((pillar, pIdx) => (
+                        <div key={pIdx} className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-canvas p-2 border border-hairline">
+                          <span
+                            className="sm:col-span-1 font-mono text-[10px] font-bold px-1.5 py-0.5 rounded text-center shrink-0"
+                            style={{
+                              color: accentColor,
+                              backgroundColor: `${accentColor}15`,
+                              border: `1px solid ${accentColor}30`,
+                            }}
+                          >
+                            {String(pIdx + 1).padStart(2, '0')}
+                          </span>
+                          <input
+                            type="text"
+                            value={pillar.title}
+                            onChange={(e) => updatePillar(pIdx, 'title', e.target.value)}
+                            placeholder={isSpanish ? `Título ${pIdx + 1}` : `Title ${pIdx + 1}`}
+                            className="sm:col-span-5 border border-hairline bg-canvas-elevated px-2 py-1 text-xs text-ink font-bold outline-none focus:border-primary"
+                          />
+                          <input
+                            type="text"
+                            value={pillar.subtitle}
+                            onChange={(e) => updatePillar(pIdx, 'subtitle', e.target.value)}
+                            placeholder={isSpanish ? `Subtítulo / Detalle ${pIdx + 1}` : `Subtitle / Detail ${pIdx + 1}`}
+                            className="sm:col-span-6 border border-hairline bg-canvas-elevated px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Customizable CTA Button & Link Text */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-hairline/40">
+                    <label className="block space-y-1">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-muted">
+                        {isSpanish ? 'Texto del Botón Principal (CTA)' : 'Main Button Text (CTA)'}
+                      </span>
+                      <input
+                        type="text"
+                        value={buttonText}
+                        onChange={(e) => setButtonText(e.target.value)}
+                        placeholder={isSpanish ? 'VER PROPUESTA INTERACTIVA →' : 'VIEW INTERACTIVE PROPOSAL →'}
+                        className="w-full border border-hairline bg-canvas px-3 py-2 text-xs text-ink outline-none focus:border-primary font-bold"
+                      />
+                    </label>
+                    <label className="block space-y-1">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-muted">
+                        {isSpanish ? 'Texto del Enlace de Respaldo' : 'Fallback Link Text'}
+                      </span>
+                      <input
+                        type="text"
+                        value={linkText}
+                        onChange={(e) => setLinkText(e.target.value)}
+                        placeholder={isSpanish ? 'Abrir propuesta interactiva en el navegador →' : 'Open interactive proposal in browser →'}
+                        className="w-full border border-hairline bg-canvas px-3 py-2 text-xs text-ink outline-none focus:border-primary"
+                      />
+                    </label>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -431,13 +845,17 @@ export default function EmailComposer({
               /* Live HTML Email Preview (Launchpad Landing Aesthetics) */
               <div className="border border-hairline bg-[#07070b] text-[#e2e8f0] p-6 sm:p-8 rounded-lg max-w-[620px] mx-auto space-y-6 select-none shadow-2xl font-sans">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <span className="font-black tracking-tighter text-base text-white block">LAUNCHPAD</span>
+                <div className="flex items-center justify-between border-b border-[#232336] pb-6 pt-2">
+                  <img
+                    src="/lp_logo.png"
+                    alt="LAUNCHPAD"
+                    className="h-6 w-auto object-contain"
+                  />
                   <span
                     className="text-[9px] font-mono font-bold tracking-widest uppercase px-3 py-1 rounded-sm border"
-                    style={{ borderColor: `${accentColor}50`, color: accentColor, backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
+                    style={{ borderColor: accentColor, color: accentColor, backgroundColor: '#161622' }}
                   >
-                    {isSpanish ? 'CONFIDENCIAL // ACCESO VIP' : 'CONFIDENTIAL // VIP ACCESS'}
+                    {badgeText || (isSpanish ? 'CONFIDENCIAL // ACCESO VIP' : 'CONFIDENTIAL // VIP ACCESS')}
                   </span>
                 </div>
 
@@ -446,69 +864,64 @@ export default function EmailComposer({
                   <p className="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">{body}</p>
                 </div>
 
-                {/* VIP Proposal Card */}
+                {/* VIP Monolithic Proposal Card */}
                 <div
-                  className="bg-[#0d0d14] border border-white/10 rounded-xl p-6 sm:p-7 space-y-5 relative overflow-hidden"
+                  className="bg-[#0d0d18] border border-[#232338] rounded-xl p-6 sm:p-7 space-y-5 relative shadow-xl"
                   style={{
-                    boxShadow: `0 24px 60px -15px ${accentColor}25`,
+                    borderTop: `3px solid ${accentColor}`,
                   }}
                 >
-                  {/* Top Accent Gradient Line */}
-                  <div
-                    className="absolute top-0 left-0 right-0 h-[2px]"
-                    style={{
-                      background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
-                    }}
-                  />
-
-                  {/* Client Tag + Subtitle Metadata */}
-                  <div className="flex items-center justify-between">
+                  {/* Client Tag + Category Metadata */}
+                  <div className="flex items-center gap-2.5">
                     <span
                       className="inline-block text-[10px] font-mono font-bold tracking-widest px-2.5 py-1 rounded-sm border text-white"
-                      style={{ borderColor: `${accentColor}50`, backgroundColor: `${accentColor}18` }}
+                      style={{ borderColor: accentColor, backgroundColor: '#161622' }}
                     >
-                      [ {pitchClientName.toUpperCase()} ]
+                      [ {clientTag || pitchClientName} ]
                     </span>
-                    <span className="text-[9px] font-mono uppercase tracking-widest text-slate-500">
-                      {isSpanish ? 'PROPUESTA ESTRATÉGICA' : 'STRATEGIC PROPOSAL'}
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">
+                      {tagline || (isSpanish ? 'PROPUESTA ESTRATÉGICA' : 'STRATEGIC PROPOSAL')}
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-tight">
-                      {selectedPitch?.title || 'Pitch Deck Title'}
+                    <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">
+                      {cardTitle || selectedPitch?.title || 'Pitch Deck Title'}
                     </h3>
-                    {selectedPitch?.subtitle && (
+                    {(cardSubtitle || selectedPitch?.subtitle) && (
                       <p className="text-xs text-slate-400 mt-1.5 font-sans">
-                        Where ideas take off • {selectedPitch.subtitle.replace(/^Where ideas take off\s*•?\s*/gi, '').trim()}
+                        {(cardSubtitle || selectedPitch?.subtitle || '').replace(/^Where ideas take off\s*•?\s*/gi, '').trim() || (cardSubtitle || selectedPitch?.subtitle)}
                       </p>
                     )}
                   </div>
 
-                  <hr className="border-white/10" />
+                  <hr className="border-[#232336]" />
 
-                  {/* Key Highlights / Squads with Numbered Badges */}
+                  {/* Key Squads / Highlights as Interactive-style Tab Cards */}
                   <div className="space-y-3">
-                    <span className="text-[9px] font-mono font-bold tracking-widest text-slate-500 uppercase block">
-                      {isSpanish ? 'PUNTOS CLAVE & ALCANCE DE LA PROPUESTA' : 'KEY PROPOSAL HIGHLIGHTS & SCOPE'}
+                    <span className="text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase block">
+                      {pillarsLabel || (isSpanish ? 'PUNTOS CLAVE & ALCANCE DE LA PROPUESTA' : 'KEY PROPOSAL HIGHLIGHTS & SCOPE')}
                     </span>
-                    <div className="space-y-2">
-                      {keyPillars.slice(0, 3).map((pillar: { title: string; subtitle?: string }, i: number) => (
-                        <div key={i} className="flex items-start gap-2.5 text-xs">
+                    <div className="space-y-2.5">
+                      {customPillars.slice(0, 3).map((pillar, i: number) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-3 p-3 bg-[#131322] border border-[#24243a] rounded-lg transition-colors"
+                        >
                           <span
-                            className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 mt-0.5"
+                            className="font-mono text-[10px] font-bold px-2 py-0.5 rounded shrink-0"
                             style={{
                               color: accentColor,
-                              backgroundColor: `${accentColor}15`,
-                              border: `1px solid ${accentColor}30`,
+                              backgroundColor: '#1b1b2e',
+                              border: `1px solid ${accentColor}`,
                             }}
                           >
                             {String(i + 1).padStart(2, '0')}
                           </span>
-                          <div className="leading-snug">
-                            <span className="text-slate-100 font-bold">{pillar.title}</span>
+                          <div className="leading-snug min-w-0">
+                            <p className="text-slate-100 font-bold text-xs truncate">{pillar.title}</p>
                             {pillar.subtitle && (
-                              <span className="text-slate-400 font-normal ml-1">— {pillar.subtitle}</span>
+                              <p className="text-slate-400 text-[11px] font-normal truncate mt-0.5">{pillar.subtitle}</p>
                             )}
                           </div>
                         </div>
@@ -516,47 +929,50 @@ export default function EmailComposer({
                     </div>
                   </div>
 
-                  {/* CTA Button matching LandingCta */}
-                  <div className="text-center pt-3">
+                  {/* CTA Button with generous breathing room */}
+                  <div className="text-center pt-5 pb-1">
                     <div
-                      className="inline-flex items-center justify-center px-8 py-3.5 rounded-sm text-xs font-bold uppercase tracking-[0.2em] text-white cursor-pointer transition-transform hover:-translate-y-0.5"
+                      className="inline-flex items-center justify-center px-8 py-3.5 rounded-sm text-xs font-bold uppercase tracking-[0.2em] text-white cursor-pointer transition-transform hover:-translate-y-0.5 text-center"
                       style={{
                         backgroundColor: accentColor,
                         color: accentColor.toUpperCase() === '#FFFFFF' ? '#000000' : '#ffffff',
-                        boxShadow: `0 0 28px ${accentColor}50, 0 10px 20px -5px ${accentColor}70`,
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
                       }}
                     >
-                      {isSpanish ? 'VER PROPUESTA INTERACTIVA →' : 'VIEW INTERACTIVE PROPOSAL →'}
+                      {buttonText || (isSpanish ? 'VER PROPUESTA INTERACTIVA →' : 'VIEW INTERACTIVE PROPOSAL →')}
                     </div>
                   </div>
 
-                  <div className="text-center text-[10px] font-mono text-slate-500 pt-1">
+                  <div className="text-center text-[10px] font-mono text-slate-400">
                     {isSpanish ? 'Enlace de acceso directo:' : 'Direct access link:'}{' '}
                     <span className="underline cursor-pointer" style={{ color: accentColor }}>
-                      {isSpanish ? 'Abrir propuesta en el navegador →' : 'Open proposal in browser →'}
+                      {linkText || (isSpanish ? 'Abrir propuesta en el navegador →' : 'Open proposal in browser →')}
                     </span>
                   </div>
                 </div>
 
-                {/* Presenter Signature */}
-                <div className="p-3.5 bg-[#0a0a10] border border-white/10 rounded-sm flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-sm border flex items-center justify-center font-mono font-bold text-xs shrink-0"
-                    style={{ borderColor: `${accentColor}60`, backgroundColor: `${accentColor}18`, color: accentColor }}
+                {/* Presenter Signature Executive Card */}
+                <div className="p-3.5 bg-[#0d0d18] border border-[#232338] rounded-lg flex items-center gap-3">
+                  <span
+                    className="w-8 h-8 rounded-full flex items-center justify-center font-mono font-bold text-[11px] shrink-0"
+                    style={{
+                      backgroundColor: '#161626',
+                      border: '1px solid #2e2e46',
+                      color: accentColor,
+                    }}
                   >
-                    {(selectedIdentity?.displayName?.replace(/LAUNCHPAD Contacto/gi, 'LAUNCHPAD Contact') || 'LC')
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')
-                      .slice(0, 2)
-                      .toUpperCase()}
-                  </div>
-                  <div>
+                    EM
+                  </span>
+                  <div className="text-left leading-snug">
                     <p className="text-xs font-bold text-white tracking-tight">
-                      {selectedIdentity?.displayName?.replace(/LAUNCHPAD Contacto/gi, 'LAUNCHPAD Contact') || 'LAUNCHPAD Contact'}
+                      {selectedIdentity?.displayName?.toLowerCase().includes('contact')
+                        ? 'Eduardo Marval'
+                        : selectedIdentity?.displayName || 'Eduardo Marval'}
                     </p>
-                    <p className="text-[11px] font-mono text-slate-400">{selectedIdentity?.email}</p>
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 mt-0.5">
+                      {selectedIdentity?.signature
+                        ? selectedIdentity.signature.split('\n').filter(Boolean).slice(-1)[0]
+                        : 'Lead Solution Architect'}
+                    </p>
                   </div>
                 </div>
 

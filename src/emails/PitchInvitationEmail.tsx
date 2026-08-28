@@ -5,6 +5,7 @@ import {
   Head,
   Hr,
   Html,
+  Img,
   Link,
   Preview,
   Section,
@@ -18,8 +19,14 @@ export interface PitchInvitationEmailProps {
   pitchTitle: string;
   pitchSubtitle?: string;
   clientName?: string;
+  clientTag?: string;
+  tagline?: string;
+  pillarsLabel?: string;
   pitchUrl: string;
   accentColor?: string;
+  buttonText?: string;
+  linkText?: string;
+  badgeText?: string;
   keyPillars?: Array<{ title: string; subtitle?: string }>;
   senderName?: string;
   senderRole?: string;
@@ -34,8 +41,14 @@ export const PitchInvitationEmail = ({
   pitchTitle = 'DiDi Food Growth & Digital Ecosystem',
   pitchSubtitle = '2026 Daily Comms & Major Event Production',
   clientName = 'DiDi',
+  clientTag,
+  tagline,
+  pillarsLabel,
+  badgeText,
   pitchUrl = 'https://launchpad.themarvals.com',
   accentColor = '#FF7D00',
+  buttonText,
+  linkText,
   keyPillars = [
     { title: 'Creative Assets & Digital Design', subtitle: 'D-Channel, D-Hub & Email' },
     { title: 'Video & Motion Graphics', subtitle: 'Shooting, Editing & 2D/3D Motion' },
@@ -48,16 +61,15 @@ export const PitchInvitationEmail = ({
   brandName = 'LAUNCHPAD',
 }: PitchInvitationEmailProps) => {
   const isSpanish = locale === 'es';
+  const effectiveClientTag = clientTag || clientName || 'Client';
+  const effectiveTagline = tagline || (isSpanish ? 'PROPUESTA ESTRATÉGICA' : 'STRATEGIC PROPOSAL');
+  const effectivePillarsLabel = pillarsLabel || (isSpanish ? 'PUNTOS CLAVE & ALCANCE DE LA PROPUESTA' : 'KEY PROPOSAL HIGHLIGHTS & SCOPE');
+  const effectiveBadgeText = badgeText || (isSpanish ? 'CONFIDENCIAL // ACCESO VIP' : 'CONFIDENTIAL // VIP ACCESS');
 
-  // Sanitize subtitle to prevent duplicate "Where ideas take off"
-  const rawSubtitle = pitchSubtitle || '';
-  const sanitizedSubtitle = rawSubtitle
-    .replace(/^Where ideas take off\s*•?\s*/gi, '')
-    .replace(/^Where ideas take off\s*•?\s*/gi, '')
-    .trim();
-  const displaySubtitle = sanitizedSubtitle
-    ? `Where ideas take off • ${sanitizedSubtitle}`
-    : 'Where ideas take off';
+  // Subtitle (clean without forced prefix)
+  const displaySubtitle = pitchSubtitle
+    ? pitchSubtitle.replace(/^Where ideas take off\s*•?\s*/gi, '').trim() || pitchSubtitle
+    : '';
 
   // Split paragraphs to ensure bulletproof rendering across Gmail/Outlook
   const introParagraphs = (introMessage || '')
@@ -90,30 +102,60 @@ export const PitchInvitationEmail = ({
       <Preview>{previewText}</Preview>
       <Body style={mainStyle}>
         <Container style={containerStyle} className="mobile-container">
-          
-          {/* Top Brand Header (Pure typography matching LandingNav, 100% bulletproof) */}
-          <Section style={headerSection}>
-            <table width="100%" border={0} cellPadding={0} cellSpacing={0}>
-              <tr>
-                <td align="left" style={{ verticalAlign: 'middle' }}>
-                  <Text style={brandLogoText}>{brandName}</Text>
-                </td>
-                <td align="right" style={{ verticalAlign: 'middle' }}>
-                  <span
-                    style={{
-                      ...badgeStyle,
-                      borderColor: `${accentColor}50`,
-                      color: accentColor,
-                    }}
-                  >
-                    {isSpanish ? 'CONFIDENCIAL // ACCESO VIP' : 'CONFIDENTIAL // VIP ACCESS'}
-                  </span>
-                </td>
-              </tr>
-            </table>
-          </Section>
+          {/* Top Brand Header with Official Logo and Lower Border */}
+          <table width="100%" border={0} cellPadding={0} cellSpacing={0} role="presentation" style={{ marginBottom: '28px' }}>
+            <tr>
+              <td
+                align="left"
+                width="45%"
+                style={{
+                  paddingTop: '20px',
+                  paddingBottom: '22px',
+                  borderBottom: '1px solid #232336',
+                  verticalAlign: 'middle',
+                  width: '45%',
+                }}
+              >
+                <Img
+                  src="https://res.cloudinary.com/djwuzrjvz/image/upload/launchpad/lp_logo.png"
+                  width="145"
+                  height="auto"
+                  alt={brandName}
+                  style={{
+                    display: 'block',
+                    maxWidth: '145px',
+                    height: 'auto',
+                    border: 'none',
+                    outline: 'none',
+                  }}
+                />
+              </td>
+              <td
+                align="right"
+                width="55%"
+                style={{
+                  paddingTop: '20px',
+                  paddingBottom: '22px',
+                  borderBottom: '1px solid #232336',
+                  verticalAlign: 'middle',
+                  width: '55%',
+                  textAlign: 'right',
+                }}
+              >
+                <span
+                  style={{
+                    ...badgeStyle,
+                    borderColor: accentColor,
+                    color: accentColor,
+                  }}
+                >
+                  {effectiveBadgeText}
+                </span>
+              </td>
+            </tr>
+          </table>
 
-          {/* Intro Message Section (preserves paragraph breaks cleanly) */}
+          {/* Intro Message Section */}
           <Section style={introSection}>
             {recipientName && (
               <Text style={greetingText}>
@@ -127,157 +169,194 @@ export const PitchInvitationEmail = ({
             ))}
           </Section>
 
-          {/* ═══ VIP Proposal Card (Bulletproof Table Structure) ═══ */}
-          <Section style={cardSection} className="mobile-card">
-            
-            {/* Top Accent Line */}
-            <div
-              style={{
-                height: '2px',
-                backgroundColor: accentColor,
-                marginBottom: '20px',
-                borderRadius: '2px',
-              }}
-            />
-
-            {/* Client Tag + Subtitle Metadata */}
-            <table width="100%" border={0} cellPadding={0} cellSpacing={0} style={{ marginBottom: '14px' }}>
-              <tr>
-                <td align="left" style={{ verticalAlign: 'middle' }}>
+          {/* ═══ VIP Monolithic Proposal Card (Bulletproof Table with explicit TD padding) ═══ */}
+          <table
+            width="100%"
+            border={0}
+            cellPadding={0}
+            cellSpacing={0}
+            role="presentation"
+            style={{
+              backgroundColor: '#0d0d18',
+              border: '1px solid #232338',
+              borderTop: `3px solid ${accentColor}`,
+              borderRadius: '10px',
+              marginBottom: '22px',
+            }}
+          >
+            <tr>
+              <td
+                style={{
+                  padding: '30px 28px 26px 28px',
+                }}
+                className="mobile-card"
+              >
+                {/* Client Tag + Category Metadata */}
+                <div style={{ marginBottom: '16px' }}>
                   <span
                     style={{
                       ...clientPillStyle,
-                      borderColor: `${accentColor}60`,
-                      backgroundColor: `${accentColor}20`,
+                      borderColor: accentColor,
                       color: '#ffffff',
+                      marginRight: '10px',
                     }}
                   >
-                    [ {clientName.toUpperCase()} ]
+                    [ {effectiveClientTag} ]
                   </span>
-                </td>
-                <td align="right" style={{ verticalAlign: 'middle' }}>
                   <span style={taglineMetaStyle}>
-                    {isSpanish ? 'PROPUESTA ESTRATÉGICA' : 'STRATEGIC PROPOSAL'}
+                    {effectiveTagline}
                   </span>
-                </td>
-              </tr>
-            </table>
+                </div>
 
-            {/* Pitch Title */}
-            <Text style={pitchTitleStyle} className="mobile-title">
-              {pitchTitle}
-            </Text>
-
-            {/* Pitch Subtitle */}
-            <Text style={pitchSubtitleStyle}>
-              {displaySubtitle}
-            </Text>
-
-            <Hr style={dividerStyle} />
-
-            {/* Key Pillars Highlights (Table Layout) */}
-            {keyPillars && keyPillars.length > 0 && (
-              <div style={{ margin: '20px 0 24px 0' }}>
-                <Text style={pillarsLabelStyle}>
-                  {isSpanish ? 'PUNTOS CLAVE & ALCANCE DE LA PROPUESTA' : 'KEY PROPOSAL HIGHLIGHTS & SCOPE'}
+                {/* Pitch Title */}
+                <Text style={pitchTitleStyle} className="mobile-title">
+                  {pitchTitle}
                 </Text>
-                
-                <table width="100%" border={0} cellPadding={0} cellSpacing={0}>
-                  {keyPillars.slice(0, 3).map((pillar, idx) => {
-                    const num = String(idx + 1).padStart(2, '0');
-                    return (
-                      <tr key={idx}>
-                        <td style={{ padding: '6px 0', verticalAlign: 'top', width: '32px' }}>
-                          <span
-                            style={{
-                              fontFamily: 'monospace',
-                              fontSize: '11px',
-                              fontWeight: 'bold',
-                              color: accentColor,
-                              backgroundColor: `${accentColor}18`,
-                              border: `1px solid ${accentColor}40`,
-                              padding: '2px 6px',
-                              borderRadius: '3px',
-                              display: 'inline-block',
-                            }}
-                          >
-                            {num}
-                          </span>
-                        </td>
-                        <td style={{ padding: '6px 0 6px 10px', verticalAlign: 'middle' }}>
-                          <Text style={pillarTitleStyle}>
-                            <span style={{ color: '#ffffff', fontWeight: 'bold' }}>{pillar.title}</span>
-                            {pillar.subtitle && (
-                              <span style={pillarSubtitleStyle}> — {pillar.subtitle}</span>
-                            )}
-                          </Text>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </table>
-              </div>
-            )}
 
-            {/* CTA Button */}
-            <Section style={{ textAlign: 'center', marginTop: '24px', marginBottom: '14px' }}>
-              <Button
-                href={pitchUrl}
-                style={{
-                  ...buttonStyle,
-                  backgroundColor: accentColor,
-                  color: accentColor.toUpperCase() === '#FFFFFF' ? '#000000' : '#ffffff',
-                }}
-                className="mobile-btn"
-              >
-                {isSpanish ? 'VER PROPUESTA INTERACTIVA →' : 'VIEW INTERACTIVE PROPOSAL →'}
-              </Button>
-            </Section>
+                {/* Pitch Subtitle */}
+                {displaySubtitle ? (
+                  <Text style={pitchSubtitleStyle}>
+                    {displaySubtitle}
+                  </Text>
+                ) : null}
 
-            {/* Direct Link fallback */}
-            <div style={{ textAlign: 'center', marginTop: '14px' }}>
-              <Text style={fallbackLinkText}>
-                {isSpanish ? 'Enlace de acceso directo:' : 'Direct access link:'}{' '}
-                <Link href={pitchUrl} style={{ color: accentColor, textDecoration: 'underline' }}>
-                  {isSpanish ? 'Abrir propuesta interactiva en el navegador →' : 'Open interactive proposal in browser →'}
-                </Link>
-              </Text>
-            </div>
-          </Section>
+                <Hr style={dividerStyle} />
 
-          {/* Presenter Executive Signature Card */}
-          <Section style={signatureSection}>
-            <table width="100%" border={0} cellPadding={0} cellSpacing={0}>
-              <tr>
-                <td style={{ verticalAlign: 'middle', width: '40px', paddingRight: '12px' }}>
-                  <div
-                    style={{
-                      ...avatarStyle,
-                      borderColor: `${accentColor}50`,
-                      backgroundColor: `${accentColor}18`,
-                      color: accentColor,
-                    }}
-                  >
-                    {senderName
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')
-                      .slice(0, 2)
-                      .toUpperCase()}
+                {/* Key Squads / Highlights as Interactive-style Tab Cards */}
+                {keyPillars && keyPillars.length > 0 && (
+                  <div style={{ margin: '22px 0 26px 0' }}>
+                    <Text style={pillarsLabelStyle}>
+                      {effectivePillarsLabel}
+                    </Text>
+                    
+                    {keyPillars.slice(0, 3).map((pillar, idx) => {
+                      const num = String(idx + 1).padStart(2, '0');
+                      return (
+                        <table
+                          key={idx}
+                          width="100%"
+                          border={0}
+                          cellPadding={0}
+                          cellSpacing={0}
+                          role="presentation"
+                          style={squadTabTableStyle}
+                        >
+                          <tr>
+                            <td style={squadTabCellStyle}>
+                              <table width="100%" border={0} cellPadding={0} cellSpacing={0} role="presentation">
+                                <tr>
+                                  <td width="36" style={{ verticalAlign: 'middle', width: '36px' }}>
+                                    <span
+                                      style={{
+                                        fontFamily: 'monospace, Courier, sans-serif',
+                                        fontSize: '11px',
+                                        fontWeight: 'bold',
+                                        color: accentColor,
+                                        backgroundColor: '#1b1b2e',
+                                        border: `1px solid ${accentColor}`,
+                                        padding: '3px 7px',
+                                        borderRadius: '4px',
+                                        display: 'inline-block',
+                                      }}
+                                    >
+                                      {num}
+                                    </span>
+                                  </td>
+                                  <td style={{ paddingLeft: '14px', verticalAlign: 'middle' }}>
+                                    <Text style={squadTitleStyle}>
+                                      {pillar.title}
+                                    </Text>
+                                    {pillar.subtitle && (
+                                      <Text style={squadSubtitleStyle}>
+                                        {pillar.subtitle}
+                                      </Text>
+                                    )}
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+                      );
+                    })}
                   </div>
-                </td>
-                <td style={{ verticalAlign: 'middle' }}>
-                  <Text style={signerNameStyle}>{senderName}</Text>
-                  <Text style={signerRoleStyle}>{senderRole}</Text>
-                  {senderEmail && (
-                    <Link href={`mailto:${senderEmail}`} style={signerEmailStyle}>
-                      {senderEmail}
+                )}
+
+                {/* CTA Button with generous breathing room */}
+                <Section style={{ textAlign: 'center', marginTop: '30px', marginBottom: '14px' }}>
+                  <Button
+                    href={pitchUrl}
+                    style={{
+                      ...buttonStyle,
+                      backgroundColor: accentColor,
+                      color: accentColor.toUpperCase() === '#FFFFFF' ? '#000000' : '#ffffff',
+                    }}
+                    className="mobile-btn"
+                  >
+                    {buttonText || (isSpanish ? 'VER PROPUESTA INTERACTIVA →' : 'VIEW INTERACTIVE PROPOSAL →')}
+                  </Button>
+                </Section>
+
+                {/* Direct Link fallback */}
+                <div style={{ textAlign: 'center', marginTop: '12px', marginBottom: '4px' }}>
+                  <Text style={fallbackLinkText}>
+                    {isSpanish ? 'Enlace de acceso directo:' : 'Direct access link:'}{' '}
+                    <Link href={pitchUrl} style={{ color: accentColor, textDecoration: 'underline' }}>
+                      {linkText || (isSpanish ? 'Abrir propuesta interactiva en el navegador →' : 'Open interactive proposal in browser →')}
                     </Link>
-                  )}
-                </td>
-              </tr>
-            </table>
-          </Section>
+                  </Text>
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          {/* Presenter Sign-off (Executive Card with explicit TD padding) */}
+          <table
+            width="100%"
+            border={0}
+            cellPadding={0}
+            cellSpacing={0}
+            role="presentation"
+            style={{
+              backgroundColor: '#0d0d18',
+              border: '1px solid #232338',
+              borderRadius: '8px',
+              marginBottom: '20px',
+            }}
+          >
+            <tr>
+              <td style={{ padding: '16px 20px' }}>
+                <table width="100%" border={0} cellPadding={0} cellSpacing={0} role="presentation">
+                  <tr>
+                    <td width="38" style={{ verticalAlign: 'middle', width: '38px' }}>
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          width: '32px',
+                          height: '32px',
+                          lineHeight: '32px',
+                          textAlign: 'center',
+                          borderRadius: '50%',
+                          backgroundColor: '#161626',
+                          border: '1px solid #2e2e46',
+                          color: accentColor,
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          fontFamily: 'monospace, Courier, sans-serif',
+                        }}
+                      >
+                        EM
+                      </span>
+                    </td>
+                    <td style={{ paddingLeft: '14px', verticalAlign: 'middle' }}>
+                      <Text style={signerNameStyle}>{senderName}</Text>
+                      <Text style={signerRoleStyle}>{senderRole}</Text>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
 
           {/* Footer */}
           <Section style={footerSection}>
@@ -313,16 +392,17 @@ const mainStyle: React.CSSProperties = {
 };
 
 const containerStyle: React.CSSProperties = {
+  width: '100%',
   maxWidth: '580px',
   margin: '0 auto',
   backgroundColor: '#07070b',
-  padding: '0 12px',
+  padding: '0 16px',
 };
 
 const headerSection: React.CSSProperties = {
-  padding: '16px 0',
-  borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-  marginBottom: '24px',
+  padding: '24px 0 20px 0',
+  borderBottom: '1px solid #232336',
+  marginBottom: '28px',
 };
 
 const brandLogoText: React.CSSProperties = {
@@ -336,15 +416,18 @@ const brandLogoText: React.CSSProperties = {
 
 const badgeStyle: React.CSSProperties = {
   fontSize: '9px',
-  fontFamily: 'monospace',
+  fontFamily: 'monospace, Courier, sans-serif',
   fontWeight: 'bold',
-  letterSpacing: '0.18em',
+  letterSpacing: '0.15em',
   textTransform: 'uppercase',
   padding: '4px 10px',
   borderRadius: '3px',
-  border: '1px solid rgba(255, 255, 255, 0.15)',
-  backgroundColor: 'rgba(255, 255, 255, 0.03)',
+  border: '1px solid #333348',
+  backgroundColor: '#161622',
   display: 'inline-block',
+  maxWidth: '100%',
+  boxSizing: 'border-box',
+  textAlign: 'center',
 };
 
 const introSection: React.CSSProperties = {
@@ -367,80 +450,100 @@ const introParagraph: React.CSSProperties = {
 };
 
 const cardSection: React.CSSProperties = {
-  backgroundColor: '#0d0d14',
-  border: '1px solid rgba(255, 255, 255, 0.12)',
-  borderRadius: '12px',
+  backgroundColor: '#0d0d18',
+  border: '1px solid #232338',
+  borderRadius: '10px',
   padding: '28px 24px',
-  marginBottom: '24px',
+  marginBottom: '20px',
 };
 
 const clientPillStyle: React.CSSProperties = {
   fontSize: '10px',
-  fontFamily: 'monospace',
+  fontFamily: 'monospace, Courier, sans-serif',
   fontWeight: 'bold',
-  letterSpacing: '0.2em',
-  padding: '3px 8px',
+  letterSpacing: '0.12em',
+  padding: '4px 10px',
   borderRadius: '3px',
-  border: '1px solid rgba(255, 255, 255, 0.2)',
+  border: '1px solid #38384f',
+  backgroundColor: '#161622',
   display: 'inline-block',
 };
 
 const taglineMetaStyle: React.CSSProperties = {
-  fontSize: '9px',
-  fontFamily: 'monospace',
-  color: '#64748b',
-  letterSpacing: '0.16em',
+  fontSize: '10px',
+  fontFamily: 'monospace, Courier, sans-serif',
+  fontWeight: 'bold',
+  color: '#94a3b8',
+  letterSpacing: '0.12em',
   textTransform: 'uppercase',
+  display: 'inline-block',
+  textAlign: 'right',
 };
 
 const pitchTitleStyle: React.CSSProperties = {
-  fontSize: '22px',
-  lineHeight: '28px',
-  fontWeight: 900,
+  fontSize: '24px',
+  lineHeight: '30px',
+  fontWeight: 800,
   color: '#ffffff',
   letterSpacing: '-0.02em',
-  margin: '6px 0 6px 0',
+  margin: '8px 0 6px 0',
 };
 
 const pitchSubtitleStyle: React.CSSProperties = {
-  fontSize: '12px',
+  fontSize: '13px',
   lineHeight: '18px',
-  color: '#94a3b8',
+  color: '#cbd5e1',
   margin: 0,
 };
 
 const dividerStyle: React.CSSProperties = {
-  borderColor: 'rgba(255, 255, 255, 0.08)',
-  margin: '18px 0 16px 0',
+  border: 'none',
+  borderTop: '1px solid #232336',
+  margin: '20px 0',
 };
 
 const pillarsLabelStyle: React.CSSProperties = {
-  fontSize: '9px',
-  fontFamily: 'monospace',
+  fontSize: '10px',
+  fontFamily: 'monospace, Courier, sans-serif',
   fontWeight: 'bold',
-  letterSpacing: '0.18em',
-  color: '#64748b',
+  letterSpacing: '0.15em',
+  color: '#94a3b8',
   textTransform: 'uppercase',
-  margin: '0 0 10px 0',
+  margin: '0 0 12px 0',
 };
 
-const pillarTitleStyle: React.CSSProperties = {
+const squadTabTableStyle: React.CSSProperties = {
+  marginBottom: '10px',
+  width: '100%',
+};
+
+const squadTabCellStyle: React.CSSProperties = {
+  backgroundColor: '#131322',
+  border: '1px solid #24243a',
+  borderRadius: '8px',
+  padding: '12px 14px',
+};
+
+const squadTitleStyle: React.CSSProperties = {
   fontSize: '13px',
-  margin: 0,
+  fontWeight: 'bold',
+  color: '#ffffff',
+  margin: '0 0 2px 0',
   lineHeight: '18px',
 };
 
-const pillarSubtitleStyle: React.CSSProperties = {
-  fontSize: '12px',
+const squadSubtitleStyle: React.CSSProperties = {
+  fontSize: '11px',
   color: '#94a3b8',
-  fontWeight: 'normal',
+  margin: 0,
+  lineHeight: '15px',
 };
 
 const buttonStyle: React.CSSProperties = {
   fontSize: '12px',
-  fontWeight: 800,
+  fontWeight: 'bold',
   letterSpacing: '0.16em',
-  padding: '14px 28px',
+  padding: '14px 32px',
   borderRadius: '4px',
   textDecoration: 'none',
   display: 'inline-block',
@@ -449,66 +552,48 @@ const buttonStyle: React.CSSProperties = {
 
 const fallbackLinkText: React.CSSProperties = {
   fontSize: '11px',
-  color: '#64748b',
+  color: '#94a3b8',
   margin: 0,
   lineHeight: '16px',
 };
 
-const signatureSection: React.CSSProperties = {
-  padding: '14px 18px',
-  backgroundColor: '#0a0a10',
-  border: '1px solid rgba(255, 255, 255, 0.08)',
+const signatureCardSection: React.CSSProperties = {
+  backgroundColor: '#0d0d18',
+  border: '1px solid #232338',
   borderRadius: '8px',
-  marginBottom: '24px',
-};
-
-const avatarStyle: React.CSSProperties = {
-  width: '36px',
-  height: '36px',
-  borderRadius: '4px',
-  border: '1px solid rgba(255, 255, 255, 0.2)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: '12px',
-  fontWeight: 'bold',
-  fontFamily: 'monospace',
-  textAlign: 'center',
-  lineHeight: '34px',
+  padding: '14px 18px',
+  marginBottom: '20px',
 };
 
 const signerNameStyle: React.CSSProperties = {
-  fontSize: '13px',
+  fontSize: '14px',
   fontWeight: 800,
   color: '#ffffff',
-  margin: 0,
-  lineHeight: '16px',
+  margin: '0 0 2px 0',
+  lineHeight: '18px',
+  letterSpacing: '-0.01em',
 };
 
 const signerRoleStyle: React.CSSProperties = {
   fontSize: '11px',
   color: '#94a3b8',
-  margin: '2px 0 0 0',
-};
-
-const signerEmailStyle: React.CSSProperties = {
-  fontSize: '11px',
-  color: '#64748b',
-  textDecoration: 'none',
-  fontFamily: 'monospace',
+  fontFamily: 'monospace, Courier, sans-serif',
+  textTransform: 'uppercase',
+  letterSpacing: '0.12em',
+  margin: 0,
 };
 
 const footerSection: React.CSSProperties = {
   textAlign: 'center',
-  padding: '16px 0 24px 0',
-  borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+  padding: '18px 0 24px 0',
+  borderTop: '1px solid #232336',
 };
 
 const footerLegalText: React.CSSProperties = {
   fontSize: '11px',
   color: '#64748b',
   margin: '0 0 6px 0',
-  fontFamily: 'monospace',
+  fontFamily: 'monospace, Courier, sans-serif',
 };
 
 const footerNoteText: React.CSSProperties = {

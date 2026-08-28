@@ -56,7 +56,25 @@ export async function POST(request: Request) {
   const requestId = formData.get('requestId');
   const templateType = formData.get('templateType');
   const pitchId = formData.get('pitchId');
+  const cardTitle = formData.get('cardTitle');
+  const cardSubtitle = formData.get('cardSubtitle');
+  const clientTag = formData.get('clientTag');
+  const tagline = formData.get('tagline');
+  const pillarsLabel = formData.get('pillarsLabel');
+  const keyPillarsRaw = formData.get('keyPillars');
+  const buttonText = formData.get('buttonText');
+  const linkText = formData.get('linkText');
+  const badgeText = formData.get('badgeText');
   const locale = formData.get('locale');
+
+  let keyPillarsParsed: Array<{ title: string; subtitle?: string }> | undefined = undefined;
+  if (typeof keyPillarsRaw === 'string' && keyPillarsRaw.trim()) {
+    try {
+      keyPillarsParsed = JSON.parse(keyPillarsRaw);
+    } catch {
+      // ignore JSON parse failure
+    }
+  }
 
   if (typeof senderIdentityId !== 'string' || !senderIdentityId) {
     return NextResponse.json({ error: 'Selecciona un remitente' }, { status: 400 });
@@ -97,6 +115,15 @@ export async function POST(request: Request) {
       requestId,
       templateType: templateType === 'pitch' ? 'pitch' : 'standard',
       pitchId: typeof pitchId === 'string' && pitchId ? pitchId : undefined,
+      cardTitle: typeof cardTitle === 'string' && cardTitle.trim() ? cardTitle.trim() : undefined,
+      cardSubtitle: typeof cardSubtitle === 'string' && cardSubtitle.trim() ? cardSubtitle.trim() : undefined,
+      clientTag: typeof clientTag === 'string' && clientTag.trim() ? clientTag.trim() : undefined,
+      tagline: typeof tagline === 'string' && tagline.trim() ? tagline.trim() : undefined,
+      pillarsLabel: typeof pillarsLabel === 'string' && pillarsLabel.trim() ? pillarsLabel.trim() : undefined,
+      keyPillars: keyPillarsParsed,
+      buttonText: typeof buttonText === 'string' ? buttonText : undefined,
+      linkText: typeof linkText === 'string' ? linkText : undefined,
+      badgeText: typeof badgeText === 'string' && badgeText.trim() ? badgeText.trim() : undefined,
       locale: typeof locale === 'string' && locale ? locale : 'es',
     }, attachments);
 

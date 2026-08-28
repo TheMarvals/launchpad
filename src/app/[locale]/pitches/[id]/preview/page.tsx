@@ -19,25 +19,44 @@ export default async function PitchPreviewPage({ params }: PitchPreviewPageProps
     // Not authenticated — render with defaults
   }
 
-  const pitch = await prisma.pitch.findUnique({
-    where: { id },
-    include: {
-      client: true,
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          cargo: true,
-          telefono: true,
+  const [pitch, showcaseProjects, senderIdentities] = await Promise.all([
+    prisma.pitch.findUnique({
+      where: { id },
+      include: {
+        client: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            cargo: true,
+            telefono: true,
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.showcaseProject.findMany({
+      where: { isActive: true },
+      include: { images: true },
+      orderBy: { order: 'asc' },
+    }),
+    prisma.emailSenderIdentity.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: 'asc' },
+    }),
+  ]);
 
   if (!pitch) {
     notFound();
   }
 
-  return <PitchPDF pitch={pitch} companyProfile={companyProfile} locale={locale} />;
+  return (
+    <PitchPDF
+      pitch={pitch}
+      companyProfile={companyProfile}
+      senderIdentities={senderIdentities}
+      showcaseProjects={showcaseProjects}
+      locale={locale}
+    />
+  );
 }

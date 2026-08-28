@@ -116,6 +116,15 @@ export interface NewEmailInput {
   requestId: string;
   templateType?: 'standard' | 'pitch';
   pitchId?: string;
+  cardTitle?: string;
+  cardSubtitle?: string;
+  clientTag?: string;
+  tagline?: string;
+  pillarsLabel?: string;
+  keyPillars?: Array<{ title: string; subtitle?: string }>;
+  buttonText?: string;
+  linkText?: string;
+  badgeText?: string;
   locale?: string;
 }
 
@@ -157,7 +166,7 @@ export async function sendNewEmail(
 
       const slides = Array.isArray(pitch.slides) ? (pitch.slides as any[]) : [];
       const pillarsSlide = slides.find((s) => s.type === 'pillars');
-      const keyPillars = pillarsSlide && Array.isArray(pillarsSlide.cards) && pillarsSlide.cards.length > 0
+      const defaultPillars = pillarsSlide && Array.isArray(pillarsSlide.cards) && pillarsSlide.cards.length > 0
         ? pillarsSlide.cards.map((c: any) => ({
             title: c.title,
             subtitle: c.subtitle || (c.description ? c.description.slice(0, 50) : undefined),
@@ -168,16 +177,48 @@ export async function sendNewEmail(
             { title: 'Roadmap & Rendimiento', subtitle: 'Ejecución y Escalamiento' },
           ];
 
+      const keyPillars = input.keyPillars && input.keyPillars.length > 0
+        ? input.keyPillars
+        : defaultPillars;
+
+      const senderSig = sender.signature?.trim() || '';
+      const sigLines = senderSig.split('\n').map((l) => l.trim()).filter(Boolean);
+      let resolvedSenderName = sender.displayName || pitch.user?.name || 'Eduardo Marval';
+      let resolvedSenderRole = pitch.user?.cargo || 'Lead Solution Architect';
+
+      if (resolvedSenderName.toLowerCase().includes('contact') || resolvedSenderName.toLowerCase().includes('launchpad')) {
+        if (sigLines[0] && !sigLines[0].toLowerCase().includes('contact') && !sigLines[0].toLowerCase().includes('launchpad')) {
+          resolvedSenderName = sigLines[0];
+          if (sigLines[1]) resolvedSenderRole = sigLines.slice(1).join(' · ');
+        } else if (pitch.user?.name) {
+          resolvedSenderName = pitch.user.name;
+        } else {
+          resolvedSenderName = 'Eduardo Marval';
+        }
+      } else if (sigLines.length > 0) {
+        if (sigLines[0].toLowerCase() === resolvedSenderName.toLowerCase() && sigLines[1]) {
+          resolvedSenderRole = sigLines.slice(1).join(' · ');
+        } else if (sigLines.length > 0 && !sigLines[0].toLowerCase().includes('contact')) {
+          resolvedSenderRole = sigLines.join(' · ');
+        }
+      }
+
       reactComponent = PitchInvitationEmail({
         introMessage: input.body,
-        pitchTitle: pitch.title,
-        pitchSubtitle: pitch.subtitle || undefined,
+        pitchTitle: input.cardTitle || pitch.title,
+        pitchSubtitle: input.cardSubtitle !== undefined ? input.cardSubtitle : (pitch.subtitle || undefined),
         clientName,
+        clientTag: input.clientTag,
+        tagline: input.tagline,
+        pillarsLabel: input.pillarsLabel,
+        badgeText: input.badgeText?.trim() || undefined,
         pitchUrl,
         accentColor,
+        buttonText: input.buttonText?.trim() || undefined,
+        linkText: input.linkText?.trim() || undefined,
         keyPillars,
-        senderName: (sender.displayName || pitch.user?.name || 'LAUNCHPAD Contact').replace(/LAUNCHPAD Contacto/gi, 'LAUNCHPAD Contact'),
-        senderRole: pitch.user?.cargo || 'Lead Solution Architect',
+        senderName: resolvedSenderName,
+        senderRole: resolvedSenderRole,
         senderEmail: sender.email,
         locale: input.locale || 'es',
       });

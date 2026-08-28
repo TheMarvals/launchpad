@@ -17,8 +17,33 @@ export default function PitchActions({ pitchId }: PitchActionsProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDuplicating, setIsDuplicating] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const handleDownloadPdf = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isDownloadingPdf || !pitchId) return;
+    setIsDownloadingPdf(true);
+    try {
+      const response = await fetch(`/api/pitches/${pitchId}/pdf`);
+      if (!response.ok) throw new Error('Failed to generate PDF');
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `pitch-${pitchId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error downloading pitch PDF:', err);
+      alert('Error al generar el PDF.');
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -52,16 +77,22 @@ export default function PitchActions({ pitchId }: PitchActionsProps) {
         <span className="material-icons text-[18px]">slideshow</span>
       </Link>
 
-      <a
-        href={`/api/pitches/${pitchId}/pdf`}
-        className="w-8 h-8 flex items-center justify-center text-muted hover:text-primary transition-colors"
-        title="Descargar PDF"
-        target="_blank"
-        rel="noreferrer"
-        download
+      <button
+        type="button"
+        onClick={handleDownloadPdf}
+        disabled={isDownloadingPdf}
+        className="w-8 h-8 flex items-center justify-center text-muted hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        title={isDownloadingPdf ? 'Generando PDF…' : 'Descargar PDF'}
       >
-        <span className="material-icons text-[18px]">picture_as_pdf</span>
-      </a>
+        {isDownloadingPdf ? (
+          <svg className="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>
+        ) : (
+          <span className="material-icons text-[18px]">picture_as_pdf</span>
+        )}
+      </button>
 
       <button
         onClick={handleCopyLink}

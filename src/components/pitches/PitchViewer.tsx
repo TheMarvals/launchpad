@@ -404,9 +404,18 @@ export function JesperCard({
         transition: 'transform 0.15s ease-out, box-shadow 0.4s ease',
       }}
     >
-      {/* Full-bleed image — always first image */}
+      {/* Full-bleed media — image or animated video */}
       <div className="absolute inset-0 overflow-hidden">
-        {firstImg ? (
+        {item.mediaType === 'video' || (firstImg && firstImg.match(/\.(mp4|webm|mov)(\?.*)?$/i)) ? (
+          <video
+            src={firstImg}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover select-none pointer-events-none transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+        ) : firstImg ? (
           <img
             src={firstImg}
             alt={item.title}
@@ -491,6 +500,7 @@ interface PitchViewerProps {
     slides: PitchSlide[] | any;
   };
   companyProfile?: any;
+  senderIdentities?: any[];
   showcaseProjects?: any[];
   isEditorPreview?: boolean;
   initialMode?: 'deck' | 'scroll';
@@ -500,6 +510,7 @@ interface PitchViewerProps {
 export default function PitchViewer({
   pitch,
   companyProfile,
+  senderIdentities = [],
   showcaseProjects = [],
   isEditorPreview = false,
   initialMode = 'deck',
@@ -512,13 +523,14 @@ export default function PitchViewer({
   const [activeMediaModal, setActiveMediaModal] = useState<ShowcaseItem | null>(null);
   const [showContactModal, setShowContactModal] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const openMediaModal = (item: ShowcaseItem) => {
     setActiveMediaModal(item);
   };
 
-  const rawSlides = Array.isArray(pitch.slides) ? pitch.slides : [];
+  const rawSlides = Array.isArray(pitch.slides) ? (pitch.slides as any[]).filter((s) => s.type !== 'emailConfig') : [];
   const slides: PitchSlide[] = rawSlides.length > 0 ? rawSlides : [
     {
       id: 'default-1',
@@ -540,10 +552,37 @@ export default function PitchViewer({
 
   const clientDisplayName = pitch.client?.razonSocial || pitch.clientName || currentSlide.clientName;
   const brandName = companyProfile?.brandNameHeader || 'LAUNCHPAD';
-  const presenterName = currentSlide.presenterName || pitch.user?.name || companyProfile?.user?.name || 'Eduardo Marval';
-  const presenterRole = currentSlide.presenterRole || pitch.user?.cargo || companyProfile?.user?.cargo || 'Lead Solution Architect';
-  const presenterEmail = companyProfile?.email || 'e.marval@themarvals.com';
-  const presenterPhone = companyProfile?.phone || '+569 94438833';
+
+  // Authorized Sender Identity / Signature from Settings
+  const primarySender = senderIdentities?.[0] || null;
+  const rawSig = primarySender?.signature?.trim() || '';
+  const sigLines = rawSig.split('\n').map((l: string) => l.trim()).filter(Boolean);
+
+  // Extract human presenter name (never use generic contact labels)
+  let presenterName = currentSlide.presenterName || pitch.user?.name || companyProfile?.user?.name || '';
+  if (!presenterName || presenterName.toLowerCase().includes('contact') || presenterName.toLowerCase().includes('launchpad')) {
+    if (primarySender?.displayName && !primarySender.displayName.toLowerCase().includes('contact') && !primarySender.displayName.toLowerCase().includes('launchpad')) {
+      presenterName = primarySender.displayName;
+    } else if (sigLines[0] && !sigLines[0].toLowerCase().includes('contact') && !sigLines[0].toLowerCase().includes('launchpad')) {
+      presenterName = sigLines[0];
+    } else {
+      presenterName = 'Eduardo Marval';
+    }
+  }
+
+  // Extract human presenter role
+  let presenterRole = currentSlide.presenterRole || pitch.user?.cargo || '';
+  if (!presenterRole) {
+    if (sigLines.length > 1) {
+      presenterRole = sigLines.slice(1).join(' • ');
+    } else if (sigLines.length === 1 && sigLines[0].toLowerCase() !== presenterName.toLowerCase()) {
+      presenterRole = sigLines[0];
+    } else if (companyProfile?.user?.cargo || companyProfile?.systemsTitle) {
+      presenterRole = companyProfile?.user?.cargo || companyProfile?.systemsTitle;
+    } else {
+      presenterRole = 'Lead Solution Architect';
+    }
+  }
 
   // Dynamic Theme & Font resolution
   const { color: accentColor, font: titleFont, style: titleStyle } = parsePitchTheme(pitch.theme, pitch.title, clientDisplayName);
@@ -605,6 +644,33 @@ export default function PitchViewer({
       containerRef.current.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
     } else {
       document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+    }
+  };
+
+  const handleDownloadPdf = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isGeneratingPdf || !pitch.id) return;
+    setIsGeneratingPdf(true);
+    try {
+      const response = await fetch(`/api/pitches/${pitch.id}/pdf`);
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const cleanTitle = (pitch.title || 'pitch').replace(/[^a-zA-Z0-9_-]/g, '_');
+      link.download = `${cleanTitle}-deck.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error downloading PDF:', err);
+      alert(locale === 'en' ? 'Failed to generate PDF. Please try again.' : 'Error al generar el PDF. Por favor intenta de nuevo.');
+    } finally {
+      setIsGeneratingPdf(false);
     }
   };
 
@@ -673,9 +739,14 @@ export default function PitchViewer({
     }
 
     if (isHero) {
+      const isLongTitle = text.length > 25;
       return (
         <h1
-          className="text-[clamp(3rem,9vw,6.5rem)] font-black tracking-tighter leading-none mb-3 select-none text-white"
+          className={`${
+            isLongTitle
+              ? 'text-[clamp(1.75rem,4.5vw,3rem)] leading-tight max-w-[850px] mx-auto tracking-tight'
+              : 'text-[clamp(2.75rem,8vw,5.5rem)] leading-none tracking-tighter'
+          } font-black mb-3 select-none text-white`}
           style={{
             fontFamily: titleFontFamily,
             WebkitTextFillColor: '#ffffff',
@@ -733,8 +804,18 @@ export default function PitchViewer({
   const renderSlideContent = (slide: PitchSlide, index: number) => {
     switch (slide.type) {
       case 'hero':
+        const heroTitle = (slide.title && slide.title.toUpperCase() === 'LAUNCHPAD') 
+          ? 'LAUNCHPAD' 
+          : (slide.title && !slide.title.toLowerCase().includes('rfi') && !slide.title.toLowerCase().includes('proposal') && slide.title.length <= 15)
+            ? slide.title
+            : brandName || 'LAUNCHPAD';
+
+        const heroSubtitle = (slide.title && slide.title !== heroTitle && slide.title !== 'LAUNCHPAD')
+          ? slide.title
+          : slide.subtitle || pitch.subtitle || 'Global Internal Communications & Multimedia Production';
+
         return (
-          <div className="relative z-10 max-w-[900px] w-full text-center px-4 md:px-6 my-auto animate-fade-in">
+          <div className="relative z-10 max-w-[960px] w-full text-center px-4 md:px-6 my-auto animate-fade-in">
             {slide.badge && (
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-white/5 border border-white/10 rounded-full mb-4 backdrop-blur-md">
                 <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: accentColor }} />
@@ -744,14 +825,14 @@ export default function PitchViewer({
               </div>
             )}
 
-            {renderStyledTitle(slide.title || brandName, true)}
+            {renderStyledTitle(heroTitle, true)}
 
-            {slide.subtitle && (
+            {heroSubtitle && (
               <p
                 className="text-[clamp(1.2rem,2.5vw,1.8rem)] font-bold tracking-tight mb-4 text-white/90"
                 style={{ fontFamily: "'Montserrat', sans-serif" }}
               >
-                {slide.subtitle}
+                {heroSubtitle}
               </p>
             )}
 
@@ -773,7 +854,7 @@ export default function PitchViewer({
             )}
 
             {slide.content && (
-              <p className="text-body text-slate-300 max-w-[660px] mx-auto leading-relaxed mb-8 text-sm md:text-base">
+              <p className="text-body text-slate-300 max-w-[920px] mx-auto leading-relaxed mb-8 text-sm md:text-base">
                 {slide.content}
               </p>
             )}
@@ -820,7 +901,7 @@ export default function PitchViewer({
               )}
               {renderStyledTitle(slide.title)}
               {slide.subtitle && (
-                <p className="text-slate-300 text-sm md:text-base max-w-[600px] mx-auto mt-2">
+                <p className="text-slate-300 text-sm md:text-base max-w-[850px] mx-auto mt-2">
                   {slide.subtitle}
                 </p>
               )}
@@ -873,7 +954,7 @@ export default function PitchViewer({
               )}
               {renderStyledTitle(slide.title)}
               {slide.subtitle && (
-                <p className="text-slate-300 text-sm md:text-base max-w-[650px] mx-auto mt-2">
+                <p className="text-slate-300 text-sm md:text-base max-w-[850px] mx-auto mt-2">
                   {slide.subtitle}
                 </p>
               )}
@@ -952,7 +1033,7 @@ export default function PitchViewer({
               )}
               {renderStyledTitle(slide.title)}
               {slide.subtitle && (
-                <p className="text-slate-300 text-xs md:text-sm max-w-[650px] mx-auto mt-0.5">
+                <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-0.5">
                   {slide.subtitle}
                 </p>
               )}
@@ -980,7 +1061,7 @@ export default function PitchViewer({
             )}
             {renderStyledTitle(slide.title)}
             {slide.subtitle && (
-              <p className="text-slate-300 text-sm md:text-base max-w-[600px] mx-auto mb-10 mt-2">
+              <p className="text-slate-300 text-sm md:text-base max-w-[850px] mx-auto mb-10 mt-2">
                 {slide.subtitle}
               </p>
             )}
@@ -1016,7 +1097,7 @@ export default function PitchViewer({
               )}
               {renderStyledTitle(slide.title)}
               {slide.subtitle && (
-                <p className="text-slate-300 text-sm md:text-base max-w-[600px] mx-auto mt-2">
+                <p className="text-slate-300 text-sm md:text-base max-w-[850px] mx-auto mt-2">
                   {slide.subtitle}
                 </p>
               )}
@@ -1056,49 +1137,80 @@ export default function PitchViewer({
               </div>
             )}
 
-            {renderStyledTitle(slide.title)}
+            {renderStyledTitle(slide.title || 'Empowering Global Comms')}
 
             {slide.subtitle && (
-              <p className="text-base md:text-lg font-semibold text-white/90 mb-6 max-w-[700px] mx-auto mt-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <p className="text-base md:text-lg font-semibold text-white/90 mb-6 max-w-[850px] mx-auto mt-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>
                 {slide.subtitle}
               </p>
             )}
 
             {/* Two Value Proposition Pillars on Closing */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl mx-auto mb-6 text-left">
-              <div className="bg-[#0d0d14] border border-white/10 p-5 rounded-xl space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="material-icons text-lg" style={{ color: accentColor }}>speed</span>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Agile Daily Comms</h4>
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Rapid <span className="font-bold text-white">&lt;24-48h turnaround</span> for banners, email templates, D-Hub & D-Channel assets with bilingual English/Spanish agility and Chinese (CN) support.
-                </p>
+            {slide.cards && slide.cards.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl mx-auto mb-6 text-left">
+                {slide.cards.map((card, cIdx) => (
+                  <div key={cIdx} className="bg-[#0d0d14] border border-white/10 p-5 rounded-xl space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="material-icons text-lg" style={{ color: accentColor }}>verified</span>
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider">{card.title}</h4>
+                    </div>
+                    {card.description && (
+                      <p className="text-xs text-slate-300 leading-relaxed">{card.description}</p>
+                    )}
+                  </div>
+                ))}
               </div>
-
-              <div className="bg-[#0d0d14] border border-white/10 p-5 rounded-xl space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="material-icons text-lg" style={{ color: accentColor }}>verified_user</span>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Major Events & VRA</h4>
+            ) : isDiDi ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl mx-auto mb-6 text-left">
+                <div className="bg-[#0d0d14] border border-white/10 p-5 rounded-xl space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="material-icons text-lg" style={{ color: accentColor }}>speed</span>
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">Agile Daily Comms</h4>
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Rapid <span className="font-bold text-white">&lt;24-48h turnaround</span> for banners, email templates, D-Hub & D-Channel assets with bilingual English/Spanish agility and Chinese (CN) support.
+                  </p>
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  End-to-end multimedia for <span className="font-bold text-white">Get-Together & Value Star</span>, with 100% compliance readiness for DiDi Vendor Risk Assessment (VRA).
-                </p>
+
+                <div className="bg-[#0d0d14] border border-white/10 p-5 rounded-xl space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="material-icons text-lg" style={{ color: accentColor }}>verified_user</span>
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">Major Events & VRA</h4>
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    End-to-end multimedia for <span className="font-bold text-white">Get-Together & Value Star</span>, with 100% compliance readiness for DiDi Vendor Risk Assessment (VRA).
+                  </p>
+                </div>
+              </div>
+            ) : null}
+
+            {/* Presenter Sign-off (Ultra discreto, elegante, minimalista) */}
+            <div className="w-full max-w-xs mx-auto pt-5 border-t border-white/5 text-center space-y-0.5 flex flex-col items-center">
+              <div className="text-sm md:text-base font-semibold text-slate-200 tracking-tight whitespace-nowrap">
+                {presenterName}
+              </div>
+              <div className="text-[10px] font-mono tracking-widest text-slate-500 uppercase whitespace-nowrap">
+                {presenterRole.replace(/\.$/, '')}
               </div>
             </div>
 
-            {/* Direct Contact Box */}
-            <div className="bg-[#12121a] border border-white/15 p-6 rounded-2xl w-full max-w-lg mx-auto text-center shadow-2xl space-y-2">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 justify-center">
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: accentColor }} />
-                Direct Contact
+            {slide.cta?.text && (
+              <div className="pt-5 text-center">
+                <button
+                  type="button"
+                  onClick={() => handlePrimaryCtaClick(slide.cta?.link, slide.type)}
+                  className="inline-flex items-center justify-center px-8 py-3 rounded-sm text-xs font-bold uppercase tracking-[0.18em] text-white cursor-pointer transition-all transform hover:-translate-y-0.5"
+                  style={{
+                    backgroundColor: accentColor,
+                    color: accentColor.toUpperCase() === '#FFFFFF' ? '#000000' : '#ffffff',
+                    boxShadow: `0 0 24px ${accentGlow}`,
+                  }}
+                >
+                  <span className="material-icons text-[16px] mr-2">send</span>
+                  {slide.cta.text}
+                </button>
               </div>
-              <div className="text-lg md:text-xl font-bold text-white tracking-tight">{presenterName}</div>
-              <div className="text-xs font-semibold" style={{ color: accentColor }}>{presenterRole}</div>
-              <div className="text-sm text-slate-300 pt-1">
-                <a href={`mailto:${presenterEmail}`} className="hover:underline hover:text-white transition-colors font-mono">{presenterEmail}</a>
-              </div>
-            </div>
+            )}
           </div>
         );
 
@@ -1204,19 +1316,29 @@ export default function PitchViewer({
               </button>
             </div>
 
-            {/* Download PDF Button */}
+            {/* Download PDF Button with Loader & Click Guard */}
             {pitch.id && (
-              <a
-                href={`/api/pitches/${pitch.id}/pdf`}
-                target="_blank"
-                rel="noreferrer"
-                download
-                className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors"
-                title={locale === 'en' ? 'Download PDF Deck' : 'Descargar Presentación en PDF'}
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={isGeneratingPdf}
+                className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                title={locale === 'en' ? (isGeneratingPdf ? 'Generating PDF...' : 'Download PDF Deck') : (isGeneratingPdf ? 'Generando PDF...' : 'Descargar Presentación en PDF')}
               >
-                <span className="material-icons text-sm" style={{ color: accentColor }}>picture_as_pdf</span>
-                <span className="hidden sm:inline">{locale === 'en' ? 'PDF' : 'PDF'}</span>
-              </a>
+                {isGeneratingPdf ? (
+                  <svg className="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style={{ color: accentColor }}>
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                  </svg>
+                ) : (
+                  <span className="material-icons text-sm" style={{ color: accentColor }}>picture_as_pdf</span>
+                )}
+                <span className="hidden sm:inline">
+                  {isGeneratingPdf
+                    ? (locale === 'en' ? 'Generando…' : 'Generando…')
+                    : 'PDF'}
+                </span>
+              </button>
             )}
 
             <button
