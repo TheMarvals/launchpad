@@ -13,6 +13,25 @@ interface ProjectDetailModalProps {
   brandName?: string;
 }
 
+const isVideoUrl = (url?: string) => {
+  if (!url) return false;
+  return Boolean(
+    url.match(/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i) ||
+    url.includes('/video/upload/') ||
+    url.includes('youtube.com') ||
+    url.includes('youtu.be') ||
+    url.includes('vimeo.com')
+  );
+};
+
+const getVideoPoster = (url?: string) => {
+  if (!url) return '';
+  if (url.includes('/video/upload/') || url.match(/\.(mp4|webm|mov|m4v)(\?.*)?$/i)) {
+    return url.replace(/\.(mp4|webm|mov|m4v)(\?.*)?$/i, '.jpg');
+  }
+  return '';
+};
+
 export default function ProjectDetailModal({
   isOpen,
   onClose,
@@ -48,52 +67,32 @@ export default function ProjectDetailModal({
         } else {
           onClose();
         }
-      }
-      if (e.key === 'ArrowRight' && images.length > 1) {
-        setActiveImageIndex((prev) => (prev + 1) % images.length);
-      }
-      if (e.key === 'ArrowLeft' && images.length > 1) {
+      } else if (e.key === 'ArrowLeft') {
         setActiveImageIndex((prev) => (prev - 1 + images.length) % images.length);
+      } else if (e.key === 'ArrowRight') {
+        setActiveImageIndex((prev) => (prev + 1) % images.length);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, isZoomed, images.length, onClose]);
 
-  const backdropPointerDown = React.useRef(false);
-
   if (!isOpen || !item) return null;
 
-  const currentImage = images[activeImageIndex] || item.thumbnailUrl || item.mediaUrl;
+  const currentImage = images[activeImageIndex] || item.mediaUrl || item.thumbnailUrl || '';
+  const isCurrentVideo = item.mediaType === 'video' || isVideoUrl(currentImage);
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 md:p-10 animate-fade-in"
-      onPointerDown={(e) => {
-        if (e.target === e.currentTarget) {
-          backdropPointerDown.current = true;
-        }
-      }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget && backdropPointerDown.current) {
-          backdropPointerDown.current = false;
-          onClose();
-        }
-      }}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-fade-in"
+      onClick={onClose}
       style={{
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.88)',
+        backdropFilter: 'blur(16px)',
       }}
     >
-      {/* Top Floating Bar */}
-      <div className="absolute top-5 left-6 right-6 flex items-center justify-between z-30 pointer-events-none">
-        <span
-          className="text-[11px] font-mono uppercase tracking-[0.25em] text-white/60 font-bold"
-          style={{ fontFamily: "'Outfit', sans-serif" }}
-        >
-          {brandName} <span className="text-white/30 font-normal">/ Case Study</span>
-        </span>
+      {/* Top Floating Close Button */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
         <button
           type="button"
           onClick={onClose}
@@ -116,9 +115,11 @@ export default function ProjectDetailModal({
         <div className="lg:w-[58%] bg-black/60 flex flex-col justify-between p-4 sm:p-6 border-b lg:border-b-0 lg:border-r border-white/10 relative">
           {/* Main Featured Image Container */}
           <div className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 group">
-            {item.mediaType === 'video' || (currentImage && currentImage.match(/\.(mp4|webm|mov)(\?.*)?$/i)) ? (
+            {isCurrentVideo ? (
               <video
+                key={currentImage}
                 src={currentImage}
+                poster={getVideoPoster(currentImage) || undefined}
                 autoPlay
                 loop
                 muted
@@ -177,34 +178,58 @@ export default function ProjectDetailModal({
                   {String(activeImageIndex + 1).padStart(2, '0')} / {String(images.length).padStart(2, '0')}
                 </span>
               )}
-              <button
-                type="button"
-                onClick={() => setIsZoomed(true)}
-                className="pointer-events-auto p-1.5 rounded-full bg-black/70 hover:bg-white hover:text-black border border-white/15 text-white/80 transition-colors shadow-lg cursor-pointer backdrop-blur-md"
-                title={locale === 'en' ? 'Click to enlarge' : 'Clic para agrandar'}
-              >
-                <span className="material-icons text-sm block">fullscreen</span>
-              </button>
+              {!isCurrentVideo && (
+                <button
+                  type="button"
+                  onClick={() => setIsZoomed(true)}
+                  className="pointer-events-auto p-1.5 rounded-full bg-black/70 hover:bg-white hover:text-black border border-white/15 text-white/80 transition-colors shadow-lg cursor-pointer backdrop-blur-md"
+                  title={locale === 'en' ? 'Click to enlarge' : 'Clic para agrandar'}
+                >
+                  <span className="material-icons text-sm block">fullscreen</span>
+                </button>
+              )}
             </div>
           </div>
 
           {/* Thumbnails Filmstrip Carousel */}
           {images.length > 1 && (
             <div className="mt-4 flex items-center gap-2.5 overflow-x-auto py-1 px-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              {images.map((img, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setActiveImageIndex(idx)}
-                  className={`relative w-20 h-13 rounded-xl overflow-hidden border transition-all duration-200 shrink-0 cursor-pointer ${
-                    idx === activeImageIndex
-                      ? 'border-white scale-105 shadow-[0_0_15px_rgba(255,255,255,0.3)] ring-2 ring-white/40'
-                      : 'border-white/15 opacity-40 hover:opacity-80'
-                  }`}
-                >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
+              {images.map((img, idx) => {
+                const isVid = isVideoUrl(img);
+                const poster = isVid ? getVideoPoster(img) : '';
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveImageIndex(idx)}
+                    className={`relative w-20 h-13 rounded-xl overflow-hidden border transition-all duration-200 shrink-0 cursor-pointer bg-zinc-900 ${
+                      idx === activeImageIndex
+                        ? 'border-white scale-105 shadow-[0_0_15px_rgba(255,255,255,0.3)] ring-2 ring-white/40'
+                        : 'border-white/15 opacity-50 hover:opacity-90'
+                    }`}
+                  >
+                    {isVid ? (
+                      poster ? (
+                        <div className="w-full h-full relative">
+                          <img src={poster} alt="" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                            <span className="material-icons text-sm text-white drop-shadow">play_circle</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-zinc-800 relative">
+                          <video src={img} className="w-full h-full object-cover pointer-events-none" muted playsInline preload="metadata" />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                            <span className="material-icons text-sm text-white drop-shadow">play_circle</span>
+                          </div>
+                        </div>
+                      )
+                    ) : (
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -334,12 +359,23 @@ export default function ProjectDetailModal({
             </>
           )}
 
-          <img
-            src={currentImage}
-            alt=""
-            className="max-w-[92vw] max-h-[88vh] object-contain rounded-2xl shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          />
+          {isCurrentVideo ? (
+            <video
+              src={currentImage}
+              controls
+              autoPlay
+              playsInline
+              className="max-w-[92vw] max-h-[88vh] object-contain rounded-2xl shadow-2xl bg-black"
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <img
+              src={currentImage}
+              alt=""
+              className="max-w-[92vw] max-h-[88vh] object-contain rounded-2xl shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
         </div>
       )}
     </div>

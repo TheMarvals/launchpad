@@ -515,9 +515,11 @@ export default function PitchPDF({
 
                 <div className="grid grid-cols-3 gap-4 text-left w-full">
                   {(slide.showcaseItems || []).slice(0, 3).map((item, idx) => {
-                    const isVideo = item.mediaType === 'video' || (item.mediaUrl && item.mediaUrl.match(/\.(mp4|webm|mov)$/i));
+                    const isVideo = item.mediaType === 'video' || Boolean(item.mediaUrl && (item.mediaUrl.match(/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i) || item.mediaUrl.includes('/video/upload/')));
                     const isSlide = item.mediaType === 'slide';
-                    const mainImg = item.thumbnailUrl || (item.images && item.images[0]) || item.mediaUrl;
+                    const rawMainImg = item.thumbnailUrl || (item.images && item.images[0]) || item.mediaUrl;
+                    const isRawVideo = Boolean(rawMainImg && (rawMainImg.match(/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i) || rawMainImg.includes('/video/upload/')));
+                    const mainImg = isRawVideo && rawMainImg?.includes('/video/upload/') ? rawMainImg.replace(/\.(mp4|webm|mov|m4v)(\?.*)?$/i, '.jpg') : rawMainImg;
                     const galleryImages = Array.isArray(item.images) && item.images.length > 1 ? item.images.slice(1, 4) : [];
                     const clickUrl = item.externalUrl || item.mediaUrl;
 
@@ -531,14 +533,16 @@ export default function PitchPDF({
                       >
                         {/* Main Featured Image Container */}
                         <div className="aspect-video bg-black/60 overflow-hidden relative">
-                          {mainImg ? (
+                          {mainImg && (!isRawVideo || mainImg !== rawMainImg) ? (
                             <img
                               src={mainImg}
                               alt={item.title}
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-slate-500">Image</div>
+                            <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-slate-500">
+                              <span className="material-icons text-3xl opacity-40">videocam</span>
+                            </div>
                           )}
 
                           {/* Media Type Badge */}
@@ -570,14 +574,22 @@ export default function PitchPDF({
                         {galleryImages.length > 0 && (
                           <div className="px-2 pt-1.5 pb-0.5 bg-black/40 flex items-center justify-between gap-1.5 border-t border-white/5">
                             <div className="flex items-center gap-1">
-                              {galleryImages.map((gImg, gIdx) => (
-                                <img
-                                  key={gIdx}
-                                  src={gImg}
-                                  alt=""
-                                  className="w-8 h-6 object-cover rounded border border-white/10"
-                                />
-                              ))}
+                              {galleryImages.map((gImg, gIdx) => {
+                                const isGVid = Boolean(gImg && (gImg.match(/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i) || gImg.includes('/video/upload/')));
+                                const gPoster = isGVid && gImg.includes('/video/upload/') ? gImg.replace(/\.(mp4|webm|mov|m4v)(\?.*)?$/i, '.jpg') : gImg;
+                                return isGVid && gPoster === gImg ? (
+                                  <div key={gIdx} className="w-8 h-6 bg-zinc-800 rounded border border-white/10 flex items-center justify-center">
+                                    <span className="material-icons text-[10px] text-white">play_arrow</span>
+                                  </div>
+                                ) : (
+                                  <img
+                                    key={gIdx}
+                                    src={gPoster || gImg}
+                                    alt=""
+                                    className="w-8 h-6 object-cover rounded border border-white/10"
+                                  />
+                                );
+                              })}
                             </div>
                             <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 px-1.5 py-0.5 rounded bg-white/5 border border-white/10">
                               +{(item.images || []).length} {locale === 'en' ? 'Photos' : 'Fotos'}

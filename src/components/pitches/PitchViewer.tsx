@@ -406,9 +406,10 @@ export function JesperCard({
     >
       {/* Full-bleed media — image or animated video */}
       <div className="absolute inset-0 overflow-hidden">
-        {item.mediaType === 'video' || (firstImg && firstImg.match(/\.(mp4|webm|mov)(\?.*)?$/i)) ? (
+        {item.mediaType === 'video' || (typeof firstImg === 'string' && (firstImg.match(/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i) || firstImg.includes('/video/upload/'))) ? (
           <video
             src={firstImg}
+            poster={typeof firstImg === 'string' && firstImg.includes('/video/upload/') ? firstImg.replace(/\.(mp4|webm|mov|m4v)(\?.*)?$/i, '.jpg') : undefined}
             autoPlay
             loop
             muted

@@ -1779,7 +1779,9 @@ export default function PitchForm({
                               }
                             };
 
-                            const imgUrl = p.images?.[0]?.url || p.featuredImage;
+                            const rawImgUrl = p.images?.[0]?.url || p.featuredImage;
+                            const isVidUrl = rawImgUrl && (rawImgUrl.match(/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i) || rawImgUrl.includes('/video/upload/'));
+                            const imgUrl = isVidUrl && rawImgUrl.includes('/video/upload/') ? rawImgUrl.replace(/\.(mp4|webm|mov|m4v)(\?.*)?$/i, '.jpg') : rawImgUrl;
 
                             return (
                               <div
@@ -1792,8 +1794,17 @@ export default function PitchForm({
                                 }`}
                               >
                                 <div className="flex items-center gap-2 min-w-0">
-                                  {imgUrl ? (
+                                  {imgUrl && !isVidUrl ? (
                                     <img src={imgUrl} alt={p.title} className="w-11 h-8 object-cover rounded border border-hairline shrink-0" />
+                                  ) : isVidUrl ? (
+                                    <div className="w-11 h-8 bg-zinc-800 rounded border border-hairline shrink-0 relative overflow-hidden flex items-center justify-center">
+                                      {imgUrl && imgUrl !== rawImgUrl ? (
+                                        <img src={imgUrl} alt={p.title} className="w-full h-full object-cover" />
+                                      ) : null}
+                                      <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                                        <span className="material-icons text-[12px] text-white">play_circle</span>
+                                      </div>
+                                    </div>
                                   ) : (
                                     <div className="w-11 h-8 bg-white/5 rounded flex items-center justify-center shrink-0">
                                       <span className="material-icons text-xs text-muted">image</span>
@@ -2576,7 +2587,18 @@ export default function PitchForm({
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     {p.images && p.images[0] ? (
-                      <img src={p.images[0].url} alt={p.title} className="w-16 h-12 object-cover rounded-sm border border-hairline" />
+                      (p.images[0].url.match(/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i) || p.images[0].url.includes('/video/upload/')) ? (
+                        <div className="w-16 h-12 bg-zinc-800 rounded-sm border border-hairline relative overflow-hidden flex items-center justify-center shrink-0">
+                          {p.images[0].url.includes('/video/upload/') ? (
+                            <img src={p.images[0].url.replace(/\.(mp4|webm|mov|m4v)(\?.*)?$/i, '.jpg')} alt={p.title} className="w-full h-full object-cover" />
+                          ) : null}
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                            <span className="material-icons text-base text-white">play_circle</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <img src={p.images[0].url} alt={p.title} className="w-16 h-12 object-cover rounded-sm border border-hairline" />
+                      )
                     ) : (
                       <div className="w-16 h-12 bg-white/5 flex items-center justify-center text-muted">
                         <span className="material-icons text-sm">image</span>
