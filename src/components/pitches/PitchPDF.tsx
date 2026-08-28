@@ -296,12 +296,14 @@ export default function PitchPDF({
                 )}
 
                 {slide.content && (
-                  <p className="text-xs md:text-sm text-slate-300 w-full max-w-3xl mx-auto leading-relaxed pt-2">
+                  <p className="text-xs md:text-sm text-slate-300 w-full max-w-3xl mx-auto leading-relaxed pt-2 whitespace-pre-wrap">
                     {slide.content}
                   </p>
                 )}
               </div>
-            )}            {slide.type === 'pillars' && (
+            )}
+
+            {slide.type === 'pillars' && (
               <div className="w-full max-w-5xl space-y-4">
                 <div>
                   {slide.badge && (
@@ -316,7 +318,7 @@ export default function PitchPDF({
                     </p>
                   )}
                   {slide.content && (
-                    <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 leading-relaxed">
+                    <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 leading-relaxed whitespace-pre-wrap">
                       {slide.content}
                     </p>
                   )}
@@ -346,7 +348,7 @@ export default function PitchPDF({
                               {card.subtitle}
                             </p>
                           )}
-                          {card.description && <p className="text-xs text-slate-300 leading-relaxed mt-1.5">{card.description}</p>}
+                          {card.description && <p className="text-xs text-slate-300 leading-relaxed mt-1.5 whitespace-pre-wrap">{card.description}</p>}
                         </div>
                         {card.tags && card.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1 pt-2 border-t border-white/10 mt-2">
@@ -386,7 +388,7 @@ export default function PitchPDF({
                             </div>
                             <h5 className="text-[11px] font-bold text-white mb-0.5 truncate max-w-full">{member.name || 'Member'}</h5>
                             <p className="text-[8px] uppercase tracking-wider font-bold mb-1 truncate max-w-full" style={{ color: accentColor }}>{member.role || 'Executive Role'}</p>
-                            {member.bio && <p className="text-[9px] text-slate-300 leading-snug line-clamp-2">{member.bio}</p>}
+                            {member.bio && <p className="text-[9px] text-slate-300 leading-snug line-clamp-2 whitespace-pre-wrap">{member.bio}</p>}
                           </div>
                         );
                       })}
@@ -411,7 +413,7 @@ export default function PitchPDF({
                     </p>
                   )}
                   {slide.content && (
-                    <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 leading-relaxed">
+                    <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 leading-relaxed whitespace-pre-wrap">
                       {slide.content}
                     </p>
                   )}
@@ -443,7 +445,7 @@ export default function PitchPDF({
                             {card.subtitle}
                           </p>
                         )}
-                        {card.description && <p className="text-[11px] text-slate-300 leading-relaxed">{card.description}</p>}
+                        {card.description && <p className="text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">{card.description}</p>}
                       </div>
                     );
                   })}
@@ -473,7 +475,7 @@ export default function PitchPDF({
                             </div>
                             <h5 className="text-[11px] font-bold text-white mb-0.5 truncate max-w-full">{member.name || 'Member'}</h5>
                             <p className="text-[8px] uppercase tracking-wider font-bold mb-1 truncate max-w-full" style={{ color: accentColor }}>{member.role || 'Executive Role'}</p>
-                            {member.bio && <p className="text-[9px] text-slate-300 leading-snug line-clamp-2">{member.bio}</p>}
+                            {member.bio && <p className="text-[9px] text-slate-300 leading-snug line-clamp-2 whitespace-pre-wrap">{member.bio}</p>}
                           </div>
                         );
                       })}
@@ -744,7 +746,7 @@ export default function PitchPDF({
                     </p>
                   )}
                   {slide.content && (
-                    <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 leading-relaxed">
+                    <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 leading-relaxed whitespace-pre-wrap">
                       {slide.content}
                     </p>
                   )}
@@ -777,7 +779,7 @@ export default function PitchPDF({
                           </p>
                         )}
                         {member.description && (
-                          <p className="text-[10px] text-slate-300 leading-relaxed mb-2 line-clamp-3">{member.description}</p>
+                          <p className="text-[10px] text-slate-300 leading-relaxed mb-2 line-clamp-3 whitespace-pre-wrap">{member.description}</p>
                         )}
                         {member.tags && member.tags.length > 0 && (
                           <div className="flex flex-wrap justify-center gap-1 mt-auto pt-1.5 border-t border-white/10 w-full">
@@ -810,7 +812,7 @@ export default function PitchPDF({
                     </p>
                   )}
                   {slide.content && (
-                    <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 leading-relaxed">
+                    <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 leading-relaxed whitespace-pre-wrap">
                       {slide.content}
                     </p>
                   )}

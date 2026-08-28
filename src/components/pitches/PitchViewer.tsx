@@ -870,7 +870,7 @@ export default function PitchViewer({
                   {member.role || (locale === 'es' ? 'Cargo / Rol' : 'Executive Role')}
                 </p>
                 {member.bio && (
-                  <p className="text-xs text-slate-300 leading-relaxed mb-3 line-clamp-2 px-1">{member.bio}</p>
+                  <p className="text-xs text-slate-300 leading-relaxed mb-3 line-clamp-3 px-1 whitespace-pre-wrap">{member.bio}</p>
                 )}
                 {member.tags && member.tags.length > 0 && (
                   <div className="flex flex-wrap justify-center gap-1 mt-auto pt-2.5 border-t border-white/10 w-full">
@@ -943,7 +943,7 @@ export default function PitchViewer({
             )}
 
             {slide.content && (
-              <p className="text-body text-slate-300 max-w-[920px] mx-auto leading-relaxed mb-8 text-sm md:text-base">
+              <p className="text-body text-slate-300 max-w-[920px] mx-auto leading-relaxed mb-8 text-sm md:text-base whitespace-pre-wrap">
                 {slide.content}
               </p>
             )}
@@ -1002,7 +1002,7 @@ export default function PitchViewer({
                 </p>
               )}
               {slide.content && (
-                <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-3 leading-relaxed">
+                <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-3 leading-relaxed whitespace-pre-wrap">
                   {slide.content}
                 </p>
               )}
@@ -1033,7 +1033,7 @@ export default function PitchViewer({
                         {card.subtitle}
                       </p>
                     )}
-                    {card.description && <p className="text-slate-300 text-xs leading-relaxed mb-4">{card.description}</p>}
+                    {card.description && <p className="text-slate-300 text-xs leading-relaxed mb-4 whitespace-pre-wrap">{card.description}</p>}
                     {card.tags && card.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 pt-3 border-t border-white/10">
                         {card.tags.map((tag, tIdx) => (
@@ -1080,7 +1080,7 @@ export default function PitchViewer({
                 </p>
               )}
               {slide.content && (
-                <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-3 leading-relaxed">
+                <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-3 leading-relaxed whitespace-pre-wrap">
                   {slide.content}
                 </p>
               )}
@@ -1116,7 +1116,7 @@ export default function PitchViewer({
                         )}
                       </div>
                     </div>
-                    {card.description && <p className="text-slate-300 text-xs md:text-sm leading-relaxed">{card.description}</p>}
+                    {card.description && <p className="text-slate-300 text-xs md:text-sm leading-relaxed whitespace-pre-wrap">{card.description}</p>}
                   </div>
                 );
               })}
@@ -1150,7 +1150,7 @@ export default function PitchViewer({
                 </p>
               )}
               {slide.content && (
-                <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-3 leading-relaxed">
+                <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-3 leading-relaxed whitespace-pre-wrap">
                   {slide.content}
                 </p>
               )}
@@ -1192,7 +1192,7 @@ export default function PitchViewer({
                       </p>
                     )}
                     {member.description && (
-                      <p className="text-slate-300 text-xs leading-relaxed mb-3 line-clamp-3 px-1">{member.description}</p>
+                      <p className="text-slate-300 text-xs leading-relaxed mb-3 line-clamp-3 px-1 whitespace-pre-wrap">{member.description}</p>
                     )}
                     {member.tags && member.tags.length > 0 && (
                       <div className="flex flex-wrap justify-center gap-1.5 mt-auto pt-3 border-t border-white/10 w-full">
@@ -1238,7 +1238,7 @@ export default function PitchViewer({
                 </p>
               )}
               {slide.content && (
-                <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-3 leading-relaxed">
+                <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-3 leading-relaxed whitespace-pre-wrap">
                   {slide.content}
                 </p>
               )}
@@ -1441,7 +1441,7 @@ export default function PitchViewer({
                       <h4 className="text-xs font-bold text-white uppercase tracking-wider">{card.title}</h4>
                     </div>
                     {card.description && (
-                      <p className="text-xs text-slate-300 leading-relaxed">{card.description}</p>
+                      <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{card.description}</p>
                     )}
                   </div>
                 ))}
