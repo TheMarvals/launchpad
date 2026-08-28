@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
 import { detectLocale, forwardCookies, applyPdfStyles } from '@/lib/pdf-utils';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -17,11 +19,40 @@ export async function GET(
   try {
     const browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-extensions',
+        '--disable-background-networking',
+        '--disable-default-apps',
+        '--disable-sync',
+        '--disable-translate',
+        '--hide-scrollbars',
+        '--metrics-recording-only',
+        '--mute-audio',
+        '--safebrowsing-disable-auto-update',
+      ],
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
     });
 
     const page = await browser.newPage();
+    
+    // Intercept and abort unnecessary heavy requests like video streams or web sockets
+    await page.setRequestInterception(true);
+    page.on('request', (req) => {
+      const resourceType = req.resourceType();
+      if (['media', 'websocket'].includes(resourceType)) {
+        req.abort();
+      } else {
+        req.continue();
+      }
+    });
+
     await forwardCookies(page, request, baseUrl);
 
     await page.setViewport({
@@ -30,29 +61,35 @@ export async function GET(
       deviceScaleFactor: 2,
     });
 
+    // Use domcontentloaded for fast load, followed by selector wait
     await page.goto(previewUrl, {
-      waitUntil: 'networkidle0',
-      timeout: 30000,
+      waitUntil: 'domcontentloaded',
+      timeout: 20000,
     });
 
-    await page.waitForSelector('.pdf-page', { timeout: 30000 });
+    await page.waitForSelector('.pdf-page', { timeout: 15000 });
     await page.emulateMediaType('screen');
     await applyPdfStyles(page);
 
-    // Ensure all Google Fonts and images are fully rendered
-    await page.evaluateHandle('document.fonts.ready');
-    await page.evaluate(async () => {
-      const selectors = Array.from(document.images);
-      await Promise.all(
-        selectors.map((img) => {
-          if (img.complete) return;
-          return new Promise((resolve) => {
-            img.addEventListener('load', resolve);
-            img.addEventListener('error', resolve);
-          });
-        })
-      );
-    });
+    // Fast check for fonts and images with 2.5s maximum timeout
+    await Promise.race([
+      Promise.all([
+        page.evaluateHandle('document.fonts.ready').catch(() => null),
+        page.evaluate(async () => {
+          const selectors = Array.from(document.images);
+          await Promise.all(
+            selectors.map((img) => {
+              if (img.complete) return Promise.resolve();
+              return new Promise((resolve) => {
+                img.addEventListener('load', resolve, { once: true });
+                img.addEventListener('error', resolve, { once: true });
+              });
+            })
+          );
+        }).catch(() => null),
+      ]),
+      new Promise((resolve) => setTimeout(resolve, 2500)),
+    ]);
 
     const pdf = await page.pdf({
       format: 'A4',

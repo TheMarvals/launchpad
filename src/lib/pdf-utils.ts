@@ -84,11 +84,39 @@ interface GeneratePdfOptions {
 export async function generatePdf(options: GeneratePdfOptions): Promise<Response> {
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-extensions',
+      '--disable-background-networking',
+      '--disable-default-apps',
+      '--disable-sync',
+      '--disable-translate',
+      '--hide-scrollbars',
+      '--metrics-recording-only',
+      '--mute-audio',
+      '--safebrowsing-disable-auto-update',
+    ],
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
   });
 
   const page = await browser.newPage();
+  
+  await page.setRequestInterception(true);
+  page.on('request', (req) => {
+    const resourceType = req.resourceType();
+    if (['media', 'websocket'].includes(resourceType)) {
+      req.abort();
+    } else {
+      req.continue();
+    }
+  });
+
   await forwardCookies(page, options.request, options.baseUrl);
 
   await page.setViewport({
@@ -98,10 +126,11 @@ export async function generatePdf(options: GeneratePdfOptions): Promise<Response
   });
 
   await page.goto(options.previewUrl, {
-    waitUntil: 'networkidle0',
+    waitUntil: 'domcontentloaded',
+    timeout: 20000,
   });
 
-  await page.waitForSelector('.pdf-page', { timeout: 30000 });
+  await page.waitForSelector('.pdf-page', { timeout: 15000 });
 
   await page.emulateMediaType('screen');
   await applyPdfStyles(page);
