@@ -24,6 +24,28 @@ const isVideoUrl = (url?: string) => {
   );
 };
 
+const getEmbedVideoUrl = (url?: string): string | null => {
+  if (!url) return null;
+  const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  if (ytMatch && ytMatch[1]) {
+    return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0`;
+  }
+  const vimeoMatch = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeoMatch && vimeoMatch[1]) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`;
+  }
+  return null;
+};
+
+const getDirectVideoUrl = (url?: string): string => {
+  if (!url) return '';
+  // If Cloudinary MOV video, automatically transcode to MP4 so browsers can decode it
+  if (url.includes('/video/upload/') && url.match(/\.mov(\?.*)?$/i)) {
+    return url.replace(/\.mov(\?.*)?$/i, '.mp4');
+  }
+  return url;
+};
+
 const getVideoPoster = (url?: string) => {
   if (!url) return '';
   if (url.includes('/video/upload/') || url.match(/\.(mp4|webm|mov|m4v)(\?.*)?$/i)) {
@@ -80,7 +102,9 @@ export default function ProjectDetailModal({
   if (!isOpen || !item) return null;
 
   const currentImage = images[activeImageIndex] || item.mediaUrl || item.thumbnailUrl || '';
-  const isCurrentVideo = item.mediaType === 'video' || isVideoUrl(currentImage);
+  const embedUrl = getEmbedVideoUrl(currentImage);
+  const isCurrentVideo = Boolean(embedUrl || item.mediaType === 'video' || isVideoUrl(currentImage));
+  const directVideoUrl = getDirectVideoUrl(currentImage);
 
   return (
     <div
@@ -115,18 +139,30 @@ export default function ProjectDetailModal({
         <div className="lg:w-[58%] bg-black/60 flex flex-col justify-between p-4 sm:p-6 border-b lg:border-b-0 lg:border-r border-white/10 relative">
           {/* Main Featured Image Container */}
           <div className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 group">
-            {isCurrentVideo ? (
+            {embedUrl ? (
+              <iframe
+                key={embedUrl}
+                src={embedUrl}
+                title={item.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="w-full h-full border-0"
+              />
+            ) : isCurrentVideo ? (
               <video
-                key={currentImage}
-                src={currentImage}
+                key={directVideoUrl}
                 poster={getVideoPoster(currentImage) || undefined}
                 autoPlay
                 loop
                 muted
                 playsInline
                 controls
-                className="w-full h-full object-contain bg-black"
-              />
+                className="w-full h-full object-contain bg-black z-10"
+              >
+                <source src={directVideoUrl} type="video/mp4" />
+                <source src={currentImage} />
+                Tu navegador no soporta reproducción de video.
+              </video>
             ) : currentImage ? (
               <img
                 src={currentImage}
@@ -140,8 +176,10 @@ export default function ProjectDetailModal({
               </div>
             )}
 
-            {/* Image Gradient Vignette */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
+            {/* Image Gradient Vignette (Only for images, not video) */}
+            {!isCurrentVideo && !embedUrl && (
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
+            )}
 
             {/* Navigation Overlay Arrows */}
             {images.length > 1 && (
@@ -292,21 +330,9 @@ export default function ProjectDetailModal({
 
           {/* Footer Action Links */}
           <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3">
-            {item.externalUrl ? (
-              <a
-                href={item.externalUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-5 py-2.5 rounded-full text-xs font-mono font-bold uppercase tracking-widest bg-white text-black hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-lg"
-              >
-                <span>{locale === 'en' ? 'Visit Project' : 'Visitar Proyecto'}</span>
-                <span className="material-icons text-sm">arrow_outward</span>
-              </a>
-            ) : (
-              <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
-                {locale === 'en' ? 'Confidential Client Case' : 'Caso de Estudio Confidencial'}
-              </div>
-            )}
+            <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
+              {locale === 'en' ? 'Confidential Client Case' : 'Caso de Estudio Confidencial'}
+            </div>
 
             <button
               type="button"
@@ -322,7 +348,7 @@ export default function ProjectDetailModal({
       {/* Fullscreen Lightbox Zoom Mode */}
       {isZoomed && currentImage && (
         <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/95 animate-fade-in p-4 sm:p-8"
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/95 animate-fade-in p-4 sm:p-8"
           onClick={() => setIsZoomed(false)}
           style={{ backdropFilter: 'blur(12px)' }}
         >
@@ -359,15 +385,28 @@ export default function ProjectDetailModal({
             </>
           )}
 
-          {isCurrentVideo ? (
+          {embedUrl ? (
+            <iframe
+              src={embedUrl}
+              title={item.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              className="w-[92vw] h-[86vh] max-w-6xl rounded-2xl shadow-2xl border-0 bg-black"
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : isCurrentVideo ? (
             <video
-              src={currentImage}
+              src={directVideoUrl}
+              poster={getVideoPoster(currentImage) || undefined}
               controls
               autoPlay
               playsInline
               className="max-w-[92vw] max-h-[88vh] object-contain rounded-2xl shadow-2xl bg-black"
               onClick={(e) => e.stopPropagation()}
-            />
+            >
+              <source src={directVideoUrl} type="video/mp4" />
+              <source src={currentImage} />
+            </video>
           ) : (
             <img
               src={currentImage}

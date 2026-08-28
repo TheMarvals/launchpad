@@ -391,6 +391,14 @@ export function JesperCard({
     ? item.images[0]
     : (item.mediaUrl || item.thumbnailUrl || '');
 
+  const isVideo = item.mediaType === 'video' || (typeof firstImg === 'string' && (firstImg.match(/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i) || firstImg.includes('/video/upload/')));
+  const videoSrc = typeof firstImg === 'string' && firstImg.includes('/video/upload/') && firstImg.match(/\.mov(\?.*)?$/i)
+    ? firstImg.replace(/\.mov(\?.*)?$/i, '.mp4')
+    : firstImg;
+  const poster = typeof firstImg === 'string' && firstImg.includes('/video/upload/')
+    ? firstImg.replace(/\.(mp4|webm|mov|m4v)(\?.*)?$/i, '.jpg')
+    : undefined;
+
   return (
     <article
       data-showcase-idx={index}
@@ -406,10 +414,10 @@ export function JesperCard({
     >
       {/* Full-bleed media — image or animated video */}
       <div className="absolute inset-0 overflow-hidden">
-        {item.mediaType === 'video' || (typeof firstImg === 'string' && (firstImg.match(/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i) || firstImg.includes('/video/upload/'))) ? (
+        {isVideo ? (
           <video
-            src={firstImg}
-            poster={typeof firstImg === 'string' && firstImg.includes('/video/upload/') ? firstImg.replace(/\.(mp4|webm|mov|m4v)(\?.*)?$/i, '.jpg') : undefined}
+            src={videoSrc}
+            poster={poster}
             autoPlay
             loop
             muted
@@ -1404,6 +1412,13 @@ export default function PitchViewer({
         );
 
       case 'roadmap':
+        const roadmapCols = slide.columns || ((slide.timeline || []).length === 2 ? 2 : (slide.timeline || []).length >= 4 ? 4 : 3);
+        const roadmapGrid = roadmapCols === 2
+          ? 'grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto'
+          : roadmapCols === 4
+          ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4'
+          : 'grid grid-cols-1 md:grid-cols-3 gap-4';
+
         return (
           <div className="relative z-10 max-w-[1100px] w-full px-4 md:px-6 my-auto animate-fade-in">
             <div className="text-center mb-8">
@@ -1418,9 +1433,14 @@ export default function PitchViewer({
                   {slide.subtitle}
                 </p>
               )}
+              {slide.content && (
+                <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-3 leading-relaxed whitespace-pre-wrap">
+                  {slide.content}
+                </p>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className={roadmapGrid}>
               {(slide.timeline || []).map((step, sIdx) => (
                 <div key={sIdx} className="bg-[#0d0d14] border border-white/10 p-6 rounded-xl relative">
                   <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-3">
@@ -1428,17 +1448,23 @@ export default function PitchViewer({
                     {step.duration && <span className="text-[10px] font-bold text-slate-400">{step.duration}</span>}
                   </div>
                   <h3 className="text-base font-bold text-white mb-3">{step.title}</h3>
-                  <ul className="space-y-1.5">
+                  <div className="space-y-2">
                     {step.deliverables.map((item, dIdx) => (
-                      <li key={dIdx} className="text-xs text-slate-300 flex items-start gap-2">
-                        <span className="material-icons text-[14px] mt-0.5" style={{ color: accentColor }}>check_circle</span>
-                        <span>{item}</span>
-                      </li>
+                      <p key={dIdx} className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
+                        {item}
+                      </p>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               ))}
             </div>
+
+            {/* Bottom Content Text */}
+            {(slide.footerContent || slide.bottomContent) && (
+              <p className="text-slate-300 text-xs md:text-sm max-w-[850px] mx-auto mt-6 text-center leading-relaxed whitespace-pre-wrap">
+                {slide.footerContent || slide.bottomContent}
+              </p>
+            )}
           </div>
         );
 

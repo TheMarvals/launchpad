@@ -658,9 +658,14 @@ export default function PitchPDF({
                       {slide.subtitle}
                     </p>
                   )}
+                  {slide.content && (
+                    <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 leading-relaxed whitespace-pre-wrap">
+                      {slide.content}
+                    </p>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 text-left w-full">
+                <div className={`grid gap-4 text-left w-full ${(slide.columns === 2 || (!slide.columns && (slide.timeline || []).length === 2)) ? 'grid-cols-2 max-w-3xl mx-auto' : (slide.columns === 4 || (!slide.columns && (slide.timeline || []).length >= 4)) ? 'grid-cols-4' : 'grid-cols-3'}`}>
                   {(slide.timeline || []).map((step, stIdx) => (
                     <div key={stIdx} className="bg-[#0d0d14] border border-white/10 p-4 rounded-xl space-y-2">
                       <div className="flex justify-between items-center border-b border-white/10 pb-1.5">
@@ -670,17 +675,22 @@ export default function PitchPDF({
                         <span className="text-[9px] text-slate-400 font-semibold">{step.duration}</span>
                       </div>
                       <h4 className="text-xs font-bold text-white">{step.title}</h4>
-                      <ul className="space-y-1 pt-1">
+                      <div className="space-y-1.5 pt-1">
                         {step.deliverables.map((d, dIdx) => (
-                          <li key={dIdx} className="text-[11px] text-slate-300 flex items-start gap-1.5">
-                            <span style={{ color: accentColor }}>•</span>
-                            <span>{d}</span>
-                          </li>
+                          <p key={dIdx} className="text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">
+                            {d}
+                          </p>
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   ))}
                 </div>
+
+                {(slide.footerContent || slide.bottomContent) && (
+                  <p className="text-[11px] text-slate-300 w-full max-w-3xl mx-auto mt-2 text-center leading-relaxed whitespace-pre-wrap">
+                    {slide.footerContent || slide.bottomContent}
+                  </p>
+                )}
               </div>
             )}
 
