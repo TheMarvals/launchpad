@@ -694,13 +694,14 @@ export default function PitchPDF({
                         <span className="text-[9px] text-slate-400 font-semibold">{step.duration}</span>
                       </div>
                       <h4 className="text-xs font-bold text-white">{step.title}</h4>
-                      <div className="space-y-1.5 pt-1">
+                      <ul className="space-y-1.5 pt-1">
                         {step.deliverables.map((d, dIdx) => (
-                          <p key={dIdx} className="text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">
-                            {d}
-                          </p>
+                          <li key={dIdx} className="text-[11px] text-slate-300 flex items-start gap-1.5">
+                            <span className="material-icons text-[12px] mt-0.5 shrink-0" style={{ color: accentColor }}>check_circle</span>
+                            <span className="leading-relaxed whitespace-pre-wrap">{d}</span>
+                          </li>
                         ))}
-                      </div>
+                      </ul>
                     </div>
                   ))}
                 </div>

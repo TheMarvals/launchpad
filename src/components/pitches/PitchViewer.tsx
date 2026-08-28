@@ -1448,13 +1448,14 @@ export default function PitchViewer({
                     {step.duration && <span className="text-[10px] font-bold text-slate-400">{step.duration}</span>}
                   </div>
                   <h3 className="text-base font-bold text-white mb-3">{step.title}</h3>
-                  <div className="space-y-2">
+                  <ul className="space-y-2">
                     {step.deliverables.map((item, dIdx) => (
-                      <p key={dIdx} className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
-                        {item}
-                      </p>
+                      <li key={dIdx} className="text-xs text-slate-300 flex items-start gap-2">
+                        <span className="material-icons text-[14px] mt-0.5 shrink-0" style={{ color: accentColor }}>check_circle</span>
+                        <span className="leading-relaxed whitespace-pre-wrap">{item}</span>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
               ))}
             </div>
