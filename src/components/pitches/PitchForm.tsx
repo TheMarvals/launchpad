@@ -194,6 +194,7 @@ export default function PitchForm({
   const [accentColor, setAccentColor] = useState(initialThemeParsed.color);
   const [titleFont, setTitleFont] = useState(initialThemeParsed.font);
   const [titleStyle, setTitleStyle] = useState<'solid' | 'outline'>(initialThemeParsed.style || 'solid');
+  const [headerBadge, setHeaderBadge] = useState(initialThemeParsed.headerBadge || (initialData?.title?.toLowerCase().includes('didi') ? 'DIDI RFI DECK' : 'PITCH DECK'));
   const [theme, setTheme] = useState(initialData?.theme || 'midnight');
 
   const [slides, setSlides] = useState<PitchSlide[]>(() => {
@@ -205,6 +206,7 @@ export default function PitchForm({
 
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showImportShowcaseModal, setShowImportShowcaseModal] = useState(false);
 
@@ -221,14 +223,23 @@ export default function PitchForm({
     const newSlide: PitchSlide = {
       id: `slide-${Date.now()}`,
       type,
-      badge: type === 'showcase' ? 'Case Studies & Examples' : 'Section Badge',
-      title: type === 'showcase' ? 'Featured Work & Case Studies' : 'New Slide',
+      badge: type === 'showcase' ? 'Case Studies & Examples' : type === 'team' ? 'Leadership & Core Team' : type === 'logos' ? 'Clients & Ecosystem' : 'Section Badge',
+      title: type === 'showcase' ? 'Featured Work & Case Studies' : type === 'team' ? 'Our Creative & Production Team' : type === 'logos' ? 'Trusted by Leading Global Brands' : 'New Slide',
       subtitle: 'Descriptive subtitle for this slide',
       content: 'Detailed description and explanatory text.',
       cards: type === 'pillars' ? [
         { title: 'Pillar 1', subtitle: 'Subtitle', description: 'Detailed description', icon: 'star', tags: ['Tag 1'] },
         { title: 'Pillar 2', subtitle: 'Subtitle', description: 'Detailed description', icon: 'code', tags: ['Tag 2'] },
         { title: 'Pillar 3', subtitle: 'Subtitle', description: 'Detailed description', icon: 'trending_up', tags: ['Tag 3'] },
+      ] : type === 'team' ? [
+        { title: 'Eduardo Marval', subtitle: 'Managing Director & Partner', description: 'Creative direction, brand systems, and executive production lead.', imageUrl: '', tags: ['Strategy', 'Direction', 'Creative'] },
+        { title: 'Team Lead', subtitle: 'Motion & Multimedia Lead', description: 'High-cadence 2D/3D motion graphics, video shooting, and video editing.', imageUrl: '', tags: ['Motion 3D', 'Video', 'VFX'] },
+        { title: 'Senior Designer', subtitle: 'Executive Presentations & UI/UX', description: 'Executive slide decks, corporate infographics, and digital interface systems.', imageUrl: '', tags: ['UI/UX', 'Decks', 'Infographics'] },
+      ] : type === 'logos' ? [
+        { title: 'DiDi', subtitle: 'Mobility & Tech', imageUrl: '', icon: 'business', description: '' },
+        { title: 'Brand 2', subtitle: 'Global Corporate', imageUrl: '', icon: 'business', description: '' },
+        { title: 'Brand 3', subtitle: 'Enterprise Partner', imageUrl: '', icon: 'business', description: '' },
+        { title: 'Brand 4', subtitle: 'Digital Ecosystem', imageUrl: '', icon: 'business', description: '' },
       ] : undefined,
       showcaseItems: type === 'showcase' ? [
         {
@@ -260,10 +271,13 @@ export default function PitchForm({
   };
 
   const removeSlide = (index: number) => {
-    if (slides.length <= 1) return alert('Debes mantener al menos una diapositiva.');
+    if (slides.length <= 1) {
+      alert(locale === 'es' ? 'Debe haber al menos un slide' : 'Must have at least one slide');
+      return;
+    }
     const updated = slides.filter((_, i) => i !== index);
     setSlides(updated);
-    setActiveSlideIndex(Math.max(0, index - 1));
+    setActiveSlideIndex(Math.max(0, activeSlideIndex - 1));
   };
 
   const moveSlide = (index: number, direction: 'up' | 'down') => {
@@ -276,14 +290,37 @@ export default function PitchForm({
     setActiveSlideIndex(targetIndex);
   };
 
-  // Card manager (for pillars, problem_solution, cta)
+  // Card manager (for team, logos, pillars, problem_solution, cta)
+  const [uploadingCardImg, setUploadingCardImg] = useState<number | null>(null);
+
+  const handleUploadCardImage = async (cardIndex: number, file: File) => {
+    setUploadingCardImg(cardIndex);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.url) {
+        updateCard(cardIndex, { imageUrl: data.url });
+      } else {
+        alert(locale === 'es' ? 'Error al subir la imagen' : 'Failed to upload image');
+      }
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert(locale === 'es' ? 'Error al subir la imagen' : 'Failed to upload image');
+    } finally {
+      setUploadingCardImg(null);
+    }
+  };
+
   const addCard = (defaultCard?: any) => {
     const currentCards = activeSlide.cards || [];
     const newCard = {
-      title: defaultCard?.title || 'Nuevo Pilar / Tarjeta',
+      title: defaultCard?.title || 'Nuevo Elemento',
       subtitle: defaultCard?.subtitle || 'SUBTÍTULO',
       description: defaultCard?.description || 'Descripción detallada...',
       icon: defaultCard?.icon || 'star',
+      imageUrl: defaultCard?.imageUrl || '',
       tags: defaultCard?.tags || ['Tag 1', 'Tag 2'],
       highlight: defaultCard?.highlight || false,
     };
@@ -411,7 +448,7 @@ export default function PitchForm({
     setIsSubmitting(true);
     try {
       const selectedClient = clients.find(c => c.id === clientId);
-      const currentTheme = `${accentColor}|${titleFont}|${titleStyle}`;
+      const currentTheme = `${accentColor}|${titleFont}|${titleStyle}|${headerBadge.trim()}`;
       const payload = {
         title,
         subtitle,
@@ -425,12 +462,14 @@ export default function PitchForm({
 
       if (isEditing) {
         await updatePitch(initialData.id, payload);
+        router.refresh();
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3500);
       } else {
-        await createPitch(payload);
+        const created = await createPitch(payload);
+        router.push(`/dashboard/pitches/edit/${created.id}`);
+        router.refresh();
       }
-
-      router.push('/dashboard/pitches');
-      router.refresh();
     } catch (error) {
       console.error(error);
       alert('Error saving Pitch.');
@@ -439,7 +478,7 @@ export default function PitchForm({
     }
   };
 
-  const currentTheme = `${accentColor}|${titleFont}|${titleStyle}`;
+  const currentTheme = `${accentColor}|${titleFont}|${titleStyle}|${headerBadge.trim()}`;
   const mockPitch = {
     title,
     subtitle,
@@ -462,7 +501,13 @@ export default function PitchForm({
             Design, edit, and present high-impact pitch decks and case studies in the official Launchpad aesthetic.
           </p>
         </div>
-        <div className="flex items-center gap-xs">
+        <div className="flex items-center gap-xs flex-wrap">
+          {saveSuccess && (
+            <span className="text-xs font-bold text-semantic-success flex items-center gap-1 animate-fade-in bg-semantic-success/10 border border-semantic-success/30 px-2 py-1">
+              <span className="material-icons text-sm">check_circle</span>
+              {locale === 'es' ? '¡Pitch actualizado!' : 'Pitch updated!'}
+            </span>
+          )}
           <button
             type="button"
             onClick={handleLoadTemplate}
@@ -478,6 +523,15 @@ export default function PitchForm({
           >
             <span className="material-icons text-sm">visibility</span>
             Fullscreen Preview
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="px-sm h-[32px] bg-primary text-black font-bold hover:bg-primary/90 transition-all flex items-center justify-center uppercase tracking-wider text-xs disabled:opacity-50 cursor-pointer"
+          >
+            <span className="material-icons mr-xxs text-sm">save</span>
+            {isSubmitting ? (locale === 'es' ? 'Guardando…' : 'Saving…') : (isEditing ? (locale === 'es' ? 'Actualizar Pitch' : 'Update Pitch') : (locale === 'es' ? 'Guardar Pitch' : 'Save Pitch'))}
           </button>
         </div>
       </div>
@@ -730,6 +784,28 @@ export default function PitchForm({
                       </button>
                     </div>
                   </div>
+
+                  {/* Header Navigation Badge Customization */}
+                  <div className="md:col-span-2 space-y-1.5 pt-2 border-t border-hairline">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold text-muted block tracking-wider">
+                        Header Navigation Badge (Pill Superior / Tipo de Deck)
+                      </span>
+                      <span
+                        className="text-[10px] font-mono px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider"
+                        style={{ borderColor: `${accentColor}40`, backgroundColor: `${accentColor}10`, color: accentColor }}
+                      >
+                        {headerBadge || 'PITCH DECK'}
+                      </span>
+                    </div>
+                    <input
+                      type="text"
+                      value={headerBadge}
+                      onChange={(e) => setHeaderBadge(e.target.value)}
+                      className="w-full border border-hairline bg-canvas-elevated text-ink px-xs py-xxs text-xs focus:border-primary outline-none font-bold uppercase tracking-wider font-mono"
+                      placeholder="e.g. DIDI RFI DECK, PITCH DECK, PROPOSAL DECK, RFI DECK"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -749,6 +825,20 @@ export default function PitchForm({
                   className="px-2 py-1 bg-canvas hover:bg-canvas/80 text-ink text-[11px] font-bold uppercase tracking-wider border border-hairline rounded-sm"
                 >
                   + Hero
+                </button>
+                <button
+                  type="button"
+                  onClick={() => addSlide('team')}
+                  className="px-2 py-1 bg-canvas hover:bg-canvas/80 text-ink text-[11px] font-bold uppercase tracking-wider border border-hairline rounded-sm"
+                >
+                  + Team
+                </button>
+                <button
+                  type="button"
+                  onClick={() => addSlide('logos')}
+                  className="px-2 py-1 bg-canvas hover:bg-canvas/80 text-ink text-[11px] font-bold uppercase tracking-wider border border-hairline rounded-sm"
+                >
+                  + Logos
                 </button>
                 <button
                   type="button"
@@ -855,17 +945,19 @@ export default function PitchForm({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-sm">
                   <div className="space-y-xxs">
                     <label className="block text-caption-uppercase text-ink font-semibold">Slide Layout Type</label>
                     <select
                       value={activeSlide.type}
                       onChange={(e) => updateActiveSlide({ type: e.target.value as any })}
-                      className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none cursor-pointer"
+                      className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none cursor-pointer font-bold"
                     >
                       <option value="hero">Hero / Cover Slide</option>
-                      <option value="pillars">Pillars of Service (3 Columns)</option>
-                      <option value="problem_solution">Problem vs Solution</option>
+                      <option value="team">{locale === 'es' ? 'Equipo & Miembros / Team Members (Fotos & Cargos)' : 'Team Members & Leadership (Photos & Bios)'}</option>
+                      <option value="logos">{locale === 'es' ? 'Logos & Clientes / Brand Grid (Logos con Título)' : 'Clients & Brand Logos Grid'}</option>
+                      <option value="pillars">Pillars of Service</option>
+                      <option value="problem_solution">Problem vs Solution / Background</option>
                       <option value="showcase">Case Studies & Examples (Videos / Slides / Images)</option>
                       <option value="metrics">Impact Metrics</option>
                       <option value="roadmap">Implementation Roadmap</option>
@@ -881,34 +973,57 @@ export default function PitchForm({
                       value={activeSlide.badge || ''}
                       onChange={(e) => updateActiveSlide({ badge: e.target.value })}
                       className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none"
-                      placeholder="e.g. Proven Work & Case Studies"
+                      placeholder="e.g. How are we?"
                     />
                   </div>
 
-                  <div className="space-y-xxs md:col-span-2">
+                  {['problem_solution', 'pillars', 'team', 'logos'].includes(activeSlide.type) ? (
+                    <div className="space-y-xxs">
+                      <label className="block text-caption-uppercase text-ink font-semibold flex items-center justify-between">
+                        <span>{locale === 'es' ? 'Columnas / Grid' : 'Columns Layout'}</span>
+                        <span className="text-[10px] text-primary font-mono font-bold">
+                          {activeSlide.columns ? `${activeSlide.columns} Cols` : 'Auto (2-4)'}
+                        </span>
+                      </label>
+                      <select
+                        value={activeSlide.columns || ''}
+                        onChange={(e) => updateActiveSlide({ columns: e.target.value ? Number(e.target.value) : undefined })}
+                        className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none cursor-pointer font-bold"
+                      >
+                        <option value="">{locale === 'es' ? 'Auto (según tarjetas)' : 'Auto (based on cards)'}</option>
+                        <option value="2">2 {locale === 'es' ? 'Columnas' : 'Columns'}</option>
+                        <option value="3">3 {locale === 'es' ? 'Columnas' : 'Columns'}</option>
+                        <option value="4">4 {locale === 'es' ? 'Columnas' : 'Columns'}</option>
+                      </select>
+                    </div>
+                  ) : (
+                    <div className="hidden md:block" />
+                  )}
+
+                  <div className="space-y-xxs md:col-span-3">
                     <label className="block text-caption-uppercase text-ink font-semibold">Slide Title</label>
                     <input
                       type="text"
                       value={activeSlide.title || ''}
                       onChange={(e) => updateActiveSlide({ title: e.target.value })}
                       className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none font-bold"
-                      placeholder="e.g. Featured Case Studies & Creative Work"
+                      placeholder="e.g. Company Background"
                     />
                   </div>
 
-                  <div className="space-y-xxs md:col-span-2">
+                  <div className="space-y-xxs md:col-span-3">
                     <label className="block text-caption-uppercase text-ink font-semibold">Subtitle</label>
                     <input
                       type="text"
                       value={activeSlide.subtitle || ''}
                       onChange={(e) => updateActiveSlide({ subtitle: e.target.value })}
                       className="w-full border border-hairline bg-canvas text-ink px-xs py-xxs text-sm focus:border-primary outline-none"
-                      placeholder="e.g. Proven video production, slide decks, and digital asset examples"
+                      placeholder="e.g. Launchpad brings together an experienced and talented creative team..."
                     />
                   </div>
 
                   {activeSlide.type !== 'showcase' && (
-                    <div className="space-y-xxs md:col-span-2">
+                    <div className="space-y-xxs md:col-span-3">
                       <label className="block text-caption-uppercase text-ink font-semibold">Content Text</label>
                       <textarea
                         rows={3}
@@ -975,21 +1090,291 @@ export default function PitchForm({
                 )}
 
                 {/* ═══ PROBLEM VS SOLUTION SLIDE EDITOR ═══ */}
+                {/* ═══ TEAM SLIDE EDITOR ═══ */}
+                {activeSlide.type === 'team' && (
+                  <div className="mt-4 pt-4 border-t border-hairline space-y-3">
+                    <div className="flex justify-between items-center bg-canvas-elevated p-2.5 border border-hairline rounded-sm">
+                      <div>
+                        <h3 className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
+                          <span className="material-icons text-sm">badge</span>
+                          {locale === 'es' ? 'Miembros del Equipo & Liderazgo' : 'Team Members & Leadership'} ({(activeSlide.cards || []).length})
+                        </h3>
+                        <p className="text-[11px] text-muted">
+                          {locale === 'es' ? 'Agrega miembros del equipo con foto, nombre, cargo, biografía y especialidades' : 'Add team members with photo, name, role, bio, and specialty tags'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => addCard({ title: 'Nombre Miembro', subtitle: 'CARGO / ROL', description: 'Experiencia y responsabilidades principales...', imageUrl: '', tags: ['Strategy', 'Design'] })}
+                        className="px-2.5 py-1.5 bg-primary text-black text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1 hover:bg-primary/80"
+                      >
+                        <span className="material-icons text-xs">add</span>
+                        {locale === 'es' ? '+ Miembro' : '+ Member'}
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {(activeSlide.cards || []).map((card, cIdx) => (
+                        <div key={cIdx} className="bg-canvas-elevated border border-hairline p-3 rounded-sm space-y-3 relative">
+                          <div className="flex justify-between items-center border-b border-hairline pb-2">
+                            <span className="text-[11px] font-bold text-ink flex items-center gap-1.5">
+                              <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] font-black flex items-center justify-center">
+                                {cIdx + 1}
+                              </span>
+                              {card.title || (locale === 'es' ? 'Miembro' : 'Member')}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => deleteCard(cIdx)}
+                              className="text-muted hover:text-red-400 text-xs flex items-center gap-1"
+                            >
+                              <span className="material-icons text-sm">delete</span>
+                              <span className="text-[10px] uppercase font-semibold">{locale === 'es' ? 'Eliminar' : 'Remove'}</span>
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            {/* Photo Upload Section */}
+                            <div className="md:col-span-3 bg-canvas p-2.5 border border-hairline rounded-sm flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                              <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-primary/40 bg-black/40 flex-shrink-0 flex items-center justify-center">
+                                {card.imageUrl ? (
+                                  <img src={card.imageUrl} alt={card.title} className="w-full h-full object-cover" />
+                                ) : (
+                                  <span className="material-icons text-muted text-2xl">person</span>
+                                )}
+                              </div>
+                              <div className="flex-1 space-y-1 w-full">
+                                <label className="block text-[10px] font-bold uppercase text-muted">
+                                  {locale === 'es' ? 'Foto de Perfil (Subir imagen o pegar URL)' : 'Profile Photo (Upload image or enter URL)'}
+                                </label>
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={card.imageUrl || ''}
+                                    onChange={(e) => updateCard(cIdx, { imageUrl: e.target.value })}
+                                    className="w-full border border-hairline bg-canvas-elevated text-ink px-2 py-1 text-xs outline-none focus:border-primary font-mono"
+                                    placeholder="https://res.cloudinary.com/... o subir foto"
+                                  />
+                                  <label className="px-2.5 py-1 bg-white/10 hover:bg-white/20 border border-hairline rounded text-[10px] uppercase font-bold text-ink cursor-pointer flex items-center gap-1 whitespace-nowrap">
+                                    <span className="material-icons text-xs">upload</span>
+                                    {uploadingCardImg === cIdx ? 'Subiendo...' : 'Subir Foto'}
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      disabled={uploadingCardImg === cIdx}
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) handleUploadCardImage(cIdx, file);
+                                      }}
+                                    />
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Nombre Completo' : 'Full Name'}
+                              </label>
+                              <input
+                                type="text"
+                                value={card.title || ''}
+                                onChange={(e) => updateCard(cIdx, { title: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-bold"
+                                placeholder="e.g. Eduardo Marval"
+                              />
+                            </div>
+
+                            <div className="space-y-1 md:col-span-2">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Cargo / Título Ejecutivo' : 'Role / Executive Title'}
+                              </label>
+                              <input
+                                type="text"
+                                value={card.subtitle || ''}
+                                onChange={(e) => updateCard(cIdx, { subtitle: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-mono"
+                                placeholder="e.g. Managing Director & Executive Producer"
+                              />
+                            </div>
+
+                            <div className="space-y-1 md:col-span-3">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Biografía / Experiencia' : 'Bio / Experience'}
+                              </label>
+                              <textarea
+                                rows={2}
+                                value={card.description || ''}
+                                onChange={(e) => updateCard(cIdx, { description: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary"
+                                placeholder="Liderazgo creativo, dirección de marca y supervisión de producción..."
+                              />
+                            </div>
+
+                            <div className="space-y-1 md:col-span-3">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Especialidades / Tags (separadas por coma)' : 'Specialties / Tags (comma separated)'}
+                              </label>
+                              <input
+                                type="text"
+                                value={(card.tags || []).join(', ')}
+                                onChange={(e) => updateCard(cIdx, { tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary"
+                                placeholder="Strategy, Motion 3D, Video Direction"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ═══ LOGOS / CLIENTS SLIDE EDITOR ═══ */}
+                {activeSlide.type === 'logos' && (
+                  <div className="mt-4 pt-4 border-t border-hairline space-y-3">
+                    <div className="flex justify-between items-center bg-canvas-elevated p-2.5 border border-hairline rounded-sm">
+                      <div>
+                        <h3 className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
+                          <span className="material-icons text-sm">business</span>
+                          {locale === 'es' ? 'Logos & Clientes / Marcas' : 'Brand Logos & Clients Grid'} ({(activeSlide.cards || []).length})
+                        </h3>
+                        <p className="text-[11px] text-muted">
+                          {locale === 'es' ? 'Agrega logotipos de marcas o clientes con nombre y categoría' : 'Add brand logos and client names with category'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => addCard({ title: 'Nueva Marca', subtitle: 'INDUSTRIA', imageUrl: '', icon: 'business' })}
+                        className="px-2.5 py-1.5 bg-primary text-black text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1 hover:bg-primary/80"
+                      >
+                        <span className="material-icons text-xs">add</span>
+                        {locale === 'es' ? '+ Logo / Cliente' : '+ Logo / Client'}
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {(activeSlide.cards || []).map((card, cIdx) => (
+                        <div key={cIdx} className="bg-canvas-elevated border border-hairline p-3 rounded-sm space-y-3 relative">
+                          <div className="flex justify-between items-center border-b border-hairline pb-2">
+                            <span className="text-[11px] font-bold text-ink flex items-center gap-1.5">
+                              <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] font-black flex items-center justify-center">
+                                {cIdx + 1}
+                              </span>
+                              {card.title || (locale === 'es' ? 'Marca' : 'Brand')}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => deleteCard(cIdx)}
+                              className="text-muted hover:text-red-400 text-xs flex items-center gap-1"
+                            >
+                              <span className="material-icons text-sm">delete</span>
+                              <span className="text-[10px] uppercase font-semibold">{locale === 'es' ? 'Eliminar' : 'Remove'}</span>
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            {/* Logo Image Upload */}
+                            <div className="md:col-span-3 bg-canvas p-2.5 border border-hairline rounded-sm flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                              <div className="relative w-14 h-14 rounded border border-hairline bg-black/40 flex-shrink-0 flex items-center justify-center p-1">
+                                {card.imageUrl ? (
+                                  <img src={card.imageUrl} alt={card.title} className="max-w-full max-h-full object-contain" />
+                                ) : (
+                                  <span className="material-icons text-muted text-2xl">{card.icon || 'business'}</span>
+                                )}
+                              </div>
+                              <div className="flex-1 space-y-1 w-full">
+                                <label className="block text-[10px] font-bold uppercase text-muted">
+                                  {locale === 'es' ? 'Logotipo (PNG/SVG/WebP o URL)' : 'Logo Image (PNG/SVG/WebP or URL)'}
+                                </label>
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={card.imageUrl || ''}
+                                    onChange={(e) => updateCard(cIdx, { imageUrl: e.target.value })}
+                                    className="w-full border border-hairline bg-canvas-elevated text-ink px-2 py-1 text-xs outline-none focus:border-primary font-mono"
+                                    placeholder="https://res.cloudinary.com/... o subir logo"
+                                  />
+                                  <label className="px-2.5 py-1 bg-white/10 hover:bg-white/20 border border-hairline rounded text-[10px] uppercase font-bold text-ink cursor-pointer flex items-center gap-1 whitespace-nowrap">
+                                    <span className="material-icons text-xs">upload</span>
+                                    {uploadingCardImg === cIdx ? 'Subiendo...' : 'Subir Logo'}
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      disabled={uploadingCardImg === cIdx}
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) handleUploadCardImage(cIdx, file);
+                                      }}
+                                    />
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Nombre de Marca / Empresa' : 'Brand / Company Name'}
+                              </label>
+                              <input
+                                type="text"
+                                value={card.title || ''}
+                                onChange={(e) => updateCard(cIdx, { title: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-bold"
+                                placeholder="e.g. DiDi"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Subtítulo / Industria' : 'Subtitle / Industry'}
+                              </label>
+                              <input
+                                type="text"
+                                value={card.subtitle || ''}
+                                onChange={(e) => updateCard(cIdx, { subtitle: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-mono"
+                                placeholder="e.g. Mobility & Tech"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-muted">
+                                {locale === 'es' ? 'Ícono de Respaldo' : 'Fallback Icon'}
+                              </label>
+                              <input
+                                type="text"
+                                value={card.icon || ''}
+                                onChange={(e) => updateCard(cIdx, { icon: e.target.value })}
+                                className="w-full border border-hairline bg-canvas text-ink px-2 py-1 text-xs outline-none focus:border-primary font-mono"
+                                placeholder="business / star / bolt"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ═══ PROBLEM VS SOLUTION SLIDE EDITOR ═══ */}
                 {activeSlide.type === 'problem_solution' && (
                   <div className="mt-4 pt-4 border-t border-hairline space-y-3">
                     <div className="flex justify-between items-center bg-canvas-elevated p-2.5 border border-hairline rounded-sm">
                       <div>
                         <h3 className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
                           <span className="material-icons text-sm">compare_arrows</span>
-                          {locale === 'es' ? 'Tarjetas Problema vs Solución' : 'Problem vs Solution Cards'} ({(activeSlide.cards || []).length})
+                          {locale === 'es' ? 'Tarjetas Problema vs Solución / Antecedentes' : 'Problem vs Solution / Background Cards'} ({(activeSlide.cards || []).length})
                         </h3>
                         <p className="text-[11px] text-muted">
-                          {locale === 'es' ? 'Define los cuellos de botella y la solución con acento visual' : 'Define bottlenecks vs solution with visual accent'}
+                          {locale === 'es' ? 'Define tarjetas con fotos de equipo, logos o íconos' : 'Define cards with team photos, logos, or icons'}
                         </p>
                       </div>
                       <button
                         type="button"
-                        onClick={() => addCard({ title: 'Nueva Tarjeta', subtitle: 'CATEGORÍA', description: 'Descripción detallada...', highlight: false })}
+                        onClick={() => addCard({ title: 'Nueva Tarjeta', subtitle: 'CATEGORÍA', description: 'Descripción detallada...', highlight: false, imageUrl: '' })}
                         className="px-2.5 py-1.5 bg-primary text-black text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1 hover:bg-primary/80"
                       >
                         <span className="material-icons text-xs">add</span>
@@ -999,7 +1384,7 @@ export default function PitchForm({
 
                     <div className="space-y-3">
                       {(activeSlide.cards || []).map((card, cIdx) => (
-                        <div key={cIdx} className="bg-canvas-elevated border border-hairline p-3 rounded-sm space-y-2 relative">
+                        <div key={cIdx} className="bg-canvas-elevated border border-hairline p-3 rounded-sm space-y-3 relative">
                           <div className="flex justify-between items-center border-b border-hairline pb-2">
                             <span className="text-[11px] font-bold text-ink flex items-center gap-1.5">
                               <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] font-black flex items-center justify-center">
@@ -1017,7 +1402,46 @@ export default function PitchForm({
                             </button>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                            {/* Optional Photo / Logo upload */}
+                            <div className="md:col-span-3 bg-canvas p-2 border border-hairline rounded-sm flex items-center gap-3">
+                              <div className="w-10 h-10 rounded border border-hairline bg-black/40 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                                {card.imageUrl ? (
+                                  <img src={card.imageUrl} alt={card.title} className="w-full h-full object-cover" />
+                                ) : (
+                                  <span className="material-icons text-muted text-lg">{card.icon || 'star'}</span>
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <label className="block text-[9px] font-bold uppercase text-muted mb-0.5">
+                                  {locale === 'es' ? 'Foto / Logo Opcional' : 'Optional Photo / Logo'}
+                                </label>
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={card.imageUrl || ''}
+                                    onChange={(e) => updateCard(cIdx, { imageUrl: e.target.value })}
+                                    className="w-full border border-hairline bg-canvas-elevated text-ink px-2 py-0.5 text-xs outline-none focus:border-primary font-mono"
+                                    placeholder="https://... o subir"
+                                  />
+                                  <label className="px-2 py-0.5 bg-white/10 hover:bg-white/20 border border-hairline rounded text-[9px] uppercase font-bold text-ink cursor-pointer flex items-center gap-1 whitespace-nowrap">
+                                    <span className="material-icons text-[12px]">upload</span>
+                                    {uploadingCardImg === cIdx ? '...' : 'Subir'}
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      disabled={uploadingCardImg === cIdx}
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) handleUploadCardImage(cIdx, file);
+                                      }}
+                                    />
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+
                             <div className="space-y-1">
                               <label className="block text-[10px] font-bold uppercase text-muted">
                                 {locale === 'es' ? 'Título' : 'Title'}
@@ -1098,12 +1522,12 @@ export default function PitchForm({
                           {locale === 'es' ? 'Pilares de Servicio (Pillars)' : 'Service Pillars'} ({(activeSlide.cards || []).length})
                         </h3>
                         <p className="text-[11px] text-muted">
-                          {locale === 'es' ? 'Edita títulos, subtítulos, descripciones, íconos y tags de cada pilar' : 'Edit titles, subtitles, descriptions, icons, and tags of each pillar'}
+                          {locale === 'es' ? 'Edita títulos, subtítulos, fotos/logos, íconos y tags de cada pilar' : 'Edit titles, subtitles, photos/logos, icons, and tags of each pillar'}
                         </p>
                       </div>
                       <button
                         type="button"
-                        onClick={() => addCard({ title: 'Nuevo Pilar', subtitle: 'SUBTÍTULO', description: 'Descripción...', icon: 'star', tags: ['Tag 1'] })}
+                        onClick={() => addCard({ title: 'Nuevo Pilar', subtitle: 'SUBTÍTULO', description: 'Descripción...', icon: 'star', tags: ['Tag 1'], imageUrl: '' })}
                         className="px-2.5 py-1.5 bg-primary text-black text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1 hover:bg-primary/80"
                       >
                         <span className="material-icons text-xs">add</span>
@@ -1113,7 +1537,7 @@ export default function PitchForm({
 
                     <div className="space-y-3">
                       {(activeSlide.cards || []).map((card, cIdx) => (
-                        <div key={cIdx} className="bg-canvas-elevated border border-hairline p-3 rounded-sm space-y-2 relative">
+                        <div key={cIdx} className="bg-canvas-elevated border border-hairline p-3 rounded-sm space-y-3 relative">
                           <div className="flex justify-between items-center border-b border-hairline pb-2">
                             <span className="text-[11px] font-bold text-ink flex items-center gap-1.5">
                               <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] font-black flex items-center justify-center">
@@ -1131,7 +1555,46 @@ export default function PitchForm({
                             </button>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                            {/* Optional Photo / Logo upload */}
+                            <div className="md:col-span-3 bg-canvas p-2 border border-hairline rounded-sm flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full border border-hairline bg-black/40 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                                {card.imageUrl ? (
+                                  <img src={card.imageUrl} alt={card.title} className="w-full h-full object-cover" />
+                                ) : (
+                                  <span className="material-icons text-muted text-lg">{card.icon || 'star'}</span>
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <label className="block text-[9px] font-bold uppercase text-muted mb-0.5">
+                                  {locale === 'es' ? 'Foto / Logo / Ícono Personalizado (Opcional)' : 'Optional Photo / Logo / Custom Icon'}
+                                </label>
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={card.imageUrl || ''}
+                                    onChange={(e) => updateCard(cIdx, { imageUrl: e.target.value })}
+                                    className="w-full border border-hairline bg-canvas-elevated text-ink px-2 py-0.5 text-xs outline-none focus:border-primary font-mono"
+                                    placeholder="https://... o subir"
+                                  />
+                                  <label className="px-2 py-0.5 bg-white/10 hover:bg-white/20 border border-hairline rounded text-[9px] uppercase font-bold text-ink cursor-pointer flex items-center gap-1 whitespace-nowrap">
+                                    <span className="material-icons text-[12px]">upload</span>
+                                    {uploadingCardImg === cIdx ? '...' : 'Subir'}
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      disabled={uploadingCardImg === cIdx}
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) handleUploadCardImage(cIdx, file);
+                                      }}
+                                    />
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+
                             <div className="space-y-1">
                               <label className="block text-[10px] font-bold uppercase text-muted">
                                 {locale === 'es' ? 'Título del Pilar' : 'Pillar Title'}
@@ -1820,6 +2283,13 @@ export default function PitchForm({
         </button>
 
         <div className="flex items-center gap-sm">
+          {saveSuccess && (
+            <span className="text-xs font-bold text-semantic-success flex items-center gap-1 animate-fade-in bg-semantic-success/10 border border-semantic-success/30 px-3 py-1.5">
+              <span className="material-icons text-sm">check_circle</span>
+              {locale === 'es' ? '¡Pitch actualizado con éxito!' : 'Pitch updated successfully!'}
+            </span>
+          )}
+
           <button
             type="button"
             onClick={() => setShowPreviewModal(true)}
@@ -1833,10 +2303,10 @@ export default function PitchForm({
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="px-lg h-[40px] bg-primary text-black font-semibold hover:bg-primary/90 transition-all flex items-center justify-center uppercase tracking-wider text-xs disabled:opacity-50"
+            className="px-lg h-[40px] bg-primary text-black font-bold hover:bg-primary/90 transition-all flex items-center justify-center uppercase tracking-wider text-xs disabled:opacity-50 cursor-pointer"
           >
             <span className="material-icons mr-xxs text-sm">save</span>
-            {isSubmitting ? 'Saving...' : (isEditing ? 'Update Pitch' : 'Save Pitch')}
+            {isSubmitting ? (locale === 'es' ? 'Guardando…' : 'Saving…') : (isEditing ? (locale === 'es' ? 'Actualizar Pitch' : 'Update Pitch') : (locale === 'es' ? 'Guardar Pitch' : 'Save Pitch'))}
           </button>
         </div>
       </div>

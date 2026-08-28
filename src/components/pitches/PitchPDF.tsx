@@ -67,7 +67,7 @@ export default function PitchPDF({
   const presenterPhone = companyProfile?.phone || '+569 94438833';
 
   // Dynamic Theme & Font resolution
-  const { color: accentColor, font: titleFont } = parsePitchTheme(pitch.theme, pitch.title, clientDisplayName);
+  const { color: accentColor, font: titleFont, headerBadge } = parsePitchTheme(pitch.theme, pitch.title, clientDisplayName);
   const accentGlow = hexToRgba(accentColor, 0.25);
   const titleFontFamily = getFontFamily(titleFont);
   const isDiDi = Boolean(
@@ -235,7 +235,7 @@ export default function PitchPDF({
                 className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full border"
                 style={{ backgroundColor: `${accentColor}15`, borderColor: `${accentColor}40`, color: accentColor }}
               >
-                {isDiDi ? 'DIDI RFI DECK' : 'PITCH DECK'}
+                {headerBadge}
               </span>
             </div>
 
@@ -301,9 +301,7 @@ export default function PitchPDF({
                   </p>
                 )}
               </div>
-            )}
-
-            {slide.type === 'pillars' && (
+            )}            {slide.type === 'pillars' && (
               <div className="w-full max-w-5xl space-y-4">
                 <div>
                   {slide.badge && (
@@ -319,41 +317,50 @@ export default function PitchPDF({
                   )}
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 text-left w-full">
-                  {(slide.cards || []).map((card, cIdx) => (
-                    <div key={cIdx} className="bg-[#0d0d14] border border-white/10 p-4 rounded-xl space-y-2 flex flex-col justify-between">
-                      <div>
-                        <div
-                          className="w-9 h-9 rounded-full flex items-center justify-center border mb-2"
-                          style={{ backgroundColor: `${accentColor}15`, borderColor: `${accentColor}40`, color: accentColor }}
-                        >
-                          <span className="material-icons text-lg">{card.icon || 'star'}</span>
+                <div className={`grid gap-4 text-left w-full ${(slide.columns === 2 || (!slide.columns && (slide.cards || []).length === 2)) ? 'grid-cols-2 max-w-3xl mx-auto' : (slide.columns === 4 || (!slide.columns && (slide.cards || []).length >= 4)) ? 'grid-cols-4' : 'grid-cols-3'}`}>
+                  {(slide.cards || []).map((card, cIdx) => {
+                    const cardImg = card.imageUrl || card.logoUrl || card.avatarUrl;
+                    return (
+                      <div key={cIdx} className="bg-[#0d0d14] border border-white/10 p-4 rounded-xl space-y-2 flex flex-col justify-between">
+                        <div>
+                          {cardImg ? (
+                            <div className="w-9 h-9 rounded-full overflow-hidden border mb-2 p-0.5" style={{ borderColor: accentColor }}>
+                              <img src={cardImg} alt={card.title} className="w-full h-full object-cover rounded-full" />
+                            </div>
+                          ) : (
+                            <div
+                              className="w-9 h-9 rounded-full flex items-center justify-center border mb-2"
+                              style={{ backgroundColor: `${accentColor}15`, borderColor: `${accentColor}40`, color: accentColor }}
+                            >
+                              <span className="material-icons text-lg">{card.icon || 'star'}</span>
+                            </div>
+                          )}
+                          <h3 className="text-sm font-bold text-white">{card.title}</h3>
+                          {card.subtitle && (
+                            <p className="text-[9px] uppercase font-bold tracking-wider" style={{ color: accentColor }}>
+                              {card.subtitle}
+                            </p>
+                          )}
+                          {card.description && <p className="text-xs text-slate-300 leading-relaxed mt-1.5">{card.description}</p>}
                         </div>
-                        <h3 className="text-sm font-bold text-white">{card.title}</h3>
-                        {card.subtitle && (
-                          <p className="text-[9px] uppercase font-bold tracking-wider" style={{ color: accentColor }}>
-                            {card.subtitle}
-                          </p>
+                        {card.tags && card.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 pt-2 border-t border-white/10 mt-2">
+                            {card.tags.map((t, tIdx) => (
+                              <span key={tIdx} className="text-[8px] uppercase bg-white/5 border border-white/10 px-1.5 py-0.5 text-slate-300 rounded-sm">
+                                {t}
+                              </span>
+                            ))}
+                          </div>
                         )}
-                        <p className="text-xs text-slate-300 leading-relaxed mt-1.5">{card.description}</p>
                       </div>
-                      {card.tags && card.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 pt-2 border-t border-white/10 mt-2">
-                          {card.tags.map((t, tIdx) => (
-                            <span key={tIdx} className="text-[8px] uppercase bg-white/5 border border-white/10 px-1.5 py-0.5 text-slate-300 rounded-sm">
-                              {t}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
 
             {slide.type === 'problem_solution' && (
-              <div className="w-full max-w-4xl space-y-4">
+              <div className={`w-full ${(slide.columns === 3 || (!slide.columns && (slide.cards || []).length === 3)) ? 'max-w-5xl' : 'max-w-4xl'} space-y-4`}>
                 <div>
                   {slide.badge && (
                     <span className="text-[10px] uppercase tracking-widest font-bold block mb-1" style={{ color: accentColor }}>
@@ -368,27 +375,36 @@ export default function PitchPDF({
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-5 text-left w-full">
-                  {(slide.cards || []).map((card, cIdx) => (
-                    <div
-                      key={cIdx}
-                      className={`p-5 rounded-xl border ${card.highlight ? 'bg-[#151210]' : 'bg-[#0d0d14] border-white/10'}`}
-                      style={card.highlight ? { borderColor: `${accentColor}60` } : {}}
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="material-icons text-xl" style={{ color: card.highlight ? accentColor : '#94a3b8' }}>
-                          {card.icon || 'verified'}
-                        </span>
-                        <h3 className="text-sm font-bold text-white">{card.title}</h3>
+                <div className={`grid gap-4 text-left w-full ${(slide.columns === 3 || (!slide.columns && (slide.cards || []).length === 3)) ? 'grid-cols-3' : (slide.columns === 4 || (!slide.columns && (slide.cards || []).length >= 4)) ? 'grid-cols-4' : 'grid-cols-2'}`}>
+                  {(slide.cards || []).map((card, cIdx) => {
+                    const cardImg = card.imageUrl || card.logoUrl || card.avatarUrl;
+                    return (
+                      <div
+                        key={cIdx}
+                        className={`p-4 rounded-xl border ${card.highlight ? 'bg-[#151210]' : 'bg-[#0d0d14] border-white/10'}`}
+                        style={card.highlight ? { borderColor: `${accentColor}60` } : {}}
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          {cardImg ? (
+                            <div className="w-8 h-8 rounded-full overflow-hidden border p-0.5 shrink-0" style={{ borderColor: accentColor }}>
+                              <img src={cardImg} alt={card.title} className="w-full h-full object-cover rounded-full" />
+                            </div>
+                          ) : (
+                            <span className="material-icons text-lg shrink-0" style={{ color: card.highlight ? accentColor : '#94a3b8' }}>
+                              {card.icon || 'verified'}
+                            </span>
+                          )}
+                          <h3 className="text-xs font-bold text-white truncate">{card.title}</h3>
+                        </div>
+                        {card.subtitle && (
+                          <p className="text-[9px] uppercase font-semibold text-slate-400 mb-1.5 tracking-wider truncate">
+                            {card.subtitle}
+                          </p>
+                        )}
+                        {card.description && <p className="text-[11px] text-slate-300 leading-relaxed">{card.description}</p>}
                       </div>
-                      {card.subtitle && (
-                        <p className="text-[9px] uppercase font-semibold text-slate-400 mb-2 tracking-wider">
-                          {card.subtitle}
-                        </p>
-                      )}
-                      <p className="text-xs text-slate-300 leading-relaxed">{card.description}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -635,6 +651,110 @@ export default function PitchPDF({
                   <div className="text-[10px] font-mono tracking-widest text-slate-500 uppercase whitespace-nowrap">
                     {(slide.presenterRole || presenterRole).replace(/\.$/, '')}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {slide.type === 'team' && (
+              <div className="w-full max-w-5xl space-y-4 text-center">
+                <div>
+                  {slide.badge && (
+                    <span className="text-[10px] uppercase tracking-widest font-bold block mb-1" style={{ color: accentColor }}>
+                      {slide.badge}
+                    </span>
+                  )}
+                  {renderStyledTitle(slide.title || 'Leadership & Core Team')}
+                  {slide.subtitle && (
+                    <p className="text-xs text-slate-300 w-full max-w-3xl mx-auto mt-1 leading-relaxed">
+                      {slide.subtitle}
+                    </p>
+                  )}
+                </div>
+
+                <div className={`grid gap-4 text-center w-full ${(slide.cards || []).length <= 2 ? 'grid-cols-2 max-w-2xl mx-auto' : (slide.cards || []).length === 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
+                  {(slide.cards || []).map((member, mIdx) => {
+                    const img = member.imageUrl || member.avatarUrl || member.logoUrl;
+                    const memberInitials = (member.title || 'TM').split(' ').map((p) => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'TM';
+                    return (
+                      <div key={mIdx} className="bg-[#0d0d14] border border-white/10 p-4 rounded-xl flex flex-col items-center">
+                        <div className="mb-2">
+                          {img ? (
+                            <div className="w-14 h-14 rounded-full overflow-hidden border-2 p-0.5" style={{ borderColor: accentColor }}>
+                              <img src={img} alt={member.title} className="w-full h-full object-cover rounded-full" />
+                            </div>
+                          ) : (
+                            <div
+                              className="w-14 h-14 rounded-full flex items-center justify-center font-bold text-sm border-2"
+                              style={{ backgroundColor: `${accentColor}15`, borderColor: accentColor, color: accentColor }}
+                            >
+                              {memberInitials}
+                            </div>
+                          )}
+                        </div>
+                        <h4 className="text-xs font-bold text-white mb-0.5">{member.title}</h4>
+                        {member.subtitle && (
+                          <p className="text-[9px] uppercase tracking-wider font-bold mb-1" style={{ color: accentColor }}>
+                            {member.subtitle}
+                          </p>
+                        )}
+                        {member.description && (
+                          <p className="text-[10px] text-slate-300 leading-relaxed mb-2 line-clamp-3">{member.description}</p>
+                        )}
+                        {member.tags && member.tags.length > 0 && (
+                          <div className="flex flex-wrap justify-center gap-1 mt-auto pt-1.5 border-t border-white/10 w-full">
+                            {member.tags.map((t, tIdx) => (
+                              <span key={tIdx} className="text-[8px] uppercase bg-white/5 border border-white/10 px-1.5 py-0.5 text-slate-300 rounded-sm">
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {slide.type === 'logos' && (
+              <div className="w-full max-w-5xl space-y-4 text-center">
+                <div>
+                  {slide.badge && (
+                    <span className="text-[10px] uppercase tracking-widest font-bold block mb-1" style={{ color: accentColor }}>
+                      {slide.badge}
+                    </span>
+                  )}
+                  {renderStyledTitle(slide.title || 'Clients & Brand Ecosystem')}
+                  {slide.subtitle && (
+                    <p className="text-xs text-slate-300 w-full max-w-3xl mx-auto mt-1 leading-relaxed">
+                      {slide.subtitle}
+                    </p>
+                  )}
+                </div>
+
+                <div className={`grid gap-3 text-center w-full ${(slide.cards || []).length <= 3 ? 'grid-cols-3 max-w-2xl mx-auto' : (slide.cards || []).length <= 4 ? 'grid-cols-4' : 'grid-cols-6'}`}>
+                  {(slide.cards || []).map((item, lIdx) => {
+                    const img = item.imageUrl || item.logoUrl || item.avatarUrl;
+                    return (
+                      <div key={lIdx} className="bg-[#0d0d14] border border-white/10 p-3 rounded-xl flex flex-col items-center justify-center min-h-[90px]">
+                        {img ? (
+                          <div className="h-9 w-full flex items-center justify-center mb-1.5 px-1">
+                            <img src={img} alt={item.title} className="max-h-full max-w-full object-contain" />
+                          </div>
+                        ) : (
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center mb-1.5 border" style={{ backgroundColor: `${accentColor}15`, borderColor: `${accentColor}40`, color: accentColor }}>
+                            <span className="material-icons text-sm">{item.icon || 'business'}</span>
+                          </div>
+                        )}
+                        <h5 className="text-[11px] font-bold text-white truncate max-w-full">{item.title}</h5>
+                        {item.subtitle && (
+                          <p className="text-[8px] uppercase tracking-wider text-slate-400 font-semibold truncate max-w-full">
+                            {item.subtitle}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

@@ -9,6 +9,7 @@ export const parsePitchTheme = (themeStr?: string, pitchTitle?: string, clientNa
   let color = isDiDi ? '#FF7D00' : '#A855F7';
   let font = 'outfit'; // 'outfit' | 'montserrat' | 'inter' | 'geist'
   let style: 'solid' | 'outline' = 'solid'; // default to crisp solid executive style
+  let headerBadge = isDiDi ? 'DIDI RFI DECK' : 'PITCH DECK';
 
   if (themeStr) {
     if (themeStr.includes('|')) {
@@ -16,12 +17,14 @@ export const parsePitchTheme = (themeStr?: string, pitchTitle?: string, clientNa
       if (parts[0]) color = parts[0].trim();
       if (parts[1]) font = parts[1].trim();
       if (parts[2]) style = (parts[2].trim() as any) || 'solid';
+      if (parts[3] !== undefined && parts[3].trim() !== '') headerBadge = parts[3].trim();
     } else if (themeStr.startsWith('{')) {
       try {
         const parsed = JSON.parse(themeStr);
         if (parsed.color) color = parsed.color;
         if (parsed.font) font = parsed.font;
         if (parsed.style) style = parsed.style;
+        if (parsed.headerBadge) headerBadge = parsed.headerBadge;
       } catch (e) {}
     } else if (themeStr.startsWith('#')) {
       color = themeStr.trim();
@@ -42,7 +45,7 @@ export const parsePitchTheme = (themeStr?: string, pitchTitle?: string, clientNa
     }
   }
 
-  return { color, font, style };
+  return { color, font, style, headerBadge };
 };
 
 export const hexToRgba = (hex: string, alpha: number) => {

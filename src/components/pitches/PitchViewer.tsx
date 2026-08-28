@@ -450,18 +450,23 @@ export const Jesper3DCard = JesperCard;
 
 export interface PitchSlide {
   id: string;
-  type: 'hero' | 'pillars' | 'problem_solution' | 'metrics' | 'roadmap' | 'showcase' | 'cta' | 'custom';
+  type: 'hero' | 'pillars' | 'problem_solution' | 'metrics' | 'roadmap' | 'showcase' | 'cta' | 'custom' | 'team' | 'logos';
   badge?: string;
   title: string;
   subtitle?: string;
   content?: string;
+  columns?: number;
   cards?: Array<{
     title: string;
     subtitle?: string;
-    description: string;
+    description?: string;
     icon?: string;
     tags?: string[];
     highlight?: boolean;
+    imageUrl?: string;
+    avatarUrl?: string;
+    logoUrl?: string;
+    role?: string;
   }>;
   showcaseItems?: ShowcaseItem[];
   metrics?: Array<{
@@ -585,7 +590,7 @@ export default function PitchViewer({
   }
 
   // Dynamic Theme & Font resolution
-  const { color: accentColor, font: titleFont, style: titleStyle } = parsePitchTheme(pitch.theme, pitch.title, clientDisplayName);
+  const { color: accentColor, font: titleFont, style: titleStyle, headerBadge } = parsePitchTheme(pitch.theme, pitch.title, clientDisplayName);
   const accentGlow = hexToRgba(accentColor, 0.25);
   const titleFontFamily = getFontFamily(titleFont);
   const isOutline = titleStyle === 'outline';
@@ -891,8 +896,15 @@ export default function PitchViewer({
         );
 
       case 'pillars':
+        const pillarsCols = slide.columns || ((slide.cards || []).length === 2 ? 2 : (slide.cards || []).length >= 4 ? 4 : 3);
+        const pillarsGrid = pillarsCols === 2
+          ? 'grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto'
+          : pillarsCols === 4
+          ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4'
+          : 'grid grid-cols-1 md:grid-cols-3 gap-4';
+
         return (
-          <div className="relative z-10 max-w-[1100px] w-full px-4 md:px-6 my-auto animate-fade-in">
+          <div className="relative z-10 max-w-[1150px] w-full px-4 md:px-6 my-auto animate-fade-in">
             <div className="text-center mb-8">
               {slide.badge && (
                 <span className="text-[10px] uppercase tracking-[0.25em] font-bold mb-2 block" style={{ color: accentColor }}>
@@ -908,44 +920,61 @@ export default function PitchViewer({
               <div className="h-[2px] mx-auto mt-3 w-24" style={{ background: `linear-gradient(to right, transparent, ${accentColor}, transparent)` }}></div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {(slide.cards || []).map((card, cIdx) => (
-                <div
-                  key={cIdx}
-                  className="relative bg-[#0d0d14] border border-white/10 hover:border-white/40 p-6 rounded-xl transition-all duration-300 group hover:-translate-y-1"
-                >
-                  <div className="absolute top-0 left-4 right-4 h-[1.5px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `linear-gradient(to right, transparent, ${accentColor}, transparent)` }} />
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 border" style={{ backgroundColor: `${accentColor}15`, borderColor: `${accentColor}40`, color: accentColor }}>
-                    <span className="material-icons text-[24px]">{card.icon || 'star'}</span>
+            <div className={pillarsGrid}>
+              {(slide.cards || []).map((card, cIdx) => {
+                const cardImg = card.imageUrl || card.logoUrl || card.avatarUrl;
+                return (
+                  <div
+                    key={cIdx}
+                    className="relative bg-[#0d0d14] border border-white/10 hover:border-white/40 p-6 rounded-xl transition-all duration-300 group hover:-translate-y-1"
+                  >
+                    <div className="absolute top-0 left-4 right-4 h-[1.5px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `linear-gradient(to right, transparent, ${accentColor}, transparent)` }} />
+                    {cardImg ? (
+                      <div className="w-12 h-12 rounded-full overflow-hidden mb-4 border p-0.5" style={{ borderColor: accentColor }}>
+                        <img src={cardImg} alt={card.title} className="w-full h-full object-cover rounded-full" />
+                      </div>
+                    ) : (
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 border" style={{ backgroundColor: `${accentColor}15`, borderColor: `${accentColor}40`, color: accentColor }}>
+                        <span className="material-icons text-[24px]">{card.icon || 'star'}</span>
+                      </div>
+                    )}
+                    <h3 className="text-lg font-bold text-white mb-1">{card.title}</h3>
+                    {card.subtitle && (
+                      <p className="text-[10px] uppercase tracking-[0.15em] font-bold mb-3" style={{ color: accentColor }}>
+                        {card.subtitle}
+                      </p>
+                    )}
+                    {card.description && <p className="text-slate-300 text-xs leading-relaxed mb-4">{card.description}</p>}
+                    {card.tags && card.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 pt-3 border-t border-white/10">
+                        {card.tags.map((tag, tIdx) => (
+                          <span
+                            key={tIdx}
+                            className="text-[9px] uppercase tracking-widest text-slate-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full font-medium"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-1">{card.title}</h3>
-                  {card.subtitle && (
-                    <p className="text-[10px] uppercase tracking-[0.15em] font-bold mb-3" style={{ color: accentColor }}>
-                      {card.subtitle}
-                    </p>
-                  )}
-                  <p className="text-slate-300 text-xs leading-relaxed mb-4">{card.description}</p>
-                  {card.tags && card.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 pt-3 border-t border-white/10">
-                      {card.tags.map((tag, tIdx) => (
-                        <span
-                          key={tIdx}
-                          className="text-[9px] uppercase tracking-widest text-slate-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full font-medium"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         );
 
       case 'problem_solution':
+        const probCols = slide.columns || ((slide.cards || []).length === 3 ? 3 : (slide.cards || []).length >= 4 ? 4 : 2);
+        const probGrid = probCols === 3
+          ? 'grid grid-cols-1 md:grid-cols-3 gap-4'
+          : probCols === 4
+          ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4'
+          : 'grid grid-cols-1 md:grid-cols-2 gap-6';
+        const probMaxWidth = probCols >= 3 ? 'max-w-[1150px]' : 'max-w-[1000px]';
+
         return (
-          <div className="relative z-10 max-w-[1000px] w-full px-4 md:px-6 my-auto animate-fade-in">
+          <div className={`relative z-10 ${probMaxWidth} w-full px-4 md:px-6 my-auto animate-fade-in`}>
             <div className="text-center mb-8">
               {slide.badge && (
                 <span className="text-[10px] uppercase tracking-[0.25em] font-bold mb-2 block" style={{ color: accentColor }}>
@@ -960,31 +989,178 @@ export default function PitchViewer({
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {(slide.cards || []).map((card, cIdx) => (
-                <div
-                  key={cIdx}
-                  className={`p-6 rounded-xl border relative ${
-                    card.highlight
-                      ? 'bg-gradient-to-b from-[#191410] to-[#0d0d14] shadow-2xl'
-                      : 'bg-[#0d0d14] border-white/10'
-                  }`}
-                  style={card.highlight ? { borderColor: `${accentColor}50` } : {}}
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="material-icons text-2xl" style={{ color: card.highlight ? accentColor : '#94a3b8' }}>
-                      {card.icon || (card.highlight ? 'verified' : 'warning')}
-                    </span>
-                    <div>
-                      <h3 className="text-base font-bold text-white">{card.title}</h3>
-                      {card.subtitle && (
-                        <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">{card.subtitle}</p>
+            <div className={probGrid}>
+              {(slide.cards || []).map((card, cIdx) => {
+                const cardImg = card.imageUrl || card.logoUrl || card.avatarUrl;
+                return (
+                  <div
+                    key={cIdx}
+                    className={`p-6 rounded-xl border relative ${
+                      card.highlight
+                        ? 'bg-gradient-to-b from-[#191410] to-[#0d0d14] shadow-2xl'
+                        : 'bg-[#0d0d14] border-white/10'
+                    }`}
+                    style={card.highlight ? { borderColor: `${accentColor}50` } : {}}
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      {cardImg ? (
+                        <div className="w-10 h-10 rounded-full overflow-hidden border p-0.5 shrink-0" style={{ borderColor: accentColor }}>
+                          <img src={cardImg} alt={card.title} className="w-full h-full object-cover rounded-full" />
+                        </div>
+                      ) : (
+                        <span className="material-icons text-2xl shrink-0" style={{ color: card.highlight ? accentColor : '#94a3b8' }}>
+                          {card.icon || (card.highlight ? 'verified' : 'warning')}
+                        </span>
+                      )}
+                      <div>
+                        <h3 className="text-base font-bold text-white">{card.title}</h3>
+                        {card.subtitle && (
+                          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">{card.subtitle}</p>
+                        )}
+                      </div>
+                    </div>
+                    {card.description && <p className="text-slate-300 text-xs md:text-sm leading-relaxed">{card.description}</p>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+
+      case 'team':
+        const teamCols = slide.columns || ((slide.cards || []).length <= 2 ? 2 : (slide.cards || []).length === 4 ? 4 : 3);
+        const teamGrid = teamCols === 2
+          ? 'grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto'
+          : teamCols === 4
+          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'
+          : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5';
+
+        return (
+          <div className="relative z-10 max-w-[1150px] w-full px-4 md:px-6 my-auto animate-fade-in">
+            <div className="text-center mb-8">
+              {slide.badge && (
+                <span className="text-[10px] uppercase tracking-[0.25em] font-bold mb-2 block" style={{ color: accentColor }}>
+                  {slide.badge}
+                </span>
+              )}
+              {renderStyledTitle(slide.title || 'Leadership & Core Team')}
+              {slide.subtitle && (
+                <p className="text-slate-300 text-sm md:text-base max-w-[850px] mx-auto mt-2">
+                  {slide.subtitle}
+                </p>
+              )}
+              <div className="h-[2px] mx-auto mt-3 w-24" style={{ background: `linear-gradient(to right, transparent, ${accentColor}, transparent)` }}></div>
+            </div>
+
+            <div className={teamGrid}>
+              {(slide.cards || []).map((member, mIdx) => {
+                const img = member.imageUrl || member.avatarUrl || member.logoUrl;
+                const memberInitials = (member.title || 'TM').split(' ').map((p) => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'TM';
+                return (
+                  <div
+                    key={mIdx}
+                    className="relative bg-[#0d0d14] border border-white/10 hover:border-white/40 p-5 rounded-xl transition-all duration-300 group hover:-translate-y-1 flex flex-col items-center text-center"
+                  >
+                    <div className="relative mb-3">
+                      {img ? (
+                        <div className="w-20 h-20 rounded-full overflow-hidden border-2 p-0.5 shadow-lg" style={{ borderColor: accentColor }}>
+                          <img src={img} alt={member.title} className="w-full h-full object-cover rounded-full" />
+                        </div>
+                      ) : (
+                        <div
+                          className="w-20 h-20 rounded-full flex items-center justify-center font-bold text-lg border-2 shadow-lg"
+                          style={{
+                            backgroundColor: `${accentColor}15`,
+                            borderColor: accentColor,
+                            color: accentColor,
+                          }}
+                        >
+                          {memberInitials}
+                        </div>
                       )}
                     </div>
+
+                    <h3 className="text-base font-bold text-white mb-0.5">{member.title}</h3>
+                    {member.subtitle && (
+                      <p className="text-[10px] uppercase tracking-wider font-bold mb-2" style={{ color: accentColor }}>
+                        {member.subtitle}
+                      </p>
+                    )}
+                    {member.description && (
+                      <p className="text-slate-300 text-xs leading-relaxed mb-3 line-clamp-3">{member.description}</p>
+                    )}
+                    {member.tags && member.tags.length > 0 && (
+                      <div className="flex flex-wrap justify-center gap-1 mt-auto pt-2 border-t border-white/10 w-full">
+                        {member.tags.map((tag, tIdx) => (
+                          <span
+                            key={tIdx}
+                            className="text-[9px] uppercase tracking-widest text-slate-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full font-medium"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <p className="text-slate-300 text-xs md:text-sm leading-relaxed">{card.description}</p>
-                </div>
-              ))}
+                );
+              })}
+            </div>
+          </div>
+        );
+
+      case 'logos':
+        const logoCols = slide.columns || ((slide.cards || []).length <= 2 ? 2 : (slide.cards || []).length === 3 ? 3 : (slide.cards || []).length <= 4 ? 4 : 6);
+        const logoGrid = logoCols === 2
+          ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto'
+          : logoCols === 3
+          ? 'grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto'
+          : logoCols === 4
+          ? 'grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto'
+          : 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4';
+
+        return (
+          <div className="relative z-10 max-w-[1150px] w-full px-4 md:px-6 my-auto animate-fade-in">
+            <div className="text-center mb-8">
+              {slide.badge && (
+                <span className="text-[10px] uppercase tracking-[0.25em] font-bold mb-2 block" style={{ color: accentColor }}>
+                  {slide.badge}
+                </span>
+              )}
+              {renderStyledTitle(slide.title || 'Clients & Brand Ecosystem')}
+              {slide.subtitle && (
+                <p className="text-slate-300 text-sm md:text-base max-w-[850px] mx-auto mt-2">
+                  {slide.subtitle}
+                </p>
+              )}
+              <div className="h-[2px] mx-auto mt-3 w-24" style={{ background: `linear-gradient(to right, transparent, ${accentColor}, transparent)` }}></div>
+            </div>
+
+            <div className={logoGrid}>
+              {(slide.cards || []).map((item, lIdx) => {
+                const img = item.imageUrl || item.logoUrl || item.avatarUrl;
+                return (
+                  <div
+                    key={lIdx}
+                    className="relative bg-[#0d0d14] border border-white/10 hover:border-white/40 p-4 rounded-xl transition-all duration-300 group hover:-translate-y-1 flex flex-col items-center justify-center text-center min-h-[130px]"
+                  >
+                    {img ? (
+                      <div className="h-12 w-full flex items-center justify-center mb-2 px-2">
+                        <img src={img} alt={item.title} className="max-h-full max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all opacity-80 group-hover:opacity-100" />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2 border" style={{ backgroundColor: `${accentColor}15`, borderColor: `${accentColor}40`, color: accentColor }}>
+                        <span className="material-icons text-lg">{item.icon || 'business'}</span>
+                      </div>
+                    )}
+                    <h3 className="text-xs font-bold text-white truncate max-w-full">{item.title}</h3>
+                    {item.subtitle && (
+                      <p className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold truncate max-w-full mt-0.5">
+                        {item.subtitle}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
@@ -1285,7 +1461,7 @@ export default function PitchViewer({
               {brandName}
             </span>
             <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full hidden sm:inline border" style={{ backgroundColor: `${accentColor}15`, borderColor: `${accentColor}30`, color: accentColor }}>
-              {isDiDi ? 'DIDI RFI DECK' : 'PITCH DECK'}
+              {headerBadge}
             </span>
           </div>
 
