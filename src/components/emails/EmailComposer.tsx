@@ -28,6 +28,12 @@ export interface EmailComposerPitch {
     razonSocial: string;
     email?: string | null;
   } | null;
+  user?: {
+    id: string;
+    name?: string | null;
+    cargo?: string | null;
+    email?: string | null;
+  } | null;
   slides?: any;
 }
 

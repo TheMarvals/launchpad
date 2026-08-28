@@ -28,6 +28,14 @@ export default async function NewEmailPage({
             email: true,
           },
         },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            cargo: true,
+            email: true,
+          },
+        },
         slides: true,
       },
     }),
