@@ -32,6 +32,26 @@ const isVideoUrl = (url?: string) => {
   );
 };
 
+/**
+ * Optimize image URL for PDF export.
+ * For Cloudinary images, injects w_800,q_auto:low,f_jpg transformations
+ * to reduce file size from ~2-5MB per image to ~50-150KB.
+ */
+const pdfImg = (url?: string, maxWidth = 800): string => {
+  if (!url) return '';
+  // Cloudinary image URLs: insert transformation before the version/filename segment
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+    // Check if transformations already exist
+    const hasTransform = /\/upload\/[a-z]/.test(url) && !/\/upload\/v\d/.test(url);
+    if (hasTransform) {
+      // Already has transforms, append our size reduction
+      return url.replace('/upload/', `/upload/w_${maxWidth},q_auto:low,f_jpg/`);
+    }
+    return url.replace('/upload/', `/upload/w_${maxWidth},q_auto:low,f_jpg/`);
+  }
+  return url;
+};
+
 export default function PitchPDF({
   pitch,
   companyProfile,
@@ -370,7 +390,7 @@ export default function PitchPDF({
                         <div>
                           {cardImg ? (
                             <div className="w-9 h-9 rounded-full overflow-hidden border mb-2 p-0.5" style={{ borderColor: accentColor }}>
-                              <img src={cardImg} alt={card.title} className="w-full h-full object-cover rounded-full" />
+                              <img src={pdfImg(cardImg, 200)} alt={card.title} className="w-full h-full object-cover rounded-full" />
                             </div>
                           ) : (
                             <div
@@ -422,7 +442,7 @@ export default function PitchPDF({
                             <div className="mb-2">
                               {img ? (
                                 <div className="w-13 h-13 rounded-full overflow-hidden border-2 p-0.5" style={{ borderColor: accentColor }}>
-                                  <img src={img} alt={member.name || 'Member'} className="w-full h-full object-cover rounded-full" />
+                                  <img src={pdfImg(img, 200)} alt={member.name || 'Member'} className="w-full h-full object-cover rounded-full" />
                                 </div>
                               ) : (
                                 <div className="w-13 h-13 rounded-full flex items-center justify-center font-bold text-sm border-2" style={{ backgroundColor: `${accentColor}15`, borderColor: accentColor, color: accentColor }}>
@@ -475,7 +495,7 @@ export default function PitchPDF({
                         <div className="flex items-center gap-2 mb-2">
                           {cardImg ? (
                             <div className="w-8 h-8 rounded-full overflow-hidden border p-0.5 shrink-0" style={{ borderColor: accentColor }}>
-                              <img src={cardImg} alt={card.title} className="w-full h-full object-cover rounded-full" />
+                              <img src={pdfImg(cardImg, 200)} alt={card.title} className="w-full h-full object-cover rounded-full" />
                             </div>
                           ) : (
                             <span className="material-icons text-lg shrink-0" style={{ color: card.highlight ? accentColor : '#94a3b8' }}>
@@ -515,7 +535,7 @@ export default function PitchPDF({
                             <div className="mb-2">
                               {img ? (
                                 <div className="w-13 h-13 rounded-full overflow-hidden border-2 p-0.5" style={{ borderColor: accentColor }}>
-                                  <img src={img} alt={member.name || 'Member'} className="w-full h-full object-cover rounded-full" />
+                                  <img src={pdfImg(img, 200)} alt={member.name || 'Member'} className="w-full h-full object-cover rounded-full" />
                                 </div>
                               ) : (
                                 <div className="w-13 h-13 rounded-full flex items-center justify-center font-bold text-sm border-2" style={{ backgroundColor: `${accentColor}15`, borderColor: accentColor, color: accentColor }}>
@@ -571,7 +591,7 @@ export default function PitchPDF({
                         <div className="aspect-video bg-black/60 overflow-hidden relative">
                           {mainImg ? (
                             <img
-                              src={mainImg}
+                              src={pdfImg(mainImg)}
                               alt={item.title}
                               className="w-full h-full object-cover"
                             />
@@ -604,7 +624,7 @@ export default function PitchPDF({
                               {galleryImages.map((gImg, gIdx) => (
                                 <img
                                   key={gIdx}
-                                  src={gImg}
+                                  src={pdfImg(gImg, 300)}
                                   alt=""
                                   className="w-8 h-6 object-cover rounded border border-white/10"
                                 />
@@ -795,7 +815,7 @@ export default function PitchPDF({
                         <div className="mb-2">
                           {img ? (
                             <div className="w-14 h-14 rounded-full overflow-hidden border-2 p-0.5" style={{ borderColor: accentColor }}>
-                              <img src={img} alt={member.title} className="w-full h-full object-cover rounded-full" />
+                              <img src={pdfImg(img, 200)} alt={member.title} className="w-full h-full object-cover rounded-full" />
                             </div>
                           ) : (
                             <div
@@ -859,7 +879,7 @@ export default function PitchPDF({
                       <div key={lIdx} className="bg-[#0d0d14] border border-white/10 p-3 rounded-xl flex flex-col items-center justify-center min-h-[90px]">
                         {img ? (
                           <div className="h-9 w-full flex items-center justify-center mb-1.5 px-1">
-                            <img src={img} alt={item.title} className="max-h-full max-w-full object-contain" />
+                            <img src={pdfImg(img)} alt={item.title} className="max-h-full max-w-full object-contain" />
                           </div>
                         ) : (
                           <div className="w-8 h-8 rounded-full flex items-center justify-center mb-1.5 border" style={{ backgroundColor: `${accentColor}15`, borderColor: `${accentColor}40`, color: accentColor }}>
