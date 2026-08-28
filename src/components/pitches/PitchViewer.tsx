@@ -820,6 +820,14 @@ export default function PitchViewer({
   const renderTeamSection = (teamMembers?: TeamMember[], customTitle?: string) => {
     if (!teamMembers || teamMembers.length === 0) return null;
     const titleText = customTitle?.trim() || (locale === 'es' ? 'Equipo Clave & Liderazgo' : 'Core Team & Leadership');
+    const teamGridClass = teamMembers.length === 1
+      ? 'max-w-xs mx-auto'
+      : teamMembers.length === 2
+      ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto'
+      : teamMembers.length === 3
+      ? 'grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto'
+      : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto';
+
     return (
       <div className="w-full mt-8 pt-6 border-t border-white/10">
         <div className="text-center mb-5">
@@ -827,24 +835,24 @@ export default function PitchViewer({
             {titleText}
           </span>
         </div>
-        <div className={`flex flex-wrap justify-center gap-5 w-full mx-auto ${teamMembers.length === 1 ? 'max-w-xs' : teamMembers.length === 2 ? 'max-w-2xl' : 'max-w-5xl'}`}>
+        <div className={teamGridClass}>
           {teamMembers.map((member, mIdx) => {
             const memberInitials = (member.name || 'TM').split(' ').map((p) => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'TM';
             const img = member.imageUrl || member.avatarUrl;
             return (
               <div
                 key={mIdx}
-                className="w-full sm:w-[260px] md:w-[280px] bg-gradient-to-b from-[#12111a] to-[#0a0a10] border border-white/10 hover:border-white/30 p-5 rounded-2xl transition-all duration-300 flex flex-col items-center text-center group shadow-xl hover:-translate-y-1"
+                className="w-full bg-gradient-to-b from-[#12111a] to-[#0a0a10] border border-white/10 hover:border-white/30 p-4 sm:p-5 rounded-2xl transition-all duration-300 flex flex-col items-center text-center group shadow-xl hover:-translate-y-1"
                 style={{ borderColor: `${accentColor}30` }}
               >
-                <div className="relative mb-3.5">
+                <div className="relative mb-3">
                   {img ? (
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 p-0.5 shadow-xl" style={{ borderColor: accentColor }}>
+                    <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 p-0.5 shadow-xl" style={{ borderColor: accentColor }}>
                       <img src={img} alt={member.name || 'Team Member'} className="w-full h-full object-cover rounded-full" />
                     </div>
                   ) : (
                     <div
-                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center font-bold text-xl sm:text-2xl border-2 shadow-xl"
+                      className="w-18 h-18 sm:w-20 sm:h-20 rounded-full flex items-center justify-center font-bold text-lg sm:text-xl border-2 shadow-xl"
                       style={{
                         backgroundColor: `${accentColor}15`,
                         borderColor: accentColor,
@@ -855,19 +863,19 @@ export default function PitchViewer({
                     </div>
                   )}
                 </div>
-                <h4 className="text-sm md:text-base font-bold text-white mb-1 w-full px-1">
+                <h4 className="text-sm sm:text-base font-bold text-white mb-0.5 w-full px-1 truncate">
                   {member.name || (locale === 'es' ? 'Nombre del Miembro' : 'Team Member')}
                 </h4>
-                <p className="text-[10px] uppercase tracking-wider font-bold mb-2 w-full px-1" style={{ color: accentColor }}>
+                <p className="text-[10px] uppercase tracking-wider font-bold mb-2 w-full px-1 line-clamp-2" style={{ color: accentColor }}>
                   {member.role || (locale === 'es' ? 'Cargo / Rol' : 'Executive Role')}
                 </p>
                 {member.bio && (
-                  <p className="text-xs text-slate-300 leading-relaxed mb-3 line-clamp-3 px-1">{member.bio}</p>
+                  <p className="text-xs text-slate-300 leading-relaxed mb-3 line-clamp-2 px-1">{member.bio}</p>
                 )}
                 {member.tags && member.tags.length > 0 && (
-                  <div className="flex flex-wrap justify-center gap-1.5 mt-auto pt-3 border-t border-white/10 w-full">
+                  <div className="flex flex-wrap justify-center gap-1 mt-auto pt-2.5 border-t border-white/10 w-full">
                     {member.tags.map((t, tIdx) => (
-                      <span key={tIdx} className="text-[9px] uppercase tracking-wider text-slate-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full font-medium">
+                      <span key={tIdx} className="text-[8px] sm:text-[9px] uppercase tracking-wider text-slate-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full font-medium">
                         {t}
                       </span>
                     ))}

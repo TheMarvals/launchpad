@@ -367,12 +367,12 @@ export default function PitchPDF({
                     <span className="text-[8px] uppercase tracking-widest font-bold block mb-2 text-center" style={{ color: accentColor }}>
                       {slide.teamTitle || 'Core Team & Leadership'}
                     </span>
-                    <div className="flex flex-wrap justify-center gap-2.5 text-center w-full mx-auto">
+                    <div className={`grid gap-2.5 text-center w-full mx-auto ${slide.teamMembers.length <= 2 ? 'grid-cols-2 max-w-xl' : slide.teamMembers.length === 3 ? 'grid-cols-3 max-w-2xl' : 'grid-cols-4 max-w-4xl'}`}>
                       {slide.teamMembers.map((member, mIdx) => {
                         const img = member.imageUrl || member.avatarUrl;
                         const memberInitials = (member.name || 'TM').split(' ').map((p) => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'TM';
                         return (
-                          <div key={mIdx} className="w-[160px] bg-[#0d0d14] border border-white/10 p-3 rounded-xl flex flex-col items-center">
+                          <div key={mIdx} className="w-full bg-[#0d0d14] border border-white/10 p-2.5 rounded-xl flex flex-col items-center">
                             <div className="mb-2">
                               {img ? (
                                 <div className="w-13 h-13 rounded-full overflow-hidden border-2 p-0.5" style={{ borderColor: accentColor }}>
@@ -454,12 +454,12 @@ export default function PitchPDF({
                     <span className="text-[8px] uppercase tracking-widest font-bold block mb-2 text-center" style={{ color: accentColor }}>
                       {slide.teamTitle || 'Core Team & Leadership'}
                     </span>
-                    <div className="flex flex-wrap justify-center gap-2.5 text-center w-full mx-auto">
+                    <div className={`grid gap-2.5 text-center w-full mx-auto ${slide.teamMembers.length <= 2 ? 'grid-cols-2 max-w-xl' : slide.teamMembers.length === 3 ? 'grid-cols-3 max-w-2xl' : 'grid-cols-4 max-w-4xl'}`}>
                       {slide.teamMembers.map((member, mIdx) => {
                         const img = member.imageUrl || member.avatarUrl;
                         const memberInitials = (member.name || 'TM').split(' ').map((p) => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'TM';
                         return (
-                          <div key={mIdx} className="w-[160px] bg-[#0d0d14] border border-white/10 p-3 rounded-xl flex flex-col items-center">
+                          <div key={mIdx} className="w-full bg-[#0d0d14] border border-white/10 p-2.5 rounded-xl flex flex-col items-center">
                             <div className="mb-2">
                               {img ? (
                                 <div className="w-13 h-13 rounded-full overflow-hidden border-2 p-0.5" style={{ borderColor: accentColor }}>
