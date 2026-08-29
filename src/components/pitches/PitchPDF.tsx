@@ -261,6 +261,18 @@ export default function PitchPDF({
             breakAfter: sIdx === slides.length - 1 ? 'auto' : 'page',
           }}
         >
+          {/* Ambient Glow */}
+          <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+            <div
+              className="absolute -top-16 -right-16 w-96 h-96 rounded-full filter blur-[90px] opacity-20"
+              style={{ backgroundColor: accentColor }}
+            />
+            <div
+              className="absolute -bottom-16 -left-16 w-80 h-80 rounded-full filter blur-[90px] opacity-15"
+              style={{ backgroundColor: '#0062ff' }}
+            />
+          </div>
+
           {/* Header */}
           <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-3">
             <div className="flex items-center gap-3">
