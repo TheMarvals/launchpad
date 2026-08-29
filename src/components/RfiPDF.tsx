@@ -197,7 +197,7 @@ const RfiPDF: React.FC<RfiPDFProps> = ({ rfi, isTemplate, companyProfile }) => {
             {pageIdx === 0 ? (
               <header className="relative w-full p-10 pb-12 text-white shrink-0 overflow-hidden" style={{ background: '#0B1026' }}>
                 <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/20 to-transparent skew-x-[-15deg] translate-x-20" />
-                <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/10 rounded-full blur-[100px]" />
+                <div className="absolute -top-24 -left-24 w-64 h-64 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(218, 41, 28, 0.15) 0%, transparent 70%)' }} />
                 <div className="relative z-10 flex justify-between items-center">
                   <div className="space-y-4">
                     <div className="relative inline-block">
