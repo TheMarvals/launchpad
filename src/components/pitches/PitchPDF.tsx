@@ -261,17 +261,6 @@ export default function PitchPDF({
             breakAfter: sIdx === slides.length - 1 ? 'auto' : 'page',
           }}
         >
-          {/* Ambient Glow via native radial gradients (fast rendering on macOS / Acrobat / all PDF engines) */}
-          <div
-            className="absolute inset-0 pointer-events-none z-0 overflow-hidden"
-            style={{
-              background: `
-                radial-gradient(circle at 100% 0%, ${hexToRgba(accentColor, 0.18)} 0%, transparent 60%),
-                radial-gradient(circle at 0% 100%, rgba(0, 98, 255, 0.12) 0%, transparent 60%)
-              `,
-            }}
-          />
-
           {/* Header */}
           <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-3">
             <div className="flex items-center gap-3">

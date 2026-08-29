@@ -99,6 +99,7 @@ export async function GET(
     const pdf = await page.pdf({
       format: 'A4',
       landscape: true,
+      preferCSSPageSize: true,
       printBackground: true,
       margin: {
         top: '0px',
