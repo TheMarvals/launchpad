@@ -223,18 +223,32 @@ export default function PitchPDF({
             padding: 0 !important;
           }
         }
+        .pdf-wrapper {
+          width: 297mm !important;
+          max-width: 297mm !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          background-color: #07070b !important;
+        }
         .pdf-page {
-          width: 1123px !important;
-          min-width: 1123px !important;
-          max-width: 1123px !important;
-          height: 794px !important;
-          min-height: 794px !important;
-          max-height: 794px !important;
+          width: 297mm !important;
+          min-width: 297mm !important;
+          max-width: 297mm !important;
+          height: 210mm !important;
+          min-height: 210mm !important;
+          max-height: 210mm !important;
           box-sizing: border-box !important;
           page-break-inside: avoid !important;
           break-inside: avoid !important;
           page-break-after: always !important;
           break-after: page !important;
+          overflow: hidden !important;
+          margin: 0 !important;
+          border: none !important;
+        }
+        .pdf-page:last-child {
+          page-break-after: avoid !important;
+          break-after: avoid !important;
         }
         .material-icons {
           font-family: 'Material Icons' !important;
@@ -256,11 +270,7 @@ export default function PitchPDF({
       {slides.map((slide, sIdx) => (
         <div
           key={slide.id || sIdx}
-          className="pdf-page relative overflow-hidden flex flex-col justify-between p-10 bg-[#07070b] border-b border-white/10"
-          style={{
-            pageBreakAfter: sIdx === slides.length - 1 ? 'auto' : 'always',
-            breakAfter: sIdx === slides.length - 1 ? 'auto' : 'page',
-          }}
+          className="pdf-page relative overflow-hidden flex flex-col justify-between p-10 bg-[#07070b]"
         >
           {/* Ambient Glow (Native radial gradient without heavy CSS blur filters) */}
           <div
