@@ -34,20 +34,13 @@ const isVideoUrl = (url?: string) => {
 
 /**
  * Optimize image URL for PDF export.
- * For Cloudinary images, injects w_800,q_auto:low,f_jpg transformations
- * to reduce file size from ~2-5MB per image to ~50-150KB.
+ * For Cloudinary images, injects w_800,q_auto,f_auto transformations
+ * to reduce file size while preserving transparency (alpha channel) for logos and PNGs.
  */
 const pdfImg = (url?: string, maxWidth = 800): string => {
   if (!url) return '';
-  // Cloudinary image URLs: insert transformation before the version/filename segment
   if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
-    // Check if transformations already exist
-    const hasTransform = /\/upload\/[a-z]/.test(url) && !/\/upload\/v\d/.test(url);
-    if (hasTransform) {
-      // Already has transforms, append our size reduction
-      return url.replace('/upload/', `/upload/w_${maxWidth},q_auto:low,f_jpg/`);
-    }
-    return url.replace('/upload/', `/upload/w_${maxWidth},q_auto:low,f_jpg/`);
+    return url.replace('/upload/', `/upload/w_${maxWidth},q_auto,f_auto/`);
   }
   return url;
 };
