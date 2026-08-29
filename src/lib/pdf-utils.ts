@@ -101,7 +101,9 @@ export async function generatePdf(options: GeneratePdfOptions): Promise<Response
   const isFlatten = options.flattenSlides ?? false;
   const viewportWidth = options.width || (isLandscape ? 1123 : 794);
   const viewportHeight = options.height || (isLandscape ? 794 : 1123);
-  const scaleFactor = options.deviceScaleFactor || (isFlatten ? 2 : 1.5);
+  // 1.5× keeps presentation text and imagery crisp on screen while avoiding
+  // the much heavier 2× images previously embedded per slide.
+  const scaleFactor = options.deviceScaleFactor || (isFlatten ? 1.5 : 1.5);
 
   const browser = await puppeteer.launch({
     headless: true,
@@ -202,7 +204,7 @@ export async function generatePdf(options: GeneratePdfOptions): Promise<Response
       for (const slideHandle of slideHandles) {
         const screenshotBuffer = await slideHandle.screenshot({
           type: 'jpeg',
-          quality: 86,
+          quality: 82,
         });
 
         const embeddedJpg = await pdfDoc.embedJpg(screenshotBuffer);
