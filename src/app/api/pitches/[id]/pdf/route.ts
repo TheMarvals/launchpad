@@ -68,12 +68,14 @@ export async function GET(
     });
 
     await page.goto(previewUrl, {
-      waitUntil: 'domcontentloaded',
-      timeout: 20000,
+      waitUntil: ['load', 'networkidle0'],
+      timeout: 25000,
+    }).catch(() => {
+      // If networkidle0 times out, continue anyway with loaded content
     });
 
     await page.waitForSelector('.pdf-page', { timeout: 15000 });
-    await page.emulateMediaType('screen');
+    await page.emulateMediaType('print');
     await applyPdfStyles(page);
 
     // Fast check for fonts and images with 2.5s maximum timeout
