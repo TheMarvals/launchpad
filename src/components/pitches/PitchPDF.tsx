@@ -748,23 +748,47 @@ export default function PitchPDF({
                   )}
                 </div>
 
-                {slide.cards && slide.cards.length > 0 && (
-                  <div className={`grid ${slide.cards.length === 1 ? 'grid-cols-1 max-w-md' : slide.cards.length === 2 ? 'grid-cols-2 max-w-3xl' : 'grid-cols-3 max-w-4xl'} gap-4 text-left w-full mx-auto`}>
-                    {slide.cards.map((card, cIdx) => (
-                      <div key={cIdx} className="bg-[#0d0d14] border border-white/10 p-4 rounded-xl space-y-1.5">
-                        <div className="flex items-center gap-2">
-                          <span className="material-icons text-base" style={{ color: accentColor }}>{card.icon || 'verified'}</span>
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-white">
-                            {card.title}
-                          </h4>
-                        </div>
-                        {card.description && (
-                          <p className="text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">{card.description}</p>
-                        )}
+                {slide.cards && slide.cards.length > 0 && (() => {
+                  const hasAnyDescription = slide.cards.some((c: any) => Boolean(c.description?.trim()));
+
+                  if (!hasAnyDescription) {
+                    return (
+                      <div className="flex flex-wrap justify-center items-center gap-3 w-full max-w-3xl mx-auto">
+                        {slide.cards.map((card: any, cIdx: number) => (
+                          <div
+                            key={cIdx}
+                            className="bg-[#0d0d14] border border-white/10 px-4 py-2.5 rounded-xl inline-flex items-center gap-2"
+                          >
+                            <span className="material-icons text-base" style={{ color: accentColor }}>
+                              {card.icon || 'verified'}
+                            </span>
+                            <h4 className="text-[11px] font-bold uppercase tracking-wider text-white whitespace-nowrap">
+                              {card.title}
+                            </h4>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                )}
+                    );
+                  }
+
+                  return (
+                    <div className={`grid ${slide.cards.length === 1 ? 'grid-cols-1 max-w-md' : slide.cards.length === 2 ? 'grid-cols-2 max-w-3xl' : 'grid-cols-3 max-w-4xl'} gap-4 text-left w-full mx-auto`}>
+                      {slide.cards.map((card: any, cIdx: number) => (
+                        <div key={cIdx} className="bg-[#0d0d14] border border-white/10 p-4 rounded-xl space-y-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className="material-icons text-base" style={{ color: accentColor }}>{card.icon || 'verified'}</span>
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-white">
+                              {card.title}
+                            </h4>
+                          </div>
+                          {card.description && (
+                            <p className="text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">{card.description}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
 
                 {/* Presenter Sign-off (Ultra discreto, elegante, minimalista, idéntico al interactivo) */}
                 <div className="w-full max-w-xs mx-auto pt-5 border-t border-white/5 text-center space-y-0.5 flex flex-col items-center">

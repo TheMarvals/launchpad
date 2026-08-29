@@ -1495,22 +1495,46 @@ export default function PitchViewer({
               </p>
             )}
 
-            {/* Two Value Proposition Pillars on Closing */}
-            {slide.cards && slide.cards.length > 0 && (
-              <div className={`grid gap-4 w-full ${slide.cards.length === 1 ? 'max-w-md grid-cols-1' : slide.cards.length === 2 ? 'max-w-3xl grid-cols-1 md:grid-cols-2' : 'max-w-4xl grid-cols-1 md:grid-cols-3'} mx-auto mb-6 text-left`}>
-                {slide.cards.map((card, cIdx) => (
-                  <div key={cIdx} className="bg-[#0d0d14] border border-white/10 p-5 rounded-xl space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="material-icons text-lg" style={{ color: accentColor }}>{card.icon || 'verified'}</span>
-                      <h4 className="text-xs font-bold text-white uppercase tracking-wider">{card.title}</h4>
-                    </div>
-                    {card.description && (
-                      <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{card.description}</p>
-                    )}
+            {/* Value Proposition Cards / Badges on Closing */}
+            {slide.cards && slide.cards.length > 0 && (() => {
+              const hasAnyDescription = slide.cards.some((c) => Boolean(c.description?.trim()));
+
+              if (!hasAnyDescription) {
+                return (
+                  <div className="flex flex-wrap justify-center items-center gap-3.5 w-full max-w-4xl mx-auto mb-6">
+                    {slide.cards.map((card, cIdx) => (
+                      <div
+                        key={cIdx}
+                        className="bg-[#0d0d14] border border-white/10 px-5 py-3 rounded-xl inline-flex items-center gap-2.5 shadow-sm transition-all hover:border-white/20"
+                      >
+                        <span className="material-icons text-lg" style={{ color: accentColor }}>
+                          {card.icon || 'verified'}
+                        </span>
+                        <h4 className="text-xs font-bold text-white uppercase tracking-wider whitespace-nowrap">
+                          {card.title}
+                        </h4>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
+                );
+              }
+
+              return (
+                <div className={`grid gap-4 w-full ${slide.cards.length === 1 ? 'max-w-md grid-cols-1' : slide.cards.length === 2 ? 'max-w-3xl grid-cols-1 md:grid-cols-2' : 'max-w-4xl grid-cols-1 md:grid-cols-3'} mx-auto mb-6 text-left`}>
+                  {slide.cards.map((card, cIdx) => (
+                    <div key={cIdx} className="bg-[#0d0d14] border border-white/10 p-5 rounded-xl space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="material-icons text-lg" style={{ color: accentColor }}>{card.icon || 'verified'}</span>
+                        <h4 className="text-xs font-bold text-white uppercase tracking-wider">{card.title}</h4>
+                      </div>
+                      {card.description && (
+                        <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{card.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
 
             {/* Bottom Content Text */}
             {(slide.footerContent || slide.bottomContent) && (
