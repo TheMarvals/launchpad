@@ -34,14 +34,13 @@ const isVideoUrl = (url?: string) => {
 
 /**
  * Optimize image URL for PDF export.
- * Standard PDF (/DCTDecode) natively embeds JPEGs without raw memory decompression.
- * For logos/transparent PNGs, we use f_png with optimized width.
+ * For Cloudinary images, injects w_800,q_auto,f_auto transformations
+ * to reduce file size while preserving transparency (alpha channel) for logos and PNGs.
  */
-const pdfImg = (url?: string, maxWidth = 800, isTransparent = false): string => {
+const pdfImg = (url?: string, maxWidth = 800): string => {
   if (!url) return '';
   if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
-    const format = isTransparent ? 'f_png' : 'f_jpg';
-    return url.replace('/upload/', `/upload/w_${maxWidth},q_80,${format}/`);
+    return url.replace('/upload/', `/upload/w_${maxWidth},q_auto,f_auto/`);
   }
   return url;
 };
@@ -211,7 +210,7 @@ export default function PitchPDF({
 
       <style>{`
         @page {
-          size: 297mm 210mm;
+          size: 1123px 794px;
           margin: 0;
         }
         @media print {
@@ -223,32 +222,18 @@ export default function PitchPDF({
             padding: 0 !important;
           }
         }
-        .pdf-wrapper {
-          width: 297mm !important;
-          max-width: 297mm !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          background-color: #07070b !important;
-        }
         .pdf-page {
-          width: 297mm !important;
-          min-width: 297mm !important;
-          max-width: 297mm !important;
-          height: 210mm !important;
-          min-height: 210mm !important;
-          max-height: 210mm !important;
+          width: 1123px !important;
+          min-width: 1123px !important;
+          max-width: 1123px !important;
+          height: 794px !important;
+          min-height: 794px !important;
+          max-height: 794px !important;
           box-sizing: border-box !important;
           page-break-inside: avoid !important;
           break-inside: avoid !important;
           page-break-after: always !important;
           break-after: page !important;
-          overflow: hidden !important;
-          margin: 0 !important;
-          border: none !important;
-        }
-        .pdf-page:last-child {
-          page-break-after: avoid !important;
-          break-after: avoid !important;
         }
         .material-icons {
           font-family: 'Material Icons' !important;
@@ -271,14 +256,22 @@ export default function PitchPDF({
         <div
           key={slide.id || sIdx}
           className="pdf-page relative overflow-hidden flex flex-col justify-between p-10 bg-[#07070b]"
+          style={{
+            pageBreakAfter: sIdx === slides.length - 1 ? 'auto' : 'always',
+            breakAfter: sIdx === slides.length - 1 ? 'auto' : 'page',
+          }}
         >
-          {/* Ambient Glow (Native radial gradient without heavy CSS blur filters) */}
-          <div
-            className="absolute inset-0 pointer-events-none z-0 overflow-hidden"
-            style={{
-              background: `radial-gradient(circle at 95% 5%, ${hexToRgba(accentColor, 0.16)} 0%, transparent 45%), radial-gradient(circle at 5% 95%, rgba(0, 98, 255, 0.12) 0%, transparent 40%)`,
-            }}
-          />
+          {/* Ambient Glow */}
+          <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+            <div
+              className="absolute -top-16 -right-16 w-96 h-96 rounded-full filter blur-[90px] opacity-20"
+              style={{ backgroundColor: accentColor }}
+            />
+            <div
+              className="absolute -bottom-16 -left-16 w-80 h-80 rounded-full filter blur-[90px] opacity-15"
+              style={{ backgroundColor: '#0062ff' }}
+            />
+          </div>
 
           {/* Header */}
           <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-3">
@@ -888,7 +881,7 @@ export default function PitchPDF({
                       <div key={lIdx} className="bg-[#0d0d14] border border-white/10 p-3 rounded-xl flex flex-col items-center justify-center min-h-[90px]">
                         {img ? (
                           <div className="h-9 w-full flex items-center justify-center mb-1.5 px-1">
-                            <img src={pdfImg(img, 300, true)} alt={item.title} className="max-h-full max-w-full object-contain" />
+                            <img src={pdfImg(img)} alt={item.title} className="max-h-full max-w-full object-contain" />
                           </div>
                         ) : (
                           <div className="w-8 h-8 rounded-full flex items-center justify-center mb-1.5 border" style={{ backgroundColor: `${accentColor}15`, borderColor: `${accentColor}40`, color: accentColor }}>

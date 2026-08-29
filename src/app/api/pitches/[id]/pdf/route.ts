@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
+import { PDFDocument } from 'pdf-lib';
 import { detectLocale, forwardCookies, applyPdfStyles } from '@/lib/pdf-utils';
 
 export const dynamic = 'force-dynamic';
@@ -42,12 +43,11 @@ export async function GET(
 
     const page = await browser.newPage();
 
-    // Block videos, large media, and unnecessary requests
+    // Block video files, media streams, and websockets
     await page.setRequestInterception(true);
     page.on('request', (req) => {
       const resourceType = req.resourceType();
       const url = req.url();
-      // Block video files, media streams, websockets, and font-display preloads
       if (
         ['media', 'websocket'].includes(resourceType) ||
         /\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i.test(url)
@@ -60,25 +60,24 @@ export async function GET(
 
     await forwardCookies(page, request, baseUrl);
 
-    // deviceScaleFactor: 1 — cuts PDF file size by ~75% (from ~47MB to ~8-12MB)
+    // Set viewport at 2x Retina resolution for razor-sharp text & graphics
     await page.setViewport({
       width: 1123,
       height: 794,
-      deviceScaleFactor: 1,
+      deviceScaleFactor: 2,
     });
 
     await page.goto(previewUrl, {
       waitUntil: ['load', 'networkidle0'],
       timeout: 25000,
     }).catch(() => {
-      // If networkidle0 times out, continue anyway with loaded content
+      // If networkidle0 times out, continue with loaded content
     });
 
     await page.waitForSelector('.pdf-page', { timeout: 15000 });
-    await page.emulateMediaType('print');
     await applyPdfStyles(page);
 
-    // Fast check for fonts and images with 2.5s maximum timeout
+    // Fast check for fonts and images
     await Promise.race([
       Promise.all([
         page.evaluateHandle('document.fonts.ready').catch(() => null),
@@ -95,25 +94,45 @@ export async function GET(
           );
         }).catch(() => null),
       ]),
-      new Promise((resolve) => setTimeout(resolve, 2500)),
+      new Promise((resolve) => setTimeout(resolve, 3000)),
     ]);
 
-    const pdf = await page.pdf({
-      format: 'A4',
-      landscape: true,
-      preferCSSPageSize: true,
-      printBackground: true,
-      margin: {
-        top: '0px',
-        right: '0px',
-        bottom: '0px',
-        left: '0px',
-      },
-    });
+    // Query all slide element handles
+    const slideHandles = await page.$$('.pdf-page');
+
+    if (slideHandles.length === 0) {
+      throw new Error('No slide pages found to export');
+    }
+
+    // Standard A4 landscape dimensions in PDF points (297mm x 210mm at 72dpi)
+    const A4_WIDTH = 841.89;
+    const A4_HEIGHT = 595.28;
+
+    const pdfDoc = await PDFDocument.create();
+
+    // High-resolution screenshot of each slide embedded as a native hardware-accelerated JPEG
+    for (const slideHandle of slideHandles) {
+      const screenshotBuffer = await slideHandle.screenshot({
+        type: 'jpeg',
+        quality: 88,
+      });
+
+      const embeddedJpg = await pdfDoc.embedJpg(screenshotBuffer);
+      const pdfPage = pdfDoc.addPage([A4_WIDTH, A4_HEIGHT]);
+
+      pdfPage.drawImage(embeddedJpg, {
+        x: 0,
+        y: 0,
+        width: A4_WIDTH,
+        height: A4_HEIGHT,
+      });
+    }
 
     await browser.close();
 
-    return new Response(pdf as any, {
+    const pdfBytes = await pdfDoc.save();
+
+    return new Response(Buffer.from(pdfBytes), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="pitch-${id}.pdf"`,
