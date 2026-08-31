@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import { prisma } from '@/lib/prisma';
 import {
   appendEmailSignature,
+  extractEmailAddresses,
   findActiveSenderIdentity,
   formatSenderAddress,
 } from '@/lib/email-sender-identities';
@@ -11,12 +12,25 @@ import { parsePitchTheme } from '@/lib/pitch-theme';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+export interface EmailReplyOptions {
+  to?: string[];
+  cc?: string[];
+  bcc?: string[];
+  replyAll?: boolean;
+  senderIdentityId?: string;
+}
+
 export async function sendEmailReply(
   originalEmailId: string,
   replyBody: string,
   attachments: OutboundEmailAttachment[] = [],
-  senderIdentityId?: string,
+  senderIdentityIdOrOptions?: string | EmailReplyOptions,
 ) {
+  const options: EmailReplyOptions =
+    typeof senderIdentityIdOrOptions === 'string'
+      ? { senderIdentityId: senderIdentityIdOrOptions }
+      : senderIdentityIdOrOptions || {};
+
   const originalEmail = await prisma.emailMessage.findUnique({
     where: { id: originalEmailId },
   });
@@ -24,9 +38,9 @@ export async function sendEmailReply(
   if (!originalEmail) throw new Error('Original email not found');
 
   let sender = null;
-  if (senderIdentityId) {
+  if (options.senderIdentityId) {
     sender = await prisma.emailSenderIdentity.findFirst({
-      where: { id: senderIdentityId, isActive: true },
+      where: { id: options.senderIdentityId, isActive: true },
     });
   }
 
@@ -45,9 +59,46 @@ export async function sendEmailReply(
     throw new Error('No hay identidades de remitente activas configuradas. Agrega una en Configuración → Remitentes.');
   }
 
-  const recipient = originalEmail.direction === 'INBOUND' ? originalEmail.from : (originalEmail.to || originalEmail.from);
-  if (!recipient) {
-    throw new Error('No se encontró destinatario para enviar la respuesta');
+  const senderEmail = sender.email.toLowerCase();
+
+  // Resolve TO recipients
+  let toRecipients: string[] = [];
+  if (options.to && options.to.length > 0) {
+    toRecipients = options.to.map((e) => e.trim().toLowerCase()).filter(Boolean);
+  } else {
+    if (originalEmail.direction === 'INBOUND') {
+      toRecipients = extractEmailAddresses(originalEmail.from || '');
+    } else {
+      toRecipients = extractEmailAddresses(originalEmail.to || '');
+    }
+  }
+
+  // Resolve CC recipients
+  let ccRecipients: string[] = [];
+  if (options.cc && options.cc.length > 0) {
+    ccRecipients = options.cc.map((e) => e.trim().toLowerCase()).filter(Boolean);
+  } else if (options.replyAll) {
+    // Reply All: include all original TO and CC recipients except sender's own email and addresses in TO
+    const allOriginalRecipients = [
+      ...extractEmailAddresses(originalEmail.to || ''),
+      ...extractEmailAddresses(originalEmail.cc || ''),
+    ];
+    const toSet = new Set(toRecipients);
+    ccRecipients = [...new Set(allOriginalRecipients)].filter(
+      (addr) => addr !== senderEmail && !toSet.has(addr)
+    );
+  }
+
+  const bccRecipients: string[] = (options.bcc || []).map((e) => e.trim().toLowerCase()).filter(Boolean);
+
+  // Fallback if TO is somehow empty
+  if (toRecipients.length === 0) {
+    const fallback = extractEmailAddresses(originalEmail.from || originalEmail.to || '');
+    if (fallback.length > 0) {
+      toRecipients = fallback;
+    } else {
+      throw new Error('No se encontró destinatario para enviar la respuesta');
+    }
   }
 
   const finalReplyBody = appendEmailSignature(replyBody, sender.signature);
@@ -57,7 +108,9 @@ export async function sendEmailReply(
 
   const response = await resend.emails.send({
     from: formatSenderAddress(sender.displayName, sender.email),
-    to: recipient,
+    to: toRecipients,
+    cc: ccRecipients.length > 0 ? ccRecipients : undefined,
+    bcc: bccRecipients.length > 0 ? bccRecipients : undefined,
     replyTo: sender.email,
     subject,
     text: finalReplyBody,
@@ -98,7 +151,9 @@ export async function sendEmailReply(
       data: {
         senderIdentityId: sender.id,
         from: sender.email,
-        to: originalEmail.from,
+        to: toRecipients.join(', '),
+        cc: ccRecipients.length > 0 ? ccRecipients.join(', ') : null,
+        bcc: bccRecipients.length > 0 ? bccRecipients.join(', ') : null,
         subject,
         textBody: finalReplyBody,
         direction: 'OUTBOUND',

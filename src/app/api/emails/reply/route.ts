@@ -47,6 +47,10 @@ export async function POST(request: Request) {
   const originalEmailId = formData.get('originalEmailId');
   const replyBody = formData.get('replyBody');
   const senderIdentityId = formData.get('senderIdentityId');
+  const replyMode = formData.get('replyMode');
+  const toRaw = formData.get('to');
+  const ccRaw = formData.get('cc');
+  const bccRaw = formData.get('bcc');
 
   if (typeof originalEmailId !== 'string' || !originalEmailId) {
     return NextResponse.json({ error: 'Missing original email' }, { status: 400 });
@@ -59,11 +63,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Escribe una respuesta o adjunta un archivo' }, { status: 400 });
     }
 
+    const to = typeof toRaw === 'string' && toRaw.trim()
+      ? toRaw.split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean)
+      : undefined;
+
+    const cc = typeof ccRaw === 'string' && ccRaw.trim()
+      ? ccRaw.split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean)
+      : undefined;
+
+    const bcc = typeof bccRaw === 'string' && bccRaw.trim()
+      ? bccRaw.split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean)
+      : undefined;
+
     const result = await sendEmailReply(
       originalEmailId,
       replyBody.trim(),
       attachments,
-      typeof senderIdentityId === 'string' && senderIdentityId ? senderIdentityId : undefined
+      {
+        senderIdentityId: typeof senderIdentityId === 'string' && senderIdentityId ? senderIdentityId : undefined,
+        replyAll: replyMode === 'all',
+        to,
+        cc,
+        bcc,
+      }
     );
     return NextResponse.json(result);
   } catch (error) {
