@@ -87,14 +87,26 @@ export async function getEmailById(id: string) {
     });
   }
 
-  const replySenderIdentity = email.direction === 'INBOUND'
-    ? await findActiveSenderIdentity(email.to)
-    : null;
+  const allActiveIdentities = await prisma.emailSenderIdentity.findMany({
+    where: { isActive: true },
+    orderBy: { email: 'asc' },
+  });
 
-  return { ...email, ...syncedDelivery, replySenderIdentity };
+  const matchingIdentity = email.direction === 'INBOUND'
+    ? await findActiveSenderIdentity(email.to)
+    : (email.senderIdentityId ? allActiveIdentities.find(i => i.id === email.senderIdentityId) : null);
+
+  const replySenderIdentity = matchingIdentity || allActiveIdentities[0] || null;
+
+  return {
+    ...email,
+    ...syncedDelivery,
+    replySenderIdentity,
+    activeSenderIdentities: allActiveIdentities,
+  };
 }
 
-export async function replyToEmail(originalEmailId: string, replyBody: string) {
+export async function replyToEmail(originalEmailId: string, replyBody: string, senderIdentityId?: string) {
   const session = await auth();
   if (!session?.user) throw new Error('Unauthorized');
 
@@ -107,7 +119,7 @@ export async function replyToEmail(originalEmailId: string, replyBody: string) {
     throw new Error('Forbidden');
   }
 
-  return sendEmailReply(originalEmailId, replyBody.trim());
+  return sendEmailReply(originalEmailId, replyBody.trim(), [], senderIdentityId);
 }
 
 export async function deleteEmail(id: string) {

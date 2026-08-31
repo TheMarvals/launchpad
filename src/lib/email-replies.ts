@@ -15,17 +15,39 @@ export async function sendEmailReply(
   originalEmailId: string,
   replyBody: string,
   attachments: OutboundEmailAttachment[] = [],
+  senderIdentityId?: string,
 ) {
   const originalEmail = await prisma.emailMessage.findUnique({
     where: { id: originalEmailId },
   });
 
   if (!originalEmail) throw new Error('Original email not found');
-  if (originalEmail.direction !== 'INBOUND') throw new Error('Only inbound emails can be replied to');
 
-  const sender = await findActiveSenderIdentity(originalEmail.to || '');
+  let sender = null;
+  if (senderIdentityId) {
+    sender = await prisma.emailSenderIdentity.findFirst({
+      where: { id: senderIdentityId, isActive: true },
+    });
+  }
+
   if (!sender) {
-    throw new Error(`No hay un remitente activo configurado para ${originalEmail.to}`);
+    sender = await findActiveSenderIdentity(originalEmail.to || '');
+  }
+
+  if (!sender) {
+    sender = await prisma.emailSenderIdentity.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  if (!sender) {
+    throw new Error('No hay identidades de remitente activas configuradas. Agrega una en Configuración → Remitentes.');
+  }
+
+  const recipient = originalEmail.direction === 'INBOUND' ? originalEmail.from : (originalEmail.to || originalEmail.from);
+  if (!recipient) {
+    throw new Error('No se encontró destinatario para enviar la respuesta');
   }
 
   const finalReplyBody = appendEmailSignature(replyBody, sender.signature);
@@ -35,7 +57,7 @@ export async function sendEmailReply(
 
   const response = await resend.emails.send({
     from: formatSenderAddress(sender.displayName, sender.email),
-    to: originalEmail.from,
+    to: recipient,
     replyTo: sender.email,
     subject,
     text: finalReplyBody,

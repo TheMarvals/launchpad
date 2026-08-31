@@ -39,6 +39,8 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [selectedSenderId, setSelectedSenderId] = useState<string>('');
+
   const dateLocale = locale === 'es' ? es : enUS;
 
   useEffect(() => {
@@ -47,6 +49,11 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
       try {
         const data = await getEmailById(id);
         setEmail(data);
+        if (data.replySenderIdentity?.id) {
+          setSelectedSenderId(data.replySenderIdentity.id);
+        } else if (data.activeSenderIdentities && data.activeSenderIdentities.length > 0) {
+          setSelectedSenderId(data.activeSenderIdentities[0].id);
+        }
       } catch (err) {
         console.error(err);
         setError('Error loading email');
@@ -83,6 +90,9 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
       const formData = new FormData();
       formData.set('originalEmailId', id);
       formData.set('replyBody', replyText);
+      if (selectedSenderId) {
+        formData.set('senderIdentityId', selectedSenderId);
+      }
       selectedFiles.forEach((file) => formData.append('attachments', file));
 
       const response = await fetch('/api/emails/reply', {
@@ -166,6 +176,10 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
       </div>
     );
   }
+
+  const activeIdentities = email.activeSenderIdentities || (email.replySenderIdentity ? [email.replySenderIdentity] : []);
+  const currentSender = activeIdentities.find((i) => i.id === selectedSenderId) || email.replySenderIdentity || activeIdentities[0] || null;
+  const replyRecipient = email.direction === 'INBOUND' ? email.from : (email.to || email.from);
 
   return (
     <div className="flex-1 min-w-0 min-h-0 flex flex-col h-full overflow-y-auto md:overflow-hidden bg-canvas">
@@ -284,100 +298,142 @@ export default function EmailDetailPage({ params }: { params: Promise<{ locale: 
       </div>
 
       {/* Reply Box */}
-      {email.direction === 'INBOUND' && (
-        <div className="px-4 py-5 md:p-6 border-t border-hairline bg-canvas-elevated/20 shrink-0">
-          <form onSubmit={handleReply} className="max-w-4xl">
-            {email.replySenderIdentity ? (
-              <div className="mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
-                <span className="text-muted">
-                  {locale === 'es' ? 'Responder como' : 'Reply as'}:{' '}
-                  <strong className="text-ink">{email.replySenderIdentity.displayName}</strong>{' '}
-                  &lt;{email.replySenderIdentity.email}&gt;
-                </span>
-                {email.replySenderIdentity.signature && (
-                  <span className="text-muted">
-                    <span className="material-icons text-[14px] align-middle mr-1">draw</span>
-                    {locale === 'es' ? 'Firma automática activa' : 'Automatic signature enabled'}
-                  </span>
-                )}
-              </div>
-            ) : (
-              <div className="mb-3 border border-amber-400/30 bg-amber-400/10 p-3 text-xs text-amber-300">
-                {locale === 'es'
-                  ? `No hay una identidad activa configurada para ${email.to}. Agrégala en Configuración → Remitentes de correo.`
-                  : `There is no active identity configured for ${email.to}. Add it under Settings → Email senders.`}
-              </div>
-            )}
-            <textarea
-              className="w-full bg-canvas border border-hairline p-3 rounded-sm min-h-[100px] focus:outline-none focus:border-primary text-sm shadow-sm"
-              placeholder={locale === 'es' ? 'Escribe tu respuesta aquí...' : 'Write your reply here...'}
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              disabled={!email.replySenderIdentity}
-            />
-
-            {selectedFiles.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {selectedFiles.map((file, index) => (
-                  <span
-                    key={`${file.name}-${file.lastModified}-${index}`}
-                    className="inline-flex items-center gap-2 max-w-full px-3 py-2 border border-hairline bg-canvas rounded-sm text-xs"
-                  >
-                    <span className="material-icons text-[16px] text-primary">attach_file</span>
-                    <span className="truncate max-w-[220px]">{file.name}</span>
-                    <span className="text-muted shrink-0">{formatFileSize(file.size)}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeSelectedFile(index)}
-                      className="text-muted hover:text-red-400 transition-colors"
-                      aria-label={locale === 'es' ? `Quitar ${file.name}` : `Remove ${file.name}`}
-                    >
-                      <span className="material-icons text-[16px]">close</span>
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-
-            <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="min-w-0">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt"
-                  onChange={handleFileSelection}
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={sending || selectedFiles.length >= 10 || !email.replySenderIdentity}
-                  className="inline-flex items-center gap-2 px-3 py-2 border border-hairline rounded-sm text-xs font-semibold text-muted hover:text-ink hover:border-primary transition-colors disabled:opacity-50"
-                >
-                  <span className="material-icons text-[17px]">attach_file</span>
-                  {locale === 'es' ? 'Adjuntar archivos' : 'Attach files'}
-                </button>
-                <p className="mt-1 text-[10px] text-muted">
-                  {locale === 'es' ? 'Máx. 10 MB por archivo · 25 MB total' : 'Max. 10 MB per file · 25 MB total'}
-                </p>
-              </div>
-              <button
-                type="submit"
-                disabled={sending || !email.replySenderIdentity || (!replyText.trim() && selectedFiles.length === 0)}
-                className="w-full sm:w-auto justify-center bg-primary text-on-primary px-5 py-3 sm:py-2 rounded-sm font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 shadow-sm"
-              >
-                {sending ? (
-                  <span className="material-icons animate-spin text-[16px]">refresh</span>
-                ) : (
-                  <span className="material-icons text-[16px]">send</span>
-                )}
-                {locale === 'es' ? 'Enviar Respuesta' : 'Send Reply'}
-              </button>
+      <div className="px-4 py-5 md:p-6 border-t border-hairline bg-canvas-elevated/20 shrink-0">
+        <form onSubmit={handleReply} className="max-w-4xl">
+          {error && (
+            <div className="mb-3 border border-red-500/30 bg-red-500/10 p-3 rounded-sm text-xs text-red-400 flex items-center gap-2">
+              <span className="material-icons text-[16px]">error</span>
+              <span>{error}</span>
             </div>
-          </form>
-        </div>
-      )}
+          )}
+
+          {activeIdentities.length > 1 ? (
+            <div className="mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-muted">
+                  {locale === 'es' ? 'Responder como' : 'Reply as'}:
+                </span>
+                <select
+                  value={selectedSenderId || currentSender?.id || ''}
+                  onChange={(e) => setSelectedSenderId(e.target.value)}
+                  className="bg-canvas border border-hairline px-2.5 py-1 rounded-sm text-xs font-semibold text-ink focus:border-primary focus:outline-none"
+                >
+                  {activeIdentities.map((identity) => (
+                    <option key={identity.id} value={identity.id}>
+                      {identity.displayName} &lt;{identity.email}&gt;
+                    </option>
+                  ))}
+                </select>
+                <span className="text-muted">
+                  → {locale === 'es' ? 'Para' : 'To'}: <strong className="text-ink">{replyRecipient}</strong>
+                </span>
+              </div>
+              {currentSender?.signature && (
+                <span className="text-muted">
+                  <span className="material-icons text-[14px] align-middle mr-1">draw</span>
+                  {locale === 'es' ? 'Firma automática activa' : 'Automatic signature enabled'}
+                </span>
+              )}
+            </div>
+          ) : currentSender ? (
+            <div className="mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+              <span className="text-muted">
+                {locale === 'es' ? 'Responder como' : 'Reply as'}:{' '}
+                <strong className="text-ink">{currentSender.displayName}</strong>{' '}
+                &lt;{currentSender.email}&gt; → {locale === 'es' ? 'Para' : 'To'}: <strong className="text-ink">{replyRecipient}</strong>
+              </span>
+              {currentSender.signature && (
+                <span className="text-muted">
+                  <span className="material-icons text-[14px] align-middle mr-1">draw</span>
+                  {locale === 'es' ? 'Firma automática activa' : 'Automatic signature enabled'}
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="mb-3 border border-amber-400/30 bg-amber-400/10 p-3 text-xs text-amber-300 flex items-center justify-between rounded-sm">
+              <span>
+                {locale === 'es'
+                  ? 'No hay identidades de remitente activas configuradas.'
+                  : 'There are no active sender identities configured.'}
+              </span>
+              <a
+                href="/dashboard/settings"
+                className="font-bold underline ml-2"
+              >
+                {locale === 'es' ? 'Ir a Configuración' : 'Go to Settings'}
+              </a>
+            </div>
+          )}
+
+          <textarea
+            className="w-full bg-canvas border border-hairline p-3 rounded-sm min-h-[100px] focus:outline-none focus:border-primary text-sm shadow-sm"
+            placeholder={locale === 'es' ? 'Escribe tu respuesta aquí...' : 'Write your reply here...'}
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+            disabled={!currentSender}
+          />
+
+          {selectedFiles.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {selectedFiles.map((file, index) => (
+                <span
+                  key={`${file.name}-${file.lastModified}-${index}`}
+                  className="inline-flex items-center gap-2 max-w-full px-3 py-2 border border-hairline bg-canvas rounded-sm text-xs"
+                >
+                  <span className="material-icons text-[16px] text-primary">attach_file</span>
+                  <span className="truncate max-w-[220px]">{file.name}</span>
+                  <span className="text-muted shrink-0">{formatFileSize(file.size)}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeSelectedFile(index)}
+                    className="text-muted hover:text-red-400 transition-colors"
+                    aria-label={locale === 'es' ? `Quitar ${file.name}` : `Remove ${file.name}`}
+                  >
+                    <span className="material-icons text-[16px]">close</span>
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="min-w-0">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt"
+                onChange={handleFileSelection}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={sending || selectedFiles.length >= 10 || !currentSender}
+                className="inline-flex items-center gap-2 px-3 py-2 border border-hairline rounded-sm text-xs font-semibold text-muted hover:text-ink hover:border-primary transition-colors disabled:opacity-50"
+              >
+                <span className="material-icons text-[17px]">attach_file</span>
+                {locale === 'es' ? 'Adjuntar archivos' : 'Attach files'}
+              </button>
+              <p className="mt-1 text-[10px] text-muted">
+                {locale === 'es' ? 'Máx. 10 MB por archivo · 25 MB total' : 'Max. 10 MB per file · 25 MB total'}
+              </p>
+            </div>
+            <button
+              type="submit"
+              disabled={sending || !currentSender || (!replyText.trim() && selectedFiles.length === 0)}
+              className="w-full sm:w-auto justify-center bg-primary text-on-primary px-5 py-3 sm:py-2 rounded-sm font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 shadow-sm"
+            >
+              {sending ? (
+                <span className="material-icons animate-spin text-[16px]">refresh</span>
+              ) : (
+                <span className="material-icons text-[16px]">send</span>
+              )}
+              {locale === 'es' ? 'Enviar Respuesta' : 'Send Reply'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

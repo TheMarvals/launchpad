@@ -46,6 +46,7 @@ export async function POST(request: Request) {
 
   const originalEmailId = formData.get('originalEmailId');
   const replyBody = formData.get('replyBody');
+  const senderIdentityId = formData.get('senderIdentityId');
 
   if (typeof originalEmailId !== 'string' || !originalEmailId) {
     return NextResponse.json({ error: 'Missing original email' }, { status: 400 });
@@ -58,7 +59,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Escribe una respuesta o adjunta un archivo' }, { status: 400 });
     }
 
-    const result = await sendEmailReply(originalEmailId, replyBody.trim(), attachments);
+    const result = await sendEmailReply(
+      originalEmailId,
+      replyBody.trim(),
+      attachments,
+      typeof senderIdentityId === 'string' && senderIdentityId ? senderIdentityId : undefined
+    );
     return NextResponse.json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'No se pudo enviar la respuesta';
