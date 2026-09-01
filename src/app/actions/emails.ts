@@ -87,6 +87,31 @@ export async function getEmailById(id: string) {
     });
   }
 
+  // Backfill/sync CC and BCC from Resend if missing on existing inbound emails
+  if (email.direction === 'INBOUND' && email.providerEmailId && email.cc === null && process.env.RESEND_API_KEY) {
+    try {
+      const { Resend } = await import('resend');
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const fullEmail = await resend.emails.receiving.get(email.providerEmailId);
+      if (fullEmail?.data) {
+        const rawCc = fullEmail.data.cc;
+        const rawBcc = fullEmail.data.bcc;
+        const cc = Array.isArray(rawCc) ? rawCc.join(', ') : (typeof rawCc === 'string' ? rawCc : null);
+        const bcc = Array.isArray(rawBcc) ? rawBcc.join(', ') : (typeof rawBcc === 'string' ? rawBcc : null);
+        if (cc || bcc) {
+          await prisma.emailMessage.update({
+            where: { id },
+            data: { cc, bcc },
+          });
+          email.cc = cc;
+          email.bcc = bcc;
+        }
+      }
+    } catch (e) {
+      // Non-blocking sync error
+    }
+  }
+
   const allActiveIdentities = await prisma.emailSenderIdentity.findMany({
     where: { isActive: true },
     orderBy: { email: 'asc' },

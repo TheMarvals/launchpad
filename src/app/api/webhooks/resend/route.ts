@@ -104,9 +104,23 @@ export async function POST(request: Request) {
       throw new Error(fullEmail.error.message);
     }
 
-    const from = emailData.from || 'Unknown Sender';
-    const to = Array.isArray(emailData.to) ? emailData.to.join(', ') : 'Unknown Recipient';
-    const subject = emailData.subject || 'No Subject';
+    const from = emailData.from || fullEmail.data?.from || 'Unknown Sender';
+    const toRaw = emailData.to || fullEmail.data?.to;
+    const to = Array.isArray(toRaw)
+      ? toRaw.join(', ')
+      : (typeof toRaw === 'string' && toRaw ? toRaw : 'Unknown Recipient');
+
+    const ccRaw = emailData.cc || fullEmail.data?.cc;
+    const cc = Array.isArray(ccRaw)
+      ? ccRaw.join(', ')
+      : (typeof ccRaw === 'string' && ccRaw ? ccRaw : null);
+
+    const bccRaw = emailData.bcc || fullEmail.data?.bcc;
+    const bcc = Array.isArray(bccRaw)
+      ? bccRaw.join(', ')
+      : (typeof bccRaw === 'string' && bccRaw ? bccRaw : null);
+
+    const subject = emailData.subject || fullEmail.data?.subject || 'No Subject';
     const textBody = fullEmail.data?.text || '';
     const htmlBody = fullEmail.data?.html || '';
 
@@ -114,6 +128,8 @@ export async function POST(request: Request) {
       data: {
         from,
         to,
+        cc,
+        bcc,
         subject,
         textBody,
         htmlBody,
@@ -122,10 +138,10 @@ export async function POST(request: Request) {
         messageId,
         providerEmailId,
         attachments: {
-          create: (emailData.attachments || []).map((attachment) => ({
+          create: (emailData.attachments || fullEmail.data?.attachments || []).map((attachment: any) => ({
             filename: attachment.filename || 'attachment',
-            contentType: attachment.content_type,
-            sizeBytes: 0,
+            contentType: attachment.content_type || attachment.contentType,
+            sizeBytes: attachment.size || 0,
             providerAttachmentId: attachment.id,
           })),
         },
