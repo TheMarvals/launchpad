@@ -90,7 +90,8 @@ export async function sendPushToUsers(userIds: string[], payload: PushPayload) {
       failed += 1;
       const statusCode = getPushStatusCode(error);
 
-      if (statusCode && [400, 403, 404, 410].includes(statusCode)) {
+      // Only delete subscription from DB if endpoint is permanently gone/unregistered (404 or 410)
+      if (statusCode && [404, 410].includes(statusCode)) {
         await prisma.pushSubscription.delete({ where: { id: subscription.id } }).catch(() => undefined);
         return;
       }
@@ -98,6 +99,7 @@ export async function sendPushToUsers(userIds: string[], payload: PushPayload) {
       console.error('[Push] Failed to deliver notification:', {
         subscriptionId: subscription.id,
         statusCode,
+        error: error instanceof Error ? error.message : error,
       });
     }
   }));
@@ -120,7 +122,10 @@ export async function notifyAdminsWithPermission(
     where: {
       role: 'ADMIN',
       isActive: true,
-      permissions: { has: permission },
+      OR: [
+        { permissions: { has: permission } },
+        { permissions: { isEmpty: true } },
+      ],
       ...(excludeUserId ? { id: { not: excludeUserId } } : {}),
     },
     select: { id: true },

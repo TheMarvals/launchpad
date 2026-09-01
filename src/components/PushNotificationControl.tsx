@@ -27,8 +27,9 @@ interface PushStatusResponse {
 }
 
 function urlBase64ToUint8Array(base64String: string) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const clean = base64String.trim().replace(/^["']|["']$/g, '');
+  const padding = '='.repeat((4 - (clean.length % 4)) % 4);
+  const base64 = (clean + padding).replace(/-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
   return Uint8Array.from([...rawData].map((character) => character.charCodeAt(0)));
 }
@@ -77,6 +78,19 @@ function subscriptionUsesKey(subscription: PushSubscription, publicKey: string) 
     && currentKey.every((value, index) => value === expectedKey[index]);
 }
 
+function formatPushError(error: unknown, isSpanish: boolean) {
+  const rawMessage = error instanceof Error ? error.message : String(error);
+  if (/push service error/i.test(rawMessage)) {
+    return isSpanish
+      ? 'Error del servicio push. En Brave: activa "Usar los servicios de Google para mensajería push" en brave://settings/privacy y reinicia el navegador.'
+      : 'Push service error. In Brave: enable "Use Google services for push messaging" in brave://settings/privacy and restart browser.';
+  }
+  if (/permission denied/i.test(rawMessage)) {
+    return isSpanish ? 'Permiso de notificaciones denegado' : 'Notification permission denied';
+  }
+  return rawMessage || (isSpanish ? 'Error al configurar notificaciones' : 'Error configuring notifications');
+}
+
 export default function PushNotificationControl({ locale, scope }: { locale: string; scope: string }) {
   const [configured, setConfigured] = useState(false);
   const [publicKey, setPublicKey] = useState<string | null>(null);
@@ -102,7 +116,6 @@ export default function PushNotificationControl({ locale, scope }: { locale: str
         const status = await response.json() as PushStatusResponse;
         let registration = await findScopedServiceWorkerRegistration(scope);
         let currentSubscription = await registration?.pushManager.getSubscription() ?? null;
-        const migrationPending = hasPendingPushMigration();
 
         if (
           currentSubscription
@@ -110,31 +123,41 @@ export default function PushNotificationControl({ locale, scope }: { locale: str
           && status.publicKey
           && !subscriptionUsesKey(currentSubscription, status.publicKey)
         ) {
-          await currentSubscription.unsubscribe();
+          try {
+            await currentSubscription.unsubscribe();
+          } catch {
+            // Ignore unsubscribe error
+          }
           currentSubscription = null;
         }
 
-        // Migrate users who had enabled Push on the former root-scoped worker.
-        // Notification permission is already granted, so this does not prompt.
+        // Auto-subscribe or restore push subscription whenever permission is granted
         if (
           !currentSubscription
-          && (status.subscribed || migrationPending)
           && status.configured
           && status.publicKey
           && Notification.permission === 'granted'
         ) {
-          registration = registration || await getServiceWorkerRegistration(scope);
-          currentSubscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(status.publicKey),
-          });
+          try {
+            registration = registration || await getServiceWorkerRegistration(scope);
+            currentSubscription = await registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(status.publicKey),
+            });
+          } catch (subscribeError) {
+            console.warn('[Push] Auto-subscribe error:', subscribeError);
+            setError(formatPushError(subscribeError, isSpanish));
+          }
         }
 
         if (currentSubscription) {
-          // Refresh the server record on every authenticated load. This repairs
-          // subscriptions after a user change on the same browser/device.
-          await persistSubscription(currentSubscription);
-          clearPendingPushMigration();
+          try {
+            await persistSubscription(currentSubscription);
+            clearPendingPushMigration();
+            setError('');
+          } catch (persistError) {
+            console.warn('[Push] Persist subscription error:', persistError);
+          }
         }
 
         setConfigured(status.configured);
@@ -142,7 +165,7 @@ export default function PushNotificationControl({ locale, scope }: { locale: str
         setSubscription(currentSubscription);
       } catch (loadError) {
         console.error('[Push] Failed to load notification status:', loadError);
-        setError(isSpanish ? 'No se pudo cargar Push' : 'Could not load Push');
+        setError(formatPushError(loadError, isSpanish));
       }
     };
 
@@ -167,6 +190,7 @@ export default function PushNotificationControl({ locale, scope }: { locale: str
     await persistSubscription(nextSubscription);
 
     setSubscription(nextSubscription);
+    setError('');
   };
 
   const disableNotifications = async () => {
@@ -183,6 +207,7 @@ export default function PushNotificationControl({ locale, scope }: { locale: str
 
     await subscription.unsubscribe();
     setSubscription(null);
+    setError('');
   };
 
   const toggleNotifications = async () => {
@@ -196,9 +221,8 @@ export default function PushNotificationControl({ locale, scope }: { locale: str
         await enableNotifications();
       }
     } catch (toggleError) {
-      const message = toggleError instanceof Error ? toggleError.message : 'Push notification error';
       console.error('[Push] Failed to update notifications:', toggleError);
-      setError(message);
+      setError(formatPushError(toggleError, isSpanish));
     } finally {
       setBusy(false);
     }
